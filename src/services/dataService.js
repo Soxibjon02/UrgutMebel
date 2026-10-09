@@ -60,32 +60,41 @@ export const dataService = {
 
   // Categories
   async getCategories() {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('display_order', { ascending: true });
-      if (!error && data?.length) return data;
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (!error && Array.isArray(data)) {
+          setStored('categories', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getCategories error:', e);
+      }
     }
     return getStored('categories', initialCategories);
   },
 
   async saveCategory(category) {
     const categories = getStored('categories', initialCategories);
-    let updated;
-    if (category.id) {
-      updated = categories.map((c) => (c.id === category.id ? { ...c, ...category } : c));
-    } else {
-      const newCat = {
-        ...category,
-        id: `cat-${Date.now()}`,
-        created_at: new Date().toISOString()
-      };
-      updated = [newCat, ...categories];
-    }
+    const newCat = category.id ? category : {
+      ...category,
+      id: `cat-${Date.now()}`,
+      created_at: new Date().toISOString()
+    };
+    const updated = category.id
+      ? categories.map((c) => (c.id === category.id ? { ...c, ...category } : c))
+      : [newCat, ...categories];
+
     setStored('categories', updated);
-    if (isSupabaseConfigured) {
-      await supabase.from('categories').upsert(category);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('categories').upsert(newCat);
+      } catch (e) {
+        console.warn('Supabase saveCategory error:', e);
+      }
     }
     return updated;
   },
@@ -93,17 +102,28 @@ export const dataService = {
   async deleteCategory(id) {
     const categories = getStored('categories', initialCategories).filter((c) => c.id !== id);
     setStored('categories', categories);
-    if (isSupabaseConfigured) {
-      await supabase.from('categories').delete().eq('id', id);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('categories').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteCategory error:', e);
+      }
     }
     return categories;
   },
 
   // Products
   async getProducts() {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.from('products').select('*');
-      if (!error && data?.length) return data;
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('products').select('*');
+        if (!error && Array.isArray(data)) {
+          setStored('products', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getProducts error:', e);
+      }
     }
     return getStored('products', initialProducts);
   },
@@ -115,24 +135,26 @@ export const dataService = {
 
   async saveProduct(product) {
     const products = getStored('products', initialProducts);
-    let updated;
-    if (product.id) {
-      updated = products.map((p) => (p.id === product.id ? { ...p, ...product } : p));
-    } else {
-      const newProd = {
-        ...product,
-        id: `prod-${Date.now()}`,
-        slug: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        rating: 5.0,
-        reviews_count: 0,
-        likes_count: 0,
-        created_at: new Date().toISOString()
-      };
-      updated = [newProd, ...products];
-    }
+    const newProd = product.id ? product : {
+      ...product,
+      id: `prod-${Date.now()}`,
+      slug: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      rating: 5.0,
+      reviews_count: 0,
+      likes_count: 0,
+      created_at: new Date().toISOString()
+    };
+    const updated = product.id
+      ? products.map((p) => (p.id === product.id ? { ...p, ...product } : p))
+      : [newProd, ...products];
+
     setStored('products', updated);
-    if (isSupabaseConfigured) {
-      await supabase.from('products').upsert(product);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('products').upsert(newProd);
+      } catch (e) {
+        console.warn('Supabase saveProduct error:', e);
+      }
     }
     return updated;
   },
@@ -140,13 +162,17 @@ export const dataService = {
   async deleteProduct(id) {
     const products = getStored('products', initialProducts).filter((p) => p.id !== id);
     setStored('products', products);
-    if (isSupabaseConfigured) {
-      await supabase.from('products').delete().eq('id', id);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('products').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteProduct error:', e);
+      }
     }
     return products;
   },
 
-  async toggleProductLike(productId, delta) {
+  async toggleProductLike(productId, delta = 1) {
     const products = getStored('products', initialProducts);
     const updated = products.map((p) =>
       p.id === productId ? { ...p, likes_count: Math.max(0, (p.likes_count || 0) + delta) } : p
@@ -157,9 +183,16 @@ export const dataService = {
 
   // Craftsmen
   async getCraftsmen() {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.from('craftsmen').select('*');
-      if (!error && data?.length) return data;
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('craftsmen').select('*');
+        if (!error && Array.isArray(data)) {
+          setStored('craftsmen', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getCraftsmen error:', e);
+      }
     }
     return getStored('craftsmen', initialCraftsmen);
   },
@@ -171,24 +204,26 @@ export const dataService = {
 
   async saveCraftsman(craftsman) {
     const craftsmen = getStored('craftsmen', initialCraftsmen);
-    let updated;
-    if (craftsman.id) {
-      updated = craftsmen.map((c) => (c.id === craftsman.id ? { ...c, ...craftsman } : c));
-    } else {
-      const newCraft = {
-        ...craftsman,
-        id: `craft-${Date.now()}`,
-        rating: 5.0,
-        reviews_count: 0,
-        services: craftsman.services || [],
-        portfolio: craftsman.portfolio || [],
-        created_at: new Date().toISOString()
-      };
-      updated = [newCraft, ...craftsmen];
-    }
+    const newCraft = craftsman.id ? craftsman : {
+      ...craftsman,
+      id: `craft-${Date.now()}`,
+      rating: 5.0,
+      reviews_count: 0,
+      services: craftsman.services || [],
+      portfolio: craftsman.portfolio || [],
+      created_at: new Date().toISOString()
+    };
+    const updated = craftsman.id
+      ? craftsmen.map((c) => (c.id === craftsman.id ? { ...c, ...craftsman } : c))
+      : [newCraft, ...craftsmen];
+
     setStored('craftsmen', updated);
-    if (isSupabaseConfigured) {
-      await supabase.from('craftsmen').upsert(craftsman);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('craftsmen').upsert(newCraft);
+      } catch (e) {
+        console.warn('Supabase saveCraftsman error:', e);
+      }
     }
     return updated;
   },
@@ -196,8 +231,12 @@ export const dataService = {
   async deleteCraftsman(id) {
     const craftsmen = getStored('craftsmen', initialCraftsmen).filter((c) => c.id !== id);
     setStored('craftsmen', craftsmen);
-    if (isSupabaseConfigured) {
-      await supabase.from('craftsmen').delete().eq('id', id);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('craftsmen').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteCraftsman error:', e);
+      }
     }
     return craftsmen;
   },
@@ -473,6 +512,17 @@ export const dataService = {
 
   // Managers (Super Admin tomonidan boshqariladi)
   async getManagers() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('managers').select('*');
+        if (!error && Array.isArray(data)) {
+          setStored('managers', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getManagers error:', e);
+      }
+    }
     const defaultManagers = [
       {
         id: "mgr-default-1",
@@ -490,19 +540,24 @@ export const dataService = {
 
   async saveManager(managerData) {
     const managers = await this.getManagers();
-    let updated;
-    if (managerData.id) {
-      updated = managers.map((m) => (m.id === managerData.id ? { ...m, ...managerData } : m));
-    } else {
-      const newMgr = {
-        ...managerData,
-        id: `mgr-${Date.now()}`,
-        role: 'manager',
-        created_at: new Date().toISOString()
-      };
-      updated = [newMgr, ...managers];
-    }
+    const newMgr = managerData.id ? managerData : {
+      ...managerData,
+      id: `mgr-${Date.now()}`,
+      role: 'manager',
+      created_at: new Date().toISOString()
+    };
+    const updated = managerData.id
+      ? managers.map((m) => (m.id === managerData.id ? { ...m, ...managerData } : m))
+      : [newMgr, ...managers];
+
     setStored('managers', updated);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('managers').upsert(newMgr);
+      } catch (e) {
+        console.warn('Supabase saveManager error:', e);
+      }
+    }
     return updated;
   },
 
@@ -510,6 +565,13 @@ export const dataService = {
     const managers = await this.getManagers();
     const updated = managers.filter((m) => m.id !== id);
     setStored('managers', updated);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('managers').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteManager error:', e);
+      }
+    }
     return updated;
   },
 
@@ -564,7 +626,7 @@ export const dataService = {
         labor_cost: 1500000,
         transport_cost: 400000,
         other_cost: 200000,
-        status: "JARAYONDA", // "JARAYONDA" | "TUGATILGAN" | "QARZDORLIK_BOR"
+        status: "JARAYONDA",
         notes: "Akril eshiklar va Blum furnitura",
         created_at: "2026-03-20T10:00:00.000Z"
       },
@@ -616,11 +678,11 @@ export const dataService = {
 
   // Algoritmik moliya hisoblagich
   calculateFinancialStats(records = []) {
-    let totalRevenue = 0;       // Jami buyurtmalar summasi (Kirim)
-    let totalReceived = 0;      // Haqiqiy qabul qilingan summa (Avanslar)
-    let totalExpenses = 0;      // Jami sarflangan xarajat
-    let totalMaterials = 0;     // Xom-ashyo xarajati
-    let totalRemainingDebt = 0; // Kutilayotgan qarzlar
+    let totalRevenue = 0;
+    let totalReceived = 0;
+    let totalExpenses = 0;
+    let totalMaterials = 0;
+    let totalRemainingDebt = 0;
 
     records.forEach((r) => {
       const total = Number(r.total_amount) || 0;
@@ -653,6 +715,24 @@ export const dataService = {
   },
 
   // ==========================================
+  // HEALTH CHECK FOR SUPABASE TABLES
+  // ==========================================
+  async checkSupabaseHealth() {
+    if (!isSupabaseConfigured || !supabase) {
+      return { configured: false, connected: false, tablesFound: false, error: "Supabase kalitlari mavjud emas" };
+    }
+    try {
+      const { data, error } = await supabase.from('craftsmen').select('id').limit(1);
+      if (error && (error.code === 'PGRST205' || error.message?.includes('schema cache') || error.message?.includes('not find the table'))) {
+        return { configured: true, connected: true, tablesFound: false, error: "Jadvallar Supabase-da hali yaratilmagan (PGRST205: 'craftsmen' jadvali topilmadi)" };
+      }
+      return { configured: true, connected: true, tablesFound: true, error: null };
+    } catch (e) {
+      return { configured: true, connected: false, tablesFound: false, error: e.message };
+    }
+  },
+
+  // ==========================================
   // SYNC ALL DATA TO LIVE SUPABASE
   // ==========================================
   async syncAllDataToSupabase() {
@@ -663,7 +743,7 @@ export const dataService = {
     try {
       // 1. Settings sync
       const settings = await this.getSettings();
-      await supabase.from('settings').upsert({ id: 1, ...settings });
+      await supabase.from('settings').upsert({ id: '1', ...settings });
 
       // 2. Categories sync
       const categories = await this.getCategories();
@@ -671,7 +751,7 @@ export const dataService = {
         for (const cat of categories) {
           const payload = { ...cat };
           if (!payload.slug) payload.slug = payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-          await supabase.from('categories').upsert(payload, { onConflict: 'slug' });
+          await supabase.from('categories').upsert(payload);
         }
       }
 
@@ -680,7 +760,7 @@ export const dataService = {
       if (products && products.length) {
         for (const prod of products) {
           const payload = {
-            id: prod.id?.includes('prod-') ? undefined : prod.id,
+            id: prod.id,
             name: prod.name,
             slug: prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
             price: Number(prod.price) || 0,
@@ -689,9 +769,27 @@ export const dataService = {
             dimensions: prod.dimensions,
             stock: prod.stock || 10,
             description: prod.description,
-            is_published: prod.is_published !== false
+            is_published: prod.is_published !== false,
+            images: prod.images || [],
+            image_url: prod.images?.[0] || prod.image_url || ''
           };
-          await supabase.from('products').upsert(payload, { onConflict: 'slug' });
+          await supabase.from('products').upsert(payload);
+        }
+      }
+
+      // 4. Craftsmen sync (Super admin o'chirish / qo'shishlari bilan birga!)
+      const craftsmen = await this.getCraftsmen();
+      if (craftsmen && craftsmen.length) {
+        for (const craft of craftsmen) {
+          await supabase.from('craftsmen').upsert(craft);
+        }
+      }
+
+      // 5. Managers sync
+      const managers = await this.getManagers();
+      if (managers && managers.length) {
+        for (const mgr of managers) {
+          await supabase.from('managers').upsert(mgr);
         }
       }
 

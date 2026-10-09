@@ -1,4 +1,4 @@
--- ====================================================================
+export const SUPABASE_SQL_SCRIPT = `-- ====================================================================
 -- URGUT MEBEL MARKAZI - SUPABASE DATABASE SCHEMA & MIGRATION
 -- Production-Ready PostgreSQL Schema with RLS, Public Access & Storage
 -- ====================================================================
@@ -238,3 +238,4 @@ CREATE POLICY "Public storage select" ON storage.objects FOR SELECT USING (true)
 CREATE POLICY "Public storage insert" ON storage.objects FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public storage update" ON storage.objects FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Public storage delete" ON storage.objects FOR DELETE USING (true);
+`;

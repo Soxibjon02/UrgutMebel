@@ -23,9 +23,14 @@ import {
   Search,
   Eye,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  AlertTriangle,
+  Database,
+  ExternalLink,
+  Copy
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
+import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
 
 export const AdminDashboard = () => {
   const { user, isAdmin, isGuest, openAuthModal } = useAuth();
@@ -79,22 +84,48 @@ export const AdminDashboard = () => {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [supabaseHealth, setSupabaseHealth] = useState(null);
+  const [copiedSql, setCopiedSql] = useState(false);
 
-  const handleSyncSupabase = async () => {
+  const checkHealth = async () => {
+    const health = await dataService.checkSupabaseHealth();
+    setSupabaseHealth(health);
+    return health;
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(SUPABASE_SQL_SCRIPT);
+    setCopiedSql(true);
+    addToast('SQL skripti nusxalandi! Uni Supabase SQL Editor ga joylab (Run) tugmasini bosing.', 'success');
+    setTimeout(() => setCopiedSql(false), 3000);
+  };
+
+  const handleCheckAndSync = async () => {
     setIsSyncing(true);
-    addToast('Barcha default ma’lumotlar Supabase-ga ko‘chirilmoqda...', 'info');
+    addToast('Supabase bazasi tekshirilmoqda...', 'info');
+    const health = await checkHealth();
+    if (!health.tablesFound) {
+      setIsSyncing(false);
+      addToast('Jadvallar hali yaratilmagan! Iltimos, nusxalangan SQL kodni Supabase SQL Editor-da ishga tushiring (Run)', 'error');
+      return;
+    }
+
+    addToast('Jadvallar topildi! Barcha ma’lumotlar Supabase-ga yozilmoqda...', 'info');
     const res = await dataService.syncAllDataToSupabase();
     setIsSyncing(false);
     if (res.success) {
-      addToast('Barcha ma’lumotlar (sozlamalar, kategoriyalar, mebellar) muvaffaqiyatli Supabase-ga ko‘chirildi!', 'success');
+      addToast('Barcha ma’lumotlar (sozlamalar, kategoriyalar, mebellar, ustalar) Supabase-ga to‘liq saqlandi!', 'success');
       loadAllData();
     } else {
       addToast(`Xatolik: ${res.error}`, 'error');
     }
   };
 
+  const handleSyncSupabase = handleCheckAndSync;
+
   const loadAllData = async () => {
     try {
+      checkHealth();
       const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
@@ -522,6 +553,67 @@ export const AdminDashboard = () => {
       {/* Main Content Area */}
       <main style={{ flex: 1, padding: '2.5rem', overflowY: 'auto' }}>
         
+        {/* SUPABASE TABLES MISSING WARNING BANNER */}
+        {supabaseHealth && !supabaseHealth.tablesFound && (
+          <div
+            style={{
+              padding: '1.25rem 1.5rem',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              border: '1.5px solid rgba(245, 158, 11, 0.4)',
+              borderRadius: 'var(--radius-lg)',
+              marginBottom: '2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.85rem'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
+              <AlertTriangle size={26} color="#f59e0b" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
+              <div>
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f59e0b', marginBottom: '0.35rem' }}>
+                  Diqqat: Supabase Ma’lumotlar Bazasi Jadvallari Yaratilishi Kerak!
+                </h4>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
+                  Siz Super Admin sifatida o‘chirgan yoki qo‘shgan ma’lumotlar (masalan, <strong>o‘chirilgan ustalar</strong>, yangi qo‘shilgan mebellar) faqat hozirgi brauzeringizda qolmasdan, <strong>barcha boshqa foydalanuvchilar, mijozlar va qurilmalarda ham to‘liq saqlanib ko‘rinishi uchun</strong> Supabase loyihangizda SQL skriptni 1 marta ishga tushiring.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', paddingTop: '0.25rem' }}>
+              <button
+                type="button"
+                onClick={handleCopySql}
+                className="btn btn-primary btn-sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+              >
+                {copiedSql ? <Check size={16} /> : <Copy size={16} />}
+                {copiedSql ? 'SQL Nusxalandi!' : '1. SQL Skriptni Nusxalash (1-Click)'}
+              </button>
+
+              <a
+                href="https://supabase.com/dashboard/project/hlnzxwcupwaaxrutvnvb/sql/new"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary btn-sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--gold-accent)', fontWeight: 700 }}
+              >
+                <ExternalLink size={15} /> 2. Supabase SQL Editor-ni Ochish
+              </a>
+
+              <button
+                type="button"
+                onClick={handleCheckAndSync}
+                disabled={isSyncing}
+                className="btn btn-secondary btn-sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+              >
+                <Database size={15} color="#10b981" />
+                {isSyncing ? 'Sinxronlanmoqda...' : '3. Tekshirish va Barchasini Supabase-ga Yozish'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: OVERVIEW & ANALYTICS */}
         {activeTab === 'overview' && (
           <div>
@@ -1002,20 +1094,42 @@ export const AdminDashboard = () => {
               <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <strong style={{ color: '#10b981', fontSize: '0.95rem' }}>🔄 Supabase-ga Ma’lumotlarni Ko‘chirish</strong>
+                    <strong style={{ color: '#10b981', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Database size={16} /> Supabase Ma’lumotlar Bazasi va Sinxronlash
+                    </strong>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                      Barcha default mahsulotlar, kategoriyalar va sozlamalarni bevosita ulangan Supabase bazasiga ko‘chiradi.
+                      Super Admin kiritgan barcha o‘zgarishlar, o‘chirilgan va yangi qo‘shilgan ustalar hamda mebellarni Supabase bulutli bazasiga to‘liq saqlaydi.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleSyncSupabase}
-                    disabled={isSyncing}
-                    className="btn btn-secondary btn-sm"
-                    style={{ backgroundColor: 'var(--bg-card)', color: '#10b981', fontWeight: 700, border: '1px solid rgba(16, 185, 129, 0.35)' }}
-                  >
-                    {isSyncing ? 'Ko‘chirilmoqda...' : 'Barchasini Supabase-ga Yozish'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={handleCopySql}
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.8rem', fontWeight: 600 }}
+                    >
+                      {copiedSql ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedSql ? 'SQL Nusxalandi!' : 'SQL Kodni Nusxalash'}
+                    </button>
+                    <a
+                      href="https://supabase.com/dashboard/project/hlnzxwcupwaaxrutvnvb/sql/new"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-secondary btn-sm"
+                      style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--gold-accent)' }}
+                    >
+                      <ExternalLink size={14} /> SQL Editor
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleSyncSupabase}
+                      disabled={isSyncing}
+                      className="btn btn-secondary btn-sm"
+                      style={{ backgroundColor: 'var(--bg-card)', color: '#10b981', fontWeight: 700, border: '1px solid rgba(16, 185, 129, 0.35)' }}
+                    >
+                      {isSyncing ? 'Yozilmoqda...' : '🔄 Barchasini Supabase-ga Yozish'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
