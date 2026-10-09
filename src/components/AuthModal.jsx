@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { X, Lock, Mail, User, Phone, ShieldCheck, ArrowRight } from 'lucide-react';
@@ -6,6 +7,7 @@ import { X, Lock, Mail, User, Phone, ShieldCheck, ArrowRight } from 'lucide-reac
 export const AuthModal = () => {
   const { authModalState, closeAuthModal, login, register } = useAuth();
   const { settings } = useSettings();
+  const navigate = useNavigate();
 
   const [isLoginMode, setIsLoginMode] = useState(authModalState.mode !== 'register');
   const [loading, setLoading] = useState(false);
@@ -23,14 +25,27 @@ export const AuthModal = () => {
     setLoading(true);
 
     if (isLoginMode) {
-      await login(email, password);
+      const res = await login(email, password);
+      if (res?.success) {
+        if (res.role === 'admin') {
+          navigate('/admin');
+        } else if (res.role === 'manager') {
+          navigate('/manager');
+        } else {
+          // Oddiy mijoz uchun o'z hisobiga yoki do'konga yo'naltirish
+          navigate('/account');
+        }
+      }
     } else {
-      await register({
+      const res = await register({
         full_name: fullName,
         email,
         password,
         phone
       });
+      if (res?.success) {
+        navigate('/account');
+      }
     }
 
     setLoading(false);
@@ -38,8 +53,8 @@ export const AuthModal = () => {
 
   const setDemoCredentials = (type) => {
     if (type === 'admin') {
-      setEmail('admin@urgutmebel.uz');
-      setPassword('admin12345');
+      setEmail('soxibgaybullayev439@gmail.com');
+      setPassword('s0x1bj0n$02$');
     } else if (type === 'manager') {
       setEmail('manager@urgutmebel.uz');
       setPassword('manager12345');

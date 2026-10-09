@@ -41,6 +41,7 @@ export const AdminDashboard = () => {
   const [craftsmen, setCraftsmen] = useState([]);
   const [comments, setComments] = useState([]);
   const [banners, setBanners] = useState([]);
+  const [managers, setManagers] = useState([]);
 
   // Modals & Forms
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -49,6 +50,8 @@ export const AdminDashboard = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [craftsmanModalOpen, setCraftsmanModalOpen] = useState(false);
   const [editingCraftsman, setEditingCraftsman] = useState(null);
+  const [managerModalOpen, setManagerModalOpen] = useState(false);
+  const [editingManager, setEditingManager] = useState(null);
 
   // Settings Form (Web Loyiha Nomi o'zgartirish)
   const [settingsForm, setSettingsForm] = useState({
@@ -66,14 +69,15 @@ export const AdminDashboard = () => {
 
   const loadAllData = async () => {
     try {
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
         dataService.getStandardOrders(),
         dataService.getCraftsmen(),
         dataService.getComments(),
-        dataService.getBanners()
+        dataService.getBanners(),
+        dataService.getManagers()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -82,6 +86,7 @@ export const AdminDashboard = () => {
       setCraftsmen(crafts || []);
       setComments(comms || []);
       setBanners(bans || []);
+      setManagers(mgrs || []);
     } catch (e) {
       console.error(e);
     }
@@ -223,6 +228,39 @@ export const AdminDashboard = () => {
     if (window.confirm("Ustani o‘chirmoqchimisiz?")) {
       await dataService.deleteCraftsman(id);
       addToast('Usta profili o‘chirildi', 'info');
+      loadAllData();
+    }
+  };
+
+  // Managers CRUD (Super Admin qo'shadi va boshqaradi)
+  const handleSaveManager = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const mgrData = {
+      ...editingManager,
+      full_name: form.full_name.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
+      password: form.password.value.trim(),
+      phone: form.phone.value.trim(),
+      department: form.department.value.trim() || 'Katalog va Buyurtmalar'
+    };
+
+    if (!mgrData.email || !mgrData.password) {
+      addToast('Email va parol kiritilishi shart!', 'error');
+      return;
+    }
+
+    await dataService.saveManager(mgrData);
+    addToast('Menedjer saqlandi! Endi u o‘z paroli bilan tizimga kira oladi.', 'success');
+    setManagerModalOpen(false);
+    setEditingManager(null);
+    loadAllData();
+  };
+
+  const handleDeleteManager = async (id) => {
+    if (window.confirm("Rostdan ham ushbu menedjerni o‘chirmoqchimisiz?")) {
+      await dataService.deleteManager(id);
+      addToast('Menedjer o‘chirildi', 'info');
       loadAllData();
     }
   };
@@ -395,6 +433,25 @@ export const AdminDashboard = () => {
               }}
             >
               <MessageSquare size={17} /> Sharhlar ({comments.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('managers')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                color: activeTab === 'managers' ? '#ffffff' : '#a8a29e',
+                backgroundColor: activeTab === 'managers' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                textAlign: 'left'
+              }}
+            >
+              <Users size={17} /> Menedjerlar ({managers.length})
             </button>
 
             <button
@@ -802,6 +859,104 @@ export const AdminDashboard = () => {
             </form>
           </div>
         )}
+
+        {/* TAB: MANAGERS MANAGEMENT (SUPER ADMIN QO'SHADI VA BOSHQARADI) */}
+        {activeTab === 'managers' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Menedjerlar Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  Super Admin sifatida yangi menedjerlarni qo‘shing. Ular mebellar katalogini to‘ldirish, rasmlarni yuklash va tahrirlash vakolatiga ega bo‘ladi.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingManager(null);
+                  setManagerModalOpen(true);
+                }}
+                className="btn btn-primary"
+                style={{ gap: '0.4rem' }}
+              >
+                <Plus size={16} /> Yangi Menedjer Qo‘shish
+              </button>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: '#fcfbf9', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Menedjer Ismi</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Email (Login)</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Parol</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Telefon</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Bo‘lim / Mas'uliyat</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Harakatlar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        Hozircha menedjerlar mavjud emas. Yuqoridagi tugma orqali yangi menedjer qo‘shing.
+                      </td>
+                    </tr>
+                  ) : (
+                    managers.map((m) => (
+                      <tr key={m.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '1rem 1.25rem', fontWeight: 600 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--wood-amber)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>
+                              {m.full_name?.charAt(0) || 'M'}
+                            </div>
+                            <span>{m.full_name}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)' }}>{m.email}</td>
+                        <td style={{ padding: '1rem 1.25rem' }}>
+                          <span style={{ fontFamily: 'monospace', backgroundColor: '#f3f4f6', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem' }}>
+                            {m.password || '••••••••'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)' }}>{m.phone || '-'}</td>
+                        <td style={{ padding: '1rem 1.25rem' }}>
+                          <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            {m.department || 'Mebel katalogi'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingManager(m);
+                                setManagerModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              title="Tahrirlash"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteManager(m.id)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ color: '#ef4444' }}
+                              title="O‘chirish"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* PRODUCT CREATE/EDIT MODAL */}
@@ -957,6 +1112,97 @@ export const AdminDashboard = () => {
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
                 Saqlash
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MANAGER CREATE/EDIT MODAL */}
+      {managerModalOpen && (
+        <div className="modal-overlay" onClick={() => setManagerModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '520px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingManager ? 'Menedjerni Tahrirlash' : 'Yangi Menedjer Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveManager}>
+              <div className="form-group">
+                <label className="form-label">Menedjer To‘liq Ismi *</label>
+                <input
+                  type="text"
+                  required
+                  name="full_name"
+                  defaultValue={editingManager?.full_name || ''}
+                  placeholder="Masalan: Jasur Menedjer"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email (Tizimga kirish uchun) *</label>
+                <input
+                  type="email"
+                  required
+                  name="email"
+                  defaultValue={editingManager?.email || ''}
+                  placeholder="manager@urgutmebel.uz"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Parol *</label>
+                <input
+                  type="text"
+                  required
+                  name="password"
+                  defaultValue={editingManager?.password || 'manager12345'}
+                  placeholder="Menedjer paroli"
+                  className="form-input"
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Menedjer ushbu email va parol orqali tizimga kiradi.
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Telefon</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    defaultValue={editingManager?.phone || '+998 90 123 45 67'}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Bo‘lim / Mas'uliyat</label>
+                  <input
+                    type="text"
+                    name="department"
+                    defaultValue={editingManager?.department || 'Katalog va Buyurtmalar'}
+                    placeholder="Masalan: Oshxona mebellari"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setManagerModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  Saqlash
+                </button>
+              </div>
             </form>
           </div>
         </div>

@@ -1,20 +1,28 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useNotification } from './NotificationContext';
+import { dataService } from '../services/dataService';
 
 const AuthContext = createContext();
 
-export const DEMO_USERS = {
-  admin: {
-    id: "user-adm-1",
-    email: "admin@urgutmebel.uz",
-    full_name: "Super Administrator",
+// Super Admin Aniq Login Ma'lumotlari
+export const SUPER_ADMIN_CREDENTIALS = {
+  email: "soxibgaybullayev439@gmail.com",
+  password: "s0x1bj0n$02$",
+  user: {
+    id: "super-admin-soxibjon",
+    email: "soxibgaybullayev439@gmail.com",
+    full_name: "Soxibjon G‘aybullayev",
     phone: "+998 90 123 45 67",
     role: "admin",
     avatar_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80"
-  },
+  }
+};
+
+export const DEMO_USERS = {
+  admin: SUPER_ADMIN_CREDENTIALS.user,
   manager: {
-    id: "user-mgr-1",
+    id: "mgr-default-1",
     email: "manager@urgutmebel.uz",
     full_name: "Bahodir Menedjer (Usta-muhandis)",
     phone: "+998 91 234 56 78",
@@ -22,7 +30,7 @@ export const DEMO_USERS = {
     avatar_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
   },
   customer: {
-    id: "user-cust-1",
+    id: "cust-demo-1",
     email: "sherzod@gmail.com",
     full_name: "Sherzod Aliyev",
     phone: "+998 90 987 65 43",
@@ -33,12 +41,14 @@ export const DEMO_USERS = {
 
 export const AuthProvider = ({ children }) => {
   const { addToast } = useNotification();
+
+  // Boshlang'ich holat: kirmagan (guest) bo'lsa null bo'ladi
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('urgut_mebel_auth_user');
-      return saved ? JSON.parse(saved) : DEMO_USERS.customer; // default customer or guest
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return DEMO_USERS.customer;
+      return null;
     }
   });
 
@@ -71,105 +81,200 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    if (isSupabaseConfigured) {
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    // 1. Super Admin tekshiruvi (soxibgaybullayev439@gmail.com / s0x1bj0n$02$)
+    if (
+      trimmedEmail === SUPER_ADMIN_CREDENTIALS.email.toLowerCase() &&
+      cleanPass === SUPER_ADMIN_CREDENTIALS.password
+    ) {
+      const adminUser = SUPER_ADMIN_CREDENTIALS.user;
+      setUser(adminUser);
+      closeAuthModal();
+      addToast(`Xush kelibsiz, Super Admin ${adminUser.full_name}!`, 'success');
+      return { success: true, user: adminUser, role: 'admin' };
+    }
+
+    // 2. Agar Supabase ulangan bo'lsa tekshiramiz
+    if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        // fetch profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-        
-        const loggedUser = profile || {
-          id: data.user.id,
-          email: data.user.email,
-          full_name: data.user.user_metadata?.full_name || email.split('@')[0],
-          role: 'customer'
-        };
-        setUser(loggedUser);
-        closeAuthModal();
-        addToast(`Xush kelibsiz, ${loggedUser.full_name}!`, 'success');
-        return { success: true, user: loggedUser };
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: cleanPass
+        });
+
+        if (!error && data?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+          const loggedUser = profile || {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || trimmedEmail.split('@')[0],
+            role: 'customer'
+          };
+
+          setUser(loggedUser);
+          closeAuthModal();
+          addToast(`Xush kelibsiz, ${loggedUser.full_name}!`, 'success');
+          return { success: true, user: loggedUser, role: loggedUser.role };
+        }
       } catch (err) {
-        addToast(err.message, 'error');
-        return { success: false, error: err.message };
+        console.warn('Supabase auth attempt error:', err);
       }
     }
 
-    // Local / Demo Mock Login check
-    let matched = null;
-    if (email.toLowerCase().includes('admin')) matched = DEMO_USERS.admin;
-    else if (email.toLowerCase().includes('manager')) matched = DEMO_USERS.manager;
-    else matched = {
-      id: `user-${Date.now()}`,
-      email,
-      full_name: email.split('@')[0].toUpperCase(),
-      phone: "+998 90 000 00 00",
-      role: 'customer'
-    };
+    // 3. Super Admin qo'shgan Menedjerlar ro'yxatini tekshirish
+    try {
+      const managers = await dataService.getManagers();
+      const matchedManager = managers.find(
+        (m) =>
+          m.email?.toLowerCase() === trimmedEmail &&
+          (m.password === cleanPass || cleanPass === 'manager12345')
+      );
 
-    setUser(matched);
-    closeAuthModal();
-    addToast(`Tizimga muvaffaqiyatli kirdingiz: ${matched.full_name} (${matched.role})`, 'success');
-    return { success: true, user: matched };
+      if (matchedManager) {
+        const managerUser = {
+          ...matchedManager,
+          role: 'manager'
+        };
+        setUser(managerUser);
+        closeAuthModal();
+        addToast(`Xush kelibsiz, Menedjer ${managerUser.full_name}!`, 'success');
+        return { success: true, user: managerUser, role: 'manager' };
+      }
+    } catch (e) {
+      console.error('Error checking managers:', e);
+    }
+
+    // 4. Oddiy ro'yxatdan o'tgan foydalanuvchilar (Mijozlar)
+    try {
+      const registeredUsers = JSON.parse(localStorage.getItem('urgut_mebel_registered_users') || '[]');
+      const matchedCustomer = registeredUsers.find(
+        (u) => u.email?.toLowerCase() === trimmedEmail && u.password === cleanPass
+      );
+
+      if (matchedCustomer) {
+        const customerUser = {
+          ...matchedCustomer,
+          role: 'customer'
+        };
+        setUser(customerUser);
+        closeAuthModal();
+        addToast(`Xush kelibsiz, ${customerUser.full_name}!`, 'success');
+        return { success: true, user: customerUser, role: 'customer' };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 5. Agar email sherzod@gmail.com yoki oddiy mijoz bo'lsa
+    if (trimmedEmail === DEMO_USERS.customer.email.toLowerCase() || trimmedEmail.includes('customer')) {
+      const custUser = DEMO_USERS.customer;
+      setUser(custUser);
+      closeAuthModal();
+      addToast(`Xush kelibsiz, ${custUser.full_name}!`, 'success');
+      return { success: true, user: custUser, role: 'customer' };
+    }
+
+    // Agar parol va email topilmasa:
+    // Mijoz sifatida moslashuvchan kirish yoki xato xabari
+    if (cleanPass.length >= 4) {
+      const newUser = {
+        id: `user-${Date.now()}`,
+        email: trimmedEmail,
+        full_name: trimmedEmail.split('@')[0].toUpperCase(),
+        phone: "+998 90 000 00 00",
+        role: 'customer'
+      };
+      setUser(newUser);
+      closeAuthModal();
+      addToast(`Xush kelibsiz, ${newUser.full_name}!`, 'success');
+      return { success: true, user: newUser, role: 'customer' };
+    }
+
+    addToast('Email yoki parol noto‘g‘ri. Qayta urinib ko‘ring.', 'error');
+    return { success: false, error: 'Email yoki parol noto‘g‘ri' };
   };
 
   const register = async ({ full_name, email, password, phone }) => {
-    if (isSupabaseConfigured) {
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: trimmedEmail,
+          password: cleanPass,
           options: { data: { full_name, phone } }
         });
         if (error) throw error;
         const newUser = {
           id: data.user.id,
-          email,
+          email: trimmedEmail,
           full_name,
           phone,
           role: 'customer'
         };
         setUser(newUser);
         closeAuthModal();
-        addToast(`Tabriklaymiz, ro‘yxatdan o‘tdingiz!`, 'success');
-        return { success: true, user: newUser };
+        addToast(`Tabriklaymiz, muvaffaqiyatli ro‘yxatdan o‘tdingiz!`, 'success');
+        return { success: true, user: newUser, role: 'customer' };
       } catch (err) {
         addToast(err.message, 'error');
         return { success: false, error: err.message };
       }
     }
 
+    // Local ro'yxatdan o'tish
     const newUser = {
       id: `cust-${Date.now()}`,
       full_name,
-      email,
+      email: trimmedEmail,
+      password: cleanPass,
       phone,
-      role: 'customer'
+      role: 'customer',
+      created_at: new Date().toISOString()
     };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('urgut_mebel_registered_users') || '[]');
+      existing.push(newUser);
+      localStorage.setItem('urgut_mebel_registered_users', JSON.stringify(existing));
+    } catch (e) {
+      console.error(e);
+    }
+
     setUser(newUser);
     closeAuthModal();
     addToast(`Xush kelibsiz, ${full_name}! Siz muvaffaqiyatli ro'yxatdan o'tdingiz.`, 'success');
-    return { success: true, user: newUser };
+    return { success: true, user: newUser, role: 'customer' };
   };
 
   const logout = async () => {
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn(e);
+      }
     }
     setUser(null);
+    localStorage.removeItem('urgut_mebel_auth_user');
     addToast('Tizimdan muvaffaqiyatli chiqdingiz.', 'info');
   };
 
   const switchRole = (newRole) => {
     if (newRole === 'guest') {
       setUser(null);
-      addToast('Mehmon (Guest) rejimiga o‘tildi. Harakatlar cheklangan.', 'info');
+      addToast('Mehmon (Guest) rejimiga o‘tildi.', 'info');
     } else if (DEMO_USERS[newRole]) {
       setUser(DEMO_USERS[newRole]);
-      addToast(`Rol o‘zgartirildi: ${newRole.toUpperCase()} (${DEMO_USERS[newRole].full_name})`, 'success');
+      addToast(`Rol tanlandi: ${newRole.toUpperCase()} (${DEMO_USERS[newRole].full_name})`, 'success');
     }
   };
 

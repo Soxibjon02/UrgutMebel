@@ -76,7 +76,6 @@ function App() {
                   {/* Floating Elements & Overlays */}
                   <Toast />
                   <AuthModal />
-                  <RoleSwitcher />
                 </div>
               </Router>
             </WishlistProvider>

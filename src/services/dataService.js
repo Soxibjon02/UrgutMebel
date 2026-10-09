@@ -469,5 +469,47 @@ export const dataService = {
     const banners = getStored('banners', initialBanners).filter((b) => b.id !== id);
     setStored('banners', banners);
     return banners;
+  },
+
+  // Managers (Super Admin tomonidan boshqariladi)
+  async getManagers() {
+    const defaultManagers = [
+      {
+        id: "mgr-default-1",
+        full_name: "Bahodir Menedjer (Usta-muhandis)",
+        email: "manager@urgutmebel.uz",
+        password: "manager12345",
+        phone: "+998 91 234 56 78",
+        role: "manager",
+        department: "Katalog va Ishlab chiqarish",
+        created_at: "2026-01-15T10:00:00.000Z"
+      }
+    ];
+    return getStored('managers', defaultManagers);
+  },
+
+  async saveManager(managerData) {
+    const managers = await this.getManagers();
+    let updated;
+    if (managerData.id) {
+      updated = managers.map((m) => (m.id === managerData.id ? { ...m, ...managerData } : m));
+    } else {
+      const newMgr = {
+        ...managerData,
+        id: `mgr-${Date.now()}`,
+        role: 'manager',
+        created_at: new Date().toISOString()
+      };
+      updated = [newMgr, ...managers];
+    }
+    setStored('managers', updated);
+    return updated;
+  },
+
+  async deleteManager(id) {
+    const managers = await this.getManagers();
+    const updated = managers.filter((m) => m.id !== id);
+    setStored('managers', updated);
+    return updated;
   }
 };
