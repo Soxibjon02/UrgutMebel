@@ -36,8 +36,13 @@ export const ManagerDashboard = () => {
   const { user, isManager, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
 
-  // Navigation tab for Manager: 'furniture' (Mebellar) or 'custom_orders' (Buyurtmalar)
+  // Navigation tab for Manager: 'furniture' | 'custom_orders' | 'craftsmen'
   const [activeMainTab, setActiveMainTab] = useState('furniture');
+
+  // Craftsmen State (Mebel menedjeri ham ustalarni qo'sha oladi)
+  const [craftsmen, setCraftsmen] = useState([]);
+  const [craftsmanModalOpen, setCraftsmanModalOpen] = useState(false);
+  const [editingCraftsman, setEditingCraftsman] = useState(null);
 
   // Furniture / Products state
   const [products, setProducts] = useState([]);
@@ -86,14 +91,16 @@ export const ManagerDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [orderList, prodList, catList] = await Promise.all([
+      const [orderList, prodList, catList, craftList] = await Promise.all([
         dataService.getCustomOrders(),
         dataService.getProducts(),
-        dataService.getCategories()
+        dataService.getCategories(),
+        dataService.getCraftsmen()
       ]);
       setOrders(orderList || []);
       setProducts(prodList || []);
       setCategories(catList || []);
+      setCraftsmen(craftList || []);
     } finally {
       setLoading(false);
     }
@@ -311,6 +318,40 @@ export const ManagerDashboard = () => {
   });
 
   // ==========================================
+  // CRAFTSMEN HANDLERS (MENEDJER QO'SHADI VA BOSHQARADI)
+  // ==========================================
+  const handleSaveCraftsman = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const craftData = {
+      ...editingCraftsman,
+      name: form.name.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
+      password: form.password.value.trim() || 'usta12345',
+      experience_years: Number(form.experience_years.value),
+      location: form.location.value,
+      phone: form.phone.value,
+      telegram: form.telegram.value,
+      bio: form.bio.value,
+      photo_url: form.photo_url.value || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      specializations: form.specializations.value.split(',').map((s) => s.trim())
+    };
+    await dataService.saveCraftsman(craftData);
+    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+    setCraftsmanModalOpen(false);
+    setEditingCraftsman(null);
+    loadData();
+  };
+
+  const handleDeleteCraftsman = async (id, name) => {
+    if (window.confirm(`Rostdan ham "${name}" ustasini o‘chirmoqchimisiz?`)) {
+      await dataService.deleteCraftsman(id);
+      addToast('Usta profili o‘chirildi', 'info');
+      loadData();
+    }
+  };
+
+  // ==========================================
   // CUSTOM ORDERS HANDLERS
   // ==========================================
   const filteredOrders = orders.filter((o) => {
@@ -468,6 +509,28 @@ export const ManagerDashboard = () => {
           >
             <Sliders size={18} />
             <span>Maxsus Buyurtmalar ({orders.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('craftsmen')}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              backgroundColor: activeMainTab === 'craftsmen' ? 'var(--wood-amber)' : 'transparent',
+              color: activeMainTab === 'craftsmen' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Hammer size={18} />
+            <span>Ustalar ({craftsmen.length})</span>
           </button>
         </div>
 
@@ -744,6 +807,110 @@ export const ManagerDashboard = () => {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 3: USTALAR BOSHQARUVI (MENEDJER QO'SHADI VA BOSHQARADI) */}
+        {/* ========================================================= */}
+        {activeMainTab === 'craftsmen' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Urgut Ustalari Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  Yangi ustalarni ro‘yxatdan o‘tkazing va login ma'lumotlarini bering. Usta o‘z panelida portfoliolarini va hisob-kitob daftarlarini yuritadi.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCraftsman(null);
+                  setCraftsmanModalOpen(true);
+                }}
+                className="btn btn-primary"
+                style={{ gap: '0.5rem', fontWeight: 700 }}
+              >
+                <Plus size={18} /> Yangi Usta Qo‘shish
+              </button>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Surati</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Usta Ismi</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Login Email</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Parol</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Telefon</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Mutaxassislik</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Tajriba</th>
+                    <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700 }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {craftsmen.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        Hozircha ustalar mavjud emas. Yuqoridagi tugma orqali yangi usta qo‘shing.
+                      </td>
+                    </tr>
+                  ) : (
+                    craftsmen.map((c) => (
+                      <tr key={c.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <img
+                            src={c.photo_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'}
+                            alt={c.name}
+                            style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-subtle)' }}
+                          />
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>{c.name}</td>
+                        <td style={{ padding: '0.85rem 1.25rem', color: 'var(--text-muted)' }}>{c.email || `${c.name?.toLowerCase().replace(/\s+/g, '')}@urgutmebel.uz`}</td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <span style={{ fontFamily: 'monospace', backgroundColor: 'var(--bg-secondary)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>
+                            {c.password || 'usta12345'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', color: 'var(--text-muted)' }}>{c.phone || '-'}</td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <span style={{ backgroundColor: 'rgba(194, 109, 46, 0.1)', color: 'var(--wood-amber)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
+                            {c.specializations?.join(', ') || 'Mebel ustasi'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>{c.experience_years || 5} yil</td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCraftsman(c);
+                                setCraftsmanModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              title="Tahrirlash"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCraftsman(c.id, c.name)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ color: '#ef4444' }}
+                              title="O‘chirish"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -1223,6 +1390,73 @@ export const ManagerDashboard = () => {
             >
               Yopish
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: USTA QO'SHISH / TAHRIRLASH (MENEDJER HAM QO'SHA OLADI) */}
+      {craftsmanModalOpen && (
+        <div className="modal-overlay" onClick={() => setCraftsmanModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '560px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingCraftsman ? 'Ustani Tahrirlash' : 'Yangi Usta Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveCraftsman}>
+              <div className="form-group">
+                <label className="form-label">Usta To‘liq Ismi *</label>
+                <input type="text" required name="name" defaultValue={editingCraftsman?.name || ''} placeholder="Masalan: Dilshod Usta" className="form-input" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Login Email *</label>
+                  <input type="email" required name="email" defaultValue={editingCraftsman?.email || ''} placeholder="usta@urgutmebel.uz" className="form-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Kirish Paroli *</label>
+                  <input type="text" required name="password" defaultValue={editingCraftsman?.password || 'usta12345'} className="form-input" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Telefon</label>
+                  <input type="text" name="phone" defaultValue={editingCraftsman?.phone || '+998 90 123 45 67'} className="form-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Tajribasi (yil)</label>
+                  <input type="number" name="experience_years" defaultValue={editingCraftsman?.experience_years || 5} className="form-input" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Joylashuv</label>
+                  <input type="text" name="location" defaultValue={editingCraftsman?.location || 'Urgut shahri'} className="form-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Telegram</label>
+                  <input type="text" name="telegram" defaultValue={editingCraftsman?.telegram || ''} placeholder="@dilshod_usta" className="form-input" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Surat URL</label>
+                <input type="url" name="photo_url" defaultValue={editingCraftsman?.photo_url || ''} placeholder="https://..." className="form-input" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Ixtisosliklar (vergul bilan)</label>
+                <input type="text" name="specializations" defaultValue={editingCraftsman?.specializations?.join(', ') || 'Klassik mebel, Oshxona, O‘ymakorlik'} className="form-input" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Biografiya / Ustaxona haqida</label>
+                <textarea rows={2} name="bio" defaultValue={editingCraftsman?.bio || ''} className="form-textarea" />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setCraftsmanModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>
+                  Bekor qilish
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
+                  Saqlash
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

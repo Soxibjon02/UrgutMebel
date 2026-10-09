@@ -31,6 +31,8 @@ export const AuthModal = () => {
           navigate('/admin');
         } else if (res.role === 'manager') {
           navigate('/manager');
+        } else if (res.role === 'craftsman') {
+          navigate('/craftsman-dashboard');
         } else {
           // Oddiy mijoz uchun o'z hisobiga yoki do'konga yo'naltirish
           navigate('/account');
@@ -58,6 +60,9 @@ export const AuthModal = () => {
     } else if (type === 'manager') {
       setEmail('manager@urgutmebel.uz');
       setPassword('manager12345');
+    } else if (type === 'craftsman') {
+      setEmail('usta@urgutmebel.uz');
+      setPassword('usta12345');
     } else {
       setEmail('sherzod@gmail.com');
       setPassword('customer123');
@@ -276,20 +281,28 @@ export const AuthModal = () => {
             <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '0.6rem', textAlign: 'center' }}>
               Sinov uchun tezkor kirish:
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
               <button
                 type="button"
                 onClick={() => setDemoCredentials('customer')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.4rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
               >
                 Mijoz
               </button>
               <button
                 type="button"
+                onClick={() => setDemoCredentials('craftsman')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
+              >
+                Usta
+              </button>
+              <button
+                type="button"
                 onClick={() => setDemoCredentials('manager')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.4rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
               >
                 Menedjer
               </button>
@@ -297,7 +310,7 @@ export const AuthModal = () => {
                 type="button"
                 onClick={() => setDemoCredentials('admin')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.75rem', padding: '0.4rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
               >
                 Admin
               </button>

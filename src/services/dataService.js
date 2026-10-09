@@ -511,5 +511,194 @@ export const dataService = {
     const updated = managers.filter((m) => m.id !== id);
     setStored('managers', updated);
     return updated;
+  },
+
+  // ==========================================
+  // CRAFTSMAN WORKS (USTANING ISHLARI / PORTFOLIO)
+  // ==========================================
+  async getCraftsmanWorks(craftsmanId) {
+    const allWorks = getStored('craftsman_works', []);
+    if (craftsmanId) {
+      return allWorks.filter((w) => w.craftsman_id === craftsmanId);
+    }
+    return allWorks;
+  },
+
+  async saveCraftsmanWork(workData) {
+    const allWorks = getStored('craftsman_works', []);
+    let updated;
+    if (workData.id) {
+      updated = allWorks.map((w) => (w.id === workData.id ? { ...w, ...workData } : w));
+    } else {
+      const newWork = {
+        ...workData,
+        id: `work-${Date.now()}`,
+        created_at: new Date().toISOString()
+      };
+      updated = [newWork, ...allWorks];
+    }
+    setStored('craftsman_works', updated);
+    return updated;
+  },
+
+  async deleteCraftsmanWork(id) {
+    const allWorks = getStored('craftsman_works', []);
+    const updated = allWorks.filter((w) => w.id !== id);
+    setStored('craftsman_works', updated);
+    return updated;
+  },
+
+  // ==========================================
+  // CRAFTSMAN FINANCES (USTAXONA HISOB-KITOB DAFTARI)
+  // ==========================================
+  async getCraftsmanFinances(craftsmanId) {
+    const allFinances = getStored('craftsman_finances', [
+      {
+        id: "fin-demo-1",
+        craftsman_id: craftsmanId || "craft-1",
+        project_name: "Yusupovlar xonadoni uchun Oshxona mebeli",
+        customer_name: "Farrux Yusupov",
+        total_amount: 14500000,
+        advance_payment: 8000000,
+        materials_cost: 6200000,
+        labor_cost: 1500000,
+        transport_cost: 400000,
+        other_cost: 200000,
+        status: "JARAYONDA", // "JARAYONDA" | "TUGATILGAN" | "QARZDORLIK_BOR"
+        notes: "Akril eshiklar va Blum furnitura",
+        created_at: "2026-03-20T10:00:00.000Z"
+      },
+      {
+        id: "fin-demo-2",
+        craftsman_id: craftsmanId || "craft-1",
+        project_name: "Klassik Eman Yotoqxona Shkafi (4 eshikli)",
+        customer_name: "Dilshod Akramov",
+        total_amount: 9800000,
+        advance_payment: 9800000,
+        materials_cost: 4100000,
+        labor_cost: 1200000,
+        transport_cost: 300000,
+        other_cost: 150000,
+        status: "TUGATILGAN",
+        notes: "Mijoz to‘liq hisob-kitob qildi, topshirildi",
+        created_at: "2026-03-12T14:30:00.000Z"
+      }
+    ]);
+    if (craftsmanId) {
+      return allFinances.filter((f) => f.craftsman_id === craftsmanId);
+    }
+    return allFinances;
+  },
+
+  async saveCraftsmanFinance(record) {
+    const all = getStored('craftsman_finances', []);
+    let updated;
+    if (record.id) {
+      updated = all.map((f) => (f.id === record.id ? { ...f, ...record } : f));
+    } else {
+      const newRec = {
+        ...record,
+        id: `fin-${Date.now()}`,
+        created_at: new Date().toISOString()
+      };
+      updated = [newRec, ...all];
+    }
+    setStored('craftsman_finances', updated);
+    return updated;
+  },
+
+  async deleteCraftsmanFinance(id) {
+    const all = getStored('craftsman_finances', []);
+    const updated = all.filter((f) => f.id !== id);
+    setStored('craftsman_finances', updated);
+    return updated;
+  },
+
+  // Algoritmik moliya hisoblagich
+  calculateFinancialStats(records = []) {
+    let totalRevenue = 0;       // Jami buyurtmalar summasi (Kirim)
+    let totalReceived = 0;      // Haqiqiy qabul qilingan summa (Avanslar)
+    let totalExpenses = 0;      // Jami sarflangan xarajat
+    let totalMaterials = 0;     // Xom-ashyo xarajati
+    let totalRemainingDebt = 0; // Kutilayotgan qarzlar
+
+    records.forEach((r) => {
+      const total = Number(r.total_amount) || 0;
+      const advance = Number(r.advance_payment) || 0;
+      const mat = Number(r.materials_cost) || 0;
+      const labor = Number(r.labor_cost) || 0;
+      const transport = Number(r.transport_cost) || 0;
+      const other = Number(r.other_cost) || 0;
+
+      const exp = mat + labor + transport + other;
+      totalRevenue += total;
+      totalReceived += advance;
+      totalExpenses += exp;
+      totalMaterials += mat;
+      totalRemainingDebt += Math.max(0, total - advance);
+    });
+
+    const netProfit = totalRevenue - totalExpenses;
+    const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0;
+
+    return {
+      totalRevenue,
+      totalReceived,
+      totalExpenses,
+      totalMaterials,
+      totalRemainingDebt,
+      netProfit,
+      profitMargin
+    };
+  },
+
+  // ==========================================
+  // SYNC ALL DATA TO LIVE SUPABASE
+  // ==========================================
+  async syncAllDataToSupabase() {
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: false, error: "Supabase kalitlari .env da ulanmagan" };
+    }
+
+    try {
+      // 1. Settings sync
+      const settings = await this.getSettings();
+      await supabase.from('settings').upsert({ id: 1, ...settings });
+
+      // 2. Categories sync
+      const categories = await this.getCategories();
+      if (categories && categories.length) {
+        for (const cat of categories) {
+          const payload = { ...cat };
+          if (!payload.slug) payload.slug = payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          await supabase.from('categories').upsert(payload, { onConflict: 'slug' });
+        }
+      }
+
+      // 3. Products sync
+      const products = await this.getProducts();
+      if (products && products.length) {
+        for (const prod of products) {
+          const payload = {
+            id: prod.id?.includes('prod-') ? undefined : prod.id,
+            name: prod.name,
+            slug: prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            price: Number(prod.price) || 0,
+            discount_price: prod.discount_price ? Number(prod.discount_price) : null,
+            material: prod.material,
+            dimensions: prod.dimensions,
+            stock: prod.stock || 10,
+            description: prod.description,
+            is_published: prod.is_published !== false
+          };
+          await supabase.from('products').upsert(payload, { onConflict: 'slug' });
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("Supabase sync error:", err);
+      return { success: false, error: err.message };
+    }
   }
 };

@@ -53,7 +53,7 @@ export const AdminDashboard = () => {
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [editingManager, setEditingManager] = useState(null);
 
-  // Settings Form (Web Loyiha Nomi o'zgartirish)
+  // Settings Form (Web Loyiha Nomi, Header & Footer o'zgartirish)
   const [settingsForm, setSettingsForm] = useState({
     site_name: settings.site_name,
     site_tagline: settings.site_tagline || '',
@@ -64,8 +64,32 @@ export const AdminDashboard = () => {
     instagram: settings.instagram || '',
     currency: settings.currency || 'so‘m',
     hero_badge: settings.hero_badge || '',
-    announcement: settings.announcement || ''
+    announcement: settings.announcement || '',
+    working_hours: settings.working_hours || '',
+    footer_about: settings.footer_about || '',
+    copyright_text: settings.copyright_text || '',
+    feature1_title: settings.feature1_title || '',
+    feature1_desc: settings.feature1_desc || '',
+    feature2_title: settings.feature2_title || '',
+    feature2_desc: settings.feature2_desc || '',
+    feature3_title: settings.feature3_title || '',
+    feature3_desc: settings.feature3_desc || ''
   });
+
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncSupabase = async () => {
+    setIsSyncing(true);
+    addToast('Barcha default ma’lumotlar Supabase-ga ko‘chirilmoqda...', 'info');
+    const res = await dataService.syncAllDataToSupabase();
+    setIsSyncing(false);
+    if (res.success) {
+      addToast('Barcha ma’lumotlar (sozlamalar, kategoriyalar, mebellar) muvaffaqiyatli Supabase-ga ko‘chirildi!', 'success');
+      loadAllData();
+    } else {
+      addToast(`Xatolik: ${res.error}`, 'error');
+    }
+  };
 
   const loadAllData = async () => {
     try {
@@ -107,7 +131,16 @@ export const AdminDashboard = () => {
       instagram: settings.instagram || '',
       currency: settings.currency || 'so‘m',
       hero_badge: settings.hero_badge || '',
-      announcement: settings.announcement || ''
+      announcement: settings.announcement || '',
+      working_hours: settings.working_hours || 'Har kuni 08:30 dan 20:00 gacha (Dam olish kunlarisiz)',
+      footer_about: settings.footer_about || '',
+      copyright_text: settings.copyright_text || '',
+      feature1_title: settings.feature1_title || 'Tezkor Yetkazib Berish',
+      feature1_desc: settings.feature1_desc || 'Butun O‘zbekiston bo‘ylab professional yetkazish va o‘rnatish',
+      feature2_title: settings.feature2_title || 'Rasmiy Kafolat',
+      feature2_desc: settings.feature2_desc || 'Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati',
+      feature3_title: settings.feature3_title || 'Urgut Duradgorlari',
+      feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi'
     });
   }, [settings]);
 
@@ -208,7 +241,9 @@ export const AdminDashboard = () => {
     const form = e.target;
     const craftData = {
       ...editingCraftsman,
-      name: form.name.value,
+      name: form.name.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
+      password: form.password.value.trim() || 'usta12345',
       experience_years: Number(form.experience_years.value),
       location: form.location.value,
       phone: form.phone.value,
@@ -218,7 +253,7 @@ export const AdminDashboard = () => {
       specializations: form.specializations.value.split(',').map((s) => s.trim())
     };
     await dataService.saveCraftsman(craftData);
-    addToast('Usta ma‘lumotlari saqlandi!', 'success');
+    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
     setCraftsmanModalOpen(false);
     setEditingCraftsman(null);
     loadAllData();
@@ -840,21 +875,141 @@ export const AdminDashboard = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Yuqori Banner E'loni (Announcement)</label>
+                <label className="form-label">Yuqori Banner E'loni (Header Announcement)</label>
                 <input
                   type="text"
                   value={settingsForm.announcement}
                   onChange={(e) => setSettingsForm({ ...settingsForm, announcement: e.target.value })}
+                  placeholder="Bahorgi aksiya: barcha yotoqxona to‘plamlariga 15% gacha chegirma!"
                   className="form-input"
                 />
+              </div>
+
+              {/* FOOTER & XIZMATLAR BO'LIMI */}
+              <div style={{ marginTop: '1.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-subtle)' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--wood-amber)' }}>
+                  Footer & Afzalliklar Sozlamalari (Super Admin)
+                </h4>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                  Saytning pastki qismidagi (Footer) 3 ta xizmat afzalliklari, ish vaqti va tavsif matnlarini tahrirlang.
+                </p>
+
+                <div className="form-group">
+                  <label className="form-label">Footer Haqida Matni</label>
+                  <textarea
+                    rows={2}
+                    value={settingsForm.footer_about}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, footer_about: e.target.value })}
+                    className="form-textarea"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Ish Vaqti</label>
+                  <input
+                    type="text"
+                    value={settingsForm.working_hours}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, working_hours: e.target.value })}
+                    placeholder="Har kuni 08:30 dan 20:00 gacha (Dam olish kunlarisiz)"
+                    className="form-input"
+                  />
+                </div>
+
+                {/* 3 ta afzallik */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>1-Afzallik Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature1_title}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature1_title: e.target.value })}
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                    <label className="form-label">1-Afzallik Tavsifi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature1_desc}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature1_desc: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>2-Afzallik Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature2_title}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature2_title: e.target.value })}
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                    <label className="form-label">2-Afzallik Tavsifi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature2_desc}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature2_desc: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>3-Afzallik Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature3_title}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature3_title: e.target.value })}
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem' }}
+                    />
+                    <label className="form-label">3-Afzallik Tavsifi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.feature3_desc}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, feature3_desc: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Copyright Matni</label>
+                  <input
+                    type="text"
+                    value={settingsForm.copyright_text}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, copyright_text: e.target.value })}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* SUPABASE SYNC BUTTON */}
+              <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div>
+                    <strong style={{ color: '#166534', fontSize: '0.95rem' }}>🔄 Supabase-ga Ma’lumotlarni Ko‘chirish</strong>
+                    <p style={{ color: '#15803d', fontSize: '0.8rem', marginTop: '0.2rem' }}>
+                      Barcha default mahsulotlar, kategoriyalar va sozlamalarni bevosita ulangan Supabase bazasiga ko‘chiradi.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSyncSupabase}
+                    disabled={isSyncing}
+                    className="btn btn-secondary btn-sm"
+                    style={{ backgroundColor: '#ffffff', color: '#166534', fontWeight: 700 }}
+                  >
+                    {isSyncing ? 'Ko‘chirilmoqda...' : 'Barchasini Supabase-ga Yozish'}
+                  </button>
+                </div>
               </div>
 
               <button
                 type="submit"
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginTop: '1rem' }}
+                style={{ width: '100%', marginTop: '1.5rem' }}
               >
-                Sozlamalarni Saqlash va Loyihada Yangilash
+                Barcha Sozlamalarni Saqlash va Saytda Yangilash
               </button>
             </form>
           </div>
@@ -1076,6 +1231,16 @@ export const AdminDashboard = () => {
               <div className="form-group">
                 <label className="form-label">Usta To‘liq Ismi *</label>
                 <input type="text" required name="name" defaultValue={editingCraftsman?.name || ''} className="form-input" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Login Email *</label>
+                  <input type="email" required name="email" defaultValue={editingCraftsman?.email || ''} placeholder="usta@urgutmebel.uz" className="form-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Kirish Paroli *</label>
+                  <input type="text" required name="password" defaultValue={editingCraftsman?.password || 'usta12345'} className="form-input" />
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">

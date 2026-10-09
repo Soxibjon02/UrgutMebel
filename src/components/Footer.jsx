@@ -1,44 +1,75 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
+import { dataService } from '../services/dataService';
 import { Sparkles, Phone, Mail, MapPin, Send, Globe, ShieldCheck, Truck, Clock } from 'lucide-react';
 
 export const Footer = () => {
   const { settings } = useSettings();
+  const [categories, setCategories] = useState([]);
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await dataService.getCategories();
+        if (cats && cats.length) {
+          setCategories(cats.slice(0, 7)); // eng ko'pi bilan 7 ta bo'lim
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadCategories();
+    const handleUpdate = () => loadCategories();
+    window.addEventListener('urgut_store_categories_updated', handleUpdate);
+    return () => window.removeEventListener('urgut_store_categories_updated', handleUpdate);
+  }, []);
 
   return (
     <footer style={{ backgroundColor: 'var(--bg-dark)', color: '#d6d3d1', marginTop: '5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-      {/* Top Value Badges */}
+      {/* Top Value Badges - Super Admin tahrirlay oladi */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '2.5rem 0' }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
               <Truck size={24} />
             </div>
             <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>Tezkor Yetkazib Berish</h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>Butun O‘zbekiston bo‘ylab professional yetkazish</p>
+              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
+                {settings.feature1_title || "Tezkor Yetkazib Berish"}
+              </h4>
+              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
+                {settings.feature1_desc || "Butun O‘zbekiston bo‘ylab professional yetkazish va o‘rnatish"}
+              </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
               <ShieldCheck size={24} />
             </div>
             <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>Rasmiy Kafolat</h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>Har bir mebel uchun 3 yildan 5 yilgacha kafolat</p>
+              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
+                {settings.feature2_title || "Rasmiy Kafolat"}
+              </h4>
+              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
+                {settings.feature2_desc || "Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati"}
+              </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
               <Clock size={24} />
             </div>
             <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>Urgut Duradgorlari</h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>Asriy hunarmandchilik va zamonaviy texnologiya</p>
+              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
+                {settings.feature3_title || "Urgut Duradgorlari"}
+              </h4>
+              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
+                {settings.feature3_desc || "Asriy hunarmandchilik va zamonaviy texnologiya uyg'unligi"}
+              </p>
             </div>
           </div>
         </div>
@@ -70,58 +101,74 @@ export const Footer = () => {
               </h3>
             </div>
             <p style={{ color: '#a8a29e', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>
-              {settings.site_tagline || "Urgutning mohir ustalari tomonidan yaratilgan zamonaviy, didli va uzoq yillar xizmat qiluvchi saralangan mebellar markazi."}
+              {settings.footer_about || settings.site_tagline || "Urgutning mohir ustalari tomonidan yaratilgan zamonaviy, didli va uzoq yillar xizmat qiluvchi saralangan mebellar markazi."}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a
-                href={`https://t.me/${settings.telegram?.replace('@', '')}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#292524',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#e7e5e4'
-                }}
-              >
-                <Send size={16} />
-              </a>
-              <a
-                href={`https://instagram.com/${settings.instagram?.replace('@', '')}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#292524',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#e7e5e4'
-                }}
-              >
-                <Globe size={16} />
-              </a>
+              {settings.telegram && (
+                <a
+                  href={`https://t.me/${settings.telegram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Telegram"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: '#292524',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#e7e5e4'
+                  }}
+                >
+                  <Send size={16} />
+                </a>
+              )}
+              {settings.instagram && (
+                <a
+                  href={`https://instagram.com/${settings.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Instagram"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: '#292524',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#e7e5e4'
+                  }}
+                >
+                  <Globe size={16} />
+                </a>
+              )}
             </div>
           </div>
 
-          {/* Catalog Categories */}
+          {/* Catalog Categories (Dinamik Admin Bo'limlari) */}
           <div>
             <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Mebel Bo‘limlari
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.88rem' }}>
-              <li><Link to="/furniture?category=mehmonxona" style={{ color: '#a8a29e' }}>Mehmonxona Mebellari</Link></li>
-              <li><Link to="/furniture?category=yotoqxona" style={{ color: '#a8a29e' }}>Yotoqxona To‘plamlari</Link></li>
-              <li><Link to="/furniture?category=oshxona" style={{ color: '#a8a29e' }}>Oshxona Garniturlari</Link></li>
-              <li><Link to="/furniture?category=ofis" style={{ color: '#a8a29e' }}>Ofis va Ish Stollari</Link></li>
-              <li><Link to="/furniture?category=bolalar" style={{ color: '#a8a29e' }}>Bolalar Xonasi Mebellari</Link></li>
-              <li><Link to="/furniture?category=yumshoq-mebellar" style={{ color: '#a8a29e' }}>Yumshoq Divan va Kreslolar</Link></li>
+              {categories.length > 0 ? (
+                categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link to={`/furniture?category=${cat.id}`} style={{ color: '#a8a29e' }}>
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li><Link to="/furniture?category=mehmonxona" style={{ color: '#a8a29e' }}>Mehmonxona Mebellari</Link></li>
+                  <li><Link to="/furniture?category=yotoqxona" style={{ color: '#a8a29e' }}>Yotoqxona To‘plamlari</Link></li>
+                  <li><Link to="/furniture?category=oshxona" style={{ color: '#a8a29e' }}>Oshxona Garniturlari</Link></li>
+                  <li><Link to="/furniture?category=ofis" style={{ color: '#a8a29e' }}>Ofis va Ish Stollari</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -135,7 +182,7 @@ export const Footer = () => {
               <li><Link to="/craftsmen" style={{ color: '#a8a29e' }}>Urgut Ustalari Katalogi</Link></li>
               <li><Link to="/about" style={{ color: '#a8a29e' }}>Biz Haqimizda</Link></li>
               <li><Link to="/contact" style={{ color: '#a8a29e' }}>Bog‘lanish & Manzil</Link></li>
-              <li><Link to="/furniture?discount=true" style={{ color: '#ef4444' }}>Aksiyadagi Mebellar</Link></li>
+              <li><Link to="/furniture" style={{ color: '#ef4444' }}>Aksiyadagi Mebellar</Link></li>
             </ul>
           </div>
 
@@ -158,7 +205,7 @@ export const Footer = () => {
                 <span>{settings.email}</span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#78716c', marginTop: '0.4rem' }}>
-                Ish vaqti: Har kuni 08:30 dan 20:00 gacha (Dam olish kunlarisiz)
+                Ish vaqti: {settings.working_hours || "Har kuni 08:30 dan 20:00 gacha (Dam olish kunlarisiz)"}
               </p>
             </div>
           </div>
@@ -180,7 +227,7 @@ export const Footer = () => {
           }}
         >
           <div>
-            © {currentYear} <strong>{settings.site_name}</strong>. Barcha huquqlar himoyalangan.
+            {settings.copyright_text || `© ${currentYear} ${settings.site_name}. Barcha huquqlar himoyalangan.`}
           </div>
           <div style={{ display: 'flex', gap: '1.25rem' }}>
             <span>O‘zbekiston, Samarqand / Urgut</span>

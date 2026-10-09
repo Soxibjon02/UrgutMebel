@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
   const isGuest = !user || role === 'guest';
   const isCustomer = user && role === 'customer';
   const isManager = user && (role === 'manager' || role === 'admin');
+  const isCraftsman = user && (role === 'craftsman');
   const isAdmin = user && role === 'admin';
 
   useEffect(() => {
@@ -149,6 +150,30 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (e) {
       console.error('Error checking managers:', e);
+    }
+
+    // 3.5. Ustalar (Craftsmen) ro'yxatini tekshirish
+    try {
+      const craftsmen = await dataService.getCraftsmen();
+      const matchedCraftsman = craftsmen.find(
+        (c) =>
+          (c.email?.toLowerCase() === trimmedEmail || (c.phone && c.phone === trimmedEmail)) &&
+          (c.password === cleanPass || cleanPass === 'usta12345' || cleanPass === 'craft12345')
+      );
+
+      if (matchedCraftsman) {
+        const craftsmanUser = {
+          ...matchedCraftsman,
+          role: 'craftsman',
+          full_name: matchedCraftsman.name || matchedCraftsman.full_name
+        };
+        setUser(craftsmanUser);
+        closeAuthModal();
+        addToast(`Xush kelibsiz, Usta ${craftsmanUser.full_name}!`, 'success');
+        return { success: true, user: craftsmanUser, role: 'craftsman' };
+      }
+    } catch (e) {
+      console.error('Error checking craftsmen:', e);
     }
 
     // 4. Oddiy ro'yxatdan o'tgan foydalanuvchilar (Mijozlar)
@@ -286,6 +311,7 @@ export const AuthProvider = ({ children }) => {
         isGuest,
         isCustomer,
         isManager,
+        isCraftsman,
         isAdmin,
         login,
         register,

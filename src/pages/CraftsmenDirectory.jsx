@@ -65,7 +65,7 @@ export const CraftsmenDirectory = () => {
         {/* Filter Controls */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)',
             padding: '1.25rem',
             border: '1px solid var(--border-subtle)',

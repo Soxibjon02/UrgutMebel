@@ -28,6 +28,7 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { CustomerAccount } from './pages/CustomerAccount';
 import { ManagerDashboard } from './pages/ManagerDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { CraftsmanDashboard } from './pages/CraftsmanDashboard';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 
@@ -59,6 +60,10 @@ function App() {
                       <Route path="/cart" element={<CartPage />} />
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="/account" element={<CustomerAccount />} />
+
+                      {/* Dedicated Craftsman Panel */}
+                      <Route path="/craftsman-dashboard" element={<CraftsmanDashboard />} />
+                      <Route path="/craftsman" element={<CraftsmanDashboard />} />
 
                       {/* Dedicated Manager Panel */}
                       <Route path="/manager" element={<ManagerDashboard />} />

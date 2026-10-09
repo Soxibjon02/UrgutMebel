@@ -8,16 +8,17 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--bg-card)',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border-subtle)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: 'var(--shadow-sm)',
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        backdropFilter: 'blur(8px)'
       }}
-      className="craftsman-card"
+      className="craftsman-card glass-card"
     >
       {/* Header with Photo & Badge */}
       <div style={{ padding: '1.5rem', display: 'flex', gap: '1.25rem', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)' }}>

@@ -14,18 +14,23 @@ import {
   Phone,
   Shield,
   Briefcase,
+  Hammer,
   LogOut,
   ChevronDown,
   Sparkles,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 export const Navbar = () => {
-  const { settings } = useSettings();
+  const { settings, theme, toggleTheme, isDark } = useSettings();
   const { user, isGuest, role, isManager, isAdmin, logout, openAuthModal } = useAuth();
   const { totalItemsCount } = useCart();
   const { favoritesCount } = useWishlist();
   const navigate = useNavigate();
+
+  const isCraftsman = user && (role === 'craftsman');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -35,7 +40,7 @@ export const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -66,9 +71,11 @@ export const Navbar = () => {
         position: 'sticky',
         top: 0,
         zIndex: 900,
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--glass-bg)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border-subtle)',
-        boxShadow: isScrolled ? '0 4px 20px rgba(0,0,0,0.06)' : 'none',
+        boxShadow: isScrolled ? '0 6px 24px rgba(0,0,0,0.08)' : 'none',
         transition: 'all 0.3s ease'
       }}
     >
@@ -92,7 +99,7 @@ export const Navbar = () => {
             gap: '0.5rem'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <span
               style={{
                 backgroundColor: 'var(--wood-amber)',
@@ -100,15 +107,18 @@ export const Navbar = () => {
                 fontSize: '0.68rem',
                 fontWeight: 700,
                 padding: '0.15rem 0.5rem',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                letterSpacing: '0.04em'
               }}
             >
               AKSIYA
             </span>
-            <span>{settings.announcement || "O‘zbekiston bo‘ylab professional o‘rnatish xizmati"}</span>
+            <span style={{ fontSize: '0.82rem' }}>
+              {settings.announcement || "Bahorgi aksiya: barcha yotoqxona to‘plamlariga 15% gacha chegirma!"}
+            </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '0.82rem' }}>
             <a
               href={`tel:${settings.phone}`}
               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#d6d3d1' }}
@@ -124,16 +134,17 @@ export const Navbar = () => {
 
       {/* Main Navbar */}
       <div className="container" style={{ padding: '0.85rem 1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
-          
-          {/* Logo with dynamic Web Project Name */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.25rem' }}>
+
+          {/* Logo */}
           <Link
             to="/"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.65rem',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              flexShrink: 0
             }}
           >
             <div
@@ -155,22 +166,24 @@ export const Navbar = () => {
               <div
                 style={{
                   fontFamily: 'var(--font-heading)',
-                  fontSize: '1.28rem',
+                  fontSize: '1.25rem',
                   fontWeight: 800,
                   color: 'var(--text-main)',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em'
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.02em',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {settings.site_name}
               </div>
               <div
                 style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.66rem',
                   color: 'var(--wood-amber)',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   letterSpacing: '0.06em',
-                  textTransform: 'uppercase'
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 Mebel & Dizayn Markazi
@@ -178,12 +191,14 @@ export const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links (Admin/Manager NEVER shown here) */}
+          {/* Desktop Navigation Links - Fixed Single Line & No Wrap */}
           <nav
             style={{
               display: 'none',
               alignItems: 'center',
-              gap: '1.5rem'
+              gap: '1.25rem',
+              flexWrap: 'nowrap',
+              flexShrink: 0
             }}
             className="desktop-nav-container"
           >
@@ -196,8 +211,10 @@ export const Navbar = () => {
                   fontWeight: isActive ? 700 : 500,
                   color: isActive ? 'var(--wood-amber)' : 'var(--text-main)',
                   position: 'relative',
-                  padding: '0.35rem 0',
-                  transition: 'color 0.2s'
+                  padding: '0.35rem 0.15rem',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 0.2s ease',
+                  borderBottom: isActive ? '2px solid var(--wood-amber)' : '2px solid transparent'
                 })}
               >
                 {link.label}
@@ -205,9 +222,31 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          {/* Actions: Search, Wishlist, Cart, User Account */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            
+          {/* Actions: Theme Toggle, Search, Wishlist, Cart, User Account */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+
+            {/* Dark Mode / Light Mode Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: isDark ? 'var(--gold-accent)' : 'var(--text-main)',
+                transition: 'all 0.2s ease'
+              }}
+              aria-label="Rejimni almashtirish"
+              title={isDark ? "Yorug‘ rejimga o‘tish" : "Tungi (Dark) rejimga o‘tish"}
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
             {/* Search Toggle */}
             <div style={{ position: 'relative' }}>
               <button
@@ -218,6 +257,7 @@ export const Navbar = () => {
                   height: '38px',
                   borderRadius: '50%',
                   background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -236,7 +276,7 @@ export const Navbar = () => {
                     top: '48px',
                     right: 0,
                     width: '300px',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--bg-card)',
                     boxShadow: 'var(--shadow-lg)',
                     borderRadius: 'var(--radius-md)',
                     padding: '0.6rem',
@@ -258,7 +298,9 @@ export const Navbar = () => {
                       border: 'none',
                       outline: 'none',
                       fontSize: '0.9rem',
-                      padding: '0.35rem'
+                      padding: '0.35rem',
+                      background: 'transparent',
+                      color: 'var(--text-main)'
                     }}
                   />
                   <button type="submit" className="btn btn-primary btn-sm" style={{ padding: '0.4rem 0.75rem' }}>
@@ -276,6 +318,7 @@ export const Navbar = () => {
                 height: '38px',
                 borderRadius: '50%',
                 background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -316,6 +359,7 @@ export const Navbar = () => {
                 height: '38px',
                 borderRadius: '50%',
                 background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -355,7 +399,7 @@ export const Navbar = () => {
                   type="button"
                   onClick={() => openAuthModal('login')}
                   className="btn btn-primary btn-sm"
-                  style={{ gap: '0.4rem', padding: '0.5rem 0.95rem' }}
+                  style={{ gap: '0.4rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
                 >
                   <User size={15} />
                   <span>Kirish</span>
@@ -404,8 +448,8 @@ export const Navbar = () => {
                         position: 'absolute',
                         top: '46px',
                         right: 0,
-                        width: '230px',
-                        backgroundColor: '#ffffff',
+                        width: '240px',
+                        backgroundColor: 'var(--bg-card)',
                         borderRadius: 'var(--radius-md)',
                         boxShadow: 'var(--shadow-lg)',
                         border: '1px solid var(--border-subtle)',
@@ -426,8 +470,8 @@ export const Navbar = () => {
                             fontSize: '0.68rem',
                             fontWeight: 700,
                             textTransform: 'uppercase',
-                            backgroundColor: role === 'admin' ? '#fee2e2' : role === 'manager' ? '#fef3c7' : '#ecfdf5',
-                            color: role === 'admin' ? '#b91c1c' : role === 'manager' ? '#b45309' : '#047857'
+                            backgroundColor: role === 'admin' ? '#fee2e2' : role === 'manager' ? '#fef3c7' : role === 'craftsman' ? '#e0e7ff' : '#ecfdf5',
+                            color: role === 'admin' ? '#b91c1c' : role === 'manager' ? '#b45309' : role === 'craftsman' ? '#3730a3' : '#047857'
                           }}
                         >
                           {role.toUpperCase()}
@@ -466,23 +510,28 @@ export const Navbar = () => {
                         Buyurtmalarim
                       </Link>
 
-                      <Link
-                        to="/account?tab=custom"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.55rem 0.75rem',
-                          fontSize: '0.85rem',
-                          color: 'var(--text-main)',
-                          borderRadius: 'var(--radius-sm)'
-                        }}
-                      >
-                        <SlidersHorizontal size={15} />
-                        Maxsus Buyurtmalarim
-                      </Link>
+                      {/* Usta paneli havolasi */}
+                      {isCraftsman && (
+                        <Link
+                          to="/craftsman-dashboard"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.55rem 0.75rem',
+                            fontSize: '0.85rem',
+                            color: '#3730a3',
+                            fontWeight: 600,
+                            borderRadius: 'var(--radius-sm)',
+                            backgroundColor: '#eef2ff'
+                          }}
+                        >
+                          <Hammer size={15} />
+                          Usta Paneli (/craftsman)
+                        </Link>
+                      )}
 
-                      {/* If user is Manager, show link to Manager Dashboard */}
+                      {/* Menedjer paneli havolasi */}
                       {isManager && (
                         <Link
                           to="/manager"
@@ -503,7 +552,7 @@ export const Navbar = () => {
                         </Link>
                       )}
 
-                      {/* If user is Admin, show link to Admin Dashboard */}
+                      {/* Super Admin paneli havolasi */}
                       {isAdmin && (
                         <Link
                           to="/admin"
@@ -559,6 +608,7 @@ export const Navbar = () => {
                 height: '38px',
                 borderRadius: '8px',
                 background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
                 display: 'none',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -577,7 +627,7 @@ export const Navbar = () => {
       {mobileMenuOpen && (
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderTop: '1px solid var(--border-subtle)',
             padding: '1.25rem 1.5rem',
             display: 'flex',
@@ -595,22 +645,26 @@ export const Navbar = () => {
                 fontSize: '1rem',
                 fontWeight: isActive ? 700 : 500,
                 color: isActive ? 'var(--wood-amber)' : 'var(--text-main)',
-                borderBottom: '1px solid #f5f2eb'
+                borderBottom: '1px solid var(--border-subtle)'
               })}
             >
               {link.label}
             </NavLink>
           ))}
 
+          {isCraftsman && (
+            <Link
+              to="/craftsman-dashboard"
+              style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#3730a3' }}
+            >
+              🔨 Usta Paneli
+            </Link>
+          )}
+
           {isManager && (
             <Link
               to="/manager"
-              style={{
-                padding: '0.6rem 0',
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#b45309'
-              }}
+              style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#b45309' }}
             >
               💼 Menedjer Paneli
             </Link>
@@ -619,12 +673,7 @@ export const Navbar = () => {
           {isAdmin && (
             <Link
               to="/admin"
-              style={{
-                padding: '0.6rem 0',
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: '#b91c1c'
-              }}
+              style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#b91c1c' }}
             >
               🛡️ Admin Paneli
             </Link>
@@ -634,12 +683,12 @@ export const Navbar = () => {
 
       {/* Responsive CSS helper */}
       <style>{`
-        @media (min-width: 900px) {
+        @media (min-width: 980px) {
           .desktop-nav-container {
             display: flex !important;
           }
         }
-        @media (max-width: 899px) {
+        @media (max-width: 979px) {
           .mobile-hamburger-btn {
             display: flex !important;
           }
