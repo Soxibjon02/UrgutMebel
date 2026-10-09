@@ -39,15 +39,15 @@ export const ContactPage = () => {
         
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <span className="section-tag">Biz Bilan Bog‘lanish</span>
-          <h1 style={{ fontSize: '2.6rem', fontWeight: 800, marginBottom: '0.85rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.5rem)', fontWeight: 800, marginBottom: '0.85rem', wordBreak: 'break-word', lineHeight: 1.25 }}>
             Bizning Showroom va Aloqa
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.92rem, 2.5vw, 1.05rem)', maxWidth: '600px', margin: '0 auto' }}>
             Mebellarni o‘z ko‘zingiz bilan ko‘rish, buyurtma berish yoki maslahat olish uchun biz bilan bog‘laning
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2rem' }}>
           
           {/* Contact Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

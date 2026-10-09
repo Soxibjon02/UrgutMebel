@@ -109,12 +109,12 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
         </div>
 
         {/* Card Actions */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
           <button
             type="button"
             onClick={() => (onRequestClick ? onRequestClick(craftsman) : null)}
             className="btn btn-primary"
-            style={{ flex: 1, padding: '0.65rem 0.75rem', fontSize: '0.85rem' }}
+            style={{ flex: '1 1 140px', padding: '0.65rem 0.75rem', fontSize: '0.85rem' }}
           >
             <span>Buyurtma Berish</span>
             <ArrowRight size={15} />

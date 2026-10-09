@@ -49,15 +49,15 @@ export const CraftsmenDirectory = () => {
   };
 
   return (
-    <div style={{ padding: '3.5rem 0 6rem' }}>
+    <div style={{ padding: '2rem 0 calc(90px + env(safe-area-inset-bottom, 24px))', overflowX: 'hidden' }}>
       <div className="container">
         {/* Page Header */}
-        <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 3rem' }}>
+        <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 2.5rem' }}>
           <span className="section-tag"><Sparkles size={14} /> Asriy An'analar</span>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.85rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.4rem, 5.5vw, 2.3rem)', fontWeight: 800, marginBottom: '0.85rem', wordBreak: 'break-word', lineHeight: 1.25 }}>
             Urgut Duradgorlari va Ustaxonalar Katalogi
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.9rem, 2.5vw, 1rem)', lineHeight: 1.6 }}>
             Urgut qadimdan yog‘och o‘ymakorligi va sifatli mebelchilik markazi bo‘lib kelgan. Bu yerda siz eng sara ustalar portfolio va narxlari bilan tanishib, to‘g‘ridan-to‘g‘ri buyurtma bera olasiz.
           </p>
         </div>
@@ -67,19 +67,21 @@ export const CraftsmenDirectory = () => {
           style={{
             backgroundColor: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)',
-            padding: '1.25rem',
+            padding: '1rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '1rem',
-            marginBottom: '2.5rem'
+            gap: '0.85rem',
+            marginBottom: '2rem',
+            maxWidth: '100%',
+            boxSizing: 'border-box'
           }}
         >
           {/* Search */}
-          <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: '400px' }}>
+          <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: '100%' }}>
             <Search
               size={18}
               style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }}
@@ -90,18 +92,18 @@ export const CraftsmenDirectory = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="form-input"
-              style={{ paddingLeft: '2.5rem' }}
+              style={{ paddingLeft: '2.5rem', width: '100%', boxSizing: 'border-box' }}
             />
           </div>
 
           {/* Specialization selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Ixtisosligi:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', maxWidth: '100%' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Ixtisosligi:</span>
             <select
               value={selectedSpec}
               onChange={(e) => setSelectedSpec(e.target.value)}
               className="form-select"
-              style={{ width: 'auto' }}
+              style={{ width: 'auto', maxWidth: '100%' }}
             >
               <option value="all">Barcha sohalar</option>
               {allSpecs.map((s, i) => (
@@ -112,7 +114,7 @@ export const CraftsmenDirectory = () => {
         </div>
 
         {/* Craftsmen Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))', gap: '1.5rem' }}>
           {filteredCraftsmen.map((c) => (
             <CraftsmanCard
               key={c.id}

@@ -151,8 +151,8 @@ export const Navbar = () => {
       </div>
 
       {/* Main Navbar */}
-      <div className="container" style={{ padding: '0.75rem 1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+      <div className="container navbar-main-container" style={{ padding: '0.75rem 1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
 
           {/* Logo */}
           <Link
@@ -162,7 +162,9 @@ export const Navbar = () => {
               alignItems: 'center',
               gap: '0.65rem',
               textDecoration: 'none',
-              flexShrink: 0
+              flexShrink: 1,
+              minWidth: 0,
+              overflow: 'hidden'
             }}
           >
             <div
@@ -244,7 +246,7 @@ export const Navbar = () => {
           </nav>
 
           {/* Actions: Theme Toggle, Search, Wishlist, Cart, User Account */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+          <div className="navbar-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
 
             {/* Dark Mode / Light Mode Toggle Button */}
             <button
@@ -440,12 +442,14 @@ export const Navbar = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.35rem 0.65rem',
+                      gap: '0.45rem',
+                      padding: '0.3rem 0.6rem',
                       background: 'var(--bg-secondary)',
                       borderRadius: 'var(--radius-full)',
-                      border: '1px solid var(--border-subtle)'
+                      border: '1px solid var(--border-subtle)',
+                      flexShrink: 0
                     }}
+                    className="navbar-user-btn"
                   >
                     <div
                       style={{
@@ -458,15 +462,16 @@ export const Navbar = () => {
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}
                     >
                       {user.full_name?.charAt(0) || 'U'}
                     </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span className="navbar-user-name" style={{ fontSize: '0.85rem', fontWeight: 600, maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {user.full_name?.split(' ')[0]}
                     </span>
-                    <ChevronDown size={14} color="var(--text-muted)" />
+                    <ChevronDown size={14} color="var(--text-muted)" className="navbar-user-chevron" />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -726,6 +731,9 @@ export const Navbar = () => {
           }
         }
         @media (max-width: 768px) {
+          .navbar-main-container {
+            padding: 0.65rem 0.85rem !important;
+          }
           .nav-action-desktop-only {
             display: none !important;
           }
@@ -735,28 +743,57 @@ export const Navbar = () => {
           .nav-guest-text {
             display: none !important;
           }
+          .navbar-user-name,
+          .navbar-user-chevron {
+            display: none !important;
+          }
+          .navbar-user-btn {
+            padding: 0 !important;
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
           .mobile-auth-btn {
             padding: 0.45rem !important;
-            width: 38px !important;
-            height: 38px !important;
+            width: 36px !important;
+            height: 36px !important;
             border-radius: 50% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
           }
           .navbar-logo-title {
-            font-size: 1.05rem !important;
+            font-size: 0.95rem !important;
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
           .navbar-logo-sub {
-            font-size: 0.58rem !important;
+            display: none !important;
           }
         }
         @media (max-width: 480px) {
+          .navbar-main-container {
+            padding: 0.5rem 0.65rem !important;
+          }
           .navbar-logo-title {
-            font-size: 0.95rem !important;
-            max-width: 140px;
+            font-size: 0.88rem !important;
+            max-width: 105px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .navbar-actions-group {
+            gap: 0.35rem !important;
+          }
+          .navbar-actions-group button,
+          .navbar-actions-group a {
+            width: 34px !important;
+            height: 34px !important;
           }
         }
       `}</style>

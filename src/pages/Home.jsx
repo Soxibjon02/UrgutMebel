@@ -249,7 +249,7 @@ export const Home = () => {
               borderRadius: 'var(--radius-xl)',
               overflow: 'hidden',
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
               boxShadow: 'var(--shadow-lg)'
             }}
           >
@@ -471,7 +471,7 @@ export const Home = () => {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
             {craftsmen.slice(0, 3).map((craftsman) => (
               <CraftsmanCard
                 key={craftsman.id}
@@ -492,7 +492,7 @@ export const Home = () => {
             <p className="section-subtitle">Bizdan mebel xarid qilgan va buyurtma bergan mijozlarimizning haqiqiy fikrlari</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
             <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
               <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
               <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
