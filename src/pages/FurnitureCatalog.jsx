@@ -48,11 +48,6 @@ export const FurnitureCatalog = () => {
       }
     };
     loadData();
-
-    // Listen to admin product updates
-    const handleUpdate = () => loadData();
-    window.addEventListener('urgut_store_products_updated', handleUpdate);
-    return () => window.removeEventListener('urgut_store_products_updated', handleUpdate);
   }, []);
 
   // Sync url param if changes

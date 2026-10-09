@@ -22,10 +22,6 @@ export const CraftsmenDirectory = () => {
       }
     };
     fetchCraftsmen();
-
-    const handleUpdate = () => fetchCraftsmen();
-    window.addEventListener('urgut_store_craftsmen_updated', handleUpdate);
-    return () => window.removeEventListener('urgut_store_craftsmen_updated', handleUpdate);
   }, []);
 
   const allSpecs = Array.from(

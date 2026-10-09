@@ -51,17 +51,6 @@ export const Home = () => {
     };
 
     loadHomeData();
-
-    // Listen for live database updates from Admin actions
-    const handleProductUpdate = () => loadHomeData();
-    window.addEventListener('urgut_store_products_updated', handleProductUpdate);
-    window.addEventListener('urgut_store_categories_updated', handleProductUpdate);
-    window.addEventListener('urgut_store_craftsmen_updated', handleProductUpdate);
-    return () => {
-      window.removeEventListener('urgut_store_products_updated', handleProductUpdate);
-      window.removeEventListener('urgut_store_categories_updated', handleProductUpdate);
-      window.removeEventListener('urgut_store_craftsmen_updated', handleProductUpdate);
-    };
   }, []);
 
   // Filter product groups

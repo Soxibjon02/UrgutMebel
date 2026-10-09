@@ -21,9 +21,6 @@ export const Footer = () => {
       }
     };
     loadCategories();
-    const handleUpdate = () => loadCategories();
-    window.addEventListener('urgut_store_categories_updated', handleUpdate);
-    return () => window.removeEventListener('urgut_store_categories_updated', handleUpdate);
   }, []);
 
   const smoothScrollToTop = () => {

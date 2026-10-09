@@ -21,11 +21,13 @@ export const getStored = (key, fallback) => {
   }
 };
 
-const setStored = (key, value) => {
+const setStored = (key, value, broadcast = false) => {
   try {
     localStorage.setItem(`urgut_mebel_${key}`, JSON.stringify(value));
-    // Trigger custom event so any component listening can react immediately
-    window.dispatchEvent(new CustomEvent(`urgut_store_${key}_updated`, { detail: value }));
+    // ONLY broadcast custom event on explicit mutations, NEVER on read/get caching!
+    if (broadcast) {
+      window.dispatchEvent(new CustomEvent(`urgut_store_${key}_updated`, { detail: value }));
+    }
   } catch (e) {
     console.error(`Error saving ${key} to storage:`, e);
   }
@@ -61,7 +63,7 @@ export const dataService = {
       ...newSettings,
       updated_at: new Date().toISOString()
     };
-    setStored('settings', updated);
+    setStored('settings', updated, true);
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -83,7 +85,7 @@ export const dataService = {
           .order('display_order', { ascending: true });
         if (!error && Array.isArray(data)) {
           if (data.length > 0) {
-            setStored('categories', data);
+            setStored('categories', data, false);
             return data;
           }
           const local = getStored('categories', null);
@@ -91,7 +93,7 @@ export const dataService = {
           for (const cat of toSeed) {
             await supabase.from('categories').upsert(cat);
           }
-          setStored('categories', toSeed);
+          setStored('categories', toSeed, false);
           return toSeed;
         }
       } catch (e) {
@@ -112,7 +114,7 @@ export const dataService = {
       ? current.map((c) => (c.id === category.id ? { ...c, ...newCat } : c))
       : [newCat, ...current];
 
-    setStored('categories', updated);
+    setStored('categories', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('categories').upsert(newCat);
@@ -126,7 +128,7 @@ export const dataService = {
   async deleteCategory(id) {
     const current = await this.getCategories();
     const categories = current.filter((c) => c.id !== id);
-    setStored('categories', categories);
+    setStored('categories', categories, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('categories').delete().eq('id', id);
@@ -195,7 +197,7 @@ export const dataService = {
       ? current.map((p) => (p.id === product.id ? { ...p, ...product } : p))
       : [newProd, ...current];
 
-    setStored('products', updated);
+    setStored('products', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('products').upsert(newProd);
@@ -209,7 +211,7 @@ export const dataService = {
   async deleteProduct(id) {
     const current = await this.getProducts();
     const products = current.filter((p) => p.id !== id);
-    setStored('products', products);
+    setStored('products', products, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('products').delete().eq('id', id);
@@ -282,7 +284,7 @@ export const dataService = {
       ? current.map((c) => (c.id === craftsman.id ? { ...c, ...newCraft } : c))
       : [newCraft, ...current];
 
-    setStored('craftsmen', updated);
+    setStored('craftsmen', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('craftsmen').upsert(newCraft);
@@ -296,7 +298,7 @@ export const dataService = {
   async deleteCraftsman(id) {
     const current = await this.getCraftsmen();
     const craftsmen = current.filter((c) => c.id !== id);
-    setStored('craftsmen', craftsmen);
+    setStored('craftsmen', craftsmen, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('craftsmen').delete().eq('id', id);
@@ -354,7 +356,7 @@ export const dataService = {
       ]
     };
     const updated = [newOrder, ...orders];
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -407,7 +409,7 @@ export const dataService = {
       }
       return o;
     });
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
@@ -436,7 +438,7 @@ export const dataService = {
       }
       return o;
     });
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
@@ -468,14 +470,14 @@ export const dataService = {
       }
       return o;
     });
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
   async updateCustomOrderNotes(orderId, internalNotes) {
     const orders = getStored('custom_orders', initialCustomOrders);
     const updated = orders.map((o) => (o.id === orderId ? { ...o, internal_notes: internalNotes } : o));
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
@@ -491,7 +493,7 @@ export const dataService = {
           }
         : o
     );
-    setStored('custom_orders', updated);
+    setStored('custom_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
@@ -504,7 +506,7 @@ export const dataService = {
           .select('*')
           .order('created_at', { ascending: false });
         if (!error && Array.isArray(data)) {
-          setStored('standard_orders', data);
+          setStored('standard_orders', data, false);
           return data;
         }
       } catch (e) {
@@ -531,7 +533,7 @@ export const dataService = {
       created_at: new Date().toISOString()
     };
     const updated = [newOrder, ...orders];
-    setStored('standard_orders', updated);
+    setStored('standard_orders', updated, true);
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -559,7 +561,7 @@ export const dataService = {
   async updateStandardOrderStatus(orderId, status) {
     const orders = getStored('standard_orders', initialOrders);
     const updated = orders.map((o) => (o.id === orderId ? { ...o, status } : o));
-    setStored('standard_orders', updated);
+    setStored('standard_orders', updated, true);
     return updated.find((o) => o.id === orderId);
   },
 
@@ -647,13 +649,13 @@ export const dataService = {
       };
       updated = [...banners, newBan];
     }
-    setStored('banners', updated);
+    setStored('banners', updated, true);
     return updated;
   },
 
   async deleteBanner(id) {
     const banners = getStored('banners', initialBanners).filter((b) => b.id !== id);
-    setStored('banners', banners);
+    setStored('banners', banners, true);
     return banners;
   },
 
@@ -666,7 +668,7 @@ export const dataService = {
           .select('*')
           .order('created_at', { ascending: false });
         if (!error && Array.isArray(data)) {
-          setStored('managers', data);
+          setStored('managers', data, false);
           return data;
         }
       } catch (e) {
@@ -691,7 +693,7 @@ export const dataService = {
       ? managers.map((m) => (m.id === managerData.id ? { ...m, ...newMgr } : m))
       : [newMgr, ...managers];
 
-    setStored('managers', updated);
+    setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('managers').upsert({
@@ -715,7 +717,7 @@ export const dataService = {
   async deleteManager(id) {
     const managers = await this.getManagers();
     const updated = managers.filter((m) => m.id !== id);
-    setStored('managers', updated);
+    setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.from('managers').delete().eq('id', id);
