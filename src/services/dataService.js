@@ -37,9 +37,20 @@ const setStored = (key, value) => {
 export const dataService = {
   // Settings
   async getSettings() {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.from('settings').select('*').single();
-      if (!error && data) return data;
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('settings').select('*').single();
+        if (!error && data) {
+          setStored('settings', data);
+          return data;
+        }
+        // If settings table is empty, seed it with current settings
+        const current = getStored('settings', initialSettings);
+        await supabase.from('settings').upsert({ id: '1', ...current });
+        return current;
+      } catch (e) {
+        console.warn('Supabase getSettings error:', e);
+      }
     }
     return getStored('settings', initialSettings);
   },
@@ -52,8 +63,12 @@ export const dataService = {
     };
     setStored('settings', updated);
 
-    if (isSupabaseConfigured) {
-      await supabase.from('settings').upsert({ id: 1, ...updated });
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('settings').upsert({ id: '1', ...updated });
+      } catch (e) {
+        console.warn('Supabase updateSettings error:', e);
+      }
     }
     return updated;
   },
@@ -67,8 +82,17 @@ export const dataService = {
           .select('*')
           .order('display_order', { ascending: true });
         if (!error && Array.isArray(data)) {
-          setStored('categories', data);
-          return data;
+          if (data.length > 0) {
+            setStored('categories', data);
+            return data;
+          }
+          const local = getStored('categories', null);
+          const toSeed = (local && local.length > 0) ? local : initialCategories;
+          for (const cat of toSeed) {
+            await supabase.from('categories').upsert(cat);
+          }
+          setStored('categories', toSeed);
+          return toSeed;
         }
       } catch (e) {
         console.warn('Supabase getCategories error:', e);
@@ -78,15 +102,15 @@ export const dataService = {
   },
 
   async saveCategory(category) {
-    const categories = getStored('categories', initialCategories);
+    const current = await this.getCategories();
     const newCat = category.id ? category : {
       ...category,
       id: `cat-${Date.now()}`,
       created_at: new Date().toISOString()
     };
     const updated = category.id
-      ? categories.map((c) => (c.id === category.id ? { ...c, ...category } : c))
-      : [newCat, ...categories];
+      ? current.map((c) => (c.id === category.id ? { ...c, ...newCat } : c))
+      : [newCat, ...current];
 
     setStored('categories', updated);
     if (isSupabaseConfigured && supabase) {
@@ -100,7 +124,8 @@ export const dataService = {
   },
 
   async deleteCategory(id) {
-    const categories = getStored('categories', initialCategories).filter((c) => c.id !== id);
+    const current = await this.getCategories();
+    const categories = current.filter((c) => c.id !== id);
     setStored('categories', categories);
     if (isSupabaseConfigured && supabase) {
       try {
@@ -118,8 +143,30 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('products').select('*');
         if (!error && Array.isArray(data)) {
-          setStored('products', data);
-          return data;
+          if (data.length > 0) {
+            setStored('products', data);
+            return data;
+          }
+          const local = getStored('products', null);
+          const toSeed = (local && local.length > 0) ? local : initialProducts;
+          for (const prod of toSeed) {
+            await supabase.from('products').upsert({
+              id: prod.id,
+              name: prod.name,
+              slug: prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+              price: Number(prod.price) || 0,
+              discount_price: prod.discount_price ? Number(prod.discount_price) : null,
+              material: prod.material,
+              dimensions: prod.dimensions,
+              stock: prod.stock || 10,
+              description: prod.description,
+              is_published: prod.is_published !== false,
+              images: prod.images || [],
+              image_url: prod.images?.[0] || prod.image_url || ''
+            });
+          }
+          setStored('products', toSeed);
+          return toSeed;
         }
       } catch (e) {
         console.warn('Supabase getProducts error:', e);
@@ -134,7 +181,7 @@ export const dataService = {
   },
 
   async saveProduct(product) {
-    const products = getStored('products', initialProducts);
+    const current = await this.getProducts();
     const newProd = product.id ? product : {
       ...product,
       id: `prod-${Date.now()}`,
@@ -145,8 +192,8 @@ export const dataService = {
       created_at: new Date().toISOString()
     };
     const updated = product.id
-      ? products.map((p) => (p.id === product.id ? { ...p, ...product } : p))
-      : [newProd, ...products];
+      ? current.map((p) => (p.id === product.id ? { ...p, ...product } : p))
+      : [newProd, ...current];
 
     setStored('products', updated);
     if (isSupabaseConfigured && supabase) {
@@ -160,7 +207,8 @@ export const dataService = {
   },
 
   async deleteProduct(id) {
-    const products = getStored('products', initialProducts).filter((p) => p.id !== id);
+    const current = await this.getProducts();
+    const products = current.filter((p) => p.id !== id);
     setStored('products', products);
     if (isSupabaseConfigured && supabase) {
       try {
@@ -187,8 +235,25 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('craftsmen').select('*');
         if (!error && Array.isArray(data)) {
-          setStored('craftsmen', data);
-          return data;
+          if (data.length > 0) {
+            setStored('craftsmen', data);
+            return data;
+          }
+          // Supabase is currently empty (fresh table created)
+          // Check if admin has already saved craftsmen in localStorage (e.g. Soxib Gaybullayev)
+          const local = getStored('craftsmen', null);
+          if (local && local.length > 0) {
+            for (const craft of local) {
+              await supabase.from('craftsmen').upsert(craft);
+            }
+            return local;
+          }
+          // If no local either, seed initialCraftsmen to Supabase
+          for (const craft of initialCraftsmen) {
+            await supabase.from('craftsmen').upsert(craft);
+          }
+          setStored('craftsmen', initialCraftsmen);
+          return initialCraftsmen;
         }
       } catch (e) {
         console.warn('Supabase getCraftsmen error:', e);
@@ -203,7 +268,7 @@ export const dataService = {
   },
 
   async saveCraftsman(craftsman) {
-    const craftsmen = getStored('craftsmen', initialCraftsmen);
+    const current = await this.getCraftsmen();
     const newCraft = craftsman.id ? craftsman : {
       ...craftsman,
       id: `craft-${Date.now()}`,
@@ -214,8 +279,8 @@ export const dataService = {
       created_at: new Date().toISOString()
     };
     const updated = craftsman.id
-      ? craftsmen.map((c) => (c.id === craftsman.id ? { ...c, ...craftsman } : c))
-      : [newCraft, ...craftsmen];
+      ? current.map((c) => (c.id === craftsman.id ? { ...c, ...newCraft } : c))
+      : [newCraft, ...current];
 
     setStored('craftsmen', updated);
     if (isSupabaseConfigured && supabase) {
@@ -229,7 +294,8 @@ export const dataService = {
   },
 
   async deleteCraftsman(id) {
-    const craftsmen = getStored('craftsmen', initialCraftsmen).filter((c) => c.id !== id);
+    const current = await this.getCraftsmen();
+    const craftsmen = current.filter((c) => c.id !== id);
     setStored('craftsmen', craftsmen);
     if (isSupabaseConfigured && supabase) {
       try {
