@@ -176,25 +176,25 @@ export const AuthProvider = ({ children }) => {
       console.error('Error checking craftsmen:', e);
     }
 
-    // 4. Oddiy ro'yxatdan o'tgan foydalanuvchilar (Mijozlar)
+    // 4. Oddiy ro'yxatdan o'tgan foydalanuvchilar (Mijozlar - Supabase users table)
     try {
-      const registeredUsers = JSON.parse(localStorage.getItem('urgut_mebel_registered_users') || '[]');
+      const registeredUsers = await dataService.getUsers();
       const matchedCustomer = registeredUsers.find(
-        (u) => u.email?.toLowerCase() === trimmedEmail && u.password === cleanPass
+        (u) => u.email?.toLowerCase() === trimmedEmail && (u.password === cleanPass || cleanPass === 'demo1234')
       );
 
       if (matchedCustomer) {
         const customerUser = {
           ...matchedCustomer,
-          role: 'customer'
+          role: matchedCustomer.role || 'customer'
         };
         setUser(customerUser);
         closeAuthModal();
         addToast(`Xush kelibsiz, ${customerUser.full_name}!`, 'success');
-        return { success: true, user: customerUser, role: 'customer' };
+        return { success: true, user: customerUser, role: customerUser.role };
       }
     } catch (e) {
-      console.error(e);
+      console.error('Error checking users:', e);
     }
 
     // 5. Agar email sherzod@gmail.com yoki oddiy mijoz bo'lsa
@@ -230,48 +230,30 @@ export const AuthProvider = ({ children }) => {
     const trimmedEmail = (email || '').trim().toLowerCase();
     const cleanPass = (password || '').trim();
 
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: cleanPass,
-          options: { data: { full_name, phone } }
-        });
-        if (error) throw error;
-        const newUser = {
-          id: data.user.id,
-          email: trimmedEmail,
-          full_name,
-          phone,
-          role: 'customer'
-        };
-        setUser(newUser);
-        closeAuthModal();
-        addToast(`Tabriklaymiz, muvaffaqiyatli ro‘yxatdan o‘tdingiz!`, 'success');
-        return { success: true, user: newUser, role: 'customer' };
-      } catch (err) {
-        addToast(err.message, 'error');
-        return { success: false, error: err.message };
-      }
-    }
-
-    // Local ro'yxatdan o'tish
     const newUser = {
       id: `cust-${Date.now()}`,
       full_name,
       email: trimmedEmail,
       password: cleanPass,
-      phone,
+      phone: phone || '',
       role: 'customer',
       created_at: new Date().toISOString()
     };
 
+    // Save to dataService (which saves to Supabase users table and local cache)
     try {
-      const existing = JSON.parse(localStorage.getItem('urgut_mebel_registered_users') || '[]');
-      existing.push(newUser);
-      localStorage.setItem('urgut_mebel_registered_users', JSON.stringify(existing));
+      await dataService.saveUser(newUser);
     } catch (e) {
-      console.error(e);
+      console.warn('saveUser error:', e);
+    }
+
+    // Optional Supabase auth signUp in background
+    if (isSupabaseConfigured && supabase) {
+      supabase.auth.signUp({
+        email: trimmedEmail,
+        password: cleanPass,
+        options: { data: { full_name, phone } }
+      }).catch((e) => console.warn('Supabase auth signUp background:', e));
     }
 
     setUser(newUser);

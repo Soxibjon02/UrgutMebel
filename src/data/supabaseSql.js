@@ -179,6 +179,52 @@ CREATE TABLE IF NOT EXISTS public.banners (
   display_order INT DEFAULT 0
 );
 
+-- 11. FOYDALANUVCHILAR VA MIJOZLAR (USERS)
+CREATE TABLE IF NOT EXISTS public.users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT,
+  full_name TEXT NOT NULL,
+  phone TEXT,
+  role TEXT NOT NULL DEFAULT 'customer',
+  avatar_url TEXT,
+  address TEXT,
+  telegram TEXT,
+  notes TEXT,
+  favorites JSONB DEFAULT '[]'::jsonb,
+  cart JSONB DEFAULT '[]'::jsonb,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 12. USTA PORTFOLIO ISHLARI (CRAFTSMAN WORKS)
+CREATE TABLE IF NOT EXISTS public.craftsman_works (
+  id TEXT PRIMARY KEY,
+  craftsman_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  image TEXT NOT NULL,
+  category TEXT,
+  price NUMERIC,
+  completion_date TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 13. USTAXONA MOLIYA HISOB-KITOBI (CRAFTSMAN FINANCES)
+CREATE TABLE IF NOT EXISTS public.craftsman_finances (
+  id TEXT PRIMARY KEY,
+  craftsman_id TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'income' | 'expense'
+  amount NUMERIC NOT NULL DEFAULT 0,
+  title TEXT NOT NULL,
+  category TEXT,
+  date TEXT,
+  order_id TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ====================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES - PERMISSIVE FOR APPLICATION
 -- ====================================================================
@@ -191,6 +237,9 @@ ALTER TABLE public.custom_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.craftsman_works ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.craftsman_finances ENABLE ROW LEVEL SECURITY;
 
 -- Drop old policies if they exist
 DO $$ BEGIN
@@ -203,6 +252,9 @@ DO $$ BEGIN
   DROP POLICY IF EXISTS "Public orders access" ON public.orders;
   DROP POLICY IF EXISTS "Public comments access" ON public.comments;
   DROP POLICY IF EXISTS "Public banners access" ON public.banners;
+  DROP POLICY IF EXISTS "Public users access" ON public.users;
+  DROP POLICY IF EXISTS "Public craftsman_works access" ON public.craftsman_works;
+  DROP POLICY IF EXISTS "Public craftsman_finances access" ON public.craftsman_finances;
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- Create open application policies
@@ -215,6 +267,9 @@ CREATE POLICY "Public custom_orders access" ON public.custom_orders FOR ALL USIN
 CREATE POLICY "Public orders access" ON public.orders FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public comments access" ON public.comments FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public banners access" ON public.banners FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public users access" ON public.users FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public craftsman_works access" ON public.craftsman_works FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public craftsman_finances access" ON public.craftsman_finances FOR ALL USING (true) WITH CHECK (true);
 
 -- Grant privileges to anon and authenticated roles
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;

@@ -57,6 +57,7 @@ export const AdminDashboard = () => {
   const [comments, setComments] = useState(() => getStored('comments', initialComments));
   const [banners, setBanners] = useState(() => getStored('banners', initialBanners));
   const [managers, setManagers] = useState(() => getStored('managers', []));
+  const [usersList, setUsersList] = useState(() => getStored('urgut_mebel_registered_users', []));
 
   // Modals & Forms
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -135,7 +136,7 @@ export const AdminDashboard = () => {
   const loadAllData = async () => {
     try {
       checkHealth();
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
@@ -143,7 +144,8 @@ export const AdminDashboard = () => {
         dataService.getCraftsmen(),
         dataService.getComments(),
         dataService.getBanners(),
-        dataService.getManagers()
+        dataService.getManagers(),
+        dataService.getUsers()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -153,6 +155,7 @@ export const AdminDashboard = () => {
       setComments(comms || []);
       setBanners(bans || []);
       setManagers(mgrs || []);
+      setUsersList(usrs || []);
     } catch (e) {
       console.error(e);
     }
@@ -360,6 +363,14 @@ export const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (id) => {
+    if (window.confirm("Rostdan ham ushbu foydalanuvchini o‘chirmoqchimisiz?")) {
+      addToast('Foydalanuvchi o‘chirildi', 'info');
+      const updated = await dataService.deleteUser(id);
+      setUsersList(updated);
+    }
+  };
+
   // Comments moderation
   const handleModerateComment = async (id, action) => {
     await dataService.moderateComment(id, action);
@@ -551,6 +562,25 @@ export const AdminDashboard = () => {
 
             <button
               type="button"
+              onClick={() => setActiveTab('users')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                color: activeTab === 'users' ? '#ffffff' : '#a8a29e',
+                backgroundColor: activeTab === 'users' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                textAlign: 'left'
+              }}
+            >
+              <Users size={17} /> Foydalanuvchilar ({usersList.length})
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('settings')}
               style={{
                 display: 'flex',
@@ -672,6 +702,13 @@ export const AdminDashboard = () => {
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>RO‘YXATDAGI USTALAR</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.4rem' }}>
                   {craftsmen.length} nafar
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>MIJOZLAR (USERS)</span>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981', marginTop: '0.4rem' }}>
+                  {usersList.length} nafar
                 </div>
               </div>
             </div>
@@ -1399,6 +1436,93 @@ export const AdminDashboard = () => {
                               <Trash2 size={14} />
                             </button>
                           </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: REGISTERED USERS MANAGEMENT */}
+        {activeTab === 'users' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Foydalanuvchilar va Ro‘yxatdan O‘tgan Mijozlar</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  Saytda ro‘yxatdan o‘tgan barcha mijozlar va foydalanuvchilar ro‘yxati (Supabase <code>public.users</code> jadvalida to‘liq saqlanadi).
+                </p>
+              </div>
+            </div>
+
+            {/* Users Table */}
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>Foydalanuvchi</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>Email</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>Telefon</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>Roli</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700 }}>Ro‘yxatdan o‘tgan sana</th>
+                    <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, textAlign: 'right' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersList.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        Hozircha birorta ham ro‘yxatdan o‘tgan foydalanuvchi yo‘q
+                      </td>
+                    </tr>
+                  ) : (
+                    usersList.map((u) => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '1rem 1.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--gold-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem' }}>
+                              {u.full_name?.charAt(0) || 'U'}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 700 }}>{u.full_name}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {u.id}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)' }}>
+                          {u.email}
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', fontWeight: 600 }}>
+                          {u.phone || '—'}
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem' }}>
+                          <span style={{
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            backgroundColor: u.role === 'admin' ? 'rgba(239,68,68,0.15)' : u.role === 'manager' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)',
+                            color: u.role === 'admin' ? '#ef4444' : u.role === 'manager' ? '#3b82f6' : '#10b981'
+                          }}>
+                            {u.role === 'admin' ? 'Admin' : u.role === 'manager' ? 'Menedjer' : 'Mijoz'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                          {u.created_at ? new Date(u.created_at).toLocaleDateString('uz-UZ') : '—'}
+                        </td>
+                        <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ color: '#ef4444' }}
+                            title="O‘chirish"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </td>
                       </tr>
                     ))

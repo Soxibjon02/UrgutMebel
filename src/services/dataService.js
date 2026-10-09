@@ -710,6 +710,75 @@ export const dataService = {
   },
 
   // ==========================================
+  // USERS / FOYDALANUVCHILAR VA MIJOZLAR
+  // ==========================================
+  async getUsers() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && Array.isArray(data)) {
+          setStored('urgut_mebel_registered_users', data, false);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getUsers error:', e);
+      }
+    }
+    return getStored('urgut_mebel_registered_users', []);
+  },
+
+  async saveUser(userData) {
+    const users = getStored('urgut_mebel_registered_users', []);
+    const newUser = {
+      id: userData.id || `user-${Date.now()}`,
+      email: (userData.email || '').toLowerCase().trim(),
+      password: userData.password || '',
+      full_name: userData.full_name || '',
+      phone: userData.phone || '',
+      role: userData.role || 'customer',
+      avatar_url: userData.avatar_url || '',
+      address: userData.address || '',
+      telegram: userData.telegram || '',
+      notes: userData.notes || '',
+      favorites: userData.favorites || [],
+      cart: userData.cart || [],
+      is_active: userData.is_active !== false,
+      created_at: userData.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const exists = users.some((u) => u.id === newUser.id || u.email === newUser.email);
+    const updated = exists
+      ? users.map((u) => (u.id === newUser.id || u.email === newUser.email ? { ...u, ...newUser } : u))
+      : [newUser, ...users];
+
+    setStored('urgut_mebel_registered_users', updated, true);
+
+    if (isSupabaseConfigured && supabase) {
+      supabase.from('users').upsert(newUser).catch((e) => {
+        console.warn('Supabase saveUser background error:', e);
+      });
+    }
+    return newUser;
+  },
+
+  async deleteUser(id) {
+    const users = getStored('urgut_mebel_registered_users', []);
+    const updated = users.filter((u) => u.id !== id);
+    setStored('urgut_mebel_registered_users', updated, true);
+
+    if (isSupabaseConfigured && supabase) {
+      supabase.from('users').delete().eq('id', id).catch((e) => {
+        console.warn('Supabase deleteUser background error:', e);
+      });
+    }
+    return updated;
+  },
+
+  // ==========================================
   // CRAFTSMAN WORKS (USTANING ISHLARI / PORTFOLIO)
   // ==========================================
   async getCraftsmanWorks(craftsmanId) {
@@ -924,6 +993,14 @@ export const dataService = {
       if (managers && managers.length) {
         for (const mgr of managers) {
           await supabase.from('managers').upsert(mgr);
+        }
+      }
+
+      // 6. Users sync (Ro'yxatdan o'tgan foydalanuvchilar va mijozlar)
+      const users = await this.getUsers();
+      if (users && users.length) {
+        for (const u of users) {
+          await supabase.from('users').upsert(u);
         }
       }
 
