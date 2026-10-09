@@ -309,6 +309,20 @@ export const dataService = {
 
   // Custom Orders & Workflow
   async getCustomOrders() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('custom_orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          setStored('custom_orders', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getCustomOrders error:', e);
+      }
+    }
     return getStored('custom_orders', initialCustomOrders);
   },
 
@@ -324,6 +338,11 @@ export const dataService = {
       ...orderData,
       id: `cust-ord-${Date.now()}`,
       order_number: orderNumber,
+      customer_name: orderData.customer_name || orderData.full_name || 'Mijoz',
+      customer_phone: orderData.customer_phone || orderData.phone || '',
+      customer_email: orderData.customer_email || orderData.email || '',
+      category: orderData.furniture_type || orderData.category || 'Maxsus Mebel',
+      title: orderData.title || orderData.furniture_type || 'Maxsus Buyurtma',
       status: 'NEW',
       created_at: new Date().toISOString(),
       history: [
@@ -337,11 +356,31 @@ export const dataService = {
     const updated = [newOrder, ...orders];
     setStored('custom_orders', updated);
 
-    if (isSupabaseConfigured) {
-      await supabase.from('custom_orders').insert({
-        order_number: orderNumber,
-        ...orderData
-      });
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('custom_orders').insert({
+          id: newOrder.id,
+          order_number: newOrder.order_number,
+          user_id: newOrder.user_id || null,
+          customer_name: newOrder.customer_name,
+          customer_phone: newOrder.customer_phone,
+          customer_email: newOrder.customer_email,
+          category: newOrder.category,
+          title: newOrder.title,
+          room_type: newOrder.room_type || '',
+          dimensions: newOrder.dimensions || (newOrder.length ? `${newOrder.length}x${newOrder.width}x${newOrder.height} sm` : ''),
+          wood_type: newOrder.material || newOrder.wood_type || '',
+          color_finish: newOrder.color || newOrder.color_finish || '',
+          notes: newOrder.description || newOrder.special_requirements || newOrder.notes || '',
+          estimated_budget: newOrder.estimated_budget ? String(newOrder.estimated_budget) : '',
+          status: 'NEW',
+          assigned_craftsman: newOrder.assigned_craftsman || newOrder.assigned_craftsman_id || null,
+          files: newOrder.files || [],
+          history: newOrder.history || []
+        });
+      } catch (e) {
+        console.warn('Supabase createCustomOrder error:', e);
+      }
     }
     return newOrder;
   },
@@ -457,6 +496,20 @@ export const dataService = {
 
   // Standard E-commerce Orders
   async getStandardOrders() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          setStored('standard_orders', data);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getStandardOrders error:', e);
+      }
+    }
     return getStored('standard_orders', initialOrders);
   },
 
@@ -472,6 +525,26 @@ export const dataService = {
     };
     const updated = [newOrder, ...orders];
     setStored('standard_orders', updated);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('orders').insert({
+          id: newOrder.id,
+          order_number: newOrder.order_number,
+          user_id: newOrder.user_id || null,
+          customer_name: newOrder.full_name || newOrder.customer_name || 'Mijoz',
+          customer_phone: newOrder.phone || newOrder.customer_phone || '',
+          shipping_address: newOrder.address || newOrder.shipping_address || '',
+          notes: newOrder.notes || '',
+          payment_method: newOrder.payment_method || 'cash_on_delivery',
+          total_amount: Number(newOrder.total_amount) || 0,
+          status: 'PENDING',
+          items: newOrder.items || []
+        });
+      } catch (e) {
+        console.warn('Supabase createStandardOrder error:', e);
+      }
+    }
     return newOrder;
   },
 

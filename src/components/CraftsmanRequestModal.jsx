@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { X, Send, Calendar, Phone, User, CheckCircle2 } from 'lucide-react';
 
+import { dataService } from '../services/dataService';
+
 export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
@@ -15,11 +17,29 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
 
   if (!isOpen || !craftsman) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isGuest) {
       openAuthModal('login', 'Ustaga buyurtma yuborish uchun avval hisobingizga kiring!');
       return;
+    }
+
+    try {
+      await dataService.createCustomOrder({
+        customer_name: fullName,
+        customer_phone: phone,
+        user_id: user?.id || null,
+        title: `${craftsman.name}ga to‘g‘ridan-to‘g‘ri shaxsiy buyurtma`,
+        category: 'Duradgorga Shaxsiy Buyurtma',
+        furniture_type: 'Shaxsiy mebel buyurtmasi',
+        notes: message,
+        urgency: preferredDate,
+        assigned_craftsman: craftsman.id,
+        assigned_craftsman_name: craftsman.name,
+        status: 'NEW'
+      });
+    } catch (err) {
+      console.warn('Error saving craftsman request:', err);
     }
 
     setSubmitted(true);

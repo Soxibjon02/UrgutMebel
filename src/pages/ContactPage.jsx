@@ -3,6 +3,8 @@ import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
 import { Phone, Mail, MapPin, Send, MessageSquare, Clock, CheckCircle2 } from 'lucide-react';
 
+import { dataService } from '../services/dataService';
+
 export const ContactPage = () => {
   const { settings } = useSettings();
   const { addToast } = useNotification();
@@ -12,8 +14,21 @@ export const ContactPage = () => {
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await dataService.createCustomOrder({
+        customer_name: name,
+        customer_phone: phone,
+        notes: message,
+        category: 'Bog‘lanish / Savol',
+        title: 'Saytdan qoldirilgan murojaat',
+        furniture_type: 'Murojaat va savol',
+        status: 'NEW'
+      });
+    } catch (err) {
+      console.warn('Error saving contact message:', err);
+    }
     setSent(true);
     addToast('Xabaringiz qabul qilindi! Tez orada bog‘lanamiz.', 'success');
   };
