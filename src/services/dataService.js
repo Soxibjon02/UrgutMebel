@@ -315,7 +315,7 @@ export const dataService = {
           .from('custom_orders')
           .select('*')
           .order('created_at', { ascending: false });
-        if (!error && Array.isArray(data) && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           setStored('custom_orders', data);
           return data;
         }
@@ -323,7 +323,7 @@ export const dataService = {
         console.warn('Supabase getCustomOrders error:', e);
       }
     }
-    return getStored('custom_orders', initialCustomOrders);
+    return getStored('custom_orders', []);
   },
 
   async getCustomOrderById(id) {
@@ -332,7 +332,7 @@ export const dataService = {
   },
 
   async createCustomOrder(orderData) {
-    const orders = getStored('custom_orders', initialCustomOrders);
+    const orders = await this.getCustomOrders();
     const orderNumber = `ORD-CUST-${Math.floor(1000 + Math.random() * 9000)}`;
     const newOrder = {
       ...orderData,
@@ -358,7 +358,7 @@ export const dataService = {
 
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('custom_orders').insert({
+        const { error } = await supabase.from('custom_orders').insert({
           id: newOrder.id,
           order_number: newOrder.order_number,
           user_id: newOrder.user_id || null,
@@ -378,6 +378,7 @@ export const dataService = {
           files: newOrder.files || [],
           history: newOrder.history || []
         });
+        if (error) console.error('Supabase createCustomOrder error:', error);
       } catch (e) {
         console.warn('Supabase createCustomOrder error:', e);
       }
@@ -502,7 +503,7 @@ export const dataService = {
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false });
-        if (!error && Array.isArray(data) && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           setStored('standard_orders', data);
           return data;
         }
@@ -510,17 +511,23 @@ export const dataService = {
         console.warn('Supabase getStandardOrders error:', e);
       }
     }
-    return getStored('standard_orders', initialOrders);
+    return getStored('standard_orders', []);
   },
 
   async createStandardOrder(orderData) {
-    const orders = getStored('standard_orders', initialOrders);
+    const orders = await this.getStandardOrders();
     const orderNumber = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
     const newOrder = {
       ...orderData,
       id: `ord-std-${Date.now()}`,
       order_number: orderNumber,
-      status: 'processing',
+      customer_name: orderData.full_name || orderData.customer_name || 'Mijoz',
+      customer_phone: orderData.phone || orderData.customer_phone || '',
+      shipping_address: orderData.address || orderData.shipping_address || '',
+      notes: orderData.notes || '',
+      payment_method: orderData.payment_method || 'cash_on_delivery',
+      total_amount: Number(orderData.total_amount) || 0,
+      status: 'PENDING',
       created_at: new Date().toISOString()
     };
     const updated = [newOrder, ...orders];
@@ -528,19 +535,20 @@ export const dataService = {
 
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('orders').insert({
+        const { error } = await supabase.from('orders').insert({
           id: newOrder.id,
           order_number: newOrder.order_number,
           user_id: newOrder.user_id || null,
-          customer_name: newOrder.full_name || newOrder.customer_name || 'Mijoz',
-          customer_phone: newOrder.phone || newOrder.customer_phone || '',
-          shipping_address: newOrder.address || newOrder.shipping_address || '',
-          notes: newOrder.notes || '',
-          payment_method: newOrder.payment_method || 'cash_on_delivery',
-          total_amount: Number(newOrder.total_amount) || 0,
-          status: 'PENDING',
+          customer_name: newOrder.customer_name,
+          customer_phone: newOrder.customer_phone,
+          shipping_address: newOrder.shipping_address,
+          notes: newOrder.notes,
+          payment_method: newOrder.payment_method,
+          total_amount: newOrder.total_amount,
+          status: newOrder.status,
           items: newOrder.items || []
         });
+        if (error) console.error('Supabase createStandardOrder error:', error);
       } catch (e) {
         console.warn('Supabase createStandardOrder error:', e);
       }

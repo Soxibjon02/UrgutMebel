@@ -72,18 +72,27 @@ export const CraftsmanDashboard = () => {
     notes: ''
   });
 
+  const [craftsmanOrders, setCraftsmanOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const craftsmanId = user?.id || 'craft-1';
 
   const loadData = async () => {
     try {
-      const [worksList, financesList] = await Promise.all([
+      const [worksList, financesList, allCustomOrders] = await Promise.all([
         dataService.getCraftsmanWorks(craftsmanId),
-        dataService.getCraftsmanFinances(craftsmanId)
+        dataService.getCraftsmanFinances(craftsmanId),
+        dataService.getCustomOrders()
       ]);
       setWorks(worksList || []);
       setFinances(financesList || []);
+      const myOrders = (allCustomOrders || []).filter((o) =>
+        o.assigned_craftsman === craftsmanId ||
+        (o.assigned_craftsman_name && user?.full_name && o.assigned_craftsman_name.toLowerCase().includes(user.full_name.toLowerCase())) ||
+        (o.title && user?.full_name && o.title.toLowerCase().includes(user.full_name.toLowerCase())) ||
+        role === 'admin'
+      );
+      setCraftsmanOrders(myOrders);
     } finally {
       setLoading(false);
     }
@@ -91,6 +100,13 @@ export const CraftsmanDashboard = () => {
 
   useEffect(() => {
     loadData();
+    const handleUpdate = () => loadData();
+    window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
+    const interval = setInterval(loadData, 10000);
+    return () => {
+      window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
+      clearInterval(interval);
+    };
   }, [user]);
 
   // Auth Guard
@@ -401,6 +417,31 @@ export const CraftsmanDashboard = () => {
             >
               <Briefcase size={17} />
               <span>Mening Ishlarim ({works.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('requests')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1.25rem',
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                backgroundColor: activeTab === 'requests' ? 'var(--wood-amber)' : 'transparent',
+                color: activeTab === 'requests' ? '#ffffff' : 'var(--text-muted)',
+                transition: 'all 0.2s ease',
+                position: 'relative'
+              }}
+            >
+              <Package size={17} />
+              <span>Kelib Tushgan Buyurtmalar ({craftsmanOrders.length})</span>
+              {craftsmanOrders.length > 0 && (
+                <span style={{ backgroundColor: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '10px', fontWeight: 800 }}>
+                  {craftsmanOrders.length}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -718,6 +759,77 @@ export const CraftsmanDashboard = () => {
                 })
               )}
             </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 3: KELIB TUSHGAN MIJOZ BUYURTMALARI                   */}
+        {/* ========================================================= */}
+        {activeTab === 'requests' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Menga Kelib Tushgan Shaxsiy Buyurtmalar</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Mijozlar to‘g‘ridan-to‘g‘ri sizga yuborgan mebel yasash buyurtmalari</p>
+              </div>
+              <span className="badge badge-wood" style={{ fontSize: '0.9rem', padding: '0.4rem 0.8rem' }}>
+                Jami: {craftsmanOrders.length} ta
+              </span>
+            </div>
+
+            {craftsmanOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }} className="glass-card">
+                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📭</div>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.35rem' }}>Hozircha yangi shaxsiy buyurtmalar yo‘q</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Mijoz sizning profilingizdan murojaat qilganda bu yerda darhol aks etadi</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {craftsmanOrders.map((ord) => (
+                  <div key={ord.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+                          <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{ord.order_number}</strong>
+                          <span className="badge badge-wood">{ord.status || 'NEW'}</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(ord.created_at).toLocaleString('uz-UZ')}</span>
+                        </div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{ord.title || ord.category || 'Shaxsiy mebel buyurtmasi'}</h4>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: 700 }}>{ord.customer_name || ord.full_name || 'Mijoz'}</div>
+                        <a href={`tel:${ord.customer_phone || ord.phone}`} style={{ color: 'var(--wood-amber)', fontWeight: 700, fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          📞 {ord.customer_phone || ord.phone}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                      <div><strong>Kategoriya:</strong> {ord.category || 'Mebel'}</div>
+                      <div><strong>O‘lchamlari:</strong> {ord.dimensions || 'Kelishiladi'}</div>
+                      <div><strong>Kutilayotgan muddat:</strong> {ord.urgency || ord.production_deadline || 'Ixtiyoriy'}</div>
+                    </div>
+
+                    {(ord.notes || ord.description) && (
+                      <div style={{ padding: '0.9rem 1.1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: '3px solid var(--wood-amber)', fontSize: '0.92rem', color: 'var(--text-main)', marginBottom: '1rem' }}>
+                        <strong>Mijoz talablari va tavsifi:</strong>
+                        <p style={{ marginTop: '0.3rem', whiteSpace: 'pre-wrap' }}>{ord.notes || ord.description}</p>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        Status: <strong style={{ color: 'var(--wood-amber)' }}>{ord.status === 'NEW' ? 'Yangi murojaat' : ord.status}</strong>
+                      </span>
+                      <a href={`tel:${ord.customer_phone || ord.phone}`} className="btn btn-primary btn-sm">
+                        📞 Mijozga Qo‘ng‘iroq Qilish
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

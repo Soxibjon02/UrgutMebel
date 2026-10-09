@@ -801,20 +801,161 @@ export const AdminDashboard = () => {
         {/* TAB 4: CUSTOM ORDERS */}
         {activeTab === 'custom_orders' && (
           <div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>Barcha Maxsus Buyurtmalar</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {customOrders.map((o) => (
-                <div key={o.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }} className="glass-card">
-                  <div>
-                    <strong style={{ color: 'var(--wood-amber)', fontSize: '1.1rem' }}>{o.order_number}</strong> — {o.furniture_type}
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mijoz: {o.full_name} ({o.phone}) | O‘lchami: {o.length}x{o.width}x{o.height} sm</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span className="badge badge-wood">{o.status}</span>
-                  </div>
-                </div>
-              ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Barcha Maxsus Buyurtmalar va Murojaatlar</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Mijozlar tomonidan qoldirilgan barcha individual buyurtma va murojaatlar</p>
+              </div>
+              <span className="badge badge-wood" style={{ fontSize: '0.9rem', padding: '0.4rem 0.8rem' }}>
+                Jami: {customOrders.length} ta
+              </span>
             </div>
+
+            {customOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📭</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha maxsus buyurtmalar yo‘q</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mijozlar buyurtma berganda bu yerda darhol aks etadi</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {customOrders.map((o) => (
+                  <div key={o.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+                          <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{o.order_number}</strong>
+                          <span className="badge badge-wood">{o.status || 'NEW'}</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(o.created_at).toLocaleString('uz-UZ')}</span>
+                        </div>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{o.title || o.furniture_type || o.category || 'Mebel Buyurtmasi'}</h4>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700 }}>{o.customer_name || o.full_name || 'Mijoz'}</div>
+                        <a href={`tel:${o.customer_phone || o.phone}`} style={{ color: 'var(--wood-amber)', fontWeight: 600, fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          📞 {o.customer_phone || o.phone || 'Telefon yo‘q'}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                      <div><strong>Kategoriya / Xona:</strong> {o.category || o.room_type || 'Noma‘lum'}</div>
+                      <div><strong>O‘lchamlari:</strong> {o.dimensions || (o.length ? `${o.length}x${o.width}x${o.height} sm` : 'Ko‘rsatilmagan')}</div>
+                      <div><strong>Material / Yog‘och:</strong> {o.wood_type || o.material || 'Standart'}</div>
+                      <div><strong>Rang / Lak:</strong> {o.color_finish || o.color || 'Standart'}</div>
+                    </div>
+
+                    {(o.notes || o.description || o.special_requirements) && (
+                      <div style={{ padding: '0.85rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: '3px solid var(--wood-amber)', fontSize: '0.88rem', color: 'var(--text-main)', marginBottom: '1rem' }}>
+                        <strong>Mijoz talabi / Izohi:</strong> {o.notes || o.description || o.special_requirements}
+                      </div>
+                    )}
+
+                    {o.files && o.files.length > 0 && (
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>Biriktirilgan rasmlar:</span>
+                        {o.files.map((f, idx) => (
+                          <a key={idx} href={f.file_url || f.url} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                            <img src={f.file_url || f.url} alt="file" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-subtle)' }} />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                        {o.assigned_craftsman ? `Biriktirilgan usta: ${o.assigned_craftsman_name || o.assigned_craftsman}` : 'Hali ustaga biriktirilmagan'}
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <a href={`tel:${o.customer_phone || o.phone}`} className="btn btn-secondary btn-sm">
+                          Mijozga Qo‘ng‘iroq
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4.5: STANDARD SHOP ORDERS */}
+        {activeTab === 'orders' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Do‘kon Xaridlari (Savatdan tushgan buyurtmalar)</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Saytdagi tayyor mebellarni onlayn sotib olgan mijozlar buyurtmalari</p>
+              </div>
+              <span className="badge badge-wood" style={{ fontSize: '0.9rem', padding: '0.4rem 0.8rem' }}>
+                Jami: {standardOrders.length} ta
+              </span>
+            </div>
+
+            {standardOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🛍️</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha do‘kon xaridlari yo‘q</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mijoz savatdan xarid qilganda bu yerda darhol aks etadi</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {standardOrders.map((ord) => (
+                  <div key={ord.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.75rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+                          <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{ord.order_number}</strong>
+                          <span className="badge badge-wood">{ord.status || 'PENDING'}</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{ord.created_at ? new Date(ord.created_at).toLocaleString('uz-UZ') : ''}</span>
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                          Yetkazib berish manzili: <strong style={{ color: 'var(--text-main)' }}>{ord.shipping_address || ord.address || 'Ko‘rsatilmagan'}</strong>
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--gold-accent)' }}>
+                          {(Number(ord.total_amount) || 0).toLocaleString()} so‘m
+                        </div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{ord.customer_name || ord.full_name || 'Mijoz'}</div>
+                        <a href={`tel:${ord.customer_phone || ord.phone}`} style={{ color: 'var(--wood-amber)', fontWeight: 600, fontSize: '0.9rem' }}>
+                          📞 {ord.customer_phone || ord.phone}
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Order items */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Xarid qilingan mebellar:</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        {(ord.items || []).map((it, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', fontSize: '0.88rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              {it.image && <img src={it.image} alt={it.name} style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '4px' }} />}
+                              <span><strong>{it.name}</strong> × {it.quantity} dona</span>
+                            </div>
+                            <span style={{ fontWeight: 600, color: 'var(--wood-amber)' }}>
+                              {(Number(it.price) * (it.quantity || 1)).toLocaleString()} so‘m
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        To‘lov usuli: <strong>{ord.payment_method === 'cash_on_delivery' ? 'Naqd (yetkazganda)' : ord.payment_method}</strong>
+                      </span>
+                      <a href={`tel:${ord.customer_phone || ord.phone}`} className="btn btn-secondary btn-sm">
+                        📞 Mijozga Bog‘lanish
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
