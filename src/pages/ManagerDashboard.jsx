@@ -431,7 +431,7 @@ export const ManagerDashboard = () => {
   ];
 
   return (
-    <div style={{ padding: '2.5rem 0 6rem', backgroundColor: '#fcfbfa', minHeight: '88vh' }}>
+    <div style={{ padding: '2.5rem 0 6rem', backgroundColor: 'var(--bg-primary)', minHeight: '88vh' }}>
       <div className="container">
 
         {/* Dashboard Header */}
@@ -458,7 +458,8 @@ export const ManagerDashboard = () => {
         <div
           style={{
             display: 'flex',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-lg)',
             padding: '0.4rem',
             border: '1px solid var(--border-subtle)',
@@ -548,7 +549,7 @@ export const ManagerDashboard = () => {
                 flexWrap: 'wrap',
                 gap: '1rem',
                 marginBottom: '1.5rem',
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--bg-card)',
                 padding: '1.25rem 1.5rem',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border-subtle)',
@@ -592,9 +593,9 @@ export const ManagerDashboard = () => {
             </div>
 
             {/* Products Table */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }} className="glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                <thead style={{ backgroundColor: '#fcfbf9', borderBottom: '1px solid var(--border-subtle)' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
                     <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Rasm</th>
                     <th style={{ padding: '0.9rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Mebel Nomi</th>
@@ -743,7 +744,7 @@ export const ManagerDashboard = () => {
             {/* Orders Cards List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {filteredOrders.length === 0 ? (
-                <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }} className="glass-card">
                   <p style={{ color: 'var(--text-muted)' }}>Ushbu bo‘limda buyurtmalar mavjud emas.</p>
                 </div>
               ) : (
@@ -751,7 +752,8 @@ export const ManagerDashboard = () => {
                   <div
                     key={order.id}
                     style={{
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--bg-card)',
+                      backdropFilter: 'blur(8px)',
                       borderRadius: 'var(--radius-xl)',
                       padding: '1.75rem 2rem',
                       border: '1px solid var(--border-subtle)',
@@ -762,6 +764,7 @@ export const ManagerDashboard = () => {
                       flexWrap: 'wrap',
                       gap: '1.5rem'
                     }}
+                    className="glass-card"
                   >
                     <div style={{ flex: '1 1 340px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
@@ -1073,7 +1076,7 @@ export const ManagerDashboard = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: isUploading ? 'not-allowed' : 'pointer',
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--bg-card)',
                       textAlign: 'center',
                       transition: 'all 0.2s ease'
                     }}
@@ -1101,7 +1104,7 @@ export const ManagerDashboard = () => {
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-md)',
                       padding: '1rem',
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--bg-card)',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between'
@@ -1146,7 +1149,7 @@ export const ManagerDashboard = () => {
                             borderRadius: '8px',
                             overflow: 'hidden',
                             border: index === 0 ? '2px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
-                            backgroundColor: '#ffffff',
+                            backgroundColor: 'var(--bg-card)',
                             boxShadow: 'var(--shadow-sm)'
                           }}
                         >
@@ -1178,7 +1181,7 @@ export const ManagerDashboard = () => {
                               padding: '0.3rem',
                               display: 'flex',
                               justifyContent: 'space-between',
-                              backgroundColor: '#ffffff',
+                              backgroundColor: 'var(--bg-card)',
                               borderTop: '1px solid var(--border-subtle)'
                             }}
                           >

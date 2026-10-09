@@ -311,7 +311,7 @@ export const AdminDashboard = () => {
   const totalRevenue = standardOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
 
   return (
-    <div style={{ display: 'flex', minHeight: '90vh', backgroundColor: '#f9f8f6' }}>
+    <div style={{ display: 'flex', minHeight: '90vh', backgroundColor: 'var(--bg-primary)' }}>
       
       {/* Sidebar Navigation */}
       <aside
@@ -526,28 +526,28 @@ export const AdminDashboard = () => {
 
             {/* Metrics Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>JAMI SAVDO (TUSHUM)</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--wood-amber)', marginTop: '0.4rem' }}>
                   {Number(totalRevenue).toLocaleString()} so‘m
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>MAXSUS BUYURTMALAR</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.4rem' }}>
                   {customOrders.length} ta
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>MAHSULOTLAR SONI</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.4rem' }}>
                   {products.length} ta
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>RO‘YXATDAGI USTALAR</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.4rem' }}>
                   {craftsmen.length} nafar
@@ -556,7 +556,7 @@ export const AdminDashboard = () => {
             </div>
 
             {/* Recent Orders Overview */}
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem' }}>So‘nggi Maxsus Buyurtmalar</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {customOrders.slice(0, 4).map((o) => (
@@ -586,7 +586,7 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }} className="glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -665,7 +665,7 @@ export const AdminDashboard = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
               {categories.map((c) => (
-                <div key={c.id} style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '1.25rem', border: '1px solid var(--border-subtle)' }}>
+                <div key={c.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
                   <img src={c.image_url} alt={c.name} style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.75rem' }} />
                   <h4 style={{ fontWeight: 700, fontSize: '1.1rem' }}>{c.name}</h4>
                   <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.3rem 0 1rem' }}>{c.description}</p>
@@ -685,7 +685,7 @@ export const AdminDashboard = () => {
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>Barcha Maxsus Buyurtmalar</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {customOrders.map((o) => (
-                <div key={o.id} style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div key={o.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }} className="glass-card">
                   <div>
                     <strong style={{ color: 'var(--wood-amber)', fontSize: '1.1rem' }}>{o.order_number}</strong> — {o.furniture_type}
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mijoz: {o.full_name} ({o.phone}) | O‘lchami: {o.length}x{o.width}x{o.height} sm</div>
@@ -715,7 +715,7 @@ export const AdminDashboard = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
               {craftsmen.map((c) => (
-                <div key={c.id} style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
+                <div key={c.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                     <img src={c.photo_url} alt={c.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div>
@@ -740,7 +740,7 @@ export const AdminDashboard = () => {
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>Sharhlar Moderatsiyasi</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {comments.map((comm) => (
-                <div key={comm.id} style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
+                <div key={comm.id} style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }} className="glass-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                     <strong>{comm.user_name}</strong>
                     <span style={{ color: '#d97706', fontWeight: 700 }}>★ {comm.rating}</span>
@@ -783,12 +783,14 @@ export const AdminDashboard = () => {
             <form
               onSubmit={handleSaveSettings}
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--bg-card)',
+                backdropFilter: 'blur(8px)',
                 borderRadius: 'var(--radius-xl)',
                 padding: '2.5rem',
                 border: '1.5px solid var(--wood-light)',
                 boxShadow: 'var(--shadow-sm)'
               }}
+              className="glass-card"
             >
               {/* PRIMARY REQUIREMENT: Web Loyiha Nomi */}
               <div className="form-group" style={{ marginBottom: '1.75rem' }}>
@@ -1038,7 +1040,7 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }} className="glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: '#fcfbf9', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>

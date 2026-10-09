@@ -74,12 +74,14 @@ export const CheckoutPage = () => {
         <div className="container" style={{ maxWidth: '640px', textAlign: 'center' }}>
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '3.5rem 2.5rem',
               boxShadow: 'var(--shadow-md)',
               border: '1px solid var(--border-subtle)'
             }}
+            className="glass-card"
           >
             <div
               style={{
@@ -150,12 +152,14 @@ export const CheckoutPage = () => {
           {/* Form Fields */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2.5rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)'
             }}
+            className="glass-card"
           >
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               Yetkazib Berish Ma'lumotlari
@@ -243,12 +247,14 @@ export const CheckoutPage = () => {
           {/* Right Summary */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)'
             }}
+            className="glass-card"
           >
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               Xarid Tarkibi ({cartItems.length} xil)

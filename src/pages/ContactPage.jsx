@@ -36,7 +36,7 @@ export const ContactPage = () => {
           
           {/* Contact Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
                   <MapPin size={22} />
@@ -91,12 +91,14 @@ export const ContactPage = () => {
           {/* Contact Message Form */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2.5rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)'
             }}
+            className="glass-card"
           >
             {sent ? (
               <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>

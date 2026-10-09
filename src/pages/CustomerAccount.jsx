@@ -140,7 +140,8 @@ export const CustomerAccount = () => {
         {/* Header Profile Summary */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
             padding: '2rem 2.5rem',
             border: '1px solid var(--border-subtle)',
@@ -152,6 +153,7 @@ export const CustomerAccount = () => {
             gap: '1.5rem',
             marginBottom: '2.5rem'
           }}
+          className="glass-card"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             <div
@@ -265,7 +267,7 @@ export const CustomerAccount = () => {
         {activeTab === 'custom' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {customOrders.length === 0 ? (
-              <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }} className="glass-card">
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Sizda hali maxsus chizma yoki o‘lchamdagi buyurtmalar mavjud emas.</p>
                 <Link to="/custom-order" className="btn btn-primary">Maxsus Buyurtma Berish</Link>
               </div>
@@ -274,12 +276,14 @@ export const CustomerAccount = () => {
                 <div
                   key={order.id}
                   style={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--bg-card)',
+                    backdropFilter: 'blur(8px)',
                     borderRadius: 'var(--radius-xl)',
                     padding: '2rem',
                     border: '1px solid var(--border-subtle)',
                     boxShadow: 'var(--shadow-sm)'
                   }}
+                  className="glass-card"
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                     <div>
@@ -367,7 +371,7 @@ export const CustomerAccount = () => {
         {activeTab === 'orders' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {standardOrders.length === 0 ? (
-              <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }} className="glass-card">
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Sizda hali standart xaridlar mavjud emas.</p>
                 <Link to="/furniture" className="btn btn-primary">Katalogga O‘tish</Link>
               </div>
@@ -376,12 +380,14 @@ export const CustomerAccount = () => {
                 <div
                   key={ord.id}
                   style={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--bg-card)',
+                    backdropFilter: 'blur(8px)',
                     borderRadius: 'var(--radius-xl)',
                     padding: '2rem',
                     border: '1px solid var(--border-subtle)',
                     boxShadow: 'var(--shadow-sm)'
                   }}
+                  className="glass-card"
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                     <div>
@@ -434,7 +440,7 @@ export const CustomerAccount = () => {
         {activeTab === 'wishlist' && (
           <div>
             {favorites.length === 0 ? (
-              <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '4rem', textAlign: 'center', border: '1px solid var(--border-subtle)' }} className="glass-card">
                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Sevimlilar ro‘yxatiga hech qanday mebel qo‘shilmagan.</p>
                 <Link to="/furniture" className="btn btn-primary">Mebellarni Ko‘rish</Link>
               </div>

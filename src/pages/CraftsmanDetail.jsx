@@ -66,7 +66,8 @@ export const CraftsmanDetail = () => {
         {/* Profile Header Card */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
             padding: '2.5rem',
             border: '1px solid var(--border-subtle)',
@@ -77,6 +78,7 @@ export const CraftsmanDetail = () => {
             flexWrap: 'wrap',
             marginBottom: '3rem'
           }}
+          className="glass-card"
         >
           <img
             src={craftsman.photo_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"}
@@ -171,13 +173,15 @@ export const CraftsmanDetail = () => {
         {/* Bio */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
             padding: '2.5rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '3rem'
           }}
+          className="glass-card"
         >
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1rem' }}>
             Usta Haqida
@@ -191,13 +195,15 @@ export const CraftsmanDetail = () => {
         {craftsman.services?.length > 0 && (
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2.5rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)',
               marginBottom: '3rem'
             }}
+            className="glass-card"
           >
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem' }}>
               Xizmatlar va Taxminiy Narxlar
@@ -228,12 +234,14 @@ export const CraftsmanDetail = () => {
         {craftsman.portfolio?.length > 0 && (
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2.5rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)'
             }}
+            className="glass-card"
           >
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem' }}>
               Portfolio (Bajarilgan Namunaviy Ishlar)
@@ -246,7 +254,7 @@ export const CraftsmanDetail = () => {
                     alt={item.title}
                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                   />
-                  <div style={{ padding: '1rem', backgroundColor: '#ffffff' }}>
+                  <div style={{ padding: '1rem', backgroundColor: 'var(--bg-card)' }}>
                     <h4 style={{ fontSize: '0.98rem', fontWeight: 700 }}>{item.title}</h4>
                     {item.description && (
                       <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>

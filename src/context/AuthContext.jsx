@@ -61,8 +61,8 @@ export const AuthProvider = ({ children }) => {
   const role = user ? user.role : 'guest';
   const isGuest = !user || role === 'guest';
   const isCustomer = user && role === 'customer';
-  const isManager = user && (role === 'manager' || role === 'admin');
-  const isCraftsman = user && (role === 'craftsman');
+  const isManager = user && role === 'manager';
+  const isCraftsman = user && role === 'craftsman';
   const isAdmin = user && role === 'admin';
 
   useEffect(() => {

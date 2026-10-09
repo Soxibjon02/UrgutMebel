@@ -194,11 +194,12 @@ export const FurnitureCatalog = () => {
         {/* Top Control Bar: Search input, Sort Dropdown & Mobile Filter Button */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: 'var(--radius-md)',
             padding: '1rem 1.25rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
+            backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -206,6 +207,7 @@ export const FurnitureCatalog = () => {
             gap: '1rem',
             marginBottom: '2rem'
           }}
+          className="glass-card"
         >
           {/* Search Input */}
           <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '400px' }}>
@@ -269,13 +271,14 @@ export const FurnitureCatalog = () => {
           {/* Filters Sidebar */}
           <aside
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-lg)',
               padding: '1.5rem',
               border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)'
+              boxShadow: 'var(--shadow-sm)',
+              backdropFilter: 'blur(8px)'
             }}
-            className={`catalog-filter-sidebar ${mobileFilterOpen ? 'mobile-open' : ''}`}
+            className={`catalog-filter-sidebar glass-card ${mobileFilterOpen ? 'mobile-open' : ''}`}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1.05rem' }}>
@@ -433,12 +436,14 @@ export const FurnitureCatalog = () => {
             {filteredProducts.length === 0 ? (
               <div
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-card)',
                   borderRadius: 'var(--radius-lg)',
                   padding: '4rem 2rem',
                   textAlign: 'center',
-                  border: '1px solid var(--border-subtle)'
+                  border: '1px solid var(--border-subtle)',
+                  backdropFilter: 'blur(8px)'
                 }}
+                className="glass-card"
               >
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛋️</div>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem' }}>

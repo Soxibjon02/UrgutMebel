@@ -504,7 +504,7 @@ export const Home = () => {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
               <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
               <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                 "Urgut mebellari haqiqatdan ham boshqacha! Oshxona garniturimizni yasatdik, har bir burchagi va fitinglari ajoyib ishlangan. Rahmat ustalarga!"
@@ -520,7 +520,7 @@ export const Home = () => {
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
               <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
               <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                 "Yotoqxona to‘plamini buyurtma qildik. Narx taklifi menedjer tomonidan tezkor berildi, ishlab chiqarish jarayonini ham xabardor qilib turishdi. O‘z vaqtida keldi."
@@ -536,7 +536,7 @@ export const Home = () => {
               </div>
             </div>
 
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
               <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
               <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                 "Bolalar karavotini tabiiy yog‘ochdan yasatdik. O‘ta baquvvat va bo‘yoqlari mutlaqo xidsiz ekan. Farzandlarim juda xursand!"

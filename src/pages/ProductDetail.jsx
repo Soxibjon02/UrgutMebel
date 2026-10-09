@@ -341,7 +341,7 @@ export const ProductDetail = () => {
                   alignItems: 'center',
                   border: '1.5px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  backgroundColor: '#ffffff'
+                  backgroundColor: 'var(--bg-secondary)'
                 }}
               >
                 <button
@@ -409,13 +409,15 @@ export const ProductDetail = () => {
         {/* Specifications & Description Section */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
             padding: '2.5rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '4rem'
           }}
+          className="glass-card"
         >
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.25rem' }}>
             Tavsif va Xususiyatlar
@@ -450,13 +452,15 @@ export const ProductDetail = () => {
         {/* Reviews & Comments Section */}
         <div
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
             padding: '2.5rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '4rem'
           }}
+          className="glass-card"
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
             <div>

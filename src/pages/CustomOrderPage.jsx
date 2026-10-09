@@ -119,12 +119,14 @@ export const CustomOrderPage = () => {
         <div className="container" style={{ maxWidth: '680px', textAlign: 'center' }}>
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '3.5rem 2.5rem',
               boxShadow: 'var(--shadow-md)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div
               style={{
@@ -218,13 +220,15 @@ export const CustomOrderPage = () => {
           {/* SECTION 1: CUSTOMER INFORMATION */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem 2.5rem',
               marginBottom: '2rem',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <User size={20} color="var(--wood-amber)" />
@@ -288,13 +292,15 @@ export const CustomOrderPage = () => {
           {/* SECTION 2: FURNITURE SPECS */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem 2.5rem',
               marginBottom: '2rem',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <Ruler size={20} color="var(--wood-amber)" />
@@ -394,13 +400,15 @@ export const CustomOrderPage = () => {
           {/* SECTION 3: MATERIALS & FINISH */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem 2.5rem',
               marginBottom: '2rem',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <Layers size={20} color="var(--wood-amber)" />
@@ -458,13 +466,15 @@ export const CustomOrderPage = () => {
           {/* SECTION 4: DESIGN & FILE UPLOADS */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem 2.5rem',
               marginBottom: '2rem',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <FileText size={20} color="var(--wood-amber)" />
@@ -585,7 +595,7 @@ export const CustomOrderPage = () => {
                       style={{
                         position: 'relative',
                         padding: '0.5rem 0.75rem',
-                        backgroundColor: '#ffffff',
+                        backgroundColor: 'var(--bg-card)',
                         border: '1px solid var(--border-subtle)',
                         borderRadius: 'var(--radius-md)',
                         display: 'flex',
@@ -619,13 +629,15 @@ export const CustomOrderPage = () => {
           {/* SECTION 5: BUDGET & SUBMISSION */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem 2.5rem',
               marginBottom: '2.5rem',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border-subtle)',
+              backdropFilter: 'blur(8px)'
             }}
+            className="glass-card"
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <DollarSign size={20} color="var(--wood-amber)" />

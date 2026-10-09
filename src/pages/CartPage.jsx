@@ -75,7 +75,8 @@ export const CartPage = () => {
               <div
                 key={`${item.product_id}-${item.selected_color}-${idx}`}
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-card)',
+                  backdropFilter: 'blur(8px)',
                   borderRadius: 'var(--radius-lg)',
                   padding: '1.5rem',
                   border: '1px solid var(--border-subtle)',
@@ -84,7 +85,7 @@ export const CartPage = () => {
                   alignItems: 'center',
                   boxShadow: 'var(--shadow-sm)'
                 }}
-                className="cart-item-card"
+                className="cart-item-card glass-card"
               >
                 <img
                   src={item.image}
@@ -160,12 +161,14 @@ export const CartPage = () => {
           {/* Order Summary Card */}
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--bg-card)',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'var(--radius-xl)',
               padding: '2rem',
               border: '1px solid var(--border-subtle)',
               boxShadow: 'var(--shadow-sm)'
             }}
+            className="glass-card"
           >
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               Buyurtma Xulosasi
