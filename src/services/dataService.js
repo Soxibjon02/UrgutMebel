@@ -104,7 +104,7 @@ export const dataService = {
   },
 
   async saveCategory(category) {
-    const current = await this.getCategories();
+    const current = getStored('categories', initialCategories);
     const newCat = category.id ? category : {
       ...category,
       id: `cat-${Date.now()}`,
@@ -116,25 +116,21 @@ export const dataService = {
 
     setStored('categories', updated, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('categories').upsert(newCat);
-      } catch (e) {
-        console.warn('Supabase saveCategory error:', e);
-      }
+      supabase.from('categories').upsert(newCat).catch((e) => {
+        console.warn('Supabase saveCategory background error:', e);
+      });
     }
     return updated;
   },
 
   async deleteCategory(id) {
-    const current = await this.getCategories();
+    const current = getStored('categories', initialCategories);
     const categories = current.filter((c) => c.id !== id);
     setStored('categories', categories, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('categories').delete().eq('id', id);
-      } catch (e) {
-        console.warn('Supabase deleteCategory error:', e);
-      }
+      supabase.from('categories').delete().eq('id', id).catch((e) => {
+        console.warn('Supabase deleteCategory background error:', e);
+      });
     }
     return categories;
   },
@@ -146,7 +142,7 @@ export const dataService = {
         const { data, error } = await supabase.from('products').select('*');
         if (!error && Array.isArray(data)) {
           if (data.length > 0) {
-            setStored('products', data);
+            setStored('products', data, false);
             return data;
           }
           const local = getStored('products', null);
@@ -167,7 +163,7 @@ export const dataService = {
               image_url: prod.images?.[0] || prod.image_url || ''
             });
           }
-          setStored('products', toSeed);
+          setStored('products', toSeed, false);
           return toSeed;
         }
       } catch (e) {
@@ -183,7 +179,7 @@ export const dataService = {
   },
 
   async saveProduct(product) {
-    const current = await this.getProducts();
+    const current = getStored('products', initialProducts);
     const newProd = product.id ? product : {
       ...product,
       id: `prod-${Date.now()}`,
@@ -199,25 +195,21 @@ export const dataService = {
 
     setStored('products', updated, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('products').upsert(newProd);
-      } catch (e) {
-        console.warn('Supabase saveProduct error:', e);
-      }
+      supabase.from('products').upsert(newProd).catch((e) => {
+        console.warn('Supabase saveProduct background error:', e);
+      });
     }
     return updated;
   },
 
   async deleteProduct(id) {
-    const current = await this.getProducts();
+    const current = getStored('products', initialProducts);
     const products = current.filter((p) => p.id !== id);
     setStored('products', products, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('products').delete().eq('id', id);
-      } catch (e) {
-        console.warn('Supabase deleteProduct error:', e);
-      }
+      supabase.from('products').delete().eq('id', id).catch((e) => {
+        console.warn('Supabase deleteProduct background error:', e);
+      });
     }
     return products;
   },
@@ -270,7 +262,7 @@ export const dataService = {
   },
 
   async saveCraftsman(craftsman) {
-    const current = await this.getCraftsmen();
+    const current = getStored('craftsmen', initialCraftsmen);
     const newCraft = craftsman.id ? craftsman : {
       ...craftsman,
       id: `craft-${Date.now()}`,
@@ -286,25 +278,21 @@ export const dataService = {
 
     setStored('craftsmen', updated, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('craftsmen').upsert(newCraft);
-      } catch (e) {
-        console.warn('Supabase saveCraftsman error:', e);
-      }
+      supabase.from('craftsmen').upsert(newCraft).catch((e) => {
+        console.warn('Supabase saveCraftsman background error:', e);
+      });
     }
     return updated;
   },
 
   async deleteCraftsman(id) {
-    const current = await this.getCraftsmen();
+    const current = getStored('craftsmen', initialCraftsmen);
     const craftsmen = current.filter((c) => c.id !== id);
     setStored('craftsmen', craftsmen, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('craftsmen').delete().eq('id', id);
-      } catch (e) {
-        console.warn('Supabase deleteCraftsman error:', e);
-      }
+      supabase.from('craftsmen').delete().eq('id', id).catch((e) => {
+        console.warn('Supabase deleteCraftsman background error:', e);
+      });
     }
     return craftsmen;
   },
@@ -679,7 +667,7 @@ export const dataService = {
   },
 
   async saveManager(managerData) {
-    const managers = await this.getManagers();
+    const managers = getStored('managers', []);
     const newMgr = {
       id: managerData.id || `mgr-${Date.now()}`,
       full_name: managerData.full_name,
@@ -695,35 +683,28 @@ export const dataService = {
 
     setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        const { error } = await supabase.from('managers').upsert({
-          id: newMgr.id,
-          full_name: newMgr.full_name,
-          email: newMgr.email,
-          password: newMgr.password,
-          phone: newMgr.phone,
-          department: newMgr.department
-        });
-        if (error) {
-          console.error('Supabase saveManager error:', error);
-        }
-      } catch (e) {
-        console.warn('Supabase saveManager error:', e);
-      }
+      supabase.from('managers').upsert({
+        id: newMgr.id,
+        full_name: newMgr.full_name,
+        email: newMgr.email,
+        password: newMgr.password,
+        phone: newMgr.phone,
+        department: newMgr.department
+      }).catch((e) => {
+        console.warn('Supabase saveManager background error:', e);
+      });
     }
     return updated;
   },
 
   async deleteManager(id) {
-    const managers = await this.getManagers();
+    const managers = getStored('managers', []);
     const updated = managers.filter((m) => m.id !== id);
     setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.from('managers').delete().eq('id', id);
-      } catch (e) {
-        console.warn('Supabase deleteManager error:', e);
-      }
+      supabase.from('managers').delete().eq('id', id).catch((e) => {
+        console.warn('Supabase deleteManager background error:', e);
+      });
     }
     return updated;
   },

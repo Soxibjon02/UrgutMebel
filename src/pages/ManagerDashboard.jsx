@@ -337,18 +337,19 @@ export const ManagerDashboard = () => {
       photo_url: form.photo_url.value || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       specializations: form.specializations.value.split(',').map((s) => s.trim())
     };
-    await dataService.saveCraftsman(craftData);
-    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+
     setCraftsmanModalOpen(false);
     setEditingCraftsman(null);
-    loadData();
+    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+    const updated = await dataService.saveCraftsman(craftData);
+    setCraftsmen(updated);
   };
 
   const handleDeleteCraftsman = async (id, name) => {
     if (window.confirm(`Rostdan ham "${name}" ustasini o‘chirmoqchimisiz?`)) {
-      await dataService.deleteCraftsman(id);
       addToast('Usta profili o‘chirildi', 'info');
-      loadData();
+      const updated = await dataService.deleteCraftsman(id);
+      setCraftsmen(updated);
     }
   };
 

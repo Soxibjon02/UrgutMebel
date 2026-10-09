@@ -252,18 +252,18 @@ export const AdminDashboard = () => {
       images: [form.image_url.value || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80']
     };
 
-    await dataService.saveProduct(prodData);
-    addToast('Mahsulot muvaffaqiyatli saqlandi!', 'success');
     setProductModalOpen(false);
     setEditingProduct(null);
-    loadAllData();
+    addToast('Mahsulot muvaffaqiyatli saqlandi!', 'success');
+    const updated = await dataService.saveProduct(prodData);
+    setProducts(updated);
   };
 
   const handleDeleteProduct = async (id) => {
     if (window.confirm("Rostdan ham ushbu mebelni o‘chirmoqchimisiz?")) {
-      await dataService.deleteProduct(id);
       addToast('Mahsulot o‘chirildi', 'info');
-      loadAllData();
+      const updated = await dataService.deleteProduct(id);
+      setProducts(updated);
     }
   };
 
@@ -278,18 +278,19 @@ export const AdminDashboard = () => {
       description: form.description.value,
       image_url: form.image_url.value || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
     };
-    await dataService.saveCategory(catData);
-    addToast('Kategoriya saqlandi!', 'success');
+
     setCategoryModalOpen(false);
     setEditingCategory(null);
-    loadAllData();
+    addToast('Kategoriya saqlandi!', 'success');
+    const updated = await dataService.saveCategory(catData);
+    setCategories(updated);
   };
 
   const handleDeleteCategory = async (id) => {
     if (window.confirm("Kategoriyani o‘chirishni xohlaysizmi?")) {
-      await dataService.deleteCategory(id);
       addToast('Kategoriya o‘chirildi', 'info');
-      loadAllData();
+      const updated = await dataService.deleteCategory(id);
+      setCategories(updated);
     }
   };
 
@@ -310,18 +311,19 @@ export const AdminDashboard = () => {
       photo_url: form.photo_url.value || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       specializations: form.specializations.value.split(',').map((s) => s.trim())
     };
-    await dataService.saveCraftsman(craftData);
-    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+
     setCraftsmanModalOpen(false);
     setEditingCraftsman(null);
-    loadAllData();
+    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+    const updated = await dataService.saveCraftsman(craftData);
+    setCraftsmen(updated);
   };
 
   const handleDeleteCraftsman = async (id) => {
     if (window.confirm("Ustani o‘chirmoqchimisiz?")) {
-      await dataService.deleteCraftsman(id);
       addToast('Usta profili o‘chirildi', 'info');
-      loadAllData();
+      const updated = await dataService.deleteCraftsman(id);
+      setCraftsmen(updated);
     }
   };
 
@@ -343,18 +345,18 @@ export const AdminDashboard = () => {
       return;
     }
 
-    await dataService.saveManager(mgrData);
-    addToast('Menedjer saqlandi! Endi u o‘z paroli bilan tizimga kira oladi.', 'success');
     setManagerModalOpen(false);
     setEditingManager(null);
-    loadAllData();
+    addToast('Menedjer saqlandi! Endi u o‘z paroli bilan tizimga kira oladi.', 'success');
+    const updated = await dataService.saveManager(mgrData);
+    setManagers(updated);
   };
 
   const handleDeleteManager = async (id) => {
     if (window.confirm("Rostdan ham ushbu menedjerni o‘chirmoqchimisiz?")) {
-      await dataService.deleteManager(id);
       addToast('Menedjer o‘chirildi', 'info');
-      loadAllData();
+      const updated = await dataService.deleteManager(id);
+      setManagers(updated);
     }
   };
 
