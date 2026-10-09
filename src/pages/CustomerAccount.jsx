@@ -111,23 +111,23 @@ export const CustomerAccount = () => {
       case 'NEW':
         return <span className="badge badge-wood">Yangi (NEW)</span>;
       case 'REVIEWING':
-        return <span className="badge" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>Ko‘rib chiqilmoqda</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>Ko‘rib chiqilmoqda</span>;
       case 'CALCULATING':
-        return <span className="badge" style={{ backgroundColor: '#fef3c7', color: '#b45309' }}>Narx hisoblanmoqda</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }}>Narx hisoblanmoqda</span>;
       case 'PRICE_SENT':
-        return <span className="badge" style={{ backgroundColor: '#fef08a', color: '#854d0e', fontWeight: 800 }}>⚠️ Narx Taklifi Yuborildi</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(234, 179, 8, 0.2)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.4)', fontWeight: 800 }}>⚠️ Narx Taklifi Yuborildi</span>;
       case 'CUSTOMER_APPROVED':
-        return <span className="badge" style={{ backgroundColor: '#dcfce7', color: '#15803d' }}>Mijoz tasdiqladi</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Mijoz tasdiqladi</span>;
       case 'IN_PRODUCTION':
-        return <span className="badge" style={{ backgroundColor: '#e0e7ff', color: '#4338ca' }}>Ishlab chiqarishda</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)' }}>Ishlab chiqarishda</span>;
       case 'READY':
-        return <span className="badge" style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>Tayyor bo‘ldi</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Tayyor bo‘ldi</span>;
       case 'DELIVERING':
-        return <span className="badge" style={{ backgroundColor: '#f3e8ff', color: '#6b21a8' }}>Yetkazilmoqda</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>Yetkazilmoqda</span>;
       case 'COMPLETED':
-        return <span className="badge" style={{ backgroundColor: '#dcfce7', color: '#15803d' }}>Bajarildi (COMPLETED)</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Bajarildi (COMPLETED)</span>;
       case 'CANCELLED':
-        return <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}>Bekor qilindi</span>;
+        return <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}>Bekor qilindi</span>;
       default:
         return <span className="badge badge-wood">{status}</span>;
     }
@@ -327,8 +327,8 @@ export const CustomerAccount = () => {
                   {order.price_offer && (
                     <div
                       style={{
-                        backgroundColor: '#fffbeb',
-                        border: '1.5px solid #fde68a',
+                        backgroundColor: 'rgba(212, 163, 89, 0.12)',
+                        border: '1.5px solid rgba(212, 163, 89, 0.35)',
                         borderRadius: 'var(--radius-lg)',
                         padding: '1.25rem 1.5rem',
                         display: 'flex',
@@ -340,7 +340,7 @@ export const CustomerAccount = () => {
                       }}
                     >
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#b45309', fontWeight: 800, fontSize: '0.95rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--wood-amber)', fontWeight: 800, fontSize: '0.95rem' }}>
                           <DollarSign size={18} />
                           <span>Menedjer Narx Taklifini Yubordi!</span>
                         </div>

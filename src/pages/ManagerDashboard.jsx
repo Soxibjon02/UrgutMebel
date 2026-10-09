@@ -634,7 +634,7 @@ export const ManagerDashboard = () => {
                             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>{p.material || 'Material ko‘rsatilmagan'}</div>
                           </td>
                           <td style={{ padding: '0.85rem 1.25rem' }}>
-                            <span style={{ backgroundColor: '#f5f2eb', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
+                            <span style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-main)', border: '1px solid var(--border-subtle)', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
                               {cat?.name || 'Umumiy'}
                             </span>
                           </td>
@@ -771,7 +771,7 @@ export const ManagerDashboard = () => {
                         <strong style={{ fontSize: '1.15rem', color: 'var(--wood-amber)' }}>
                           {order.order_number}
                         </strong>
-                        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 700, backgroundColor: '#fef3c7', color: '#b45309' }}>
+                        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 700, backgroundColor: 'rgba(212, 163, 89, 0.15)', color: 'var(--gold-accent)', border: '1px solid rgba(212, 163, 89, 0.3)' }}>
                           {order.status}
                         </span>
                       </div>
@@ -1053,7 +1053,7 @@ export const ManagerDashboard = () => {
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   padding: '1.25rem',
-                  backgroundColor: '#fbf9f5',
+                  backgroundColor: 'var(--bg-secondary)',
                   marginBottom: '1.5rem'
                 }}
               >
@@ -1338,9 +1338,9 @@ export const ManagerDashboard = () => {
                 />
               </div>
 
-              <div style={{ padding: '1rem', backgroundColor: '#fef3c7', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
-                <div style={{ fontSize: '0.85rem', color: '#92400e' }}>Yakuniy Taklif Qilinadigan Narx:</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309' }}>
+              <div style={{ padding: '1rem', backgroundColor: 'rgba(212, 163, 89, 0.12)', border: '1px solid rgba(212, 163, 89, 0.25)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Yakuniy Taklif Qilinadigan Narx:</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--gold-accent)' }}>
                   {totalCost > 0 ? Number(totalCost).toLocaleString() : 0} so‘m
                 </div>
               </div>

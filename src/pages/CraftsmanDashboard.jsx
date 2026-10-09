@@ -580,8 +580,9 @@ export const CraftsmanDashboard = () => {
                                 borderRadius: '12px',
                                 fontSize: '0.75rem',
                                 fontWeight: 700,
-                                backgroundColor: item.status === 'TUGATILGAN' ? '#ecfdf5' : item.status === 'QARZDORLIK_BOR' ? '#fef2f2' : '#fef3c7',
-                                color: item.status === 'TUGATILGAN' ? '#047857' : item.status === 'QARZDORLIK_BOR' ? '#b91c1c' : '#b45309'
+                                backgroundColor: item.status === 'TUGATILGAN' ? 'rgba(16, 185, 129, 0.15)' : item.status === 'QARZDORLIK_BOR' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                                color: item.status === 'TUGATILGAN' ? '#10b981' : item.status === 'QARZDORLIK_BOR' ? '#ef4444' : '#f59e0b',
+                                border: `1px solid ${item.status === 'TUGATILGAN' ? 'rgba(16, 185, 129, 0.3)' : item.status === 'QARZDORLIK_BOR' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`
                               }}
                             >
                               {item.status}

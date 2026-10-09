@@ -470,8 +470,9 @@ export const Navbar = () => {
                             fontSize: '0.68rem',
                             fontWeight: 700,
                             textTransform: 'uppercase',
-                            backgroundColor: role === 'admin' ? '#fee2e2' : role === 'manager' ? '#fef3c7' : role === 'craftsman' ? '#e0e7ff' : '#ecfdf5',
-                            color: role === 'admin' ? '#b91c1c' : role === 'manager' ? '#b45309' : role === 'craftsman' ? '#3730a3' : '#047857'
+                            backgroundColor: role === 'admin' ? 'rgba(239, 68, 68, 0.15)' : role === 'manager' ? 'rgba(245, 158, 11, 0.15)' : role === 'craftsman' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            color: role === 'admin' ? '#ef4444' : role === 'manager' ? '#f59e0b' : role === 'craftsman' ? '#818cf8' : '#10b981',
+                            border: `1px solid ${role === 'admin' ? 'rgba(239, 68, 68, 0.3)' : role === 'manager' ? 'rgba(245, 158, 11, 0.3)' : role === 'craftsman' ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
                           }}
                         >
                           {role.toUpperCase()}
@@ -520,10 +521,11 @@ export const Navbar = () => {
                             gap: '0.5rem',
                             padding: '0.55rem 0.75rem',
                             fontSize: '0.85rem',
-                            color: '#3730a3',
+                            color: '#818cf8',
                             fontWeight: 600,
                             borderRadius: 'var(--radius-sm)',
-                            backgroundColor: '#eef2ff'
+                            backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                            border: '1px solid rgba(99, 102, 241, 0.25)'
                           }}
                         >
                           <Hammer size={15} />
@@ -541,10 +543,11 @@ export const Navbar = () => {
                             gap: '0.5rem',
                             padding: '0.55rem 0.75rem',
                             fontSize: '0.85rem',
-                            color: '#b45309',
+                            color: '#f59e0b',
                             fontWeight: 600,
                             borderRadius: 'var(--radius-sm)',
-                            backgroundColor: '#fffbeb'
+                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px solid rgba(245, 158, 11, 0.25)'
                           }}
                         >
                           <Briefcase size={15} />
@@ -562,10 +565,11 @@ export const Navbar = () => {
                             gap: '0.5rem',
                             padding: '0.55rem 0.75rem',
                             fontSize: '0.85rem',
-                            color: '#b91c1c',
+                            color: '#ef4444',
                             fontWeight: 600,
                             borderRadius: 'var(--radius-sm)',
-                            backgroundColor: '#fef2f2'
+                            backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                            border: '1px solid rgba(239, 68, 68, 0.25)'
                           }}
                         >
                           <Shield size={15} />

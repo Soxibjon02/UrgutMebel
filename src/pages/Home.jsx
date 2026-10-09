@@ -447,7 +447,7 @@ export const Home = () => {
 
       {/* 10. DISCOUNTED FURNITURE */}
       {discountedProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: '#fef2f2' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
           <div className="container">
             <div className="section-header">
               <div>

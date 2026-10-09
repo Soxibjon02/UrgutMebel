@@ -919,7 +919,7 @@ export const AdminDashboard = () => {
 
                 {/* 3 ta afzallik */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
                     <label className="form-label" style={{ fontWeight: 700 }}>1-Afzallik Sarlavhasi</label>
                     <input
                       type="text"
@@ -937,7 +937,7 @@ export const AdminDashboard = () => {
                     />
                   </div>
 
-                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
                     <label className="form-label" style={{ fontWeight: 700 }}>2-Afzallik Sarlavhasi</label>
                     <input
                       type="text"
@@ -955,7 +955,7 @@ export const AdminDashboard = () => {
                     />
                   </div>
 
-                  <div style={{ padding: '0.9rem', backgroundColor: '#fcfbfa', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
                     <label className="form-label" style={{ fontWeight: 700 }}>3-Afzallik Sarlavhasi</label>
                     <input
                       type="text"
@@ -986,11 +986,11 @@ export const AdminDashboard = () => {
               </div>
 
               {/* SUPABASE SYNC BUTTON */}
-              <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <strong style={{ color: '#166534', fontSize: '0.95rem' }}>🔄 Supabase-ga Ma’lumotlarni Ko‘chirish</strong>
-                    <p style={{ color: '#15803d', fontSize: '0.8rem', marginTop: '0.2rem' }}>
+                    <strong style={{ color: '#10b981', fontSize: '0.95rem' }}>🔄 Supabase-ga Ma’lumotlarni Ko‘chirish</strong>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
                       Barcha default mahsulotlar, kategoriyalar va sozlamalarni bevosita ulangan Supabase bazasiga ko‘chiradi.
                     </p>
                   </div>
@@ -999,7 +999,7 @@ export const AdminDashboard = () => {
                     onClick={handleSyncSupabase}
                     disabled={isSyncing}
                     className="btn btn-secondary btn-sm"
-                    style={{ backgroundColor: '#ffffff', color: '#166534', fontWeight: 700 }}
+                    style={{ backgroundColor: 'var(--bg-card)', color: '#10b981', fontWeight: 700, border: '1px solid rgba(16, 185, 129, 0.35)' }}
                   >
                     {isSyncing ? 'Ko‘chirilmoqda...' : 'Barchasini Supabase-ga Yozish'}
                   </button>
@@ -1042,7 +1042,7 @@ export const AdminDashboard = () => {
 
             <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }} className="glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                <thead style={{ backgroundColor: '#fcfbf9', borderBottom: '1px solid var(--border-subtle)' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
                     <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Menedjer Ismi</th>
                     <th style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Email (Login)</th>
@@ -1072,13 +1072,13 @@ export const AdminDashboard = () => {
                         </td>
                         <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)' }}>{m.email}</td>
                         <td style={{ padding: '1rem 1.25rem' }}>
-                          <span style={{ fontFamily: 'monospace', backgroundColor: '#f3f4f6', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem' }}>
+                          <span style={{ fontFamily: 'monospace', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-main)', border: '1px solid var(--border-subtle)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem' }}>
                             {m.password || '••••••••'}
                           </span>
                         </td>
                         <td style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)' }}>{m.phone || '-'}</td>
                         <td style={{ padding: '1rem 1.25rem' }}>
-                          <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
+                          <span style={{ backgroundColor: 'rgba(212, 163, 89, 0.15)', color: 'var(--gold-accent)', border: '1px solid rgba(212, 163, 89, 0.3)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
                             {m.department || 'Mebel katalogi'}
                           </span>
                         </td>
