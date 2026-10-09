@@ -317,70 +317,24 @@ export const initialProducts = [
 
 export const initialCraftsmen = [
   {
-    id: "craft-1",
-    name: "Usta Mahmudxon Rahimov",
-    photo_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-    experience_years: 24,
-    location: "Urgut tumani, Qoratepa",
-    specializations: ["Klassik o‘ymakorlik", "Mehmonxona to‘plamlari", "Tabiiy yog‘och eshiklar"],
-    rating: 5.0,
-    reviews_count: 46,
-    phone: "+998 91 555 12 34",
-    telegram: "@usta_mahmud_urgut",
-    bio: "24 yildan beri Urgutning qadimiy yog‘ochsozlik an'analari asosida buyurtma mebellar yasab kelmoqda. 1500 dan ziyod xonadon va idoralarni bezatgan mohir usta.",
-    services: [
-      { name: "Klassik o‘ymakor mehmonxona mebeli", price: "12,000,000 so‘mdan", desc: "Har bir naqsh qo‘lda o‘yiladi" },
-      { name: "Yong‘oq va eman karavotlari", price: "9,000,000 so‘mdan", desc: "Umrlik mustahkamlik va tabiiy yog‘och" },
-      { name: "O‘ymakor ustun va darvozalar", price: "Kelishuv asosida", desc: "Milliy me'morchilik san'ati" }
-    ],
-    portfolio: [
-      { title: "Klassik Urgut vitrinasi", image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80" },
-      { title: "Hashamatli mehmonxona stoli", image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=800&q=80" },
-      { title: "Eman yog‘ochli divan karkasi", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80" }
-    ],
-    is_active: true
-  },
-  {
-    id: "craft-2",
-    name: "Akmaljon Olimov (Modern Ustaxonasi)",
+    id: "craft-soxib",
+    name: "Soxib Gaybullayev",
     photo_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
-    experience_years: 14,
-    location: "Urgut shahri, Yangiobod",
-    specializations: ["Zamonaviy oshxona garniturlari", "Shkaf-kupe", "Loft uslubi"],
-    rating: 4.9,
-    reviews_count: 38,
-    phone: "+998 90 223 99 88",
-    telegram: "@akmal_modern_mebel",
-    bio: "Germaniya va Avstriya texnologiyalari (CNC, Blum) asosida yuqori aniqlikdagi nozik oshxona va shkaflarni tayyorlash bo‘yicha ixtisoslashgan.",
+    experience_years: 2,
+    location: "Urgut tumani",
+    specializations: ["Oshxona mebellari", "Ofis mebellari", "Yotoqxona to‘plamlari"],
+    rating: 5.0,
+    reviews_count: 1,
+    phone: "+998 90 456 78 90",
+    telegram: "@urgutmebel_uz",
+    bio: "Professional mebel ustasi ! Ko‘plab korxona va ofislar mebellarini yasab topshirgan maser!",
     services: [
-      { name: "Modern oshxona garnituri", price: "2,500,000 so‘m / metr", desc: "Akril va tosh yuzali oshxonalar" },
-      { name: "Shkaf-kupe va garderob", price: "1,800,000 so‘m / metr", desc: "Alyumin profillar va yumshoq yopilish" }
+      { name: "Oshxona va xonadon mebellari", price: "Kelishuv asosida", desc: "Sifatli va zamonaviy materiallar" },
+      { name: "Ofis va korxona mebellari", price: "Kelishuv asosida", desc: "Buyurtmaga asosan sifatli yig‘ish" }
     ],
     portfolio: [
-      { title: "Zaytun rangli zamonaviy oshxona", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80" },
-      { title: "Garderob xonasi to‘plami", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80" }
-    ],
-    is_active: true
-  },
-  {
-    id: "craft-3",
-    name: "Usta Jamshid Beknazarov",
-    photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80",
-    experience_years: 18,
-    location: "Urgut tumani, Mergancha",
-    specializations: ["Yumshoq mebel yasash", "Chesterfield divanlar", "Mebel restavratsiyasi"],
-    rating: 4.8,
-    reviews_count: 29,
-    phone: "+998 93 331 44 22",
-    telegram: "@usta_jamshid_divan",
-    bio: "Angliya va Italiya uslubidagi Chesterfield divanlari va yumshoq mebellar bo‘yicha tajribali usta. Har bir tikuv va tugmachani mehr bilan ishlaydi.",
-    services: [
-      { name: "Chesterfield tabiiy charm divan", price: "11,000,000 so‘mdan", desc: "Haqiqiy charm va ortopedik karkas" },
-      { name: "Burchak divanlar buyurtmaga", price: "7,500,000 so‘mdan", desc: "Xonadon o‘lchamiga moslab chiqariladi" }
-    ],
-    portfolio: [
-      { title: "Moviy baxmal burchak divan", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80" },
-      { title: "Skandinav kreslosi", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80" }
+      { title: "Mebel loyihasi 1", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80" },
+      { title: "Mebel loyihasi 2", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80" }
     ],
     is_active: true
   }

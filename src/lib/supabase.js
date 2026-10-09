@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hlnzxwcupwaaxrutvnvb.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsbnp4d2N1cHdhYXhydXR2bnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjI5NDMsImV4cCI6MjEwNzAzODk0M30.wb7W9sZ4_oJyip6tdonojlSjgJ-MXmtf05RiMgntjTI';
 
 // Check if valid credentials are configured
 export const isSupabaseConfigured = Boolean(
