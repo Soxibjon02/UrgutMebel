@@ -653,7 +653,10 @@ export const dataService = {
   async getManagers() {
     if (isSupabaseConfigured && supabase) {
       try {
-        const { data, error } = await supabase.from('managers').select('*');
+        const { data, error } = await supabase
+          .from('managers')
+          .select('*')
+          .order('created_at', { ascending: false });
         if (!error && Array.isArray(data)) {
           setStored('managers', data);
           return data;
@@ -662,37 +665,38 @@ export const dataService = {
         console.warn('Supabase getManagers error:', e);
       }
     }
-    const defaultManagers = [
-      {
-        id: "mgr-default-1",
-        full_name: "Bahodir Menedjer (Usta-muhandis)",
-        email: "manager@urgutmebel.uz",
-        password: "manager12345",
-        phone: "+998 91 234 56 78",
-        role: "manager",
-        department: "Katalog va Ishlab chiqarish",
-        created_at: "2026-01-15T10:00:00.000Z"
-      }
-    ];
-    return getStored('managers', defaultManagers);
+    return getStored('managers', []);
   },
 
   async saveManager(managerData) {
     const managers = await this.getManagers();
-    const newMgr = managerData.id ? managerData : {
-      ...managerData,
-      id: `mgr-${Date.now()}`,
-      role: 'manager',
-      created_at: new Date().toISOString()
+    const newMgr = {
+      id: managerData.id || `mgr-${Date.now()}`,
+      full_name: managerData.full_name,
+      email: managerData.email,
+      password: managerData.password,
+      phone: managerData.phone || '',
+      department: managerData.department || 'Katalog va Buyurtmalar',
+      created_at: managerData.created_at || new Date().toISOString()
     };
     const updated = managerData.id
-      ? managers.map((m) => (m.id === managerData.id ? { ...m, ...managerData } : m))
+      ? managers.map((m) => (m.id === managerData.id ? { ...m, ...newMgr } : m))
       : [newMgr, ...managers];
 
     setStored('managers', updated);
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('managers').upsert(newMgr);
+        const { error } = await supabase.from('managers').upsert({
+          id: newMgr.id,
+          full_name: newMgr.full_name,
+          email: newMgr.email,
+          password: newMgr.password,
+          phone: newMgr.phone,
+          department: newMgr.department
+        });
+        if (error) {
+          console.error('Supabase saveManager error:', error);
+        }
       } catch (e) {
         console.warn('Supabase saveManager error:', e);
       }

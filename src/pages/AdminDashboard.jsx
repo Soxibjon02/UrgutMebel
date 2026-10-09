@@ -151,6 +151,21 @@ export const AdminDashboard = () => {
 
   useEffect(() => {
     loadAllData();
+    const handleUpdate = () => loadAllData();
+    window.addEventListener('urgut_store_orders_updated', handleUpdate);
+    window.addEventListener('urgut_store_standard_orders_updated', handleUpdate);
+    window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
+    window.addEventListener('urgut_store_managers_updated', handleUpdate);
+    window.addEventListener('urgut_store_craftsmen_updated', handleUpdate);
+    const interval = setInterval(loadAllData, 10000);
+    return () => {
+      window.removeEventListener('urgut_store_orders_updated', handleUpdate);
+      window.removeEventListener('urgut_store_standard_orders_updated', handleUpdate);
+      window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
+      window.removeEventListener('urgut_store_managers_updated', handleUpdate);
+      window.removeEventListener('urgut_store_craftsmen_updated', handleUpdate);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
