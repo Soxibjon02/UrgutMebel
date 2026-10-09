@@ -95,46 +95,64 @@ export const Navbar = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.5rem'
+            flexWrap: 'nowrap',
+            gap: '0.5rem',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0, overflow: 'hidden' }}>
             <span
               style={{
                 backgroundColor: 'var(--wood-amber)',
                 color: '#fff',
                 fontSize: '0.68rem',
                 fontWeight: 700,
-                padding: '0.15rem 0.5rem',
+                padding: '0.15rem 0.45rem',
                 borderRadius: '4px',
-                letterSpacing: '0.04em'
+                letterSpacing: '0.04em',
+                flexShrink: 0
               }}
             >
               AKSIYA
             </span>
-            <span style={{ fontSize: '0.82rem' }}>
+            <span
+              style={{
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
               {settings.announcement || "Bahorgi aksiya: barcha yotoqxona to‘plamlariga 15% gacha chegirma!"}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '0.82rem' }}>
+          <div
+            className="desktop-announcement-info"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              fontSize: '0.82rem',
+              flexShrink: 0
+            }}
+          >
             <a
               href={`tel:${settings.phone}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#d6d3d1' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#d6d3d1', whiteSpace: 'nowrap' }}
             >
               <Phone size={13} color="var(--wood-amber)" />
               <span>{settings.phone}</span>
             </a>
             <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-            <span style={{ color: '#a8a29e' }}>Samarqand, Urgut</span>
+            <span style={{ color: '#a8a29e', whiteSpace: 'nowrap' }}>Samarqand, Urgut</span>
           </div>
         </div>
       </div>
 
       {/* Main Navbar */}
-      <div className="container" style={{ padding: '0.85rem 1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.25rem' }}>
+      <div className="container" style={{ padding: '0.75rem 1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
 
           {/* Logo */}
           <Link
@@ -149,21 +167,23 @@ export const Navbar = () => {
           >
             <div
               style={{
-                width: '42px',
-                height: '42px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '12px',
                 background: 'var(--gold-gradient)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ffffff',
-                boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)'
+                boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)',
+                flexShrink: 0
               }}
             >
-              <Sparkles size={22} />
+              <Sparkles size={20} />
             </div>
             <div>
               <div
+                className="navbar-logo-title"
                 style={{
                   fontFamily: 'var(--font-heading)',
                   fontSize: '1.25rem',
@@ -177,6 +197,7 @@ export const Navbar = () => {
                 {settings.site_name}
               </div>
               <div
+                className="navbar-logo-sub"
                 style={{
                   fontSize: '0.66rem',
                   color: 'var(--wood-amber)',
@@ -223,7 +244,7 @@ export const Navbar = () => {
           </nav>
 
           {/* Actions: Theme Toggle, Search, Wishlist, Cart, User Account */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
 
             {/* Dark Mode / Light Mode Toggle Button */}
             <button
@@ -239,7 +260,8 @@ export const Navbar = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: isDark ? 'var(--gold-accent)' : 'var(--text-main)',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                flexShrink: 0
               }}
               aria-label="Rejimni almashtirish"
               title={isDark ? "Yorug‘ rejimga o‘tish" : "Tungi (Dark) rejimga o‘tish"}
@@ -261,7 +283,8 @@ export const Navbar = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--text-main)'
+                  color: 'var(--text-main)',
+                  flexShrink: 0
                 }}
                 aria-label="Qidirish"
               >
@@ -275,7 +298,7 @@ export const Navbar = () => {
                     position: 'absolute',
                     top: '48px',
                     right: 0,
-                    width: '300px',
+                    width: 'min(300px, calc(100vw - 2rem))',
                     backgroundColor: 'var(--bg-card)',
                     boxShadow: 'var(--shadow-lg)',
                     borderRadius: 'var(--radius-md)',
@@ -310,9 +333,10 @@ export const Navbar = () => {
               )}
             </div>
 
-            {/* Wishlist Button */}
+            {/* Wishlist Button - Desktop & Tablet Only (Already inside mobile account) */}
             <Link
               to="/account?tab=wishlist"
+              className="nav-action-desktop-only"
               style={{
                 width: '38px',
                 height: '38px',
@@ -323,7 +347,8 @@ export const Navbar = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--text-main)',
-                position: 'relative'
+                position: 'relative',
+                flexShrink: 0
               }}
               aria-label="Istaklar ro‘yxati"
             >
@@ -351,9 +376,10 @@ export const Navbar = () => {
               )}
             </Link>
 
-            {/* Cart Button */}
+            {/* Cart Button - Desktop & Tablet Only (Already pinned permanently in MobileBottomNav) */}
             <Link
               to="/cart"
+              className="nav-action-desktop-only"
               style={{
                 width: '38px',
                 height: '38px',
@@ -364,7 +390,8 @@ export const Navbar = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--text-main)',
-                position: 'relative'
+                position: 'relative',
+                flexShrink: 0
               }}
               aria-label="Savat"
             >
@@ -398,11 +425,12 @@ export const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => openAuthModal('login')}
-                  className="btn btn-primary btn-sm"
-                  style={{ gap: '0.4rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
+                  className="btn btn-primary btn-sm mobile-auth-btn"
+                  style={{ gap: '0.35rem', padding: '0.5rem 0.9rem', whiteSpace: 'nowrap' }}
+                  title="Kirish"
                 >
                   <User size={15} />
-                  <span>Kirish</span>
+                  <span className="nav-guest-text">Kirish</span>
                 </button>
               ) : (
                 <>
@@ -695,6 +723,40 @@ export const Navbar = () => {
         @media (max-width: 979px) {
           .mobile-hamburger-btn {
             display: flex !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .nav-action-desktop-only {
+            display: none !important;
+          }
+          .desktop-announcement-info {
+            display: none !important;
+          }
+          .nav-guest-text {
+            display: none !important;
+          }
+          .mobile-auth-btn {
+            padding: 0.45rem !important;
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .navbar-logo-title {
+            font-size: 1.05rem !important;
+          }
+          .navbar-logo-sub {
+            font-size: 0.58rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .navbar-logo-title {
+            font-size: 0.95rem !important;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       `}</style>

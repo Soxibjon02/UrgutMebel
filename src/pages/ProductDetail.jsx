@@ -135,20 +135,46 @@ export const ProductDetail = () => {
   };
 
   return (
-    <div style={{ padding: '2rem 0 5rem' }}>
+    <div style={{ padding: '1.25rem 0 calc(90px + env(safe-area-inset-bottom, 24px))' }}>
       <div className="container">
         
-        {/* Breadcrumb */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '1.75rem' }}>
-          <Link to="/" style={{ color: 'var(--text-muted)' }}>Bosh sahifa</Link>
-          <ChevronRight size={14} />
-          <Link to="/furniture" style={{ color: 'var(--text-muted)' }}>Mebellar</Link>
-          <ChevronRight size={14} />
-          <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{product.name}</span>
+        {/* Breadcrumb - Clean, single-line horizontal scroll with ellipsis */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.82rem',
+            color: 'var(--text-light)',
+            marginBottom: '1.5rem',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            WebkitOverflowScrolling: 'touch'
+          }}
+          className="no-scrollbar"
+        >
+          <Link to="/" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>Bosh sahifa</Link>
+          <ChevronRight size={14} style={{ flexShrink: 0 }} />
+          <Link to="/furniture" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>Mebellar</Link>
+          <ChevronRight size={14} style={{ flexShrink: 0 }} />
+          <span
+            style={{
+              color: 'var(--text-main)',
+              fontWeight: 600,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '220px',
+              flexShrink: 1
+            }}
+            title={product.name}
+          >
+            {product.name}
+          </span>
         </div>
 
         {/* Product Top Grid: Gallery & Info */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', marginBottom: '4rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', marginBottom: '3.5rem' }}>
           
           {/* Left: Image Gallery */}
           <div>
@@ -174,7 +200,7 @@ export const ProductDetail = () => {
               {discountPercent && (
                 <span
                   className="badge badge-discount"
-                  style={{ position: 'absolute', top: '1.25rem', left: '1.25rem', fontSize: '0.88rem', padding: '0.4rem 0.8rem' }}
+                  style={{ position: 'absolute', top: '1rem', left: '1rem', fontSize: '0.85rem', padding: '0.35rem 0.75rem' }}
                 >
                   -{discountPercent}% CHEGIRMA
                 </span>
@@ -183,15 +209,15 @@ export const ProductDetail = () => {
 
             {/* Thumbnail selector */}
             {images.length > 1 && (
-              <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.65rem', overflowX: 'auto', paddingBottom: '0.5rem' }} className="no-scrollbar">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setSelectedImage(idx)}
                     style={{
-                      width: '76px',
-                      height: '76px',
+                      width: '70px',
+                      height: '70px',
                       borderRadius: 'var(--radius-md)',
                       overflow: 'hidden',
                       border: selectedImage === idx ? '2.5px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
@@ -268,36 +294,37 @@ export const ProductDetail = () => {
               </div>
             </div>
 
-            <h1 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.25 }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4.5vw, 2.2rem)', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.25 }}>
               {product.name}
             </h1>
 
-            {/* Price section */}
+            {/* Price section - Guarantees NO awkward wrapping of "so'm" */}
             <div
               style={{
                 backgroundColor: 'var(--bg-secondary)',
-                padding: '1.25rem 1.5rem',
+                padding: '1rem 1.25rem',
                 borderRadius: 'var(--radius-lg)',
-                marginBottom: '1.75rem',
+                marginBottom: '1.5rem',
                 display: 'flex',
                 alignItems: 'baseline',
-                gap: '1rem',
+                flexWrap: 'wrap',
+                gap: '0.5rem 1rem',
                 border: '1px solid var(--border-subtle)'
               }}
             >
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--wood-amber)' }}>
+              <div style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2rem)', fontWeight: 800, color: 'var(--wood-amber)', whiteSpace: 'nowrap' }}>
                 {Number(effectivePrice).toLocaleString()} so‘m
               </div>
               {product.discount_price && (
-                <div style={{ fontSize: '1.15rem', color: 'var(--text-light)', textDecoration: 'line-through' }}>
+                <div style={{ fontSize: 'clamp(0.95rem, 3.5vw, 1.15rem)', color: 'var(--text-light)', textDecoration: 'line-through', whiteSpace: 'nowrap' }}>
                   {Number(product.price).toLocaleString()} so‘m
                 </div>
               )}
             </div>
 
             {/* Availability */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-              <CheckCircle2 size={18} color="var(--status-success)" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', fontSize: '0.88rem' }}>
+              <CheckCircle2 size={18} color="var(--status-success)" style={{ flexShrink: 0 }} />
               <span style={{ fontWeight: 600 }}>
                 Holati: <strong style={{ color: 'var(--status-success)' }}>Omborda tayyor (Yetkazib berish 1-2 kun)</strong>
               </span>
@@ -333,29 +360,40 @@ export const ProductDetail = () => {
               </div>
             )}
 
-            {/* Quantity & Buy Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            {/* Quantity & Buy Buttons - Mobile Optimized Stack */}
+            <div
+              className="product-detail-actions"
+              style={{
+                display: 'flex',
+                gap: '0.75rem',
+                marginBottom: '1.5rem',
+                flexWrap: 'wrap'
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   border: '1.5px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-secondary)'
+                  backgroundColor: 'var(--bg-secondary)',
+                  flexShrink: 0
                 }}
               >
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   style={{ width: '40px', height: '46px', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}
+                  aria-label="Kamaytirish"
                 >
                   -
                 </button>
-                <span style={{ width: '40px', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
+                <span style={{ width: '38px', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
                 <button
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
                   style={{ width: '40px', height: '46px', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}
+                  aria-label="Ko'paytirish"
                 >
                   +
                 </button>
@@ -364,8 +402,8 @@ export const ProductDetail = () => {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="btn btn-primary"
-                style={{ flex: 1, minWidth: '160px', padding: '0.85rem 1.5rem', fontSize: '1rem' }}
+                className="btn btn-primary product-btn-add-cart"
+                style={{ flex: '1 1 180px', padding: '0.85rem 1.25rem', fontSize: '0.98rem' }}
               >
                 <ShoppingBag size={18} />
                 <span>Savatga Qo‘shish</span>
@@ -374,8 +412,8 @@ export const ProductDetail = () => {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="btn btn-dark"
-                style={{ flex: 1, minWidth: '160px', padding: '0.85rem 1.5rem', fontSize: '1rem' }}
+                className="btn btn-dark product-btn-buy-now"
+                style={{ flex: '1 1 180px', padding: '0.85rem 1.25rem', fontSize: '0.98rem' }}
               >
                 <Zap size={18} color="var(--gold-accent)" />
                 <span>Hozir Xarid Qilish</span>
@@ -388,18 +426,18 @@ export const ProductDetail = () => {
                 borderTop: '1px solid var(--border-subtle)',
                 paddingTop: '1.25rem',
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '0.75rem',
                 fontSize: '0.82rem',
                 color: 'var(--text-muted)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Truck size={18} color="var(--wood-amber)" />
+                <Truck size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
                 <span>O‘zbekiston bo‘ylab bepul yetkazib o‘rnatish</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ShieldCheck size={18} color="var(--wood-amber)" />
+                <ShieldCheck size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
                 <span>3 yillik rasmiy kafolat sertifikati</span>
               </div>
             </div>
@@ -412,10 +450,10 @@ export const ProductDetail = () => {
             backgroundColor: 'var(--bg-card)',
             backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
-            marginBottom: '4rem'
+            marginBottom: '3.5rem'
           }}
           className="glass-card"
         >
@@ -455,10 +493,10 @@ export const ProductDetail = () => {
             backgroundColor: 'var(--bg-card)',
             backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
-            marginBottom: '4rem'
+            marginBottom: '3.5rem'
           }}
           className="glass-card"
         >
@@ -614,6 +652,20 @@ export const ProductDetail = () => {
           </div>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .product-detail-actions {
+            display: grid !important;
+            grid-template-columns: auto 1fr !important;
+            gap: 0.75rem !important;
+          }
+          .product-btn-buy-now {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

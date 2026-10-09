@@ -182,14 +182,15 @@ export const ProductCard = ({ product }) => {
 
         <div>
           {/* Price */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.4rem 0.6rem', marginBottom: '1rem' }}>
             {product.discount_price ? (
               <>
                 <span
                   style={{
-                    fontSize: '1.25rem',
+                    fontSize: '1.2rem',
                     fontWeight: 800,
-                    color: 'var(--wood-amber)'
+                    color: 'var(--wood-amber)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {Number(product.discount_price).toLocaleString()} so‘m
@@ -198,18 +199,20 @@ export const ProductCard = ({ product }) => {
                   style={{
                     fontSize: '0.85rem',
                     color: 'var(--text-light)',
-                    textDecoration: 'line-through'
+                    textDecoration: 'line-through',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  {Number(product.price).toLocaleString()}
+                  {Number(product.price).toLocaleString()} so‘m
                 </span>
               </>
             ) : (
               <span
                 style={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.2rem',
                   fontWeight: 800,
-                  color: 'var(--text-main)'
+                  color: 'var(--text-main)',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {Number(product.price).toLocaleString()} so‘m
