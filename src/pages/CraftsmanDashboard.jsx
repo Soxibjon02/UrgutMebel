@@ -186,7 +186,8 @@ export const CraftsmanDashboard = () => {
           ...prev,
           images: [...prev.images, ...newUrls]
         }));
-        addToast(`${newUrls.length} ta rasm yuklandi!`, 'success');
+        setWorkUrlInput(newUrls[newUrls.length - 1]);
+        addToast(`${newUrls.length} ta rasm Supabase-ga yuklandi va URL havolasi o‘rnatildi!`, 'success');
       }
     } catch (err) {
       console.error(err);

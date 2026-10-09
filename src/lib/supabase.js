@@ -22,48 +22,45 @@ if (!isSupabaseConfigured) {
 }
 
 /**
- * Uploads a product image file to Supabase Storage (bucket: 'products')
- * Falls back to local Base64 Data URL if Supabase is not configured or fails.
+ * Uploads an image file to Supabase Storage.
+ * Attempts upload across common buckets ('products', 'furniture', 'images', 'public', 'uploads', 'media').
+ * Falls back to local Base64 Data URL if Supabase is not configured or bucket is not ready.
  */
-export async function uploadProductImage(file) {
+export async function uploadImageToSupabase(file, folder = 'furniture') {
   if (!file) return { error: 'Fayl tanlanmadi' };
 
   if (isSupabaseConfigured && supabase) {
     try {
-      const ext = file.name.split('.').pop();
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const sanitizedName = file.name ? file.name.replace(/[^a-zA-Z0-9.-]/g, '_') : 'image.jpg';
       const fileName = `${Date.now()}_${sanitizedName}`;
-      const filePath = `furniture/${fileName}`;
+      const filePath = `${folder}/${fileName}`;
 
-      const { data, error } = await supabase.storage
-        .from('products')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
+      const bucketsToTry = ['products', 'furniture', 'images', 'public', 'uploads', 'media'];
 
-      if (!error && data) {
-        const { data: publicData } = supabase.storage
-          .from('products')
-          .getPublicUrl(filePath);
+      for (const bucket of bucketsToTry) {
+        try {
+          const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: true
+            });
 
-        if (publicData?.publicUrl) {
-          return { url: publicData.publicUrl, isSupabase: true };
+          if (!error && data) {
+            const { data: publicData } = supabase.storage
+              .from(bucket)
+              .getPublicUrl(filePath);
+
+            if (publicData?.publicUrl) {
+              return { url: publicData.publicUrl, isSupabase: true, bucket };
+            }
+          }
+        } catch (innerErr) {
+          // Attempt next bucket
         }
       }
-
-      // Try fallback bucket 'furniture' if 'products' bucket is missing
-      if (error && (error.message?.includes('not found') || error.statusCode === 404)) {
-        const altTry = await supabase.storage.from('furniture').upload(filePath, file, { upsert: true });
-        if (!altTry.error && altTry.data) {
-          const { data: altUrl } = supabase.storage.from('furniture').getPublicUrl(filePath);
-          if (altUrl?.publicUrl) return { url: altUrl.publicUrl, isSupabase: true };
-        }
-      }
-
-      console.warn('Supabase storage upload returned error, using Data URL fallback:', error);
     } catch (e) {
-      console.warn('Supabase storage upload exception, using Data URL fallback:', e);
+      console.warn('Supabase storage upload exception, falling back to Data URL:', e);
     }
   }
 
@@ -74,4 +71,11 @@ export async function uploadProductImage(file) {
     reader.onerror = () => resolve({ error: 'Faylni o‘qishda xatolik yuz berdi' });
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Uploads a product image file (wrapper around uploadImageToSupabase)
+ */
+export async function uploadProductImage(file) {
+  return uploadImageToSupabase(file, 'products');
 }

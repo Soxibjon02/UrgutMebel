@@ -208,9 +208,10 @@ export const ManagerDashboard = () => {
           ...prev,
           images: [...prev.images, ...newUrls]
         }));
+        setUrlInput(newUrls[newUrls.length - 1]);
         addToast(
           isSupabaseConfigured
-            ? `${newUrls.length} ta rasm Supabase Storage ga muvaffaqiyatli yuklandi!`
+            ? `${newUrls.length} ta rasm Supabase Storage ga muvaffaqiyatli yuklandi va URL havolasi o‘rnatildi!`
             : `${newUrls.length} ta rasm muvaffaqiyatli qo‘shildi!`,
           'success'
         );

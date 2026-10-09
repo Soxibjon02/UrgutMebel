@@ -25,6 +25,7 @@ import {
   TrendingUp,
   DollarSign
 } from 'lucide-react';
+import ImageUploadField from '../components/ImageUploadField';
 
 export const AdminDashboard = () => {
   const { user, isAdmin, isGuest, openAuthModal } = useAuth();
@@ -73,7 +74,8 @@ export const AdminDashboard = () => {
     feature2_title: settings.feature2_title || '',
     feature2_desc: settings.feature2_desc || '',
     feature3_title: settings.feature3_title || '',
-    feature3_desc: settings.feature3_desc || ''
+    feature3_desc: settings.feature3_desc || '',
+    hero_banner_image: settings.hero_banner_image || ''
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -140,7 +142,8 @@ export const AdminDashboard = () => {
       feature2_title: settings.feature2_title || 'Rasmiy Kafolat',
       feature2_desc: settings.feature2_desc || 'Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati',
       feature3_title: settings.feature3_title || 'Urgut Duradgorlari',
-      feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi'
+      feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi',
+      hero_banner_image: settings.hero_banner_image || ''
     });
   }, [settings]);
 
@@ -822,6 +825,16 @@ export const AdminDashboard = () => {
                 />
               </div>
 
+              <ImageUploadField
+                label="Bosh Sahifa Asosiy Banner Rasmi (Hero Banner)"
+                value={settingsForm.hero_banner_image}
+                onChange={(val) => setSettingsForm({ ...settingsForm, hero_banner_image: val })}
+                folder="banners"
+                name="hero_banner_image"
+                placeholder="https://images.unsplash.com/... yoki kompyuterdan yuklang"
+                helperText="Saytning bosh sahifasi fon rasmi. Havola kiriting yoki fayl tanlang (Supabase Storage ga saqlanadi)."
+              />
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                 <div className="form-group">
                   <label className="form-label">Aloqa Telefoni</label>
@@ -1152,10 +1165,14 @@ export const AdminDashboard = () => {
                   <input type="number" name="stock" defaultValue={editingProduct?.stock ?? 10} className="form-input" />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Rasm URL manzili</label>
-                <input type="url" name="image_url" defaultValue={editingProduct?.images?.[0] || ''} placeholder="https://..." className="form-input" />
-              </div>
+              <ImageUploadField
+                label="Mebel Rasmi (URL yoki Supabase-ga yuklash)"
+                name="image_url"
+                value={editingProduct?.images?.[0] || ''}
+                folder="furniture"
+                placeholder="https://... yoki faylni tanlab yuklang"
+                helperText="Mebel rasm havolasini kiriting yoki fayl tanlang (Supabase Storage ga yuklanadi va URL qo‘yiladi)."
+              />
               <div className="form-group">
                 <label className="form-label">Material</label>
                 <input type="text" name="material" defaultValue={editingProduct?.material || 'Eman massiv'} className="form-input" />
@@ -1206,10 +1223,14 @@ export const AdminDashboard = () => {
                 <label className="form-label">Slug (URL)</label>
                 <input type="text" name="slug" defaultValue={editingCategory?.slug || ''} placeholder="masalan: oshxona" className="form-input" />
               </div>
-              <div className="form-group">
-                <label className="form-label">Rasm URL</label>
-                <input type="url" name="image_url" defaultValue={editingCategory?.image_url || ''} className="form-input" />
-              </div>
+              <ImageUploadField
+                label="Kategoriya Rasmi (URL yoki Supabase-ga yuklash)"
+                name="image_url"
+                value={editingCategory?.image_url || ''}
+                folder="categories"
+                placeholder="https://... yoki fayldan yuklang"
+                helperText="Kategoriya uchun muqova rasmi (URL yoki Supabase-ga yuklang)."
+              />
               <div className="form-group">
                 <label className="form-label">Qisqa Tavsif</label>
                 <input type="text" name="description" defaultValue={editingCategory?.description || ''} className="form-input" />
@@ -1264,10 +1285,14 @@ export const AdminDashboard = () => {
                   <input type="text" name="telegram" defaultValue={editingCraftsman?.telegram || ''} className="form-input" />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Surat URL</label>
-                <input type="url" name="photo_url" defaultValue={editingCraftsman?.photo_url || ''} className="form-input" />
-              </div>
+              <ImageUploadField
+                label="Usta Fotosurati (URL yoki Supabase-ga yuklash)"
+                name="photo_url"
+                value={editingCraftsman?.photo_url || ''}
+                folder="craftsmen"
+                placeholder="https://... yoki fayldan yuklang"
+                helperText="Usta profili uchun fotosurat (URL yoki Supabase Storage ga saqlanadi)."
+              />
               <div className="form-group">
                 <label className="form-label">Ixtisosliklar (vergul bilan)</label>
                 <input type="text" name="specializations" defaultValue={editingCraftsman?.specializations?.join(', ') || 'Klassik mebel, Oshxona'} className="form-input" />

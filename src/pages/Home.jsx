@@ -78,7 +78,7 @@ export const Home = () => {
     title: `${settings.site_name} - Zamonaviy va Buyurtma Mebellar`,
     subtitle: "Urgutning asriy duradgorlik san'ati va eng so'nggi zamonaviy dizayn texnologiyalari birlashgan maskan.",
     link: "/custom-order",
-    image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
+    image_url: settings.hero_banner_image || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
     button_text: "O‘z O‘lchamingizda Buyurtma Bering"
   };
 

@@ -18,8 +18,11 @@ import {
   Sparkles,
   ArrowRight,
   Sliders,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Loader2
 } from 'lucide-react';
+import { uploadImageToSupabase } from '../lib/supabase';
 
 export const CustomOrderPage = () => {
   const { user, isGuest, openAuthModal } = useAuth();
@@ -51,6 +54,8 @@ export const CustomOrderPage = () => {
   });
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [urlInput, setUrlInput] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
 
@@ -59,27 +64,65 @@ export const CustomOrderPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileUpload = (e, category = 'reference') => {
+  const handleFileUpload = async (e, category = 'reference') => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedFiles((prev) => [
-          ...prev,
-          {
-            id: `f-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-            file_name: file.name,
-            file_type: file.type,
-            file_category: category,
-            file_url: event.target.result // Base64 data URL
-          }
-        ]);
-        addToast(`Fayl qo‘shildi: ${file.name}`, 'info');
-      };
-      reader.readAsDataURL(file);
-    });
+    setIsUploading(true);
+    addToast('Fayl Supabase-ga yuklanmoqda...', 'info');
+
+    try {
+      for (const file of files) {
+        const res = await uploadImageToSupabase(file, 'custom-orders');
+        if (res.url) {
+          setUploadedFiles((prev) => [
+            ...prev,
+            {
+              id: `f-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+              file_name: file.name,
+              file_type: file.type || 'image/jpeg',
+              file_category: category,
+              file_url: res.url,
+              is_supabase: res.isSupabase
+            }
+          ]);
+          setUrlInput(res.url);
+          addToast(`Fayl Supabase-ga yuklandi va havola o‘rnatildi: ${file.name}`, 'success');
+        }
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      addToast('Faylni yuklashda xatolik yuz berdi', 'error');
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddUrlFile = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) {
+      addToast('Iltimos, rasm havolasini (URL) kiriting', 'warning');
+      return;
+    }
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('data:image')) {
+      addToast('To‘g‘ri rasm havolasini kiriting (https://...)', 'error');
+      return;
+    }
+
+    setUploadedFiles((prev) => [
+      ...prev,
+      {
+        id: `f-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        file_name: 'Internetdan rasm havolasi',
+        file_type: 'image/jpeg',
+        file_category: 'reference',
+        file_url: trimmed,
+        is_supabase: trimmed.includes('supabase.co')
+      }
+    ]);
+    setUrlInput('');
+    addToast('Rasm havolasi buyurtmaga biriktirildi!', 'success');
   };
 
   const removeFile = (id) => {
@@ -586,41 +629,85 @@ export const CustomOrderPage = () => {
                 </label>
               </div>
 
+              {/* URL orqali rasm biriktirish */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  marginBottom: '1.25rem',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
+                  <LinkIcon size={16} color="var(--wood-amber)" /> Yoki Rasm Havolasi (URL):
+                </div>
+                <input
+                  type="url"
+                  placeholder="https://images.unsplash.com/... yoki internetdan havola"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  className="form-input"
+                  style={{ flex: '1 1 240px', padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddUrlFile}
+                  className="btn btn-secondary btn-sm"
+                  style={{ flexShrink: 0 }}
+                >
+                  + Linkni Qo‘shish
+                </button>
+              </div>
+
               {/* Uploaded Files Previews */}
               {uploadedFiles.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  {uploadedFiles.map((f) => (
-                    <div
-                      key={f.id}
-                      style={{
-                        position: 'relative',
-                        padding: '0.5rem 0.75rem',
-                        backgroundColor: 'var(--bg-card)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-md)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.82rem'
-                      }}
-                    >
-                      {f.file_url && f.file_type?.startsWith('image') ? (
-                        <img src={f.file_url} alt="Uploaded" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }} />
-                      ) : (
-                        <FileText size={18} color="var(--wood-amber)" />
-                      )}
-                      <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {f.file_name}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(f.id)}
-                        style={{ color: '#ef4444', fontWeight: 700, marginLeft: '0.25rem' }}
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+                    Biriktirilgan fayllar ({uploadedFiles.length} ta):
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    {uploadedFiles.map((f) => (
+                      <div
+                        key={f.id}
+                        style={{
+                          position: 'relative',
+                          padding: '0.5rem 0.75rem',
+                          backgroundColor: 'var(--bg-card)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-md)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          fontSize: '0.82rem'
+                        }}
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                        {f.file_url && f.file_type?.startsWith('image') ? (
+                          <img src={f.file_url} alt="Uploaded" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }} />
+                        ) : (
+                          <FileText size={18} color="var(--wood-amber)" />
+                        )}
+                        <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {f.file_name}
+                        </span>
+                        {f.is_supabase && (
+                          <span style={{ fontSize: '0.68rem', color: '#10b981', fontWeight: 700 }}>☁️ Supabase</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeFile(f.id)}
+                          style={{ color: '#ef4444', fontWeight: 700, marginLeft: '0.25rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}
+                          title="O‘chirish"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
