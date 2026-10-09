@@ -1,0 +1,22 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Check if valid credentials are configured
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl && 
+  supabaseAnonKey && 
+  !supabaseUrl.includes('your-project') &&
+  !supabaseAnonKey.includes('your-anon-key')
+);
+
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+if (!isSupabaseConfigured) {
+  console.info(
+    'ℹ️ Supabase credentials not found or placeholder in .env. Running in resilient local storage / offline mock mode. All changes persist locally and can be synchronized with Supabase anytime.'
+  );
+}
