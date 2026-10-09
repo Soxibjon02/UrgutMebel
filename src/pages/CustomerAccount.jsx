@@ -5,6 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
 import { ProductCard } from '../components/ProductCard';
+import { AppInstallCard } from '../components/AppInstallCard';
 import {
   User,
   ShoppingBag,
@@ -79,6 +80,8 @@ export const CustomerAccount = () => {
           >
             Kirish / Ro‘yxatdan O‘tish
           </button>
+
+          <AppInstallCard />
         </div>
       </div>
     );
@@ -542,6 +545,9 @@ export const CustomerAccount = () => {
             </div>
           </div>
         )}
+
+        {/* Shaxsiy Profil Eng Pastidagi Ilovani O'rnatish Bloki */}
+        <AppInstallCard />
       </div>
     </div>
   );

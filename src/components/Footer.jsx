@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import { dataService } from '../services/dataService';
-import { Sparkles, Phone, Mail, MapPin, Send, Globe, ShieldCheck, Truck, Clock } from 'lucide-react';
+import { Sparkles, Phone, Mail, MapPin, Send, Globe, ShieldCheck, Truck, Clock, ChevronRight } from 'lucide-react';
 
 export const Footer = () => {
   const { settings } = useSettings();
@@ -14,7 +14,7 @@ export const Footer = () => {
       try {
         const cats = await dataService.getCategories();
         if (cats && cats.length) {
-          setCategories(cats.slice(0, 7)); // eng ko'pi bilan 7 ta bo'lim
+          setCategories(cats.slice(0, 8)); // eng sara 8 ta bo'lim
         }
       } catch (e) {
         console.error(e);
@@ -26,102 +26,105 @@ export const Footer = () => {
     return () => window.removeEventListener('urgut_store_categories_updated', handleUpdate);
   }, []);
 
+  const smoothScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
-    <footer style={{ backgroundColor: 'var(--bg-dark)', color: '#d6d3d1', marginTop: '5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-      {/* Top Value Badges - Super Admin tahrirlay oladi */}
-      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '2.5rem 0' }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-              <Truck size={24} />
+    <footer className="site-footer">
+      {/* 3 Asosiy Afzallik Kartalari (Ixcham va Chiroyli) */}
+      <div className="footer-features-section">
+        <div className="container">
+          <div className="footer-features-grid">
+            <div className="footer-feature-item">
+              <div className="footer-feature-icon">
+                <Truck size={22} />
+              </div>
+              <div>
+                <h4 className="footer-feature-title">
+                  {settings.feature1_title || "Tezkor Yetkazib Berish"}
+                </h4>
+                <p className="footer-feature-desc">
+                  {settings.feature1_desc || "O‘zbekiston bo‘ylab ehtiyotkor yetkazish va yig‘ib berish"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
-                {settings.feature1_title || "Tezkor Yetkazib Berish"}
-              </h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
-                {settings.feature1_desc || "Butun O‘zbekiston bo‘ylab professional yetkazish va o‘rnatish"}
-              </p>
-            </div>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-              <ShieldCheck size={24} />
+            <div className="footer-feature-item">
+              <div className="footer-feature-icon">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h4 className="footer-feature-title">
+                  {settings.feature2_title || "Rasmiy Kafolat"}
+                </h4>
+                <p className="footer-feature-desc">
+                  {settings.feature2_desc || "Har bir mebel mahsulotiga uzoq muddatli sifat kafolati"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
-                {settings.feature2_title || "Rasmiy Kafolat"}
-              </h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
-                {settings.feature2_desc || "Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati"}
-              </p>
-            </div>
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-              <Clock size={24} />
-            </div>
-            <div>
-              <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: 600 }}>
-                {settings.feature3_title || "Urgut Duradgorlari"}
-              </h4>
-              <p style={{ color: '#a8a29e', fontSize: '0.82rem' }}>
-                {settings.feature3_desc || "Asriy hunarmandchilik va zamonaviy texnologiya uyg'unligi"}
-              </p>
+            <div className="footer-feature-item">
+              <div className="footer-feature-icon">
+                <Clock size={22} />
+              </div>
+              <div>
+                <h4 className="footer-feature-title">
+                  {settings.feature3_title || "Urgut Duradgorlari"}
+                </h4>
+                <p className="footer-feature-desc">
+                  {settings.feature3_desc || "Asriy hunarmandchilik tajribasi va zamonaviy texnologiya"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Links */}
+      {/* Asosiy Havolalar & Ma'lumotlar */}
       <div className="container" style={{ padding: '3.5rem 1.5rem 2.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2.5rem' }}>
+        <div className="footer-columns-grid">
           
-          {/* Brand Info */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+          {/* 1. Brend & Ijtimoiy tarmoqlar */}
+          <div className="footer-brand-col">
+            <Link to="/" onClick={smoothScrollToTop} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem', textDecoration: 'none' }}>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '11px',
                   background: 'var(--gold-gradient)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ffffff'
+                  color: '#ffffff',
+                  boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)'
                 }}
               >
-                <Sparkles size={18} />
+                <Sparkles size={20} />
               </div>
-              <h3 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: 800 }}>
+              <h3 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
                 {settings.site_name}
               </h3>
-            </div>
+            </Link>
+
             <p style={{ color: '#a8a29e', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>
-              {settings.footer_about || settings.site_tagline || "Urgutning mohir ustalari tomonidan yaratilgan zamonaviy, didli va uzoq yillar xizmat qiluvchi saralangan mebellar markazi."}
+              {settings.footer_about || "Urgutning mohir ustalari tomonidan tayyorlangan zamonaviy, didli va uzoq yillik xizmat qiluvchi saralangan mebellar markazi."}
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
               {settings.telegram && (
                 <a
                   href={`https://t.me/${settings.telegram.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
                   title="Telegram"
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#292524',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#e7e5e4'
-                  }}
+                  className="footer-social-btn"
                 >
-                  <Send size={16} />
+                  <Send size={15} />
                 </a>
               )}
               {settings.instagram && (
@@ -130,109 +133,148 @@ export const Footer = () => {
                   target="_blank"
                   rel="noreferrer"
                   title="Instagram"
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: '#292524',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#e7e5e4'
-                  }}
+                  className="footer-social-btn"
                 >
-                  <Globe size={16} />
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                  </svg>
                 </a>
               )}
+              <Link to="/contact" onClick={smoothScrollToTop} className="footer-social-btn" title="Vebsayt & Manzil">
+                <Globe size={15} />
+              </Link>
             </div>
           </div>
 
-          {/* Catalog Categories (Dinamik Admin Bo'limlari) */}
+          {/* 2. Mebel Bo'limlari (Dinamik Admin Kategoriyalari) */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h4 className="footer-heading">
               Mebel Bo‘limlari
             </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.88rem' }}>
+            <ul className="footer-nav-list">
               {categories.length > 0 ? (
                 categories.map((cat) => (
                   <li key={cat.id}>
-                    <Link to={`/furniture?category=${cat.id}`} style={{ color: '#a8a29e' }}>
-                      {cat.name}
+                    <Link
+                      to={`/furniture?category=${cat.id}`}
+                      onClick={smoothScrollToTop}
+                      className="footer-nav-link"
+                    >
+                      <ChevronRight size={13} className="footer-link-chevron" />
+                      <span>{cat.name}</span>
                     </Link>
                   </li>
                 ))
               ) : (
                 <>
-                  <li><Link to="/furniture?category=mehmonxona" style={{ color: '#a8a29e' }}>Mehmonxona Mebellari</Link></li>
-                  <li><Link to="/furniture?category=yotoqxona" style={{ color: '#a8a29e' }}>Yotoqxona To‘plamlari</Link></li>
-                  <li><Link to="/furniture?category=oshxona" style={{ color: '#a8a29e' }}>Oshxona Garniturlari</Link></li>
-                  <li><Link to="/furniture?category=ofis" style={{ color: '#a8a29e' }}>Ofis va Ish Stollari</Link></li>
+                  <li><Link to="/furniture?category=mehmonxona" onClick={smoothScrollToTop} className="footer-nav-link"><ChevronRight size={13} className="footer-link-chevron" />Mehmonxona Mebellari</Link></li>
+                  <li><Link to="/furniture?category=yotoqxona" onClick={smoothScrollToTop} className="footer-nav-link"><ChevronRight size={13} className="footer-link-chevron" />Yotoqxona To‘plamlari</Link></li>
+                  <li><Link to="/furniture?category=oshxona" onClick={smoothScrollToTop} className="footer-nav-link"><ChevronRight size={13} className="footer-link-chevron" />Oshxona Garniturlari</Link></li>
+                  <li><Link to="/furniture?category=ofis" onClick={smoothScrollToTop} className="footer-nav-link"><ChevronRight size={13} className="footer-link-chevron" />Ofis va Ish Stollari</Link></li>
                 </>
               )}
             </ul>
           </div>
 
-          {/* Quick Links */}
+          {/* 3. Foydali Havolalar */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Xizmatlar & Havolalar
+            <h4 className="footer-heading">
+              Xizmatlar
             </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.88rem' }}>
-              <li><Link to="/custom-order" style={{ color: '#d4a359', fontWeight: 600 }}>Maxsus O‘lchamda Buyurtma</Link></li>
-              <li><Link to="/craftsmen" style={{ color: '#a8a29e' }}>Urgut Ustalari Katalogi</Link></li>
-              <li><Link to="/about" style={{ color: '#a8a29e' }}>Biz Haqimizda</Link></li>
-              <li><Link to="/contact" style={{ color: '#a8a29e' }}>Bog‘lanish & Manzil</Link></li>
-              <li><Link to="/furniture" style={{ color: '#ef4444' }}>Aksiyadagi Mebellar</Link></li>
+            <ul className="footer-nav-list">
+              <li>
+                <Link to="/custom-order" onClick={smoothScrollToTop} className="footer-nav-link highlight-link">
+                  <Sparkles size={14} color="var(--wood-amber)" />
+                  <span>Maxsus O‘lchamda Buyurtma</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/craftsmen" onClick={smoothScrollToTop} className="footer-nav-link">
+                  <ChevronRight size={13} className="footer-link-chevron" />
+                  <span>Urgut Ustalari Katalogi</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" onClick={smoothScrollToTop} className="footer-nav-link">
+                  <ChevronRight size={13} className="footer-link-chevron" />
+                  <span>Biz Haqimizda</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" onClick={smoothScrollToTop} className="footer-nav-link">
+                  <ChevronRight size={13} className="footer-link-chevron" />
+                  <span>Bog‘lanish & Manzil</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/furniture" onClick={smoothScrollToTop} className="footer-nav-link">
+                  <ChevronRight size={13} className="footer-link-chevron" />
+                  <span>Chegirmadagi Mebellar</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact & Showroom */}
+          {/* 4. Bog'lanish & Lokatsiya */}
           <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Biz Bilan Bog‘lanish
+            <h4 className="footer-heading">
+              Bog‘lanish
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: '#a8a29e' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                <MapPin size={18} color="var(--wood-amber)" style={{ marginTop: '0.2rem', flexShrink: 0 }} />
-                <span>{settings.address}</span>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem' }}>
+                <MapPin size={18} color="var(--wood-amber)" style={{ marginTop: '0.15rem', flexShrink: 0 }} />
+                <span style={{ color: '#e7e5e4' }}>{settings.address}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <Phone size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
-                <a href={`tel:${settings.phone}`} style={{ color: '#ffffff', fontWeight: 600 }}>{settings.phone}</a>
+                <a href={`tel:${settings.phone}`} style={{ color: '#ffffff', fontWeight: 700, textDecoration: 'none' }}>
+                  {settings.phone}
+                </a>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Mail size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
-                <span>{settings.email}</span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#78716c', marginTop: '0.4rem' }}>
-                Ish vaqti: {settings.working_hours || "Har kuni 08:30 dan 20:00 gacha (Dam olish kunlarisiz)"}
+
+              {settings.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <Mail size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: '#d6d3d1' }}>{settings.email}</span>
+                </div>
+              )}
+
+              <p style={{ fontSize: '0.8rem', color: '#78716c', marginTop: '0.35rem', lineHeight: 1.5 }}>
+                Ish vaqti: {settings.working_hours || "Har kuni 08:30 dan 20:00 gacha"}
               </p>
             </div>
           </div>
+
         </div>
 
-        {/* Bottom Copyright */}
-        <div
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            marginTop: '3rem',
-            paddingTop: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            fontSize: '0.8rem',
-            color: '#78716c'
-          }}
-        >
+        {/* Bottom Copyright Bar */}
+        <div className="footer-bottom-bar">
           <div>
             {settings.copyright_text || `© ${currentYear} ${settings.site_name}. Barcha huquqlar himoyalangan.`}
           </div>
-          <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <span>O‘zbekiston, Samarqand / Urgut</span>
-            <span>Maxfiylik siyosati</span>
-            <span>Foydalanish shartlari</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#78716c' }}>
+            <span>Samarqand, Urgut tumani</span>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={smoothScrollToTop}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--wood-amber)',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+            >
+              Yuqoriga qaytish ↑
+            </button>
           </div>
         </div>
       </div>

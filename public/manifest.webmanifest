@@ -1,0 +1,27 @@
+{
+  "name": "Urgut Mebel Markazi",
+  "short_name": "Urgut Mebel",
+  "description": "Urgutning mohir ustalari tomonidan yaratilgan zamonaviy, didli va saralangan mebellar platformasi",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#c26d2e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle", "business"]
+}
