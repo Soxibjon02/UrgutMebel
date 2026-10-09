@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
-import { dataService } from '../services/dataService';
+import { dataService, getStored } from '../services/dataService';
+import {
+  initialProducts,
+  initialCategories,
+  initialCraftsmen,
+  initialOrders,
+  initialCustomOrders,
+  initialComments,
+  initialBanners
+} from '../data/mockData';
 import {
   Shield,
   LayoutDashboard,
@@ -39,15 +48,15 @@ export const AdminDashboard = () => {
 
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Datasets
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [customOrders, setCustomOrders] = useState([]);
-  const [standardOrders, setStandardOrders] = useState([]);
-  const [craftsmen, setCraftsmen] = useState([]);
-  const [comments, setComments] = useState([]);
-  const [banners, setBanners] = useState([]);
-  const [managers, setManagers] = useState([]);
+  // Datasets - Instantaneous cache hydration so UI NEVER flashes (0)!
+  const [products, setProducts] = useState(() => getStored('products', initialProducts));
+  const [categories, setCategories] = useState(() => getStored('categories', initialCategories));
+  const [customOrders, setCustomOrders] = useState(() => getStored('custom_orders', initialCustomOrders));
+  const [standardOrders, setStandardOrders] = useState(() => getStored('standard_orders', initialOrders));
+  const [craftsmen, setCraftsmen] = useState(() => getStored('craftsmen', initialCraftsmen));
+  const [comments, setComments] = useState(() => getStored('comments', initialComments));
+  const [banners, setBanners] = useState(() => getStored('banners', initialBanners));
+  const [managers, setManagers] = useState(() => getStored('managers', []));
 
   // Modals & Forms
   const [productModalOpen, setProductModalOpen] = useState(false);

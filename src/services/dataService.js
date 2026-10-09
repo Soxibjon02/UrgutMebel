@@ -11,7 +11,7 @@ import {
 } from '../data/mockData';
 
 // Helper to get from local storage or fallback to initial
-const getStored = (key, fallback) => {
+export const getStored = (key, fallback) => {
   try {
     const item = localStorage.getItem(`urgut_mebel_${key}`);
     return item ? JSON.parse(item) : fallback;
