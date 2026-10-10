@@ -408,7 +408,7 @@ export const AdminDashboard = () => {
             <Shield size={16} />
           </div>
           <div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>{settings.site_name}</div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{settings.site_name}</div>
             <div style={{ fontSize: '0.65rem', color: 'var(--wood-amber)', fontWeight: 700 }}>SUPER ADMIN PANEL</div>
           </div>
         </div>
@@ -421,12 +421,12 @@ export const AdminDashboard = () => {
             alignItems: 'center',
             gap: '0.4rem',
             padding: '0.45rem 0.8rem',
-            backgroundColor: 'rgba(255,255,255,0.12)',
-            color: '#ffffff',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-main)',
             borderRadius: '8px',
             fontSize: '0.8rem',
             fontWeight: 700,
-            border: 'none',
+            border: '1px solid var(--border-subtle)',
             cursor: 'pointer'
           }}
         >
@@ -461,7 +461,8 @@ export const AdminDashboard = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.65)',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(4px)',
             zIndex: 999,
             display: 'flex',
             flexDirection: 'column',
@@ -471,22 +472,23 @@ export const AdminDashboard = () => {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: 'var(--bg-dark)',
-              color: '#fff',
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
               padding: '1.25rem',
               borderBottomLeftRadius: '20px',
               borderBottomRightRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              boxShadow: 'var(--shadow-lg)',
+              borderBottom: '1px solid var(--border-subtle)',
               maxHeight: '80vh',
               overflowY: 'auto'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--wood-amber)' }}>Admin Bo‘limlari</div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}
               >
                 <X size={20} />
               </button>
@@ -512,9 +514,9 @@ export const AdminDashboard = () => {
                       borderRadius: 'var(--radius-md)',
                       fontSize: '0.85rem',
                       fontWeight: 600,
-                      color: isActive ? '#ffffff' : '#a8a29e',
-                      backgroundColor: isActive ? 'var(--wood-amber)' : 'rgba(255,255,255,0.06)',
-                      border: 'none',
+                      color: isActive ? '#ffffff' : 'var(--text-muted)',
+                      backgroundColor: isActive ? 'var(--wood-amber)' : 'var(--bg-secondary)',
+                      border: '1px solid var(--border-subtle)',
                       textAlign: 'left',
                       cursor: 'pointer'
                     }}
@@ -537,7 +539,7 @@ export const AdminDashboard = () => {
               <Shield size={18} />
             </div>
             <div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff' }}>{settings.site_name}</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>{settings.site_name}</div>
               <div style={{ fontSize: '0.7rem', color: 'var(--wood-amber)', fontWeight: 700 }}>SUPER ADMIN PANEL</div>
             </div>
           </div>
@@ -551,18 +553,7 @@ export const AdminDashboard = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: 'var(--radius-md)',
-                    fontSize: '0.88rem',
-                    fontWeight: 600,
-                    color: isActive ? '#ffffff' : (tab.id === 'settings' ? 'var(--gold-accent)' : '#a8a29e'),
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
-                    textAlign: 'left'
-                  }}
+                  className={`admin-sidebar-tab-btn ${isActive ? 'active' : ''}`}
                 >
                   <Icon size={17} /> {tab.label}
                 </button>
@@ -571,7 +562,7 @@ export const AdminDashboard = () => {
           </nav>
         </div>
 
-        <div style={{ padding: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', color: '#78716c' }}>
+        <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           <div>Foydalanuvchi: {user.full_name}</div>
           <div style={{ color: 'var(--status-success)', marginTop: '0.2rem' }}>● Tizim faol</div>
         </div>
