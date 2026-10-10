@@ -207,7 +207,7 @@ export const Home = () => {
 
       {/* 4. POPULAR FURNITURE */}
       {popularProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -336,7 +336,7 @@ export const Home = () => {
 
       {/* 6. BEDROOM FURNITURE */}
       {bedroomProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -382,7 +382,7 @@ export const Home = () => {
 
       {/* 8. OFFICE FURNITURE */}
       {officeProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -428,7 +428,7 @@ export const Home = () => {
 
       {/* 10. DISCOUNTED FURNITURE */}
       {discountedProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -450,7 +450,7 @@ export const Home = () => {
       )}
 
       {/* 12. CRAFTSMEN PREVIEW */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'transparent' }}>
         <div className="container">
           <div className="section-header">
             <div>
