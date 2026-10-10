@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export const AnimatedFurnitureBackground = ({
-  showControls = true
-}) => {
+export const AnimatedFurnitureBackground = () => {
   const location = useLocation();
   // Don't render 3D canvas inside admin/manager/craftsman workspace dashboards
   const isDashboard = location.pathname.startsWith('/admin') ||
@@ -12,9 +10,6 @@ export const AnimatedFurnitureBackground = ({
 
   const canvasRef = useRef(null);
   const [isPhone, setIsPhone] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
-  const [currentFrame, setCurrentFrame] = useState(1);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [loadedCount, setLoadedCount] = useState(0);
 
   const imagesCacheRef = useRef({});
   const isPhoneRef = useRef(isPhone);
@@ -25,7 +20,6 @@ export const AnimatedFurnitureBackground = ({
   const targetFrameRef = useRef(0);
   const renderedFrameRef = useRef(1);
   const isTickingRef = useRef(false);
-  const scrollTimeoutRef = useRef(null);
 
   // Helper to get image path for frame index 1..300
   const getImagePath = useCallback((index, phone) => {
@@ -102,7 +96,6 @@ export const AnimatedFurnitureBackground = ({
 
       if (nextFrame !== renderedFrameRef.current) {
         renderedFrameRef.current = nextFrame;
-        setCurrentFrame(nextFrame);
         const img = imagesCacheRef.current[nextFrame] || findClosestFrame(nextFrame);
         if (img) renderFrame(img);
       }
@@ -115,7 +108,6 @@ export const AnimatedFurnitureBackground = ({
       const finalFrame = normalized + 1;
 
       renderedFrameRef.current = finalFrame;
-      setCurrentFrame(finalFrame);
       const img = imagesCacheRef.current[finalFrame] || findClosestFrame(finalFrame);
       if (img) renderFrame(img);
 
@@ -133,7 +125,6 @@ export const AnimatedFurnitureBackground = ({
         setIsPhone(phoneMode);
         isPhoneRef.current = phoneMode;
         imagesCacheRef.current = {};
-        setLoadedCount(0);
 
         // Preload frame 1 of new device folder immediately
         const newFirst = new Image();
@@ -165,7 +156,6 @@ export const AnimatedFurnitureBackground = ({
     initialImg.onload = () => {
       if (isCancelled) return;
       imagesCacheRef.current[1] = initialImg;
-      setLoadedCount((prev) => prev + 1);
       renderFrame(initialImg);
     };
 
@@ -178,7 +168,6 @@ export const AnimatedFurnitureBackground = ({
           await new Promise((resolve) => {
             img.onload = () => {
               imagesCacheRef.current[i] = img;
-              if (!isCancelled) setLoadedCount((prev) => prev + 1);
               resolve();
             };
             img.onerror = () => resolve();
@@ -223,12 +212,6 @@ export const AnimatedFurnitureBackground = ({
       // Update target frame strictly according to scroll position
       targetFrameRef.current = scrollY / pixelsPerFrame;
 
-      setIsScrolling(true);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-      }, 250);
-
       if (!isTickingRef.current) {
         isTickingRef.current = true;
         requestAnimationFrame(renderLoop);
@@ -245,13 +228,11 @@ export const AnimatedFurnitureBackground = ({
     if (normalized < 0) normalized += TOTAL_FRAMES;
     const initialFrame = normalized + 1;
     renderedFrameRef.current = initialFrame;
-    setCurrentFrame(initialFrame);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
   }, [TOTAL_FRAMES, isDashboard, renderLoop]);
 
@@ -306,58 +287,6 @@ export const AnimatedFurnitureBackground = ({
           pointerEvents: 'none'
         }}
       />
-
-      {/* Fixed bottom right indicator: shows user that scrolling rotates the 3D model */}
-      {showControls && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: isPhone ? '4.8rem' : '1.35rem',
-            right: '1.25rem',
-            zIndex: 40,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            pointerEvents: 'auto'
-          }}
-        >
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: 'rgba(12, 10, 9, 0.72)',
-              backdropFilter: 'blur(12px)',
-              border: `1px solid ${isScrolling ? 'rgba(16, 185, 129, 0.6)' : 'rgba(194, 109, 46, 0.4)'}`,
-              padding: '0.35rem 0.75rem',
-              borderRadius: '20px',
-              fontSize: '0.74rem',
-              color: 'var(--wood-light)',
-              fontWeight: 600,
-              boxShadow: isScrolling
-                ? '0 4px 16px rgba(16, 185, 129, 0.25)'
-                : '0 4px 16px rgba(0,0,0,0.4)',
-              transition: 'all 0.25s ease'
-            }}
-          >
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: isScrolling ? '#10b981' : '#c26d2e',
-                display: 'inline-block',
-                boxShadow: isScrolling ? '0 0 10px #10b981' : '0 0 6px rgba(194,109,46,0.6)',
-                transition: 'all 0.2s ease'
-              }}
-            />
-            <span>{isPhone ? '📱 Scroll: 3D Mobil' : '🖱️ Scroll: 3D Aylanish'}</span>
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.68rem', fontFamily: 'monospace' }}>
-              ({currentFrame}/300)
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
