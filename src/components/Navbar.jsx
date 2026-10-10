@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
@@ -39,6 +39,19 @@ export const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(105);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,19 +81,24 @@ export const Navbar = () => {
   ];
 
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 900,
-        backgroundColor: 'var(--glass-bg)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--border-subtle)',
-        boxShadow: isScrolled ? '0 6px 24px rgba(0,0,0,0.08)' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
+    <>
+      <header
+        ref={headerRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          width: '100%',
+          zIndex: 900,
+          backgroundColor: 'var(--glass-bg)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border-subtle)',
+          boxShadow: isScrolled ? '0 6px 24px rgba(0,0,0,0.12)' : 'none',
+          transition: 'box-shadow 0.3s ease'
+        }}
+      >
       {/* Top Announcement Bar */}
       <div
         style={{
@@ -866,5 +884,8 @@ export const Navbar = () => {
         }
       `}</style>
     </header>
+    {/* Spacer to prevent layout shift and keep content visible below fixed navbar */}
+    <div style={{ height: `${headerHeight}px`, flexShrink: 0 }} aria-hidden="true" />
+  </>
   );
 };
