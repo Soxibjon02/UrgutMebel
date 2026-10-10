@@ -16,6 +16,7 @@ import { Toast } from './components/Toast';
 import { AuthModal } from './components/AuthModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { InstallPromptModal } from './components/InstallPromptModal';
+import { ScrollToTop } from './components/ScrollToTop';
 import { AnimatedFurnitureBackground } from './components/AnimatedFurnitureBackground';
 
 // Pages
@@ -44,6 +45,7 @@ function App() {
             <WishlistProvider>
               <PwaProvider>
                 <Router>
+                  <ScrollToTop />
                   <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
                     {/* Fixed 3D Animated Background - persists continuously across scroll */}
                     <AnimatedFurnitureBackground />

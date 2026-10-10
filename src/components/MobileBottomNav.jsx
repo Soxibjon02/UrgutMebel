@@ -9,7 +9,27 @@ export const MobileBottomNav = () => {
   const { user, isGuest, isAdmin, isManager, isCraftsman, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
+  const handleNavClick = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    document.documentElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    document.body.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const handleProfileClick = (e) => {
+    handleNavClick();
+
     if (isGuest) {
       e.preventDefault();
       openAuthModal('login');
@@ -64,6 +84,7 @@ export const MobileBottomNav = () => {
               key={item.to}
               to={item.to}
               end={item.exact}
+              onClick={handleNavClick}
               className={({ isActive }) =>
                 `mobile-nav-link ${isActive ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`
               }

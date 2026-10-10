@@ -61,12 +61,31 @@ export const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const smoothScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    document.documentElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    document.body.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/furniture?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchOpen(false);
       setSearchQuery('');
+      smoothScrollToTop();
     }
   };
 
@@ -200,6 +219,7 @@ export const Navbar = () => {
           {/* Logo */}
           <Link
             to="/"
+            onClick={smoothScrollToTop}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -287,6 +307,7 @@ export const Navbar = () => {
               <NavLink
                 key={link.to}
                 to={link.to}
+                onClick={smoothScrollToTop}
                 style={({ isActive }) => ({
                   fontSize: '0.85rem',
                   fontWeight: isActive ? 700 : 500,
@@ -735,6 +756,7 @@ export const Navbar = () => {
             <NavLink
               key={link.to}
               to={link.to}
+              onClick={smoothScrollToTop}
               style={({ isActive }) => ({
                 padding: '0.6rem 0',
                 fontSize: '1rem',
@@ -750,6 +772,7 @@ export const Navbar = () => {
           {isCraftsman && (
             <Link
               to="/craftsman-dashboard"
+              onClick={smoothScrollToTop}
               style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#3730a3' }}
             >
               🔨 Usta Paneli
@@ -759,6 +782,7 @@ export const Navbar = () => {
           {isManager && (
             <Link
               to="/manager"
+              onClick={smoothScrollToTop}
               style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#b45309' }}
             >
               💼 Menedjer Paneli
@@ -768,6 +792,7 @@ export const Navbar = () => {
           {isAdmin && (
             <Link
               to="/admin"
+              onClick={smoothScrollToTop}
               style={{ padding: '0.6rem 0', fontSize: '1rem', fontWeight: 600, color: '#b91c1c' }}
             >
               🛡️ Admin Paneli
