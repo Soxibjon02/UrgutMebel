@@ -89,47 +89,38 @@ export const Home = () => {
           overflow: 'hidden'
         }}
       >
-        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '4.5rem 1.5rem' }}>
-          <div
-            style={{
-              maxWidth: '680px',
-              backgroundColor: 'var(--glass-bg)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              padding: 'clamp(1.75rem, 4vw, 2.75rem)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px solid var(--glass-border)',
-              boxShadow: 'var(--glass-shadow)'
-            }}
-          >
+        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '5rem 1.5rem' }}>
+          <div style={{ maxWidth: '680px' }}>
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'rgba(194, 109, 46, 0.15)',
+                backgroundColor: 'rgba(194, 109, 46, 0.25)',
+                backdropFilter: 'blur(8px)',
                 padding: '0.4rem 1rem',
                 borderRadius: 'var(--radius-full)',
-                color: 'var(--wood-amber)',
+                color: 'var(--wood-light)',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 letterSpacing: '0.04em',
                 marginBottom: '1.25rem',
-                border: '1px solid rgba(194, 109, 46, 0.3)'
+                border: '1px solid rgba(212, 163, 89, 0.4)'
               }}
             >
-              <Sparkles size={15} color="var(--wood-amber)" />
+              <Sparkles size={15} color="var(--gold-accent)" />
               <span>{settings.hero_badge || "Urgut Hunarmandlari Markazi 2026"}</span>
             </div>
 
             <h1
               style={{
-                fontSize: 'clamp(2.1rem, 4.5vw, 3.4rem)',
+                fontSize: 'clamp(2.3rem, 5vw, 3.8rem)',
                 fontWeight: 800,
-                lineHeight: 1.18,
-                color: 'var(--text-main)',
+                lineHeight: 1.15,
+                color: '#ffffff',
                 marginBottom: '1.25rem',
-                letterSpacing: '-0.02em'
+                letterSpacing: '-0.02em',
+                textShadow: '0 2px 24px rgba(0,0,0,0.75)'
               }}
             >
               {activeBanner.title}
@@ -137,10 +128,11 @@ export const Home = () => {
 
             <p
               style={{
-                fontSize: 'clamp(0.95rem, 1.6vw, 1.12rem)',
-                color: 'var(--text-muted)',
+                fontSize: 'clamp(1rem, 1.8vw, 1.18rem)',
+                color: '#e7e5e4',
                 lineHeight: 1.6,
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                textShadow: '0 1px 14px rgba(0,0,0,0.85)'
               }}
             >
               {activeBanner.subtitle}
@@ -151,7 +143,16 @@ export const Home = () => {
                 <span>{activeBanner.button_text || "Buyurtma Berish"}</span>
                 <ArrowRight size={18} />
               </Link>
-              <Link to="/furniture" className="btn btn-secondary btn-lg">
+              <Link
+                to="/furniture"
+                className="btn btn-secondary btn-lg"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(10px)',
+                  color: '#fff',
+                  borderColor: 'rgba(255,255,255,0.25)'
+                }}
+              >
                 <span>Katalogni Ko‘rish</span>
               </Link>
             </div>
