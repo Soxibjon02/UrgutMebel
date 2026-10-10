@@ -117,10 +117,9 @@ export const Home = () => {
                 fontSize: 'clamp(2.3rem, 5vw, 3.8rem)',
                 fontWeight: 800,
                 lineHeight: 1.15,
-                color: '#ffffff',
+                color: 'var(--text-main)',
                 marginBottom: '1.25rem',
-                letterSpacing: '-0.02em',
-                textShadow: '0 2px 24px rgba(0,0,0,0.75)'
+                letterSpacing: '-0.02em'
               }}
             >
               {activeBanner.title}
@@ -129,10 +128,9 @@ export const Home = () => {
             <p
               style={{
                 fontSize: 'clamp(1rem, 1.8vw, 1.18rem)',
-                color: '#e7e5e4',
+                color: 'var(--text-muted)',
                 lineHeight: 1.6,
-                marginBottom: '2rem',
-                textShadow: '0 1px 14px rgba(0,0,0,0.85)'
+                marginBottom: '2rem'
               }}
             >
               {activeBanner.subtitle}
@@ -266,27 +264,27 @@ export const Home = () => {
                 style={{
                   fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)',
                   fontWeight: 800,
-                  color: '#ffffff',
+                  color: 'var(--text-main)',
                   marginBottom: '1rem',
                   lineHeight: 1.2
                 }}
               >
                 O‘zingiz Istagan O‘lchamda Mebel Yasating
               </h2>
-              <p style={{ color: '#a8a29e', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
                 Xonangiz o‘lchamiga to‘liq mos tushadigan, sifatli tabiiy yog‘och yoki MDF materialidan individual buyurtma bering. Mutaxassislarimiz narxni tezkor hisoblab berishadi.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#e7e5e4', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
                   <CheckCircle size={18} color="var(--status-success)" />
                   <span>Xonadon o‘lchami va chizmalarni yuklash imkoniyati</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#e7e5e4', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
                   <CheckCircle size={18} color="var(--status-success)" />
                   <span>Menedjer tomonidan shaffof narx kalkulyatsiyasi</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#e7e5e4', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
                   <CheckCircle size={18} color="var(--status-success)" />
                   <span>Ishlab chiqarish jarayonini onlayn kuzatish</span>
                 </div>

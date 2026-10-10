@@ -117,12 +117,12 @@ export const Footer = () => {
                   }}
                 />
               </div>
-              <h3 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
                 {settings.site_name}
               </h3>
             </Link>
 
-            <p style={{ color: '#a8a29e', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>
               {settings.footer_about || "Urgutning mohir ustalari tomonidan tayyorlangan zamonaviy, didli va uzoq yillik xizmat qiluvchi saralangan mebellar markazi."}
             </p>
 
