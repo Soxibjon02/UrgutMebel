@@ -437,14 +437,14 @@ export const ManagerDashboard = () => {
       <div className="container">
 
         {/* Dashboard Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b45309', fontWeight: 700, fontSize: '0.85rem' }}>
               <Briefcase size={16} /> MENEDJER PANELI
             </div>
-            <h1 style={{ fontSize: '2.2rem', fontWeight: 800 }}>Mebel va Ishlab Chiqarish Boshqaruvi</h1>
+            <h1 style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', fontWeight: 800 }}>Mebel va Ishlab Chiqarish Boshqaruvi</h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
               Menedjer: <strong style={{ color: 'var(--text-main)' }}>{user.full_name}</strong>
             </div>
@@ -456,39 +456,43 @@ export const ManagerDashboard = () => {
           </div>
         </div>
 
-        {/* Top Navigation Switch: MEBELLAR vs MAXSUS BUYURTMALAR */}
+        {/* Top Navigation Switch: MEBELLAR vs MAXSUS BUYURTMALAR vs USTALAR */}
         <div
+          className="no-scrollbar"
           style={{
             display: 'flex',
             backgroundColor: 'var(--bg-card)',
             backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-lg)',
-            padding: '0.4rem',
+            padding: '0.35rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '2rem',
-            maxWidth: '540px'
+            maxWidth: '620px',
+            overflowX: 'auto',
+            gap: '0.35rem'
           }}
         >
           <button
             type="button"
             onClick={() => setActiveMainTab('furniture')}
             style={{
-              flex: 1,
+              flex: '1 0 auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem',
-              padding: '0.75rem 1rem',
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
+              whiteSpace: 'nowrap',
               backgroundColor: activeMainTab === 'furniture' ? 'var(--wood-amber)' : 'transparent',
               color: activeMainTab === 'furniture' ? '#ffffff' : 'var(--text-muted)',
               transition: 'all 0.2s ease'
             }}
           >
-            <Package size={18} />
+            <Package size={17} />
             <span>Mebellar Katalogi ({products.length})</span>
           </button>
 
@@ -496,21 +500,22 @@ export const ManagerDashboard = () => {
             type="button"
             onClick={() => setActiveMainTab('custom_orders')}
             style={{
-              flex: 1,
+              flex: '1 0 auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem',
-              padding: '0.75rem 1rem',
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
+              whiteSpace: 'nowrap',
               backgroundColor: activeMainTab === 'custom_orders' ? 'var(--wood-amber)' : 'transparent',
               color: activeMainTab === 'custom_orders' ? '#ffffff' : 'var(--text-muted)',
               transition: 'all 0.2s ease'
             }}
           >
-            <Sliders size={18} />
+            <Sliders size={17} />
             <span>Maxsus Buyurtmalar ({orders.length})</span>
           </button>
 
@@ -518,21 +523,22 @@ export const ManagerDashboard = () => {
             type="button"
             onClick={() => setActiveMainTab('craftsmen')}
             style={{
-              flex: 1,
+              flex: '1 0 auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem',
-              padding: '0.75rem 1rem',
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
+              whiteSpace: 'nowrap',
               backgroundColor: activeMainTab === 'craftsmen' ? 'var(--wood-amber)' : 'transparent',
               color: activeMainTab === 'craftsmen' ? '#ffffff' : 'var(--text-muted)',
               transition: 'all 0.2s ease'
             }}
           >
-            <Hammer size={18} />
+            <Hammer size={17} />
             <span>Ustalar ({craftsmen.length})</span>
           </button>
         </div>
@@ -544,12 +550,8 @@ export const ManagerDashboard = () => {
           <div>
             {/* Top Toolbar: Search, Category Filter, and Add Button */}
             <div
+              className="dashboard-action-toolbar"
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1rem',
                 marginBottom: '1.5rem',
                 backgroundColor: 'var(--bg-card)',
                 padding: '1.25rem 1.5rem',
@@ -558,8 +560,8 @@ export const ManagerDashboard = () => {
                 boxShadow: 'var(--shadow-sm)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 320px' }}>
-                <div style={{ position: 'relative', flex: 1, maxWidth: '340px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: '1 1 300px' }}>
+                <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '180px' }}>
                   <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
                     type="text"
@@ -575,7 +577,7 @@ export const ManagerDashboard = () => {
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="form-select"
-                  style={{ width: 'auto', minWidth: '180px' }}
+                  style={{ width: 'auto', minWidth: '160px', flex: '1 1 140px' }}
                 >
                   <option value="ALL">Barcha kategoriyalar</option>
                   {categories.map((c) => (
@@ -595,7 +597,7 @@ export const ManagerDashboard = () => {
             </div>
 
             {/* Products Table */}
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }} className="glass-card">
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -842,7 +844,7 @@ export const ManagerDashboard = () => {
               </button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -985,7 +987,7 @@ export const ManagerDashboard = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Narxi (so‘m) *</label>
                   <input
@@ -1012,7 +1014,7 @@ export const ManagerDashboard = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Materiali</label>
                   <input
@@ -1067,7 +1069,7 @@ export const ManagerDashboard = () => {
                 </p>
 
                 {/* 1. Fayl yuklash (Kompyuterdan tanlash) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div className="dashboard-form-row" style={{ marginBottom: '1.25rem' }}>
                   <label
                     style={{
                       border: '2px dashed var(--wood-amber)',

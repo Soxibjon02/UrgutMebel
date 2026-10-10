@@ -24,7 +24,8 @@ export const defaultSettings = {
   feature2_desc: "Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati",
   feature3_title: "Urgut Duradgorlari",
   feature3_desc: "Asriy hunarmandchilik an'analari va zamonaviy texnologiya uyg'unligi",
-  hero_banner_image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80"
+  hero_banner_image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
+  logo_url: "/pwa-icon.svg"
 };
 
 export const SettingsProvider = ({ children }) => {

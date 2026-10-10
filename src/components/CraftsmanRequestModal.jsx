@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { X, Send, Calendar, Phone, User, CheckCircle2 } from 'lucide-react';
+import { X, Send, Calendar, Phone, User, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 import { dataService } from '../services/dataService';
 
@@ -19,8 +19,14 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isGuest) {
-      openAuthModal('login', 'Ustaga buyurtma yuborish uchun avval hisobingizga kiring!');
+    if (isGuest || !user) {
+      openAuthModal('login', 'Ustaga buyurtma yuborish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      return;
+    }
+
+    if (user.role !== 'customer') {
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
+      addToast(`Ustaga buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berilmaydi.`, 'error');
       return;
     }
 
@@ -28,7 +34,8 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
       await dataService.createCustomOrder({
         customer_name: fullName,
         customer_phone: phone,
-        user_id: user?.id || null,
+        user_id: user.id,
+        user_role: user.role,
         title: `${craftsman.name}ga to‘g‘ridan-to‘g‘ri shaxsiy buyurtma`,
         category: 'Duradgorga Shaxsiy Buyurtma',
         furniture_type: 'Shaxsiy mebel buyurtmasi',
@@ -40,6 +47,8 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
       });
     } catch (err) {
       console.warn('Error saving craftsman request:', err);
+      addToast(err.message || 'Xatolik yuz berdi', 'error');
+      return;
     }
 
     setSubmitted(true);
@@ -113,6 +122,30 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
               </p>
             </div>
 
+            {user && user.role !== 'customer' && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.75rem 0.95rem',
+                  marginBottom: '1.25rem',
+                  fontSize: '0.82rem',
+                  color: '#991b1b',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.5rem',
+                  lineHeight: 1.4
+                }}
+              >
+                <ShieldAlert size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                <span>
+                  Siz <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz.
+                  Chalkashliklarning oldini olish uchun faqatgina <strong>oddiy mijozlar</strong> ustaga buyurtma bera oladi.
+                </span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Ismingiz</label>
@@ -172,9 +205,19 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
                 />
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
+              <button
+                type="submit"
+                disabled={user && user.role !== 'customer'}
+                className="btn btn-primary"
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  opacity: (user && user.role !== 'customer') ? 0.6 : 1,
+                  cursor: (user && user.role !== 'customer') ? 'not-allowed' : 'pointer'
+                }}
+              >
                 <Send size={16} />
-                <span>Ustaga Yuborish</span>
+                <span>{user && user.role !== 'customer' ? 'Xodim hisobidan buyurtma taqiqlangan' : 'Ustaga Yuborish'}</span>
               </button>
             </form>
           </>

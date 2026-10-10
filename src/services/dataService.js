@@ -322,6 +322,22 @@ export const dataService = {
   },
 
   async createCustomOrder(orderData) {
+    // FAQATGINA ODDIY MIJOZ (CUSTOMER) BUYURTMA BERA OLADI!
+    // Super admin, manager va usta chalkashliklarning oldini olish uchun buyurtma bera olmaydi.
+    if (orderData.user_role && orderData.user_role !== 'customer') {
+      throw new Error(`Xodimlar (${orderData.user_role}) hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.`);
+    }
+    if (orderData.user_id) {
+      if (orderData.user_id === 'super-admin-soxibjon' || String(orderData.user_id).startsWith('mgr-') || String(orderData.user_id).startsWith('craft-')) {
+        throw new Error("Chalkashliklarning oldini olish uchun xodimlar hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.");
+      }
+      const allUsers = getStored('urgut_mebel_registered_users', []);
+      const matched = allUsers.find(u => u.id === orderData.user_id);
+      if (matched && matched.role && matched.role !== 'customer') {
+        throw new Error(`Xodim (${matched.role}) hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.`);
+      }
+    }
+
     const orders = await this.getCustomOrders();
     const orderNumber = `ORD-CUST-${Math.floor(1000 + Math.random() * 9000)}`;
     const newOrder = {
@@ -505,6 +521,22 @@ export const dataService = {
   },
 
   async createStandardOrder(orderData) {
+    // FAQATGINA ODDIY MIJOZ (CUSTOMER) BUYURTMA BERA OLADI!
+    // Super admin, manager va usta chalkashliklarning oldini olish uchun buyurtma bera olmaydi.
+    if (orderData.user_role && orderData.user_role !== 'customer') {
+      throw new Error(`Xodimlar (${orderData.user_role}) hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.`);
+    }
+    if (orderData.user_id) {
+      if (orderData.user_id === 'super-admin-soxibjon' || String(orderData.user_id).startsWith('mgr-') || String(orderData.user_id).startsWith('craft-')) {
+        throw new Error("Chalkashliklarning oldini olish uchun xodimlar hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.");
+      }
+      const allUsers = getStored('urgut_mebel_registered_users', []);
+      const matched = allUsers.find(u => u.id === orderData.user_id);
+      if (matched && matched.role && matched.role !== 'customer') {
+        throw new Error(`Xodim (${matched.role}) hisobidan buyurtma berish taqiqlangan! Faqatgina oddiy mijoz buyurtma bera oladi.`);
+      }
+    }
+
     const orders = await this.getStandardOrders();
     const orderNumber = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
     const newOrder = {

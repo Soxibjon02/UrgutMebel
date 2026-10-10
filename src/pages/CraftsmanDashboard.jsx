@@ -379,18 +379,20 @@ export const CraftsmanDashboard = () => {
           </div>
 
           {/* Switcher Tab Buttons */}
-          <div style={{ display: 'flex', backgroundColor: 'var(--bg-secondary)', padding: '0.35rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+          <div className="no-scrollbar" style={{ display: 'flex', backgroundColor: 'var(--bg-secondary)', padding: '0.35rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', overflowX: 'auto', maxWidth: '100%', gap: '0.35rem' }}>
             <button
               type="button"
               onClick={() => setActiveTab('finances')}
               style={{
+                flex: '1 0 auto',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.65rem 1.25rem',
+                padding: '0.65rem 1.15rem',
                 borderRadius: 'var(--radius-sm)',
                 fontWeight: 700,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
+                whiteSpace: 'nowrap',
                 backgroundColor: activeTab === 'finances' ? 'var(--wood-amber)' : 'transparent',
                 color: activeTab === 'finances' ? '#ffffff' : 'var(--text-muted)',
                 transition: 'all 0.2s ease'
@@ -403,13 +405,15 @@ export const CraftsmanDashboard = () => {
               type="button"
               onClick={() => setActiveTab('works')}
               style={{
+                flex: '1 0 auto',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.65rem 1.25rem',
+                padding: '0.65rem 1.15rem',
                 borderRadius: 'var(--radius-sm)',
                 fontWeight: 700,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
+                whiteSpace: 'nowrap',
                 backgroundColor: activeTab === 'works' ? 'var(--wood-amber)' : 'transparent',
                 color: activeTab === 'works' ? '#ffffff' : 'var(--text-muted)',
                 transition: 'all 0.2s ease'
@@ -422,13 +426,15 @@ export const CraftsmanDashboard = () => {
               type="button"
               onClick={() => setActiveTab('requests')}
               style={{
+                flex: '1 0 auto',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.65rem 1.25rem',
+                padding: '0.65rem 1.15rem',
                 borderRadius: 'var(--radius-sm)',
                 fontWeight: 700,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
+                whiteSpace: 'nowrap',
                 backgroundColor: activeTab === 'requests' ? 'var(--wood-amber)' : 'transparent',
                 color: activeTab === 'requests' ? '#ffffff' : 'var(--text-muted)',
                 transition: 'all 0.2s ease',
@@ -436,7 +442,7 @@ export const CraftsmanDashboard = () => {
               }}
             >
               <Package size={17} />
-              <span>Kelib Tushgan Buyurtmalar ({craftsmanOrders.length})</span>
+              <span>Buyurtmalar ({craftsmanOrders.length})</span>
               {craftsmanOrders.length > 0 && (
                 <span style={{ backgroundColor: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '10px', fontWeight: 800 }}>
                   {craftsmanOrders.length}
@@ -452,7 +458,7 @@ export const CraftsmanDashboard = () => {
         {activeTab === 'finances' && (
           <div>
             {/* KPI STATS CARDS (Avtomatik Algoritm natijalari) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+            <div className="dashboard-grid-stats">
               
               <div className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid #10b981' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#10b981', marginBottom: '0.5rem' }}>
@@ -510,19 +516,15 @@ export const CraftsmanDashboard = () => {
 
             {/* Toolbar: Search, Status Filter & Add Button */}
             <div
-              className="glass-card"
+              className="dashboard-action-toolbar glass-card"
               style={{
                 padding: '1.25rem 1.5rem',
                 marginBottom: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem'
+                border: '1px solid var(--border-subtle)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 320px' }}>
-                <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: '1 1 300px' }}>
+                <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '160px' }}>
                   <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
                     type="text"
@@ -538,7 +540,7 @@ export const CraftsmanDashboard = () => {
                   value={financeFilter}
                   onChange={(e) => setFinanceFilter(e.target.value)}
                   className="form-select"
-                  style={{ width: 'auto', minWidth: '160px' }}
+                  style={{ width: 'auto', minWidth: '150px', flex: '1 1 130px' }}
                 >
                   <option value="ALL">Barcha holatlar</option>
                   <option value="JARAYONDA">Jarayonda</option>
@@ -558,7 +560,7 @@ export const CraftsmanDashboard = () => {
             </div>
 
             {/* Finances Table */}
-            <div className="glass-card" style={{ overflowX: 'auto' }}>
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -666,7 +668,7 @@ export const CraftsmanDashboard = () => {
         {/* ========================================================= */}
         {activeTab === 'works' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div className="dashboard-action-toolbar">
               <div>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Mening Qilgan Ishlarim</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -685,7 +687,7 @@ export const CraftsmanDashboard = () => {
             </div>
 
             {/* Works Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.25rem' }}>
               {works.length === 0 ? (
                 <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Hozircha ishlaringiz mavjud emas. "+ Yangi Portfolio Ishi Qo‘shish" tugmasini bosing.
@@ -867,7 +869,7 @@ export const CraftsmanDashboard = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Toifasi</label>
                   <input
@@ -890,7 +892,7 @@ export const CraftsmanDashboard = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Buyurtmachi Ismi</label>
                   <input
@@ -1041,7 +1043,7 @@ export const CraftsmanDashboard = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Mijoz Ismi</label>
                   <input
@@ -1066,7 +1068,7 @@ export const CraftsmanDashboard = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Umumiy Kelishilgan Summa (so‘m) *</label>
                   <input
@@ -1098,7 +1100,7 @@ export const CraftsmanDashboard = () => {
                   Xarajatlar Tafsiloti (Sof foydani aniqlash uchun):
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="dashboard-form-row">
                   <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                     <label className="form-label">Materiallar (Taxta, MDF, bo‘yoq)</label>
                     <input
@@ -1121,7 +1123,7 @@ export const CraftsmanDashboard = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="dashboard-form-row">
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Transport & Yetkazish</label>
                     <input

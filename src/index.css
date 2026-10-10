@@ -896,3 +896,201 @@ img {
   scrollbar-width: none;
 }
 
+/* ====================================================================
+   DASHBOARD & PANELS RESPONSIVE SYSTEM (Admin, Manager, Craftsman, User)
+   ==================================================================== */
+.admin-layout {
+  display: flex;
+  min-height: 90vh;
+  background-color: var(--bg-primary);
+  width: 100%;
+}
+
+.admin-sidebar-desktop {
+  width: 270px;
+  background-color: var(--bg-dark);
+  color: #e7e5e4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+.admin-mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  background-color: var(--bg-dark);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 45;
+}
+
+.admin-mobile-tabs-bar {
+  display: none;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.65rem 0.85rem;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-mobile-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.admin-mobile-tab-btn.active {
+  background-color: var(--wood-amber);
+  color: #ffffff;
+  border-color: var(--wood-amber);
+  box-shadow: 0 2px 8px rgba(194, 109, 46, 0.35);
+}
+
+.admin-main-content {
+  flex: 1;
+  padding: 2.25rem;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: var(--bg-card);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 1.5rem;
+}
+
+.table-responsive table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+/* Responsive Stat Cards Grid */
+.dashboard-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* Responsive Form Rows */
+.dashboard-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dashboard-form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Responsive Header / Action Toolbar */
+.dashboard-action-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Breakpoint for Tablets and Mobile Phones */
+@media (max-width: 1024px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar-desktop {
+    display: none !important;
+  }
+
+  .admin-mobile-header {
+    display: flex !important;
+  }
+
+  .admin-mobile-tabs-bar {
+    display: flex !important;
+  }
+
+  .admin-main-content {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .dashboard-grid-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-form-row,
+  .dashboard-form-row-3 {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .dashboard-action-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .dashboard-action-toolbar > * {
+    width: 100% !important;
+  }
+
+  .dashboard-action-toolbar button,
+  .dashboard-action-toolbar a {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .table-responsive table {
+    min-width: 540px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-grid-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-main-content {
+    padding: 1rem 0.65rem !important;
+  }
+
+  .table-responsive table {
+    font-size: 0.82rem !important;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    padding: 0.75rem 0.65rem !important;
+  }
+}
+

@@ -143,41 +143,42 @@ export const CustomerAccount = () => {
             backgroundColor: 'var(--bg-card)',
             backdropFilter: 'blur(8px)',
             borderRadius: 'var(--radius-xl)',
-            padding: '2rem 2.5rem',
+            padding: '1.75rem',
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '1.5rem',
-            marginBottom: '2.5rem'
+            gap: '1.25rem',
+            marginBottom: '2rem'
           }}
           className="glass-card"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '56px',
+                height: '56px',
                 borderRadius: '50%',
                 background: 'var(--gold-gradient)',
                 color: '#fff',
-                fontSize: '1.6rem',
+                fontSize: '1.5rem',
                 fontWeight: 800,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 15px rgba(194, 109, 46, 0.3)'
+                boxShadow: '0 4px 15px rgba(194, 109, 46, 0.3)',
+                flexShrink: 0
               }}
             >
               {user.full_name?.charAt(0) || 'U'}
             </div>
             <div>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '0.2rem' }}>
+              <h1 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.2rem' }}>
                 {user.full_name}
               </h1>
-              <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', gap: '0.65rem', color: 'var(--text-muted)', fontSize: '0.82rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <span>{user.email}</span>
                 <span>•</span>
                 <span>{user.phone || "Telefon kiritilmagan"}</span>
@@ -189,7 +190,7 @@ export const CustomerAccount = () => {
             </div>
           </div>
 
-          <Link to="/custom-order" className="btn btn-primary">
+          <Link to="/custom-order" className="btn btn-primary" style={{ padding: '0.65rem 1.25rem' }}>
             <Sliders size={16} />
             <span>Yangi Maxsus Buyurtma</span>
           </Link>
@@ -197,30 +198,34 @@ export const CustomerAccount = () => {
 
         {/* Tab Navigation */}
         <div
+          className="no-scrollbar"
           style={{
             display: 'flex',
             gap: '0.5rem',
             borderBottom: '2px solid var(--border-subtle)',
             marginBottom: '2rem',
-            overflowX: 'auto'
+            overflowX: 'auto',
+            whiteSpace: 'nowrap'
           }}
         >
           <button
             type="button"
             onClick={() => { setActiveTab('custom'); setSearchParams({ tab: 'custom' }); }}
             style={{
-              padding: '0.85rem 1.4rem',
+              padding: '0.8rem 1.2rem',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
               color: activeTab === 'custom' ? 'var(--wood-amber)' : 'var(--text-muted)',
               borderBottom: activeTab === 'custom' ? '3px solid var(--wood-amber)' : '3px solid transparent',
               marginBottom: '-2px',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Sliders size={17} />
+            <Sliders size={16} />
             <span>Maxsus Buyurtmalarim ({customOrders.length})</span>
           </button>
 
@@ -228,18 +233,20 @@ export const CustomerAccount = () => {
             type="button"
             onClick={() => { setActiveTab('orders'); setSearchParams({ tab: 'orders' }); }}
             style={{
-              padding: '0.85rem 1.4rem',
+              padding: '0.8rem 1.2rem',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
               color: activeTab === 'orders' ? 'var(--wood-amber)' : 'var(--text-muted)',
               borderBottom: activeTab === 'orders' ? '3px solid var(--wood-amber)' : '3px solid transparent',
               marginBottom: '-2px',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <ShoppingBag size={17} />
+            <ShoppingBag size={16} />
             <span>Do‘kon Buyurtmalari ({standardOrders.length})</span>
           </button>
 
@@ -247,18 +254,20 @@ export const CustomerAccount = () => {
             type="button"
             onClick={() => { setActiveTab('wishlist'); setSearchParams({ tab: 'wishlist' }); }}
             style={{
-              padding: '0.85rem 1.4rem',
+              padding: '0.8rem 1.2rem',
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: '0.9rem',
               color: activeTab === 'wishlist' ? 'var(--wood-amber)' : 'var(--text-muted)',
               borderBottom: activeTab === 'wishlist' ? '3px solid var(--wood-amber)' : '3px solid transparent',
               marginBottom: '-2px',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Heart size={17} />
+            <Heart size={16} />
             <span>Sevimlilar ({favorites.length})</span>
           </button>
         </div>

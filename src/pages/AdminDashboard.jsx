@@ -36,7 +36,8 @@ import {
   AlertTriangle,
   Database,
   ExternalLink,
-  Copy
+  Copy,
+  Menu
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
@@ -90,7 +91,8 @@ export const AdminDashboard = () => {
     feature2_desc: settings.feature2_desc || '',
     feature3_title: settings.feature3_title || '',
     feature3_desc: settings.feature3_desc || '',
-    hero_banner_image: settings.hero_banner_image || ''
+    hero_banner_image: settings.hero_banner_image || '',
+    logo_url: settings.logo_url || '/pwa-icon.svg'
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -378,24 +380,157 @@ export const AdminDashboard = () => {
     loadAllData();
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Total revenue calc
   const totalRevenue = standardOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
 
+  const adminTabs = [
+    { id: 'overview', label: 'Umumiy Statistika', shortLabel: 'Statistika', icon: LayoutDashboard },
+    { id: 'products', label: `Mahsulotlar (${products.length})`, shortLabel: `Mebellar (${products.length})`, icon: Package },
+    { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
+    { id: 'custom_orders', label: `Maxsus Buyurtmalar (${customOrders.length})`, shortLabel: `Maxsus (${customOrders.length})`, icon: Sliders },
+    { id: 'orders', label: `Do‘kon Buyurtmalari (${standardOrders.length})`, shortLabel: `Do‘kon (${standardOrders.length})`, icon: ShoppingBag },
+    { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
+    { id: 'comments', label: `Sharhlar (${comments.length})`, shortLabel: `Sharhlar (${comments.length})`, icon: MessageSquare },
+    { id: 'managers', label: `Menedjerlar (${managers.length})`, shortLabel: `Menedjerlar (${managers.length})`, icon: Users },
+    { id: 'users', label: `Foydalanuvchilar (${usersList.length})`, shortLabel: `Foydalanuvchilar (${usersList.length})`, icon: Users },
+    { id: 'settings', label: 'Tizim & Sayt Nomi', shortLabel: 'Sozlamalar', icon: SettingsIcon }
+  ];
+
   return (
-    <div style={{ display: 'flex', minHeight: '90vh', backgroundColor: 'var(--bg-primary)' }}>
+    <div className="admin-layout">
+
+      {/* Mobile Top Header (<= 1024px) */}
+      <div className="admin-mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <Shield size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>{settings.site_name}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--wood-amber)', fontWeight: 700 }}>SUPER ADMIN PANEL</div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.45rem 0.8rem',
+            backgroundColor: 'rgba(255,255,255,0.12)',
+            color: '#ffffff',
+            borderRadius: '8px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          {mobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+          <span>{mobileMenuOpen ? 'Yopish' : 'Bo‘limlar'}</span>
+        </button>
+      </div>
+
+      {/* Mobile Horizontal Tabs Quick Switch Bar */}
+      <div className="admin-mobile-tabs-bar no-scrollbar">
+        {adminTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`admin-mobile-tab-btn ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={14} />
+              <span>{tab.shortLabel}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile Menu Dropdown Drawer */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            zIndex: 999,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-dark)',
+              color: '#fff',
+              padding: '1.25rem',
+              borderBottomLeftRadius: '20px',
+              borderBottomRightRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              maxHeight: '80vh',
+              overflowY: 'auto'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.75rem' }}>
+              <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--wood-amber)' }}>Admin Bo‘limlari</div>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+              {adminTabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      padding: '0.75rem 0.85rem',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: isActive ? '#ffffff' : '#a8a29e',
+                      backgroundColor: isActive ? 'var(--wood-amber)' : 'rgba(255,255,255,0.06)',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Icon size={16} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
       
-      {/* Sidebar Navigation */}
-      <aside
-        style={{
-          width: '260px',
-          backgroundColor: 'var(--bg-dark)',
-          color: '#e7e5e4',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          flexShrink: 0
-        }}
-      >
+      {/* Sidebar Navigation (Desktop) */}
+      <aside className="admin-sidebar-desktop">
         <div style={{ padding: '1.5rem 1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '2rem' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -408,195 +543,31 @@ export const AdminDashboard = () => {
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <button
-              type="button"
-              onClick={() => setActiveTab('overview')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'overview' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'overview' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <LayoutDashboard size={17} /> Umumiy Statistika
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('products')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'products' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'products' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Package size={17} /> Mahsulotlar ({products.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('categories')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'categories' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'categories' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Layers size={17} /> Kategoriyalar ({categories.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('custom_orders')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'custom_orders' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'custom_orders' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Sliders size={17} /> Maxsus Buyurtmalar ({customOrders.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('orders')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'orders' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'orders' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <ShoppingBag size={17} /> Do‘kon Buyurtmalari ({standardOrders.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('craftsmen')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'craftsmen' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'craftsmen' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Award size={17} /> Ustalar ({craftsmen.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('comments')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'comments' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'comments' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <MessageSquare size={17} /> Sharhlar ({comments.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('managers')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'managers' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'managers' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Users size={17} /> Menedjerlar ({managers.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('users')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'users' ? '#ffffff' : '#a8a29e',
-                backgroundColor: activeTab === 'users' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <Users size={17} /> Foydalanuvchilar ({usersList.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('settings')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: activeTab === 'settings' ? 'var(--gold-accent)' : '#a8a29e',
-                backgroundColor: activeTab === 'settings' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                textAlign: 'left'
-              }}
-            >
-              <SettingsIcon size={17} /> Tizim & Sayt Nomi
-            </button>
+            {adminTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    color: isActive ? '#ffffff' : (tab.id === 'settings' ? 'var(--gold-accent)' : '#a8a29e'),
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    textAlign: 'left'
+                  }}
+                >
+                  <Icon size={17} /> {tab.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -607,7 +578,7 @@ export const AdminDashboard = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, padding: '2.5rem', overflowY: 'auto' }}>
+      <main className="admin-main-content">
         
         {/* SUPABASE TABLES MISSING WARNING BANNER */}
         {supabaseHealth && !supabaseHealth.tablesFound && (
@@ -676,7 +647,7 @@ export const AdminDashboard = () => {
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>Platforma Statistikasi</h2>
 
             {/* Metrics Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div className="dashboard-grid-stats">
               <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>JAMI SAVDO (TUSHUM)</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--wood-amber)', marginTop: '0.4rem' }}>
@@ -733,7 +704,7 @@ export const AdminDashboard = () => {
         {/* TAB 2: PRODUCTS CRUD */}
         {activeTab === 'products' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="dashboard-action-toolbar">
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Mahsulotlar Boshqaruvi</h2>
               <button
                 type="button"
@@ -744,7 +715,7 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }} className="glass-card">
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -1110,6 +1081,17 @@ export const AdminDashboard = () => {
                 </span>
               </div>
 
+              {/* LOGO IMAGE UPLOAD */}
+              <ImageUploadField
+                label="Sayt Logotipi (Logo Rasmi) *"
+                value={settingsForm.logo_url || '/pwa-icon.svg'}
+                onChange={(val) => setSettingsForm({ ...settingsForm, logo_url: val })}
+                folder="logos"
+                name="logo_url"
+                placeholder="https://... yoki fayldan tanlang"
+                helperText="Saytning boshidagi (Header) va pastidagi (Footer) logotip rasmi. Kompyuterdan rasm yuklash yoki URL kiritishingiz mumkin."
+              />
+
               <div className="form-group">
                 <label className="form-label">Sayt Shiori (Tagline)</label>
                 <input
@@ -1371,7 +1353,7 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }} className="glass-card">
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -1459,7 +1441,7 @@ export const AdminDashboard = () => {
             </div>
 
             {/* Users Table */}
-            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
+            <div className="table-responsive glass-card">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
@@ -1546,7 +1528,7 @@ export const AdminDashboard = () => {
                 <label className="form-label">Mebel Nomi *</label>
                 <input type="text" required name="name" defaultValue={editingProduct?.name || ''} className="form-input" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Narxi (so‘m) *</label>
                   <input type="number" required name="price" defaultValue={editingProduct?.price || ''} className="form-input" />
@@ -1556,7 +1538,7 @@ export const AdminDashboard = () => {
                   <input type="number" name="discount_price" defaultValue={editingProduct?.discount_price || ''} className="form-input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Kategoriya</label>
                   <select name="category_id" defaultValue={editingProduct?.category_id || categories[0]?.id} className="form-select">
@@ -1660,7 +1642,7 @@ export const AdminDashboard = () => {
                 <label className="form-label">Usta To‘liq Ismi *</label>
                 <input type="text" required name="name" defaultValue={editingCraftsman?.name || ''} className="form-input" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Login Email *</label>
                   <input type="email" required name="email" defaultValue={editingCraftsman?.email || ''} placeholder="usta@urgutmebel.uz" className="form-input" />
@@ -1670,7 +1652,7 @@ export const AdminDashboard = () => {
                   <input type="text" required name="password" defaultValue={editingCraftsman?.password || 'usta12345'} className="form-input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Tajribasi (yil)</label>
                   <input type="number" name="experience_years" defaultValue={editingCraftsman?.experience_years || 5} className="form-input" />
@@ -1680,7 +1662,7 @@ export const AdminDashboard = () => {
                   <input type="text" name="location" defaultValue={editingCraftsman?.location || 'Urgut tumani'} className="form-input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Telefon</label>
                   <input type="text" name="phone" defaultValue={editingCraftsman?.phone || ''} className="form-input" />
@@ -1761,7 +1743,7 @@ export const AdminDashboard = () => {
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Telefon</label>
                   <input

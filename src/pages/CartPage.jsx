@@ -2,16 +2,23 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, Truck } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
+import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, Truck, ShieldAlert } from 'lucide-react';
 
 export const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart, totalAmount } = useCart();
-  const { isGuest, openAuthModal } = useAuth();
+  const { user, isGuest, openAuthModal } = useAuth();
+  const { addToast } = useNotification();
   const navigate = useNavigate();
 
   const handleCheckoutClick = () => {
-    if (isGuest) {
-      openAuthModal('login', 'Buyurtmani rasmiylashtirish uchun hisobingizga kiring!');
+    if (isGuest || !user) {
+      openAuthModal('login', 'Buyurtmani rasmiylashtirish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      return;
+    }
+    if (user.role !== 'customer') {
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
+      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
       return;
     }
     navigate('/checkout');
@@ -205,13 +212,44 @@ export const CartPage = () => {
               </span>
             </div>
 
+            {user && user.role !== 'customer' && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.85rem 1rem',
+                  marginBottom: '1.25rem',
+                  fontSize: '0.84rem',
+                  color: '#991b1b',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.65rem',
+                  lineHeight: 1.4
+                }}
+              >
+                <ShieldAlert size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
+                <span>
+                  Siz <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz.
+                  Chalkashliklarning oldini olish uchun faqatgina <strong>oddiy mijozlar</strong> buyurtma bera oladi.
+                </span>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={handleCheckoutClick}
+              disabled={user && user.role !== 'customer'}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '0.95rem', fontSize: '1.05rem' }}
+              style={{
+                width: '100%',
+                padding: '0.95rem',
+                fontSize: '1.05rem',
+                opacity: (user && user.role !== 'customer') ? 0.6 : 1,
+                cursor: (user && user.role !== 'customer') ? 'not-allowed' : 'pointer'
+              }}
             >
-              <span>Rasmiylashtirish</span>
+              <span>{user && user.role !== 'customer' ? 'Xodim hisobidan xarid taqiqlangan' : 'Rasmiylashtirish'}</span>
               <ArrowRight size={18} />
             </button>
 

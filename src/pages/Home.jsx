@@ -6,6 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { CraftsmanCard } from '../components/CraftsmanCard';
 import { CraftsmanRequestModal } from '../components/CraftsmanRequestModal';
+import { AnimatedFurnitureBackground } from '../components/AnimatedFurnitureBackground';
 import {
   Sparkles,
   ArrowRight,
@@ -82,35 +83,18 @@ export const Home = () => {
       <section
         style={{
           position: 'relative',
-          minHeight: '580px',
+          minHeight: '640px',
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'var(--bg-dark)',
+          backgroundColor: '#0c0a09',
           overflow: 'hidden',
           color: '#ffffff'
         }}
       >
-        {/* Background Image with Overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url('${activeBanner.image_url}')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.38,
-            transition: 'background-image 0.5s ease-in-out'
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to right, rgba(20,20,19,0.95) 0%, rgba(20,20,19,0.7) 60%, rgba(20,20,19,0.4) 100%)'
-          }}
-        />
+        {/* Dynamic 3D Animated Furniture Background (Automatically adapts to phone vs computer) */}
+        <AnimatedFurnitureBackground />
 
-        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '4.5rem 1.5rem' }}>
+        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '5rem 1.5rem' }}>
           <div style={{ maxWidth: '680px' }}>
             <div
               style={{

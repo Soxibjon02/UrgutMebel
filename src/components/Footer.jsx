@@ -92,16 +92,30 @@ export const Footer = () => {
                 style={{
                   width: '38px',
                   height: '38px',
-                  borderRadius: '11px',
-                  background: 'var(--gold-gradient)',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)'
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1.5px solid rgba(194, 109, 46, 0.35)',
+                  boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)',
+                  flexShrink: 0
                 }}
               >
-                <Sparkles size={20} />
+                <img
+                  src={settings.logo_url || '/pwa-icon.svg'}
+                  alt={settings.site_name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/pwa-icon.svg';
+                  }}
+                />
               </div>
               <h3 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
                 {settings.site_name}

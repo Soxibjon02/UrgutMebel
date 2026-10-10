@@ -20,7 +20,9 @@ import {
   Sparkles,
   SlidersHorizontal,
   Moon,
-  Sun
+  Sun,
+  Download,
+  Smartphone
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -146,6 +148,29 @@ export const Navbar = () => {
             </a>
             <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
             <span style={{ color: '#a8a29e', whiteSpace: 'nowrap' }}>Samarqand, Urgut</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-urgut-install-modal'))}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: 'rgba(194, 109, 46, 0.2)',
+                border: '1px solid rgba(194, 109, 46, 0.45)',
+                color: '#fbbf24',
+                padding: '0.15rem 0.55rem',
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              title="Urgut Mebel ilovasini o‘rnatish"
+            >
+              <Download size={12} />
+              <span>Ilovani o‘rnatish</span>
+            </button>
           </div>
         </div>
       </div>
@@ -162,37 +187,50 @@ export const Navbar = () => {
               alignItems: 'center',
               gap: '0.65rem',
               textDecoration: 'none',
-              flexShrink: 1,
-              minWidth: 0,
-              overflow: 'hidden'
+              flexShrink: 0,
+              minWidth: 0
             }}
+            className="navbar-brand-logo"
           >
             <div
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                background: 'var(--gold-gradient)',
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
-                boxShadow: '0 4px 12px rgba(194, 109, 46, 0.3)',
+                background: 'var(--bg-secondary)',
+                border: '1.5px solid rgba(194, 109, 46, 0.35)',
+                boxShadow: '0 3px 10px rgba(194, 109, 46, 0.2)',
                 flexShrink: 0
               }}
             >
-              <Sparkles size={20} />
+              <img
+                src={settings.logo_url || '/pwa-icon.svg'}
+                alt={settings.site_name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain'
+                }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/pwa-icon.svg';
+                }}
+              />
             </div>
             <div>
               <div
                 className="navbar-logo-title"
                 style={{
                   fontFamily: 'var(--font-heading)',
-                  fontSize: '1.25rem',
+                  fontSize: '1.1rem',
                   fontWeight: 800,
                   color: 'var(--text-main)',
                   lineHeight: 1.15,
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.015em',
                   whiteSpace: 'nowrap'
                 }}
               >
@@ -201,12 +239,13 @@ export const Navbar = () => {
               <div
                 className="navbar-logo-sub"
                 style={{
-                  fontSize: '0.66rem',
+                  fontSize: '0.58rem',
                   color: 'var(--wood-amber)',
                   fontWeight: 700,
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.05em',
                   textTransform: 'uppercase',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  marginTop: '1px'
                 }}
               >
                 Mebel & Dizayn Markazi
@@ -214,14 +253,15 @@ export const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links - Fixed Single Line & No Wrap */}
+          {/* Desktop Navigation Links - Fixed Single Line & Responsive */}
           <nav
             style={{
               display: 'none',
               alignItems: 'center',
-              gap: '1.25rem',
+              gap: '0.75rem',
               flexWrap: 'nowrap',
-              flexShrink: 0
+              flexShrink: 1,
+              minWidth: 0
             }}
             className="desktop-nav-container"
           >
@@ -230,7 +270,7 @@ export const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 style={({ isActive }) => ({
-                  fontSize: '0.92rem',
+                  fontSize: '0.85rem',
                   fontWeight: isActive ? 700 : 500,
                   color: isActive ? 'var(--wood-amber)' : 'var(--text-main)',
                   position: 'relative',
@@ -715,19 +755,55 @@ export const Navbar = () => {
               🛡️ Admin Paneli
             </Link>
           )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              window.dispatchEvent(new CustomEvent('open-urgut-install-modal'));
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.65rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(194, 109, 46, 0.1)',
+              border: '1px solid rgba(194, 109, 46, 0.25)',
+              color: 'var(--wood-amber)',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              marginTop: '0.75rem',
+              cursor: 'pointer',
+              width: '100%',
+              textAlign: 'left'
+            }}
+          >
+            <Download size={18} />
+            <span>📲 Ilovani O‘rnatish (PWA)</span>
+          </button>
         </div>
       )}
 
       {/* Responsive CSS helper */}
       <style>{`
-        @media (min-width: 980px) {
+        @media (min-width: 1100px) {
           .desktop-nav-container {
             display: flex !important;
           }
         }
-        @media (max-width: 979px) {
+        @media (max-width: 1099px) {
           .mobile-hamburger-btn {
             display: flex !important;
+          }
+        }
+        @media (min-width: 1100px) and (max-width: 1280px) {
+          .desktop-nav-container {
+            gap: 0.55rem !important;
+          }
+          .desktop-nav-container a {
+            font-size: 0.82rem !important;
+            padding: 0.3rem 0.15rem !important;
           }
         }
         @media (max-width: 768px) {
@@ -767,10 +843,6 @@ export const Navbar = () => {
           }
           .navbar-logo-title {
             font-size: 0.95rem !important;
-            max-width: 130px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
           }
           .navbar-logo-sub {
             display: none !important;
@@ -782,13 +854,9 @@ export const Navbar = () => {
           }
           .navbar-logo-title {
             font-size: 0.88rem !important;
-            max-width: 105px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
           }
           .navbar-actions-group {
-            gap: 0.35rem !important;
+            gap: 0.3rem !important;
           }
           .navbar-actions-group button,
           .navbar-actions-group a {

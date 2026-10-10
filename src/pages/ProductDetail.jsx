@@ -102,6 +102,15 @@ export const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    if (isGuest || !user) {
+      openAuthModal('login', 'Xarid qilish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      return;
+    }
+    if (user.role !== 'customer') {
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
+      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
+      return;
+    }
     addToCart(product, quantity, selectedColor);
     navigate('/checkout');
   };

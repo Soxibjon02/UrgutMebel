@@ -20,7 +20,9 @@ import {
   Sliders,
   Image as ImageIcon,
   Link as LinkIcon,
-  Loader2
+  Loader2,
+  ShieldAlert,
+  AlertTriangle
 } from 'lucide-react';
 import { uploadImageToSupabase } from '../lib/supabase';
 
@@ -132,8 +134,14 @@ export const CustomOrderPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isGuest) {
-      openAuthModal('login', 'Maxsus buyurtma yuborish uchun avval hisobingizga kiring!');
+    if (isGuest || !user) {
+      openAuthModal('login', 'Maxsus buyurtma yuborish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      return;
+    }
+
+    if (user.role !== 'customer') {
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
+      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
       return;
     }
 
@@ -142,6 +150,7 @@ export const CustomOrderPage = () => {
       const newOrder = await dataService.createCustomOrder({
         ...formData,
         user_id: user.id,
+        user_role: user.role,
         files: uploadedFiles,
         status: 'NEW'
       });
@@ -150,7 +159,7 @@ export const CustomOrderPage = () => {
       addToast(`Buyurtma muvaffaqiyatli yuborildi! Buyurtma raqami: ${newOrder.order_number}`, 'success');
     } catch (err) {
       console.error("Custom order error:", err);
-      addToast('Buyurtma yuborishda xatolik yuz berdi. Qayta urinib ko‘ring.', 'error');
+      addToast(err.message || 'Buyurtma yuborishda xatolik yuz berdi. Qayta urinib ko‘ring.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -256,6 +265,80 @@ export const CustomOrderPage = () => {
             Xonadon o‘lchamlari, siz yoqtirgan yog‘och turi, mato va ranglarni ko‘rsating. Menedjerlarimiz narxni hisoblab taklif yuborishadi.
           </p>
         </div>
+
+        {/* Warning banner for staff or guests */}
+        {user && user.role !== 'customer' && (
+          <div
+            style={{
+              backgroundColor: '#fef2f2',
+              border: '1.5px solid #f87171',
+              borderRadius: 'var(--radius-xl)',
+              padding: '1.25rem 1.75rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.08)'
+            }}
+          >
+            <div
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                backgroundColor: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <ShieldAlert size={26} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.25rem' }}>
+                Xodimlar hisobidan buyurtma berish taqiqlangan!
+              </h4>
+              <p style={{ fontSize: '0.88rem', color: '#b91c1c', margin: 0, lineHeight: 1.5 }}>
+                Siz hozirda <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz ({user.full_name || user.email}).
+                Tizimda chalkashliklar kelib chiqmasligi uchun <strong>faqatgina oddiy mijoz (user)</strong> buyurtma bera oladi.
+                Iltimos, buyurtma yuborish uchun mijoz hisobiga kiring!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {isGuest && (
+          <div
+            style={{
+              backgroundColor: 'rgba(194, 109, 46, 0.08)',
+              border: '1px solid rgba(194, 109, 46, 0.25)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '1rem 1.5rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <User size={20} color="var(--wood-amber)" />
+              <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                Maxsus buyurtma yuborish faqat ro‘yxatdan o‘tgan <strong>oddiy mijozlar</strong> uchun ochiq.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => openAuthModal('login', 'Buyurtma yuborish uchun mijoz hisobingizga kiring')}
+              className="btn btn-secondary btn-sm"
+            >
+              Mijoz hisobiga kirish
+            </button>
+          </div>
+        )}
 
         {/* Custom Order Form */}
         <form onSubmit={handleSubmit}>
@@ -749,11 +832,21 @@ export const CustomOrderPage = () => {
             <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.5rem' }}>
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || (user && user.role !== 'customer')}
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  fontSize: '1.1rem',
+                  opacity: (user && user.role !== 'customer') ? 0.6 : 1,
+                  cursor: (user && user.role !== 'customer') ? 'not-allowed' : 'pointer'
+                }}
               >
-                {submitting ? 'Yuborilmoqda...' : 'Buyurtmani Yuborish va Hisoblash'}
+                {user && user.role !== 'customer'
+                  ? 'Xodimlar hisobidan buyurtma berilmaydi (Faqat mijoz)'
+                  : submitting
+                  ? 'Yuborilmoqda...'
+                  : 'Buyurtmani Yuborish va Hisoblash'}
                 <ArrowRight size={20} />
               </button>
             </div>

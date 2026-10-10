@@ -15,6 +15,7 @@ import { Footer } from './components/Footer';
 import { Toast } from './components/Toast';
 import { AuthModal } from './components/AuthModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { InstallPromptModal } from './components/InstallPromptModal';
 
 // Pages
 import { Home } from './pages/Home';
@@ -84,6 +85,7 @@ function App() {
                     <MobileBottomNav />
                     <Toast />
                     <AuthModal />
+                    <InstallPromptModal />
                   </div>
                 </Router>
               </PwaProvider>

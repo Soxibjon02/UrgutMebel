@@ -4,11 +4,11 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
-import { CheckCircle2, ShieldCheck, Truck, CreditCard, Banknote, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Truck, CreditCard, Banknote, ArrowRight, ShieldAlert, User } from 'lucide-react';
 
 export const CheckoutPage = () => {
   const { cartItems, totalAmount, clearCart } = useCart();
-  const { user, isGuest } = useAuth();
+  const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
   const navigate = useNavigate();
 
@@ -36,6 +36,17 @@ export const CheckoutPage = () => {
       return;
     }
 
+    if (isGuest || !user) {
+      openAuthModal('login', 'Buyurtmani rasmiylashtirish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      return;
+    }
+
+    if (user.role !== 'customer') {
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
+      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       // Historical items snapshot preservation
@@ -51,7 +62,8 @@ export const CheckoutPage = () => {
 
       const newOrder = await dataService.createStandardOrder({
         ...formData,
-        user_id: user?.id || null,
+        user_id: user.id,
+        user_role: user.role,
         items: itemsSnapshot,
         total_amount: totalAmount,
         status: 'processing'
@@ -62,7 +74,7 @@ export const CheckoutPage = () => {
       addToast(`Buyurtma qabul qilindi! Raqami: ${newOrder.order_number}`, 'success');
     } catch (err) {
       console.error("Checkout error:", err);
-      addToast('Buyurtmani rasmiylashtirishda xatolik yuz berdi', 'error');
+      addToast(err.message || 'Buyurtmani rasmiylashtirishda xatolik yuz berdi', 'error');
     } finally {
       setLoading(false);
     }
@@ -146,6 +158,80 @@ export const CheckoutPage = () => {
         <h1 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '2rem' }}>
           Buyurtmani Rasmiylashtirish
         </h1>
+
+        {/* Warning banner for staff or guests */}
+        {user && user.role !== 'customer' && (
+          <div
+            style={{
+              backgroundColor: '#fef2f2',
+              border: '1.5px solid #f87171',
+              borderRadius: 'var(--radius-xl)',
+              padding: '1.25rem 1.75rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.08)'
+            }}
+          >
+            <div
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '50%',
+                backgroundColor: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <ShieldAlert size={26} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.25rem' }}>
+                Xodimlar hisobidan buyurtma berish taqiqlangan!
+              </h4>
+              <p style={{ fontSize: '0.88rem', color: '#b91c1c', margin: 0, lineHeight: 1.5 }}>
+                Siz hozirda <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz ({user.full_name || user.email}).
+                Chalkashliklarning oldini olish uchun faqatgina oddiy mijoz (user) buyurtma berishi mumkin.
+                Iltimos, xarid qilish uchun oddiy mijoz hisobiga kiring!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {isGuest && (
+          <div
+            style={{
+              backgroundColor: 'rgba(194, 109, 46, 0.08)',
+              border: '1px solid rgba(194, 109, 46, 0.25)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '1rem 1.5rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <User size={20} color="var(--wood-amber)" />
+              <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                Buyurtmani rasmiylashtirish uchun oddiy mijoz sifatida tizimga kiring.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => openAuthModal('login', 'Buyurtma berish uchun mijoz hisobingizga kiring')}
+              className="btn btn-secondary btn-sm"
+            >
+              Mijoz hisobiga kirish
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }} className="checkout-layout">
           
@@ -283,11 +369,20 @@ export const CheckoutPage = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (user && user.role !== 'customer')}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '0.95rem' }}
+              style={{
+                width: '100%',
+                padding: '0.95rem',
+                opacity: (user && user.role !== 'customer') ? 0.6 : 1,
+                cursor: (user && user.role !== 'customer') ? 'not-allowed' : 'pointer'
+              }}
             >
-              {loading ? 'Tasdiqlanmoqda...' : 'Buyurtmani Tasdiqlash'}
+              {user && user.role !== 'customer'
+                ? 'Xodimlar hisobidan buyurtma berilmaydi'
+                : loading
+                ? 'Tasdiqlanmoqda...'
+                : 'Buyurtmani Tasdiqlash'}
               <ArrowRight size={18} />
             </button>
           </div>
