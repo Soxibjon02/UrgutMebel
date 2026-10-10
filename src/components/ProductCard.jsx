@@ -34,7 +34,8 @@ export const ProductCard = ({ product }) => {
         position: 'relative',
         transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
         boxShadow: 'var(--shadow-sm)',
-        backdropFilter: 'blur(10px)'
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)'
       }}
       className="product-card furniture-card glass-card"
     >
@@ -44,7 +45,7 @@ export const ProductCard = ({ product }) => {
           position: 'relative',
           paddingTop: '75%', // 4:3 Aspect ratio
           overflow: 'hidden',
-          backgroundColor: 'var(--bg-secondary)'
+          backgroundColor: 'transparent'
         }}
       >
         <Link to={`/furniture/${product.id}`} style={{ position: 'absolute', inset: 0 }}>

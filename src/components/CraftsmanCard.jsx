@@ -16,7 +16,8 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
         flexDirection: 'column',
         boxShadow: 'var(--shadow-sm)',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        backdropFilter: 'blur(8px)'
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)'
       }}
       className="craftsman-card glass-card"
     >

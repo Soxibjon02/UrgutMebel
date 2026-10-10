@@ -207,7 +207,7 @@ export const Home = () => {
 
       {/* 4. POPULAR FURNITURE */}
       {popularProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -234,12 +234,15 @@ export const Home = () => {
         <div className="container">
           <div
             style={{
-              backgroundColor: 'var(--bg-dark)',
+              backgroundColor: 'var(--glass-bg)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid var(--glass-border)',
               borderRadius: 'var(--radius-xl)',
               overflow: 'hidden',
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-              boxShadow: 'var(--shadow-lg)'
+              boxShadow: 'var(--glass-shadow)'
             }}
           >
             <div style={{ padding: 'clamp(2rem, 5vw, 4rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -333,7 +336,7 @@ export const Home = () => {
 
       {/* 6. BEDROOM FURNITURE */}
       {bedroomProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -379,7 +382,7 @@ export const Home = () => {
 
       {/* 8. OFFICE FURNITURE */}
       {officeProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -425,7 +428,7 @@ export const Home = () => {
 
       {/* 10. DISCOUNTED FURNITURE */}
       {discountedProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -447,7 +450,7 @@ export const Home = () => {
       )}
 
       {/* 12. CRAFTSMEN PREVIEW */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-secondary)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div className="container">
           <div className="section-header">
             <div>
