@@ -25,19 +25,16 @@ export const ProductCard = ({ product }) => {
   return (
     <div
       style={{
-        backgroundColor: 'var(--bg-card)',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--border-subtle)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: 'var(--shadow-sm)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)'
       }}
-      className="product-card furniture-card glass-card"
+      className="product-card furniture-card"
     >
       {/* Image Container with Badges & Actions */}
       <div
@@ -256,11 +253,6 @@ export const ProductCard = ({ product }) => {
       </div>
 
       <style>{`
-        .product-card:hover {
-          transform: translateY(-6px);
-          box-shadow: var(--shadow-hover);
-          border-color: rgba(194, 109, 46, 0.3);
-        }
         .product-card:hover .product-card-img {
           transform: scale(1.05);
         }
