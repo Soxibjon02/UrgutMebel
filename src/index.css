@@ -1094,3 +1094,23 @@ img {
   }
 }
 
+/* Animated Furniture Background Overlay */
+.animated-furniture-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(252, 251, 249, 0.45) 0%,
+    rgba(252, 251, 249, 0.65) 50%,
+    rgba(246, 243, 238, 0.5) 100%
+  );
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .animated-furniture-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(12, 10, 9, 0.72) 0%,
+    rgba(12, 10, 9, 0.8) 50%,
+    rgba(20, 18, 16, 0.75) 100%
+  );
+}
+

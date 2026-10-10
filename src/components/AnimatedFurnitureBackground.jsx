@@ -1,9 +1,15 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export const AnimatedFurnitureBackground = ({
-  overlayOpacity = 0.55,
   showControls = true
 }) => {
+  const location = useLocation();
+  // Don't render 3D canvas inside admin/manager/craftsman workspace dashboards
+  const isDashboard = location.pathname.startsWith('/admin') ||
+                      location.pathname.startsWith('/manager') ||
+                      location.pathname.startsWith('/craftsman');
+
   const canvasRef = useRef(null);
   const [isPhone, setIsPhone] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const [currentFrame, setCurrentFrame] = useState(1);
@@ -119,6 +125,8 @@ export const AnimatedFurnitureBackground = ({
 
   // Window resize listener to switch between phone & comp
   useEffect(() => {
+    if (isDashboard) return;
+
     const handleResize = () => {
       const phoneMode = window.innerWidth < 768;
       if (phoneMode !== isPhoneRef.current) {
@@ -142,10 +150,12 @@ export const AnimatedFurnitureBackground = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [findClosestFrame, getImagePath, renderFrame]);
+  }, [findClosestFrame, getImagePath, isDashboard, renderFrame]);
 
   // Progressive background preloader of 300 frames
   useEffect(() => {
+    if (isDashboard) return;
+
     let isCancelled = false;
     const phone = isPhone;
 
@@ -198,10 +208,12 @@ export const AnimatedFurnitureBackground = ({
     return () => {
       isCancelled = true;
     };
-  }, [getImagePath, isPhone, renderFrame]);
+  }, [getImagePath, isDashboard, isPhone, renderFrame]);
 
   // SCROLL EVENT LISTENER: Only rotates when the user scrolls!
   useEffect(() => {
+    if (isDashboard) return;
+
     const handleScroll = () => {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
 
@@ -241,13 +253,17 @@ export const AnimatedFurnitureBackground = ({
       window.removeEventListener('scroll', handleScroll);
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-  }, [TOTAL_FRAMES, renderLoop]);
+  }, [TOTAL_FRAMES, isDashboard, renderLoop]);
+
+  if (isDashboard) return null;
 
   return (
     <div
       style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
+        width: '100vw',
+        height: '100vh',
         overflow: 'hidden',
         pointerEvents: 'none',
         zIndex: 0
@@ -266,41 +282,39 @@ export const AnimatedFurnitureBackground = ({
         }}
       />
 
-      {/* Atmospheric Cinematic Gradients for Readability and Contrast */}
+      {/* Atmospheric Theme-aware Scrim Overlay for Readability and Contrast */}
       <div
+        className="animated-furniture-overlay"
         style={{
           position: 'absolute',
           inset: 0,
-          background: isPhone
-            ? 'linear-gradient(to bottom, rgba(12,10,9,0.88) 0%, rgba(12,10,9,0.48) 50%, rgba(12,10,9,0.92) 100%)'
-            : 'linear-gradient(to right, rgba(12,10,9,0.92) 0%, rgba(12,10,9,0.65) 55%, rgba(12,10,9,0.3) 100%)',
           pointerEvents: 'none'
         }}
       />
 
-      {/* Subtle Warm Amber Glow Accent */}
+      {/* Subtle Warm Amber Light Accent */}
       <div
         style={{
           position: 'absolute',
-          top: '-20%',
+          top: '-15%',
           left: '-10%',
-          width: '600px',
-          height: '600px',
+          width: '550px',
+          height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(194, 109, 46, 0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(194, 109, 46, 0.12) 0%, transparent 70%)',
           filter: 'blur(60px)',
           pointerEvents: 'none'
         }}
       />
 
-      {/* Bottom right indicator: shows user that scrolling rotates the 3D model */}
+      {/* Fixed bottom right indicator: shows user that scrolling rotates the 3D model */}
       {showControls && (
         <div
           style={{
-            position: 'absolute',
-            bottom: '1.25rem',
+            position: 'fixed',
+            bottom: isPhone ? '4.8rem' : '1.35rem',
             right: '1.25rem',
-            zIndex: 10,
+            zIndex: 40,
             display: 'flex',
             alignItems: 'center',
             gap: '0.65rem',
