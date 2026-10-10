@@ -231,20 +231,8 @@ export const Home = () => {
       {/* 11. CUSTOM ORDER PROMOTIONAL SECTION */}
       <section style={{ padding: '4.5rem 0' }}>
         <div className="container">
-          <div
-            style={{
-              backgroundColor: 'var(--glass-bg)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid var(--glass-border)',
-              borderRadius: 'var(--radius-xl)',
-              overflow: 'hidden',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-              boxShadow: 'var(--glass-shadow)'
-            }}
-          >
-            <div style={{ padding: 'clamp(2rem, 5vw, 4rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="custom-order-promo-card">
+            <div style={{ padding: 'clamp(1.5rem, 5vw, 3.5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div
                 style={{
                   display: 'inline-flex',
@@ -262,11 +250,11 @@ export const Home = () => {
               </div>
               <h2
                 style={{
-                  fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)',
+                  fontSize: 'clamp(1.5rem, 3.5vw, 2.5rem)',
                   fontWeight: 800,
                   color: 'var(--text-main)',
                   marginBottom: '1rem',
-                  lineHeight: 1.2
+                  lineHeight: 1.25
                 }}
               >
                 O‘zingiz Istagan O‘lchamda Mebel Yasating
@@ -291,21 +279,14 @@ export const Home = () => {
               </div>
 
               <div>
-                <Link to="/custom-order" className="btn btn-primary btn-lg">
+                <Link to="/custom-order" className="btn btn-primary btn-lg" style={{ width: 'fit-content', maxWidth: '100%' }}>
                   <PenTool size={18} />
                   <span>Maxsus Buyurtma Shaklini To‘ldirish</span>
                 </Link>
               </div>
             </div>
 
-            <div
-              style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80')",
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                minHeight: '350px'
-              }}
-            />
+            <div className="custom-order-promo-img" />
           </div>
         </div>
       </section>

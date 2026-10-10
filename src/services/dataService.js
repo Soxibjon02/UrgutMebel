@@ -33,9 +33,24 @@ const setStored = (key, value, broadcast = false) => {
   }
 };
 
-// ==========================================
-// 1. SETTINGS (PLATFORM TITLE & SITE CONFIG)
-// ==========================================
+// Whitelist only columns existing in Supabase public.settings table
+const sanitizeSettingsPayload = (settingsObj = {}) => {
+  const VALID_SETTINGS_COLS = [
+    'id', 'site_name', 'site_tagline', 'phone', 'email', 'address',
+    'telegram', 'instagram', 'currency', 'hero_badge', 'hero_banner_image',
+    'announcement', 'working_hours', 'footer_about', 'copyright_text',
+    'feature1_title', 'feature1_desc', 'feature2_title', 'feature2_desc',
+    'feature3_title', 'feature3_desc', 'updated_at'
+  ];
+  const payload = { id: '1', updated_at: new Date().toISOString() };
+  for (const col of VALID_SETTINGS_COLS) {
+    if (settingsObj[col] !== undefined) {
+      payload[col] = settingsObj[col];
+    }
+  }
+  return payload;
+};
+
 export const dataService = {
   // Settings
   async getSettings() {
@@ -48,7 +63,8 @@ export const dataService = {
         }
         // If settings table is empty, seed it with current settings
         const current = getStored('settings', initialSettings);
-        await supabase.from('settings').upsert({ id: '1', ...current });
+        const payload = sanitizeSettingsPayload(current);
+        await supabase.from('settings').upsert(payload);
         return current;
       } catch (e) {
         console.warn('Supabase getSettings error:', e);
@@ -66,10 +82,17 @@ export const dataService = {
     setStored('settings', updated, true);
 
     if (isSupabaseConfigured && supabase) {
+      const payload = sanitizeSettingsPayload(updated);
+
       try {
-        await supabase.from('settings').upsert({ id: '1', ...updated });
+        const { error } = await supabase.from('settings').upsert(payload);
+        if (error) {
+          console.error('Supabase updateSettings error:', error);
+          throw error;
+        }
       } catch (e) {
-        console.warn('Supabase updateSettings error:', e);
+        console.error('Supabase updateSettings exception:', e);
+        throw e;
       }
     }
     return updated;

@@ -37,7 +37,8 @@ import {
   Database,
   ExternalLink,
   Copy,
-  Menu
+  Menu,
+  Loader2
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
@@ -69,6 +70,7 @@ export const AdminDashboard = () => {
   const [editingCraftsman, setEditingCraftsman] = useState(null);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [editingManager, setEditingManager] = useState(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Settings Form (Web Loyiha Nomi, Header & Footer o'zgartirish)
   const [settingsForm, setSettingsForm] = useState({
@@ -203,7 +205,8 @@ export const AdminDashboard = () => {
       feature2_desc: settings.feature2_desc || 'Har bir mebel uchun 3 yildan 5 yilgacha sifat kafolati',
       feature3_title: settings.feature3_title || 'Urgut Duradgorlari',
       feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi',
-      hero_banner_image: settings.hero_banner_image || ''
+      hero_banner_image: settings.hero_banner_image || '',
+      logo_url: settings.logo_url || '/pwa-icon.svg'
     });
   }, [settings]);
 
@@ -230,11 +233,19 @@ export const AdminDashboard = () => {
     );
   }
 
-  // Handle Settings Save (Web Loyiha Nomini o'zgartirish)
+  // Handle Settings Save (Web Loyiha Nomini o'zgartirish va Supabase-ga to'g'ridan-to'g'ri saqlash)
   const handleSaveSettings = async (e) => {
     e.preventDefault();
-    await updateSettings(settingsForm);
-    addToast(`Tizim sozlamalari saqlandi! Loyiha nomi: "${settingsForm.site_name}" ga o‘zgartirildi. Barcha joyda aks etdi.`, 'success');
+    setIsSavingSettings(true);
+    try {
+      await updateSettings(settingsForm);
+      addToast(`Barcha sozlamalar Supabase bazasiga muvaffaqiyatli saqlandi va saytda yangilandi!`, 'success');
+    } catch (err) {
+      console.error(err);
+      addToast(`Xatolik: Sozlamalarni saqlashda xatolik yuz berdi (${err.message || 'Supabase xatosi'})`, 'error');
+    } finally {
+      setIsSavingSettings(false);
+    }
   };
 
   // Products CRUD
@@ -461,9 +472,10 @@ export const AdminDashboard = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 999,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            zIndex: 9999,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start'
@@ -472,29 +484,29 @@ export const AdminDashboard = () => {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: 'var(--bg-card)',
+              backgroundColor: 'var(--bg-primary)',
               color: 'var(--text-main)',
               padding: '1.25rem',
-              borderBottomLeftRadius: '20px',
-              borderBottomRightRadius: '20px',
-              boxShadow: 'var(--shadow-lg)',
-              borderBottom: '1px solid var(--border-subtle)',
-              maxHeight: '80vh',
+              borderBottomLeftRadius: '22px',
+              borderBottomRightRadius: '22px',
+              boxShadow: 'var(--shadow-xl)',
+              borderBottom: '1.5px solid var(--border-subtle)',
+              maxHeight: '82vh',
               overflowY: 'auto'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
-              <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--wood-amber)' }}>Admin Bo‘limlari</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--wood-amber)' }}>Admin Bo‘limlari</div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '4px' }}
               >
-                <X size={20} />
+                <X size={22} />
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
               {adminTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -509,20 +521,23 @@ export const AdminDashboard = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.6rem',
-                      padding: '0.75rem 0.85rem',
+                      gap: '0.55rem',
+                      padding: '0.75rem 0.8rem',
                       borderRadius: 'var(--radius-md)',
-                      fontSize: '0.85rem',
+                      fontSize: '0.82rem',
                       fontWeight: 600,
-                      color: isActive ? '#ffffff' : 'var(--text-muted)',
+                      color: isActive ? '#ffffff' : 'var(--text-main)',
                       backgroundColor: isActive ? 'var(--wood-amber)' : 'var(--bg-secondary)',
-                      border: '1px solid var(--border-subtle)',
+                      border: isActive ? '1px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
                       textAlign: 'left',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      minHeight: '48px',
+                      boxShadow: isActive ? '0 4px 12px rgba(194, 109, 46, 0.3)' : 'none',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <Icon size={16} />
-                    <span>{tab.label}</span>
+                    <Icon size={16} style={{ flexShrink: 0 }} />
+                    <span style={{ lineHeight: 1.25 }}>{tab.label}</span>
                   </button>
                 );
               })}
@@ -1047,9 +1062,11 @@ export const AdminDashboard = () => {
                 backgroundColor: 'var(--bg-card)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: 'var(--radius-xl)',
-                padding: '2.5rem',
+                padding: 'clamp(1.2rem, 4vw, 2.5rem)',
                 border: '1.5px solid var(--wood-light)',
-                boxShadow: 'var(--shadow-sm)'
+                boxShadow: 'var(--shadow-sm)',
+                boxSizing: 'border-box',
+                width: '100%'
               }}
               className="glass-card"
             >
@@ -1267,55 +1284,30 @@ export const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* SUPABASE SYNC BUTTON */}
-              <div style={{ marginTop: '1.5rem', padding: '1.25rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div>
-                    <strong style={{ color: '#10b981', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Database size={16} /> Supabase Ma’lumotlar Bazasi va Sinxronlash
-                    </strong>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                      Super Admin kiritgan barcha o‘zgarishlar, o‘chirilgan va yangi qo‘shilgan ustalar hamda mebellarni Supabase bulutli bazasiga to‘liq saqlaydi.
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      onClick={handleCopySql}
-                      className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '0.8rem', fontWeight: 600 }}
-                    >
-                      {copiedSql ? <Check size={14} /> : <Copy size={14} />}
-                      {copiedSql ? 'SQL Nusxalandi!' : 'SQL Kodni Nusxalash'}
-                    </button>
-                    <a
-                      href="https://supabase.com/dashboard/project/hlnzxwcupwaaxrutvnvb/sql/new"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--gold-accent)' }}
-                    >
-                      <ExternalLink size={14} /> SQL Editor
-                    </a>
-                    <button
-                      type="button"
-                      onClick={handleSyncSupabase}
-                      disabled={isSyncing}
-                      className="btn btn-secondary btn-sm"
-                      style={{ backgroundColor: 'var(--bg-card)', color: '#10b981', fontWeight: 700, border: '1px solid rgba(16, 185, 129, 0.35)' }}
-                    >
-                      {isSyncing ? 'Yozilmoqda...' : '🔄 Barchasini Supabase-ga Yozish'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               <button
                 type="submit"
+                disabled={isSavingSettings}
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginTop: '1.5rem' }}
+                style={{
+                  width: '100%',
+                  marginTop: '1.75rem',
+                  padding: '0.9rem 1.25rem',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.6rem'
+                }}
               >
-                Barcha Sozlamalarni Saqlash va Saytda Yangilash
+                {isSavingSettings ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Supabase-ga Saqlanmoqda...</span>
+                  </>
+                ) : (
+                  <span>Barcha Sozlamalarni Saqlash va Saytda Yangilash</span>
+                )}
               </button>
             </form>
           </div>
