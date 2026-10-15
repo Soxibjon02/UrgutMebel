@@ -25,16 +25,17 @@ export const ProductCard = ({ product }) => {
   return (
     <div
       style={{
+        backgroundColor: 'var(--bg-card)',
         borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--border-subtle)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)'
+        boxShadow: 'var(--shadow-sm)'
       }}
-      className="product-card furniture-card"
+      className="product-card furniture-card glass-card"
     >
       {/* Image Container with Badges & Actions */}
       <div
@@ -42,7 +43,7 @@ export const ProductCard = ({ product }) => {
           position: 'relative',
           paddingTop: '75%', // 4:3 Aspect ratio
           overflow: 'hidden',
-          backgroundColor: 'transparent'
+          backgroundColor: 'var(--bg-secondary)'
         }}
       >
         <Link to={`/furniture/${product.id}`} style={{ position: 'absolute', inset: 0 }}>

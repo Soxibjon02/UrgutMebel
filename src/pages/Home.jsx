@@ -82,14 +82,35 @@ export const Home = () => {
       <section
         style={{
           position: 'relative',
-          minHeight: '640px',
+          minHeight: '580px',
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'transparent',
-          overflow: 'hidden'
+          backgroundColor: 'var(--bg-dark)',
+          overflow: 'hidden',
+          color: '#ffffff'
         }}
       >
-        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '5rem 1.5rem' }}>
+        {/* Background Image with Overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url('${activeBanner.image_url}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.38,
+            transition: 'background-image 0.5s ease-in-out'
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to right, rgba(20,20,19,0.95) 0%, rgba(20,20,19,0.7) 60%, rgba(20,20,19,0.4) 100%)'
+          }}
+        />
+
+        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '4.5rem 1.5rem' }}>
           <div style={{ maxWidth: '680px' }}>
             <div
               style={{
@@ -97,7 +118,7 @@ export const Home = () => {
                 alignItems: 'center',
                 gap: '0.5rem',
                 backgroundColor: 'rgba(194, 109, 46, 0.25)',
-                backdropFilter: 'blur(8px)',
+                backdropFilter: 'blur(6px)',
                 padding: '0.4rem 1rem',
                 borderRadius: 'var(--radius-full)',
                 color: 'var(--wood-light)',
@@ -117,7 +138,7 @@ export const Home = () => {
                 fontSize: 'clamp(2.3rem, 5vw, 3.8rem)',
                 fontWeight: 800,
                 lineHeight: 1.15,
-                color: 'var(--text-main)',
+                color: '#ffffff',
                 marginBottom: '1.25rem',
                 letterSpacing: '-0.02em'
               }}
@@ -128,7 +149,7 @@ export const Home = () => {
             <p
               style={{
                 fontSize: 'clamp(1rem, 1.8vw, 1.18rem)',
-                color: 'var(--text-muted)',
+                color: '#d6d3d1',
                 lineHeight: 1.6,
                 marginBottom: '2rem'
               }}
@@ -145,10 +166,9 @@ export const Home = () => {
                 to="/furniture"
                 className="btn btn-secondary btn-lg"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(10px)',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
                   color: '#fff',
-                  borderColor: 'rgba(255,255,255,0.25)'
+                  borderColor: 'rgba(255,255,255,0.2)'
                 }}
               >
                 <span>Katalogni Ko‘rish</span>
@@ -206,7 +226,7 @@ export const Home = () => {
 
       {/* 4. POPULAR FURNITURE */}
       {popularProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -316,7 +336,7 @@ export const Home = () => {
 
       {/* 6. BEDROOM FURNITURE */}
       {bedroomProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -362,7 +382,7 @@ export const Home = () => {
 
       {/* 8. OFFICE FURNITURE */}
       {officeProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -408,7 +428,7 @@ export const Home = () => {
 
       {/* 10. DISCOUNTED FURNITURE */}
       {discountedProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'transparent' }}>
+        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -430,7 +450,7 @@ export const Home = () => {
       )}
 
       {/* 12. CRAFTSMEN PREVIEW */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: 'transparent' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
         <div className="container">
           <div className="section-header">
             <div>
