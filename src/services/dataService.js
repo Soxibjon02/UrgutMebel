@@ -48,6 +48,44 @@ const sanitizeSettingsPayload = (settingsObj = {}) => {
       payload[col] = settingsObj[col];
     }
   }
+
+  // Pack about_* fields into footer_about JSON bundle for Supabase persistence
+  let baseFooterText = settingsObj.footer_about || "Urgutning asriy duradgorlik san'ati va zamonaviy uslub uyg'unligi.";
+  if (typeof baseFooterText === 'string' && baseFooterText.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(baseFooterText);
+      baseFooterText = parsed.footer_text || parsed.footer_about || '';
+    } catch {}
+  }
+
+  const aboutBundle = {
+    footer_text: baseFooterText,
+    about_title: settingsObj.about_title,
+    about_subtitle: settingsObj.about_subtitle,
+    about_badge: settingsObj.about_badge,
+    about_story_title: settingsObj.about_story_title,
+    about_story_p1: settingsObj.about_story_p1,
+    about_story_p2: settingsObj.about_story_p2,
+    about_image_url: settingsObj.about_image_url,
+    about_btn_text: settingsObj.about_btn_text,
+    about_btn_url: settingsObj.about_btn_url,
+    about_stat1_number: settingsObj.about_stat1_number,
+    about_stat1_label: settingsObj.about_stat1_label,
+    about_stat2_number: settingsObj.about_stat2_number,
+    about_stat2_label: settingsObj.about_stat2_label,
+    about_stat3_number: settingsObj.about_stat3_number,
+    about_stat3_label: settingsObj.about_stat3_label,
+    about_stat4_number: settingsObj.about_stat4_number,
+    about_stat4_label: settingsObj.about_stat4_label,
+    about_val1_title: settingsObj.about_val1_title,
+    about_val1_desc: settingsObj.about_val1_desc,
+    about_val2_title: settingsObj.about_val2_title,
+    about_val2_desc: settingsObj.about_val2_desc,
+    about_val3_title: settingsObj.about_val3_title,
+    about_val3_desc: settingsObj.about_val3_desc
+  };
+  payload.footer_about = JSON.stringify(aboutBundle);
+
   return payload;
 };
 
@@ -59,7 +97,17 @@ export const dataService = {
         const { data, error } = await supabase.from('settings').select('*').single();
         if (!error && data) {
           const current = getStored('settings', initialSettings);
-          const merged = { ...current, ...data };
+          let extraAbout = {};
+          let cleanFooterAbout = data.footer_about;
+          if (data.footer_about && typeof data.footer_about === 'string' && data.footer_about.trim().startsWith('{')) {
+            try {
+              extraAbout = JSON.parse(data.footer_about);
+              cleanFooterAbout = extraAbout.footer_text || extraAbout.footer_about || '';
+            } catch (err) {
+              console.warn('Error parsing footer_about json in getSettings:', err);
+            }
+          }
+          const merged = { ...current, ...data, ...extraAbout, footer_about: cleanFooterAbout };
           setStored('settings', merged, false);
           return merged;
         }

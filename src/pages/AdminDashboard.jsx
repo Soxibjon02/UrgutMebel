@@ -38,7 +38,8 @@ import {
   ExternalLink,
   Copy,
   Menu,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
@@ -98,7 +99,32 @@ export const AdminDashboard = () => {
     feature3_title: settings.feature3_title || '',
     feature3_desc: settings.feature3_desc || '',
     hero_banner_image: settings.hero_banner_image || '',
-    logo_url: settings.logo_url || '/pwa-icon.svg'
+    logo_url: settings.logo_url || '/pwa-icon.svg',
+
+    // Biz Haqimizda (About Page) fields
+    about_title: settings.about_title || 'Urgut Mebel Markazi Haqida',
+    about_subtitle: settings.about_subtitle || settings.site_tagline || "Urgutning asriy duradgorlik san'ati va zamonaviy uslub uyg'unligi",
+    about_badge: settings.about_badge || 'Tarix & Mahorat',
+    about_story_title: settings.about_story_title || 'Urgut Duradgorlarining Asriy Merosi',
+    about_story_p1: settings.about_story_p1 || "Samarqand viloyatining Urgut tumani qadim zamonlardan beri hunarmandchilik, ayniqsa yog‘ochsozlik va mebelchilik maktabi bilan butun O‘rta Osiyoda dong taratgan.",
+    about_story_p2: settings.about_story_p2 || "Biz ushbu asriy tajribani eng so‘nggi Germaniya va Italiya texnologiyalari (CNC kesish, avstriyalik Blum fitinglari, ekologik xavfsiz bo‘yoqlar) bilan birlashtirib, har bir xonadonga ko‘p yillar xizmat qiluvchi hashamatli va qulay mebellarni taqdim etamiz.",
+    about_image_url: settings.about_image_url || 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?auto=format&fit=crop&w=800&q=80',
+    about_btn_text: settings.about_btn_text || 'Maxsus Buyurtma Berish',
+    about_btn_url: settings.about_btn_url || '/custom-order',
+    about_stat1_number: settings.about_stat1_number || '25+',
+    about_stat1_label: settings.about_stat1_label || 'Yillik Tajriba',
+    about_stat2_number: settings.about_stat2_number || '10,000+',
+    about_stat2_label: settings.about_stat2_label || 'Tayyorlangan Mebellar',
+    about_stat3_number: settings.about_stat3_number || '98%',
+    about_stat3_label: settings.about_stat3_label || 'Mamnun Mijozlar',
+    about_stat4_number: settings.about_stat4_number || '5 Yil',
+    about_stat4_label: settings.about_stat4_label || 'Rasmiy Kafolat',
+    about_val1_title: settings.about_val1_title || '100% Tabiiy Massiv',
+    about_val1_desc: settings.about_val1_desc || 'Quritilgan eman, yong‘oq va qarag‘ay daraxtlaridan foydalanamiz. Mebellar yorilmaydi va qiyshaymaydi.',
+    about_val2_title: settings.about_val2_title || 'Rasmiy Kafolat',
+    about_val2_desc: settings.about_val2_desc || 'Har bir ishlab chiqarilgan mebel uchun 3 yildan 5 yilgacha rasmiy kafolat va servis xizmati beriladi.',
+    about_val3_title: settings.about_val3_title || '200+ Mohir Usta',
+    about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.'
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -210,7 +236,31 @@ export const AdminDashboard = () => {
       feature3_title: settings.feature3_title || 'Urgut Duradgorlari',
       feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi',
       hero_banner_image: settings.hero_banner_image || '',
-      logo_url: settings.logo_url || '/pwa-icon.svg'
+      logo_url: settings.logo_url || '/pwa-icon.svg',
+
+      about_title: settings.about_title || 'Urgut Mebel Markazi Haqida',
+      about_subtitle: settings.about_subtitle || settings.site_tagline || "Urgutning asriy duradgorlik san'ati va zamonaviy uslub uyg'unligi",
+      about_badge: settings.about_badge || 'Tarix & Mahorat',
+      about_story_title: settings.about_story_title || 'Urgut Duradgorlarining Asriy Merosi',
+      about_story_p1: settings.about_story_p1 || "Samarqand viloyatining Urgut tumani qadim zamonlardan beri hunarmandchilik, ayniqsa yog‘ochsozlik va mebelchilik maktabi bilan butun O‘rta Osiyoda dong taratgan.",
+      about_story_p2: settings.about_story_p2 || "Biz ushbu asriy tajribani eng so‘nggi Germaniya va Italiya texnologiyalari (CNC kesish, avstriyalik Blum fitinglari, ekologik xavfsiz bo‘yoqlar) bilan birlashtirib, har bir xonadonga ko‘p yillar xizmat qiluvchi hashamatli va qulay mebellarni taqdim etamiz.",
+      about_image_url: settings.about_image_url || 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?auto=format&fit=crop&w=800&q=80',
+      about_btn_text: settings.about_btn_text || 'Maxsus Buyurtma Berish',
+      about_btn_url: settings.about_btn_url || '/custom-order',
+      about_stat1_number: settings.about_stat1_number || '25+',
+      about_stat1_label: settings.about_stat1_label || 'Yillik Tajriba',
+      about_stat2_number: settings.about_stat2_number || '10,000+',
+      about_stat2_label: settings.about_stat2_label || 'Tayyorlangan Mebellar',
+      about_stat3_number: settings.about_stat3_number || '98%',
+      about_stat3_label: settings.about_stat3_label || 'Mamnun Mijozlar',
+      about_stat4_number: settings.about_stat4_number || '5 Yil',
+      about_stat4_label: settings.about_stat4_label || 'Rasmiy Kafolat',
+      about_val1_title: settings.about_val1_title || '100% Tabiiy Massiv',
+      about_val1_desc: settings.about_val1_desc || 'Quritilgan eman, yong‘oq va qarag‘ay daraxtlaridan foydalanamiz. Mebellar yorilmaydi va qiyshaymaydi.',
+      about_val2_title: settings.about_val2_title || 'Rasmiy Kafolat',
+      about_val2_desc: settings.about_val2_desc || 'Har bir ishlab chiqarilgan mebel uchun 3 yildan 5 yilgacha rasmiy kafolat va servis xizmati beriladi.',
+      about_val3_title: settings.about_val3_title || '200+ Mohir Usta',
+      about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.'
     });
   }, [settings]);
 
@@ -247,6 +297,20 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err);
       addToast(`Xatolik: Sozlamalarni saqlashda xatolik yuz berdi (${err.message || 'Supabase xatosi'})`, 'error');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleSaveAbout = async (e) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      await updateSettings(settingsForm);
+      addToast(`"Biz Haqimizda" ma‘lumotlari saqlandi va saytda yangilandi!`, 'success');
+    } catch (err) {
+      console.error(err);
+      addToast(`Xatolik: ${err.message || 'Saqlashda xatolik yuz berdi'}`, 'error');
     } finally {
       setIsSavingSettings(false);
     }
@@ -468,6 +532,7 @@ export const AdminDashboard = () => {
     { id: 'comments', label: `Sharhlar (${comments.length})`, shortLabel: `Sharhlar (${comments.length})`, icon: MessageSquare },
     { id: 'managers', label: `Menedjerlar (${managers.length})`, shortLabel: `Menedjerlar (${managers.length})`, icon: Users },
     { id: 'users', label: `Foydalanuvchilar (${usersList.length})`, shortLabel: `Foydalanuvchilar (${usersList.length})`, icon: Users },
+    { id: 'about', label: 'Biz Haqimizda Boshqaruvi', shortLabel: 'Biz Haqimizda', icon: Info },
     { id: 'settings', label: 'Tizim & Sayt Nomi', shortLabel: 'Sozlamalar', icon: SettingsIcon }
   ];
 
@@ -1223,6 +1288,354 @@ export const AdminDashboard = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* TAB: BIZ HAQIMIZDA BOSHQARUVI */}
+        {activeTab === 'about' && (
+          <div style={{ maxWidth: '920px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <span className="section-tag" style={{ color: 'var(--gold-accent)' }}>SAHIFA VA MAZMUN BOSHQARUVI</span>
+                <h2 style={{ fontSize: '2rem', fontWeight: 800 }}>"Biz Haqimizda" Sahifasi Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.2rem' }}>
+                  Saytning <code>/about</code> sahifasidagi barcha matnlar, sarlavhalar, tarix, suratlar, statistika va tamoyillarni o‘zingiz istagandek o‘zgartiring.
+                </p>
+              </div>
+              <a
+                href="/about"
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary btn-sm"
+                style={{ gap: '0.5rem', fontWeight: 700 }}
+              >
+                <Eye size={16} /> Saytda Ko‘rish
+              </a>
+            </div>
+
+            <form
+              onSubmit={handleSaveAbout}
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'clamp(1.2rem, 4vw, 2.5rem)',
+                border: '1.5px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-sm)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.75rem'
+              }}
+              className="glass-card"
+            >
+              {/* 1. SAHIFA BOSH QISMI (HERO & INTRO) */}
+              <div style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--wood-amber)', marginBottom: '1.25rem' }}>
+                  1. Sahifa Sarlavhasi va Nishoni
+                </h3>
+
+                <div className="dashboard-form-row">
+                  <div className="form-group">
+                    <label className="form-label">Kichik Nishon (Badge matni)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_badge || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_badge: e.target.value })}
+                      placeholder="Masalan: Tarix & Mahorat"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Sahifa Asosiy Sarlavhasi (H1) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={settingsForm.about_title || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_title: e.target.value })}
+                      placeholder="Masalan: Urgut Mebel Markazi Haqida"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Qisqa Shior / Tavsif (Tagline)</label>
+                  <input
+                    type="text"
+                    value={settingsForm.about_subtitle || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, about_subtitle: e.target.value })}
+                    placeholder="Urgutning asriy duradgorlik san'ati va zamonaviy uslub uyg'unligi"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* 2. TARIX VA ASOSIY MATN (STORY SECTION) */}
+              <div style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--wood-amber)', marginBottom: '1.25rem' }}>
+                  2. Kompaniya Tarixi va Faoliyati
+                </h3>
+
+                <div className="form-group">
+                  <label className="form-label">Bo‘lim Sarlavhasi (H2)</label>
+                  <input
+                    type="text"
+                    value={settingsForm.about_story_title || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, about_story_title: e.target.value })}
+                    placeholder="Masalan: Urgut Duradgorlarining Asriy Merosi"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">1-Asosiy Paragraf (Tarix va an'analar)</label>
+                  <textarea
+                    rows={3}
+                    value={settingsForm.about_story_p1 || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, about_story_p1: e.target.value })}
+                    placeholder="Samarqand viloyatining Urgut tumani qadim zamonlardan beri hunarmandchilik..."
+                    className="form-textarea"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">2-Asosiy Paragraf (Texnologiya va sifat)</label>
+                  <textarea
+                    rows={3}
+                    value={settingsForm.about_story_p2 || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, about_story_p2: e.target.value })}
+                    placeholder="Biz ushbu asriy tajribani eng so‘nggi Germaniya va Italiya texnologiyalari bilan..."
+                    className="form-textarea"
+                  />
+                </div>
+
+                <ImageUploadField
+                  label="Tarix Bo‘limi Rasmi (Surat yuklang yoki havola bering)"
+                  value={settingsForm.about_image_url || ''}
+                  onChange={(val) => setSettingsForm({ ...settingsForm, about_image_url: val })}
+                  folder="about"
+                  name="about_image_url"
+                  placeholder="https://... yoki kompyuterdan surat yuklang"
+                  helperText="Biz haqimizda sahifasidagi asosiy illustrativ fotosurat (Supabase Storage ga saqlanadi)."
+                />
+
+                <div className="dashboard-form-row" style={{ marginTop: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Tugma Matni</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_btn_text || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_btn_text: e.target.value })}
+                      placeholder="Maxsus Buyurtma Berish"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Tugma Havolasi (URL)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_btn_url || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_btn_url: e.target.value })}
+                      placeholder="/custom-order"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. RAQAMLAR VA STATISTIKA (STATS BLOCK) */}
+              <div style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--wood-amber)', marginBottom: '0.4rem' }}>
+                  3. Statistika Ko‘rsatkichlari (4 ta ko‘rsatkich)
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                  Mijozlarga ishonch bag‘ishlovchi statistika raqamlarini o‘zgartiring.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem' }}>
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label">1-Raqam</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat1_number || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat1_number: e.target.value })}
+                      placeholder="25+"
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem', fontWeight: 700 }}
+                    />
+                    <label className="form-label">1-Izoh</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat1_label || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat1_label: e.target.value })}
+                      placeholder="Yillik Tajriba"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label">2-Raqam</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat2_number || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat2_number: e.target.value })}
+                      placeholder="10,000+"
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem', fontWeight: 700 }}
+                    />
+                    <label className="form-label">2-Izoh</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat2_label || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat2_label: e.target.value })}
+                      placeholder="Mebellar"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label">3-Raqam</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat3_number || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat3_number: e.target.value })}
+                      placeholder="98%"
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem', fontWeight: 700 }}
+                    />
+                    <label className="form-label">3-Izoh</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat3_label || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat3_label: e.target.value })}
+                      placeholder="Mamnun Mijozlar"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ padding: '0.9rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label">4-Raqam</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat4_number || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat4_number: e.target.value })}
+                      placeholder="5 Yil"
+                      className="form-input"
+                      style={{ marginBottom: '0.5rem', fontWeight: 700 }}
+                    />
+                    <label className="form-label">4-Izoh</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_stat4_label || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_stat4_label: e.target.value })}
+                      placeholder="Rasmiy Kafolat"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. ASOSIY TAMOYILLAR VA AFZALLIKLAR (VALUES) */}
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--wood-amber)', marginBottom: '0.4rem' }}>
+                  4. Asosiy Tamoyillar va Ustunliklar (3 ta karta)
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                  Kompaniya sifat kafolatlari va ustunliklari.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                  <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>1-Tamoyil Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_val1_title || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val1_title: e.target.value })}
+                      placeholder="100% Tabiiy Massiv"
+                      className="form-input"
+                      style={{ marginBottom: '0.6rem' }}
+                    />
+                    <label className="form-label">1-Tamoyil Tavsifi</label>
+                    <textarea
+                      rows={2}
+                      value={settingsForm.about_val1_desc || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val1_desc: e.target.value })}
+                      placeholder="Quritilgan eman, yong‘oq va qarag‘ay daraxtlaridan foydalanamiz..."
+                      className="form-textarea"
+                    />
+                  </div>
+
+                  <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>2-Tamoyil Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_val2_title || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val2_title: e.target.value })}
+                      placeholder="Rasmiy Kafolat"
+                      className="form-input"
+                      style={{ marginBottom: '0.6rem' }}
+                    />
+                    <label className="form-label">2-Tamoyil Tavsifi</label>
+                    <textarea
+                      rows={2}
+                      value={settingsForm.about_val2_desc || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val2_desc: e.target.value })}
+                      placeholder="Har bir ishlab chiqarilgan mebel uchun 3 yildan 5 yilgacha rasmiy kafolat..."
+                      className="form-textarea"
+                    />
+                  </div>
+
+                  <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>3-Tamoyil Sarlavhasi</label>
+                    <input
+                      type="text"
+                      value={settingsForm.about_val3_title || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val3_title: e.target.value })}
+                      placeholder="200+ Mohir Usta"
+                      className="form-input"
+                      style={{ marginBottom: '0.6rem' }}
+                    />
+                    <label className="form-label">3-Tamoyil Tavsifi</label>
+                    <textarea
+                      rows={2}
+                      value={settingsForm.about_val3_desc || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, about_val3_desc: e.target.value })}
+                      placeholder="Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib..."
+                      className="form-textarea"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <button
+                type="submit"
+                disabled={isSavingSettings}
+                className="btn btn-primary btn-lg"
+                style={{
+                  width: '100%',
+                  marginTop: '1rem',
+                  padding: '0.9rem 1.25rem',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.6rem'
+                }}
+              >
+                {isSavingSettings ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Supabase-ga Saqlanmoqda...</span>
+                  </>
+                ) : (
+                  <span>"Biz Haqimizda" Ma‘lumotlarini Saqlash va Saytda Yangilash</span>
+                )}
+              </button>
+            </form>
           </div>
         )}
 
