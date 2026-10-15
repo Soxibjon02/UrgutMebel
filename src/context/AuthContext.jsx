@@ -262,7 +262,11 @@ export const AuthProvider = ({ children }) => {
     return { success: true, user: newUser, role: 'customer' };
   };
 
-  const logout = async () => {
+  const logout = async (force = false) => {
+    if (!force) {
+      const confirmLogout = window.confirm("Haqiqatan ham profilingizdan chiqmoqchimisiz?");
+      if (!confirmLogout) return false;
+    }
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.auth.signOut();
@@ -273,6 +277,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('urgut_mebel_auth_user');
     addToast('Tizimdan muvaffaqiyatli chiqdingiz.', 'info');
+    return true;
   };
 
   const switchRole = (newRole) => {

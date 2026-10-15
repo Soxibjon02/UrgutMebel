@@ -40,6 +40,21 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
             <Star size={15} fill="#d97706" />
             <span style={{ fontWeight: 700 }}>{craftsman.rating || 5.0}</span>
             <span style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>({craftsman.reviews_count || 18} baho)</span>
+            
+            {/* Status Badge */}
+            {craftsman.schedule?.status === 'busy' ? (
+              <span style={{ marginLeft: 'auto', backgroundColor: '#fee2e2', color: '#dc2626', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
+                🔴 Band
+              </span>
+            ) : craftsman.schedule?.status === 'partial' ? (
+              <span style={{ marginLeft: 'auto', backgroundColor: '#fef3c7', color: '#d97706', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
+                🟡 Qisman band
+              </span>
+            ) : (
+              <span style={{ marginLeft: 'auto', backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
+                🟢 Bo‘sh (Buyurtmaga tayyor)
+              </span>
+            )}
           </div>
 
           <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
@@ -48,7 +63,7 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
             </Link>
           </h3>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <Award size={14} color="var(--wood-amber)" />
               {craftsman.experience_years} yil tajriba
@@ -58,6 +73,14 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
               <MapPin size={14} color="var(--wood-amber)" />
               {craftsman.location}
             </span>
+            {craftsman.schedule?.working_hours && (
+              <>
+                <span>•</span>
+                <span title="Ish vaqti" style={{ color: 'var(--wood-amber)', fontWeight: 600 }}>
+                  🕒 {craftsman.schedule.working_hours}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>

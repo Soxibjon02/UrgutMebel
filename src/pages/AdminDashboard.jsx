@@ -70,6 +70,10 @@ export const AdminDashboard = () => {
   const [editingCraftsman, setEditingCraftsman] = useState(null);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [editingManager, setEditingManager] = useState(null);
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [editingDiscountProduct, setEditingDiscountProduct] = useState(null);
+  const [discountVal, setDiscountVal] = useState('');
+  const [discountType, setDiscountType] = useState('price'); // 'price' | 'percent'
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Settings Form (Web Loyiha Nomi, Header & Footer o'zgartirish)
@@ -289,6 +293,51 @@ export const AdminDashboard = () => {
     }
   };
 
+  // Discounts Management
+  const handleOpenAddDiscount = (product = null) => {
+    setEditingDiscountProduct(product);
+    setDiscountVal(product?.discount_price ? String(product.discount_price) : '');
+    setDiscountType('price');
+    setDiscountModalOpen(true);
+  };
+
+  const handleSaveDiscount = async (e) => {
+    e.preventDefault();
+    if (!editingDiscountProduct) return;
+    let finalDiscountPrice = Number(discountVal);
+    if (discountType === 'percent') {
+      const pct = Math.min(99, Math.max(1, Number(discountVal)));
+      finalDiscountPrice = Math.round(editingDiscountProduct.price * (1 - pct / 100));
+    }
+    if (!finalDiscountPrice || finalDiscountPrice >= editingDiscountProduct.price) {
+      addToast('Chegirmali narx asl narxdan past bo‘lishi shart!', 'warning');
+      return;
+    }
+    const updatedProd = {
+      ...editingDiscountProduct,
+      discount_price: finalDiscountPrice
+    };
+    addToast('Chegirma saqlanmoqda...', 'info');
+    const updatedList = await dataService.saveProduct(updatedProd);
+    setProducts(updatedList);
+    setDiscountModalOpen(false);
+    setEditingDiscountProduct(null);
+    addToast('Chegirma muvaffaqiyatli saqlandi va saytda aks ettirildi!', 'success');
+  };
+
+  const handleRemoveDiscount = async (product) => {
+    if (window.confirm(`"${product.name}" mahsulotidan chegirmani bekor qilmoqchimisiz?`)) {
+      const updatedProd = {
+        ...product,
+        discount_price: null
+      };
+      addToast('Chegirma bekor qilinmoqda...', 'info');
+      const updatedList = await dataService.saveProduct(updatedProd);
+      setProducts(updatedList);
+      addToast('Chegirma bekor qilindi', 'success');
+    }
+  };
+
   // Categories CRUD
   const handleSaveCategory = async (e) => {
     e.preventDefault();
@@ -411,6 +460,7 @@ export const AdminDashboard = () => {
   const adminTabs = [
     { id: 'overview', label: 'Umumiy Statistika', shortLabel: 'Statistika', icon: LayoutDashboard },
     { id: 'products', label: `Mahsulotlar (${products.length})`, shortLabel: `Mebellar (${products.length})`, icon: Package },
+    { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
     { id: 'custom_orders', label: `Maxsus Buyurtmalar (${customOrders.length})`, shortLabel: `Maxsus (${customOrders.length})`, icon: Sliders },
     { id: 'orders', label: `Do‘kon Buyurtmalari (${standardOrders.length})`, shortLabel: `Do‘kon (${standardOrders.length})`, icon: ShoppingBag },
@@ -790,6 +840,125 @@ export const AdminDashboard = () => {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: DISCOUNTS & SPECIAL OFFERS */}
+        {activeTab === 'discounts' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Chegirmalar & Aksiyalar Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                  Asosiy sahifadagi va katalogdagi chegirmadagi barcha mebellarni boshqaring.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenAddDiscount(null)}
+                className="btn btn-primary"
+              >
+                <Plus size={16} /> Mebelga Chegirma Qo‘shish
+              </button>
+            </div>
+
+            {/* Announcement Banner Quick Edit */}
+            <div className="glass-card" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 300px' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--wood-amber)', textTransform: 'uppercase' }}>
+                  Sayt Yuqorisidagi Chegirma E’loni:
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                  {settings.announcement || 'Hozircha faol chegirma e’loni yo‘q'}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('settings')}
+                className="btn btn-secondary btn-sm"
+              >
+                E’lonni O‘zgartirish
+              </button>
+            </div>
+
+            <div className="table-responsive glass-card">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Mebel nomi</th>
+                    <th style={{ padding: '0.85rem' }}>Asl Narxi</th>
+                    <th style={{ padding: '0.85rem' }}>Chegirmali Narx</th>
+                    <th style={{ padding: '0.85rem' }}>Tejov / Chegirma</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.filter((p) => Boolean(p.discount_price)).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏷️</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.3rem' }}>Hozircha chegirmadagi mebellar yo‘q</h4>
+                        <p style={{ fontSize: '0.85rem' }}>Yuqoridagi "+ Mebelga Chegirma Qo‘shish" tugmasini bosib istalgan mebelga aksiya belgilang.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    products.filter((p) => Boolean(p.discount_price)).map((p) => {
+                      const discountPct = p.price > 0 ? Math.round((1 - p.discount_price / p.price) * 100) : 0;
+                      const savings = p.price - p.discount_price;
+                      return (
+                        <tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: '1rem 1.25rem', fontWeight: 600 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <img
+                                src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                                alt=""
+                                style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover' }}
+                              />
+                              <div>
+                                <div>{p.name}</div>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{p.category_id || 'Mebel'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '1rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                            {Number(p.price).toLocaleString()} so‘m
+                          </td>
+                          <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--wood-amber)' }}>
+                            {Number(p.discount_price).toLocaleString()} so‘m
+                          </td>
+                          <td style={{ padding: '1rem' }}>
+                            <span style={{ backgroundColor: '#fee2e2', color: '#dc2626', fontWeight: 700, fontSize: '0.8rem', padding: '0.2rem 0.55rem', borderRadius: '12px', display: 'inline-block' }}>
+                              -{discountPct}% ({savings.toLocaleString()} so‘m tejov)
+                            </span>
+                          </td>
+                          <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenAddDiscount(p)}
+                                className="btn btn-secondary btn-sm"
+                                title="Chegirmani o‘zgartirish"
+                              >
+                                Tahrirlash
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveDiscount(p)}
+                                className="btn btn-secondary btn-sm"
+                                style={{ color: '#ef4444' }}
+                                title="Chegirmani bekor qilish"
+                              >
+                                Bekor qilish
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1775,6 +1944,118 @@ export const AdminDashboard = () => {
                   style={{ flex: 1 }}
                 >
                   Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DISCOUNT CREATE/EDIT MODAL */}
+      {discountModalOpen && (
+        <div className="modal-overlay" onClick={() => setDiscountModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '520px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingDiscountProduct ? `"${editingDiscountProduct.name}"ga Chegirma Belgilash` : 'Yangi Mebelga Chegirma Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveDiscount}>
+              {!editingDiscountProduct ? (
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label className="form-label">Mebelni Tanlang *</label>
+                  <select
+                    required
+                    className="form-select"
+                    onChange={(e) => {
+                      const found = products.find((p) => p.id === e.target.value);
+                      setEditingDiscountProduct(found);
+                      setDiscountVal(found?.discount_price ? String(found.discount_price) : '');
+                    }}
+                    style={{ width: '100%', padding: '0.65rem' }}
+                  >
+                    <option value="">-- Mebelni tanlang --</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({Number(p.price).toLocaleString()} so‘m)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-light)' }}>Tanlangan mebel:</div>
+                  <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>{editingDiscountProduct.name}</strong>
+                  <div style={{ fontSize: '0.88rem', color: 'var(--wood-amber)', marginTop: '0.2rem' }}>
+                    Asl narxi: <strong>{Number(editingDiscountProduct.price).toLocaleString()} so‘m</strong>
+                  </div>
+                </div>
+              )}
+
+              {/* Discount Type: Price or Percent */}
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Chegirma Usuli:</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setDiscountType('price')}
+                    className={`btn ${discountType === 'price' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                    style={{ flex: 1 }}
+                  >
+                    Aniq Narx (so‘m)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDiscountType('percent')}
+                    className={`btn ${discountType === 'percent' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                    style={{ flex: 1 }}
+                  >
+                    Foiz (% off)
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">
+                  {discountType === 'price' ? 'Yangi Chegirmali Narx (so‘m) *' : 'Chegirma Foizi (%) *'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={discountVal}
+                  onChange={(e) => setDiscountVal(e.target.value)}
+                  placeholder={discountType === 'price' ? 'Masalan: 9500000' : 'Masalan: 15'}
+                  className="form-input"
+                />
+                {editingDiscountProduct && discountVal && (
+                  <div style={{ fontSize: '0.82rem', color: '#16a34a', marginTop: '0.35rem', fontWeight: 600 }}>
+                    {discountType === 'percent' ? (
+                      `Mijoz to‘laydigan yakuniy narx: ${Math.round(editingDiscountProduct.price * (1 - Math.min(99, Number(discountVal)) / 100)).toLocaleString()} so‘m`
+                    ) : (
+                      Number(discountVal) < editingDiscountProduct.price ? (
+                        `Chegirma: -${Math.round((1 - Number(discountVal) / editingDiscountProduct.price) * 100)}% (${(editingDiscountProduct.price - Number(discountVal)).toLocaleString()} so‘m tejov)`
+                      ) : (
+                        <span style={{ color: '#dc2626' }}>Chegirmali narx asl narxdan kam bo‘lishi lozim!</span>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => { setDiscountModalOpen(false); setEditingDiscountProduct(null); }}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={!editingDiscountProduct}
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  Chegirmani Saqlash
                 </button>
               </div>
             </form>

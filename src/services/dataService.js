@@ -106,17 +106,8 @@ export const dataService = {
           .select('*')
           .order('display_order', { ascending: true });
         if (!error && Array.isArray(data)) {
-          if (data.length > 0) {
-            setStored('categories', data, false);
-            return data;
-          }
-          const local = getStored('categories', null);
-          const toSeed = (local && local.length > 0) ? local : initialCategories;
-          for (const cat of toSeed) {
-            await supabase.from('categories').upsert(cat);
-          }
-          setStored('categories', toSeed, false);
-          return toSeed;
+          setStored('categories', data, false);
+          return data;
         }
       } catch (e) {
         console.warn('Supabase getCategories error:', e);
@@ -134,11 +125,7 @@ export const dataService = {
       slug,
       created_at: new Date().toISOString()
     };
-    const updated = category.id
-      ? current.map((c) => (c.id === category.id ? { ...c, ...newCat } : c))
-      : [newCat, ...current];
 
-    setStored('categories', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('categories').upsert({
@@ -155,13 +142,16 @@ export const dataService = {
         console.warn('Supabase saveCategory background error:', e);
       }
     }
+
+    const updated = category.id
+      ? current.map((c) => (c.id === category.id ? { ...c, ...newCat } : c))
+      : [newCat, ...current];
+
+    setStored('categories', updated, true);
     return updated;
   },
 
   async deleteCategory(id) {
-    const current = getStored('categories', initialCategories);
-    const categories = current.filter((c) => c.id !== id);
-    setStored('categories', categories, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('categories').delete().eq('id', id);
@@ -170,6 +160,9 @@ export const dataService = {
         console.warn('Supabase deleteCategory background error:', e);
       }
     }
+    const current = getStored('categories', initialCategories);
+    const categories = current.filter((c) => c.id !== id);
+    setStored('categories', categories, true);
     return categories;
   },
 
@@ -179,30 +172,8 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('products').select('*');
         if (!error && Array.isArray(data)) {
-          if (data.length > 0) {
-            setStored('products', data, false);
-            return data;
-          }
-          const local = getStored('products', null);
-          const toSeed = (local && local.length > 0) ? local : initialProducts;
-          for (const prod of toSeed) {
-            await supabase.from('products').upsert({
-              id: prod.id,
-              name: prod.name,
-              slug: prod.slug || prod.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-              price: Number(prod.price) || 0,
-              discount_price: prod.discount_price ? Number(prod.discount_price) : null,
-              material: prod.material,
-              dimensions: prod.dimensions,
-              stock: prod.stock || 10,
-              description: prod.description,
-              is_published: prod.is_published !== false,
-              images: prod.images || [],
-              image_url: prod.images?.[0] || prod.image_url || ''
-            });
-          }
-          setStored('products', toSeed, false);
-          return toSeed;
+          setStored('products', data, false);
+          return data;
         }
       } catch (e) {
         console.warn('Supabase getProducts error:', e);
@@ -243,11 +214,6 @@ export const dataService = {
       updated_at: new Date().toISOString()
     };
 
-    const updated = product.id
-      ? current.map((p) => (p.id === product.id ? { ...p, ...newProd } : p))
-      : [newProd, ...current];
-
-    setStored('products', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const prodPayload = {
@@ -280,13 +246,16 @@ export const dataService = {
         console.warn('Supabase saveProduct background error:', e);
       }
     }
+
+    const updated = product.id
+      ? current.map((p) => (p.id === product.id ? { ...p, ...newProd } : p))
+      : [newProd, ...current];
+
+    setStored('products', updated, true);
     return updated;
   },
 
   async deleteProduct(id) {
-    const current = getStored('products', initialProducts);
-    const products = current.filter((p) => p.id !== id);
-    setStored('products', products, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('products').delete().eq('id', id);
@@ -295,6 +264,9 @@ export const dataService = {
         console.warn('Supabase deleteProduct background error:', e);
       }
     }
+    const current = getStored('products', initialProducts);
+    const products = current.filter((p) => p.id !== id);
+    setStored('products', products, true);
     return products;
   },
 
@@ -313,25 +285,24 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('craftsmen').select('*');
         if (!error && Array.isArray(data)) {
-          if (data.length > 0) {
-            setStored('craftsmen', data);
-            return data;
-          }
-          // Supabase is currently empty (fresh table created)
-          // Check if admin has already saved craftsmen in localStorage (e.g. Soxib Gaybullayev)
-          const local = getStored('craftsmen', null);
-          if (local && local.length > 0) {
-            for (const craft of local) {
-              await supabase.from('craftsmen').upsert(craft);
-            }
-            return local;
-          }
-          // If no local either, seed initialCraftsmen to Supabase
-          for (const craft of initialCraftsmen) {
-            await supabase.from('craftsmen').upsert(craft);
-          }
-          setStored('craftsmen', initialCraftsmen);
-          return initialCraftsmen;
+          const normalized = data.map((c) => {
+            let services = Array.isArray(c.services) ? c.services : [];
+            let portfolio = Array.isArray(c.portfolio) ? c.portfolio : [];
+            const sched = services.find((s) => s.type === 'schedule') || null;
+            return {
+              ...c,
+              services: services.filter((s) => s.type !== 'schedule'),
+              schedule: sched || {
+                status: 'available',
+                working_hours: '08:30 - 18:30',
+                days: 'Dushanba - Shanba',
+                busy_notes: ''
+              },
+              portfolio
+            };
+          });
+          setStored('craftsmen', normalized, false);
+          return normalized;
         }
       } catch (e) {
         console.warn('Supabase getCraftsmen error:', e);
@@ -352,15 +323,19 @@ export const dataService = {
       id: `craft-${Date.now()}`,
       rating: 5.0,
       reviews_count: 0,
-      services: craftsman.services || [],
-      portfolio: craftsman.portfolio || [],
       created_at: new Date().toISOString()
     };
-    const updated = craftsman.id
-      ? current.map((c) => (c.id === craftsman.id ? { ...c, ...newCraft } : c))
-      : [newCraft, ...current];
 
-    setStored('craftsmen', updated, true);
+    const schedObj = newCraft.schedule || {
+      type: 'schedule',
+      status: newCraft.status || 'available',
+      working_hours: newCraft.working_hours || '08:30 - 18:30',
+      days: newCraft.days || 'Dushanba - Shanba',
+      busy_notes: newCraft.busy_notes || ''
+    };
+    const realServices = (Array.isArray(newCraft.services) ? newCraft.services : []).filter((s) => s.type !== 'schedule');
+    const combinedServices = [{ ...schedObj, type: 'schedule' }, ...realServices];
+
     if (isSupabaseConfigured && supabase) {
       try {
         const craftPayload = {
@@ -375,6 +350,8 @@ export const dataService = {
           bio: newCraft.bio || '',
           photo_url: newCraft.photo_url || '',
           specializations: Array.isArray(newCraft.specializations) ? newCraft.specializations : [],
+          services: combinedServices,
+          portfolio: Array.isArray(newCraft.portfolio) ? newCraft.portfolio : [],
           is_active: newCraft.is_active !== false,
           updated_at: new Date().toISOString()
         };
@@ -384,13 +361,23 @@ export const dataService = {
         console.warn('Supabase saveCraftsman background error:', e);
       }
     }
+
+    const savedCraftsman = {
+      ...newCraft,
+      schedule: schedObj,
+      services: realServices,
+      portfolio: Array.isArray(newCraft.portfolio) ? newCraft.portfolio : []
+    };
+
+    const updated = craftsman.id
+      ? current.map((c) => (c.id === craftsman.id ? { ...c, ...savedCraftsman } : c))
+      : [savedCraftsman, ...current];
+
+    setStored('craftsmen', updated, true);
     return updated;
   },
 
   async deleteCraftsman(id) {
-    const current = getStored('craftsmen', initialCraftsmen);
-    const craftsmen = current.filter((c) => c.id !== id);
-    setStored('craftsmen', craftsmen, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('craftsmen').delete().eq('id', id);
@@ -399,6 +386,9 @@ export const dataService = {
         console.warn('Supabase deleteCraftsman background error:', e);
       }
     }
+    const current = getStored('craftsmen', initialCraftsmen);
+    const craftsmen = current.filter((c) => c.id !== id);
+    setStored('craftsmen', craftsmen, true);
     return craftsmen;
   },
 
@@ -932,7 +922,6 @@ export const dataService = {
   },
 
   async saveManager(managerData) {
-    const managers = getStored('managers', []);
     const newMgr = {
       id: managerData.id || `mgr-${Date.now()}`,
       full_name: managerData.full_name,
@@ -942,11 +931,7 @@ export const dataService = {
       department: managerData.department || 'Katalog va Buyurtmalar',
       created_at: managerData.created_at || new Date().toISOString()
     };
-    const updated = managerData.id
-      ? managers.map((m) => (m.id === managerData.id ? { ...m, ...newMgr } : m))
-      : [newMgr, ...managers];
 
-    setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('managers').upsert({
@@ -962,13 +947,17 @@ export const dataService = {
         console.warn('Supabase saveManager background error:', e);
       }
     }
+
+    const managers = getStored('managers', []);
+    const updated = managerData.id
+      ? managers.map((m) => (m.id === managerData.id ? { ...m, ...newMgr } : m))
+      : [newMgr, ...managers];
+
+    setStored('managers', updated, true);
     return updated;
   },
 
   async deleteManager(id) {
-    const managers = getStored('managers', []);
-    const updated = managers.filter((m) => m.id !== id);
-    setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
       try {
         const { error } = await supabase.from('managers').delete().eq('id', id);
@@ -977,6 +966,9 @@ export const dataService = {
         console.warn('Supabase deleteManager background error:', e);
       }
     }
+    const managers = getStored('managers', []);
+    const updated = managers.filter((m) => m.id !== id);
+    setStored('managers', updated, true);
     return updated;
   },
 
@@ -1002,7 +994,6 @@ export const dataService = {
   },
 
   async saveUser(userData) {
-    const users = getStored('urgut_mebel_registered_users', []);
     const newUser = {
       id: userData.id || `user-${Date.now()}`,
       email: (userData.email || '').toLowerCase().trim(),
@@ -1021,32 +1012,99 @@ export const dataService = {
       updated_at: new Date().toISOString()
     };
 
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('users').upsert(newUser);
+        if (error) console.error('Supabase saveUser error:', error);
+      } catch (e) {
+        console.warn('Supabase saveUser background error:', e);
+      }
+    }
+
+    const users = getStored('urgut_mebel_registered_users', []);
     const exists = users.some((u) => u.id === newUser.id || u.email === newUser.email);
     const updated = exists
       ? users.map((u) => (u.id === newUser.id || u.email === newUser.email ? { ...u, ...newUser } : u))
       : [newUser, ...users];
 
     setStored('urgut_mebel_registered_users', updated, true);
-
-    if (isSupabaseConfigured && supabase) {
-      supabase.from('users').upsert(newUser).catch((e) => {
-        console.warn('Supabase saveUser background error:', e);
-      });
-    }
     return newUser;
   },
 
   async deleteUser(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('users').delete().eq('id', id);
+        if (error) console.error('Supabase deleteUser error:', error);
+      } catch (e) {
+        console.warn('Supabase deleteUser background error:', e);
+      }
+    }
     const users = getStored('urgut_mebel_registered_users', []);
     const updated = users.filter((u) => u.id !== id);
     setStored('urgut_mebel_registered_users', updated, true);
-
-    if (isSupabaseConfigured && supabase) {
-      supabase.from('users').delete().eq('id', id).catch((e) => {
-        console.warn('Supabase deleteUser background error:', e);
-      });
-    }
     return updated;
+  },
+
+  // Craftsman Schedule & Availability Management
+  async updateCraftsmanSchedule(craftsmanId, scheduleData) {
+    const craftsmen = await this.getCraftsmen();
+    const target = craftsmen.find((c) => c.id === craftsmanId);
+    if (!target) return null;
+
+    const updatedCraftsman = {
+      ...target,
+      schedule: {
+        ...(target.schedule || {}),
+        ...scheduleData
+      }
+    };
+    await this.saveCraftsman(updatedCraftsman);
+    return updatedCraftsman;
+  },
+
+  // Craftsman Portfolio Management
+  async saveCraftsmanPortfolioItem(craftsmanId, portfolioItem) {
+    const craftsmen = await this.getCraftsmen();
+    const target = craftsmen.find((c) => c.id === craftsmanId);
+    if (!target) return null;
+
+    const currentPortfolio = Array.isArray(target.portfolio) ? target.portfolio : [];
+    const itemWithId = {
+      ...portfolioItem,
+      id: portfolioItem.id || `port-${Date.now()}`,
+      created_at: portfolioItem.created_at || new Date().toISOString()
+    };
+
+    const exists = currentPortfolio.some((p) => p.id === itemWithId.id);
+    const newPortfolio = exists
+      ? currentPortfolio.map((p) => (p.id === itemWithId.id ? { ...p, ...itemWithId } : p))
+      : [itemWithId, ...currentPortfolio];
+
+    const updatedCraftsman = {
+      ...target,
+      portfolio: newPortfolio
+    };
+
+    await this.saveCraftsman(updatedCraftsman);
+    return updatedCraftsman;
+  },
+
+  async deleteCraftsmanPortfolioItem(craftsmanId, portfolioItemId) {
+    const craftsmen = await this.getCraftsmen();
+    const target = craftsmen.find((c) => c.id === craftsmanId);
+    if (!target) return null;
+
+    const currentPortfolio = Array.isArray(target.portfolio) ? target.portfolio : [];
+    const newPortfolio = currentPortfolio.filter((p) => p.id !== portfolioItemId);
+
+    const updatedCraftsman = {
+      ...target,
+      portfolio: newPortfolio
+    };
+
+    await this.saveCraftsman(updatedCraftsman);
+    return updatedCraftsman;
   },
 
   // ==========================================

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
 import { uploadProductImage, isSupabaseConfigured } from '../lib/supabase';
+import { ImageUploadField } from '../components/ImageUploadField';
 import {
   Briefcase,
   Sliders,
@@ -29,15 +30,24 @@ import {
   Link as LinkIcon,
   Search,
   Check,
-  X
+  X,
+  Hammer,
+  Tag,
+  Percent
 } from 'lucide-react';
 
 export const ManagerDashboard = () => {
   const { user, isManager, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
 
-  // Navigation tab for Manager: 'furniture' | 'custom_orders' | 'craftsmen'
+  // Navigation tab for Manager: 'furniture' | 'custom_orders' | 'craftsmen' | 'discounts'
   const [activeMainTab, setActiveMainTab] = useState('furniture');
+
+  // Discount Management State (Menedjer ham chegirmalarni boshqaradi)
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [editingDiscountProduct, setEditingDiscountProduct] = useState(null);
+  const [discountVal, setDiscountVal] = useState('');
+  const [discountType, setDiscountType] = useState('price'); // 'price' | 'percent'
 
   // Craftsmen State (Mebel menedjeri ham ustalarni qo'sha oladi)
   const [craftsmen, setCraftsmen] = useState([]);
@@ -357,6 +367,53 @@ export const ManagerDashboard = () => {
   };
 
   // ==========================================
+  // DISCOUNTS HANDLERS (MENEDJER CHEGIRMALAR BOSHQARUVI)
+  // ==========================================
+  const handleOpenAddDiscount = (product = null) => {
+    setEditingDiscountProduct(product);
+    setDiscountVal(product?.discount_price ? String(product.discount_price) : '');
+    setDiscountType('price');
+    setDiscountModalOpen(true);
+  };
+
+  const handleSaveDiscount = async (e) => {
+    e.preventDefault();
+    if (!editingDiscountProduct) return;
+    let finalDiscountPrice = Number(discountVal);
+    if (discountType === 'percent') {
+      const pct = Math.min(99, Math.max(1, Number(discountVal)));
+      finalDiscountPrice = Math.round(editingDiscountProduct.price * (1 - pct / 100));
+    }
+    if (!finalDiscountPrice || finalDiscountPrice >= editingDiscountProduct.price) {
+      addToast('Chegirmali narx asl narxdan past bo‘lishi shart!', 'warning');
+      return;
+    }
+    const updatedProd = {
+      ...editingDiscountProduct,
+      discount_price: finalDiscountPrice
+    };
+    addToast('Chegirma saqlanmoqda...', 'info');
+    const updatedList = await dataService.saveProduct(updatedProd);
+    setProducts(updatedList);
+    setDiscountModalOpen(false);
+    setEditingDiscountProduct(null);
+    addToast('Chegirma muvaffaqiyatli saqlandi va saytda aks ettirildi!', 'success');
+  };
+
+  const handleRemoveDiscount = async (product) => {
+    if (window.confirm(`"${product.name}" mahsulotidan chegirmani bekor qilmoqchimisiz?`)) {
+      const updatedProd = {
+        ...product,
+        discount_price: null
+      };
+      addToast('Chegirma bekor qilinmoqda...', 'info');
+      const updatedList = await dataService.saveProduct(updatedProd);
+      setProducts(updatedList);
+      addToast('Chegirma bekor qilindi', 'success');
+    }
+  };
+
+  // ==========================================
   // CUSTOM ORDERS HANDLERS
   // ==========================================
   const filteredOrders = orders.filter((o) => {
@@ -471,7 +528,7 @@ export const ManagerDashboard = () => {
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '2rem',
-            maxWidth: '620px',
+            maxWidth: '820px',
             overflowX: 'auto',
             gap: '0.35rem'
           }}
@@ -497,6 +554,29 @@ export const ManagerDashboard = () => {
           >
             <Package size={17} />
             <span>Mebellar Katalogi ({products.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('discounts')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'discounts' ? 'var(--wood-amber)' : 'transparent',
+              color: activeMainTab === 'discounts' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Tag size={17} />
+            <span>Chegirmalar ({products.filter(p => Boolean(p.discount_price)).length})</span>
           </button>
 
           <button
@@ -918,6 +998,114 @@ export const ManagerDashboard = () => {
                         </td>
                       </tr>
                     ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB: CHEGIRMALAR VA AKSIYALAR BOSHQARUVI                  */}
+        {/* ========================================================= */}
+        {activeMainTab === 'discounts' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '1.25rem 1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Chegirmalar & Aksiyalar Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                  Katalogdagi mebellarga chegirmali narx belgilang va aksiyalarni boshqaring.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenAddDiscount(null)}
+                className="btn btn-primary"
+                style={{ gap: '0.5rem' }}
+              >
+                <Plus size={16} /> Mebelga Chegirma Qo‘shish
+              </button>
+            </div>
+
+            <div className="table-responsive glass-card">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Mebel nomi</th>
+                    <th style={{ padding: '0.85rem' }}>Asl Narxi</th>
+                    <th style={{ padding: '0.85rem' }}>Chegirmali Narx</th>
+                    <th style={{ padding: '0.85rem' }}>Tejov / Chegirma</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.filter((p) => Boolean(p.discount_price)).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏷️</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>Hozirda chegirmadagi mebellar yo‘q</h4>
+                        <p style={{ fontSize: '0.85rem' }}>Yuqoridagi tugma orqali istalgan mebelga aksiya yoki chegirma belgilang</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    products
+                      .filter((p) => Boolean(p.discount_price))
+                      .map((p) => {
+                        const originalPrice = Number(p.price) || 0;
+                        const discPrice = Number(p.discount_price) || 0;
+                        const savings = Math.max(0, originalPrice - discPrice);
+                        const discountPercent = originalPrice > 0 ? Math.round((savings / originalPrice) * 100) : 0;
+
+                        return (
+                          <tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '0.85rem 1.25rem', fontWeight: 600 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <img
+                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                                  alt=""
+                                  style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
+                                />
+                                <div>
+                                  <div>{p.name}</div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {p.id?.slice(0, 8)}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ padding: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                              {originalPrice.toLocaleString()} so‘m
+                            </td>
+                            <td style={{ padding: '0.85rem', fontWeight: 700, color: 'var(--wood-amber)', fontSize: '0.95rem' }}>
+                              {discPrice.toLocaleString()} so‘m
+                            </td>
+                            <td style={{ padding: '0.85rem' }}>
+                              <span style={{ backgroundColor: 'rgba(239,68,68,0.12)', color: '#ef4444', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.78rem' }}>
+                                -{discountPercent}% ({savings.toLocaleString()} so‘m tejash)
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                              <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAddDiscount(p)}
+                                  className="btn btn-secondary btn-sm"
+                                  title="Chegirmani tahrirlash"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDiscount(p)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ color: '#ef4444' }}
+                                  title="Chegirmani olib tashlash"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                   )}
                 </tbody>
               </table>
@@ -1446,10 +1634,14 @@ export const ManagerDashboard = () => {
                   <input type="text" name="telegram" defaultValue={editingCraftsman?.telegram || ''} placeholder="@dilshod_usta" className="form-input" />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Surat URL</label>
-                <input type="url" name="photo_url" defaultValue={editingCraftsman?.photo_url || ''} placeholder="https://..." className="form-input" />
-              </div>
+              <ImageUploadField
+                label="Usta Fotosurati (URL yoki Supabase-ga yuklash)"
+                name="photo_url"
+                value={editingCraftsman?.photo_url || ''}
+                folder="craftsmen"
+                placeholder="https://... yoki fayldan yuklang"
+                helperText="Usta profili uchun fotosurat (URL yoki Supabase Storage ga saqlanadi)."
+              />
               <div className="form-group">
                 <label className="form-label">Ixtisosliklar (vergul bilan)</label>
                 <input type="text" name="specializations" defaultValue={editingCraftsman?.specializations?.join(', ') || 'Klassik mebel, Oshxona, O‘ymakorlik'} className="form-input" />
@@ -1464,6 +1656,125 @@ export const ManagerDashboard = () => {
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
                   Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: CHEGIRMA QO'SHISH / TAHRIRLASH                     */}
+      {/* ========================================================= */}
+      {discountModalOpen && (
+        <div className="modal-overlay" onClick={() => setDiscountModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '520px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingDiscountProduct ? `"${editingDiscountProduct.name}"ga Chegirma Belgilash` : 'Yangi Mebelga Chegirma Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveDiscount}>
+              {!editingDiscountProduct ? (
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label className="form-label">Mebelni Tanlang *</label>
+                  <select
+                    required
+                    className="form-select"
+                    onChange={(e) => {
+                      const found = products.find((p) => p.id === e.target.value);
+                      setEditingDiscountProduct(found);
+                      setDiscountVal(found?.discount_price ? String(found.discount_price) : '');
+                    }}
+                    style={{ width: '100%', padding: '0.65rem' }}
+                  >
+                    <option value="">-- Mebelni tanlang --</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({Number(p.price).toLocaleString()} so‘m)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{editingDiscountProduct.name}</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    Asl narxi: <strong style={{ color: 'var(--text-main)' }}>{Number(editingDiscountProduct.price).toLocaleString()} so‘m</strong>
+                  </div>
+                </div>
+              )}
+
+              {/* Discount type tabs */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setDiscountType('price')}
+                  className="btn btn-sm"
+                  style={{
+                    flex: 1,
+                    backgroundColor: discountType === 'price' ? 'var(--wood-amber)' : 'var(--bg-secondary)',
+                    color: discountType === 'price' ? '#fff' : 'var(--text-main)'
+                  }}
+                >
+                  <DollarSign size={14} /> Aniq Chegirmali Narx (so‘m)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDiscountType('percent')}
+                  className="btn btn-sm"
+                  style={{
+                    flex: 1,
+                    backgroundColor: discountType === 'percent' ? 'var(--wood-amber)' : 'var(--bg-secondary)',
+                    color: discountType === 'percent' ? '#fff' : 'var(--text-main)'
+                  }}
+                >
+                  <Percent size={14} /> Foizda (% chegirma)
+                </button>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">
+                  {discountType === 'price' ? 'Yangi Chegirmali Narx (so‘m) *' : 'Chegirma Foizi (1% - 99%) *'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={discountType === 'percent' ? 99 : (editingDiscountProduct ? editingDiscountProduct.price - 1 : undefined)}
+                  value={discountVal}
+                  onChange={(e) => setDiscountVal(e.target.value)}
+                  placeholder={discountType === 'price' ? 'Masalan: 8500000' : 'Masalan: 15'}
+                  className="form-input"
+                  style={{ fontSize: '1.1rem', fontWeight: 700 }}
+                />
+                {editingDiscountProduct && discountVal && (
+                  <div style={{ fontSize: '0.82rem', color: 'var(--wood-amber)', marginTop: '0.4rem', fontWeight: 600 }}>
+                    {discountType === 'price'
+                      ? `Mijoz tejaydi: ${(editingDiscountProduct.price - Number(discountVal)).toLocaleString()} so‘m (${Math.round(((editingDiscountProduct.price - Number(discountVal)) / editingDiscountProduct.price) * 100)}%)`
+                      : `Chegirmali narx: ${(Math.round(editingDiscountProduct.price * (1 - Number(discountVal) / 100))).toLocaleString()} so‘m`
+                    }
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDiscountModalOpen(false);
+                    setEditingDiscountProduct(null);
+                  }}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  disabled={!editingDiscountProduct || !discountVal}
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  Chegirmani Saqlash
                 </button>
               </div>
             </form>

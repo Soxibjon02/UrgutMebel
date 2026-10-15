@@ -29,7 +29,17 @@ export const defaultSettings = {
 };
 
 export const SettingsProvider = ({ children }) => {
-  const [settings, setSettings] = useState(defaultSettings);
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('urgut_mebel_settings');
+      if (saved) {
+        return { ...defaultSettings, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn('Error reading cached settings:', e);
+    }
+    return defaultSettings;
+  });
   const [loading, setLoading] = useState(true);
 
   // Theme: Dark Mode / Light Mode

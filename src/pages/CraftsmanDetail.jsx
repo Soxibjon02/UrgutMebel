@@ -94,10 +94,25 @@ export const CraftsmanDetail = () => {
           />
 
           <div style={{ flex: '1 1 300px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#d97706', marginBottom: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#d97706', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
               <Star size={18} fill="#d97706" />
               <strong style={{ fontSize: '1.1rem' }}>{craftsman.rating || 5.0}</strong>
               <span style={{ color: 'var(--text-light)', fontSize: '0.85rem' }}>({craftsman.reviews_count || 32} ta mijoz bahosi)</span>
+
+              {/* Live Availability Status */}
+              {craftsman.schedule?.status === 'busy' ? (
+                <span style={{ marginLeft: 'auto', backgroundColor: '#fee2e2', color: '#dc2626', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fca5a5' }}>
+                  🔴 Ayni paytda band
+                </span>
+              ) : craftsman.schedule?.status === 'partial' ? (
+                <span style={{ marginLeft: 'auto', backgroundColor: '#fef3c7', color: '#d97706', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde68a' }}>
+                  🟡 Qisman band
+                </span>
+              ) : (
+                <span style={{ marginLeft: 'auto', backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #86efac' }}>
+                  🟢 Bo‘sh (Buyurtmalarni qabul qilmoqda)
+                </span>
+              )}
             </div>
 
             <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
@@ -141,7 +156,7 @@ export const CraftsmanDetail = () => {
               className="btn btn-primary"
               style={{ width: '100%', padding: '0.85rem' }}
             >
-              <span>Buyurtma Berish</span>
+              <span>Ustani Yollash / Buyurtma</span>
             </button>
 
             {craftsman.phone && (
@@ -170,6 +185,65 @@ export const CraftsmanDetail = () => {
           </div>
         </div>
 
+        {/* Schedule & Working Hours Card */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '2rem 2.5rem',
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'var(--shadow-sm)',
+            marginBottom: '3rem'
+          }}
+          className="glass-card"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>🕒</span> Ish Vaqti va Bandlik Jadvali
+            </h2>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Mijozlar buyurtma berishdan oldin usta jadvali bilan tanishishi mumkin
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: craftsman.schedule?.busy_notes ? '1.25rem' : 0 }}>
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.35rem' }}>
+                Ish Soatlari
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                {craftsman.schedule?.working_hours || '08:30 - 18:30'}
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.35rem' }}>
+                Haftalik Kunlar
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                {craftsman.schedule?.days || 'Dushanba - Shanba'}
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.35rem' }}>
+                Ayni Paytdagi Holat
+              </div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700, color: craftsman.schedule?.status === 'busy' ? '#dc2626' : craftsman.schedule?.status === 'partial' ? '#d97706' : '#16a34a' }}>
+                {craftsman.schedule?.status === 'busy' ? 'Ayni paytda band' : craftsman.schedule?.status === 'partial' ? 'Qisman band' : 'Bo‘sh — Yangi buyurtma qabul qilmoqda'}
+              </div>
+            </div>
+          </div>
+
+          {craftsman.schedule?.busy_notes && (
+            <div style={{ backgroundColor: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.3)', borderRadius: 'var(--radius-md)', padding: '0.85rem 1.25rem', marginTop: '1rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+              <strong style={{ color: '#d97706' }}>📌 Usta Bildirishnomasi: </strong>
+              <span>{craftsman.schedule.busy_notes}</span>
+            </div>
+          )}
+        </div>
+
         {/* Bio */}
         <div
           style={{
@@ -191,44 +265,47 @@ export const CraftsmanDetail = () => {
           </p>
         </div>
 
-        {/* Services & Price Estimates */}
-        {craftsman.services?.length > 0 && (
-          <div
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              backdropFilter: 'blur(8px)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '2.5rem',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)',
-              marginBottom: '3rem'
-            }}
-            className="glass-card"
-          >
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem' }}>
-              Xizmatlar va Taxminiy Narxlar
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {craftsman.services.map((srv, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    padding: '1.25rem',
-                    borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--border-subtle)'
-                  }}
-                >
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.25rem' }}>{srv.name}</h3>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--wood-amber)', marginBottom: '0.4rem' }}>
-                    {srv.price}
-                  </div>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{srv.desc}</p>
+        {/* Services & Price Estimates (Ta'mirlash, Ko'chirish va hokazo) */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '2.5rem',
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'var(--shadow-sm)',
+            marginBottom: '3rem'
+          }}
+          className="glass-card"
+        >
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span>🛠️</span> Taklif Qilinadigan Duradgorlik Xizmatlari
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            {(craftsman.services?.length > 0 ? craftsman.services : [
+              { name: "Uy mebellarini ta'mirlash", price: "Kelishuv asosida", desc: "Siniq eshik, ilgaklar, mebel mexanizmi, stul va shkaflarni sozlash" },
+              { name: "Mebellarni ko'chirish va montaj", price: "Xonadonga qarab", desc: "Mebellarni xavfsiz ko'chirish, yechish va yangi uyda sifatli qayta yig'ib berish" },
+              { name: "Yangi mebel yasash", price: "O‘lchamga qarab", desc: "Mijoz xohishi va o'lchamlari bo'yicha hashamatli shaxsiy mebellar" },
+              { name: "Mebel restavratsiyasi", price: "Kelishuv asosida", desc: "Eski sifatli yog'och mebellarni qayta silliqlash, loklash va yangilash" }
+            ]).map((srv, idx) => (
+              <div
+                key={idx}
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  padding: '1.25rem',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid var(--border-subtle)'
+                }}
+              >
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.25rem' }}>{srv.name}</h3>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--wood-amber)', marginBottom: '0.4rem' }}>
+                  {srv.price}
                 </div>
-              ))}
-            </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{srv.desc}</p>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Portfolio Gallery */}
         {craftsman.portfolio?.length > 0 && (

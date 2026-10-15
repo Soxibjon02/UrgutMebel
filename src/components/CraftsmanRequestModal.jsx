@@ -9,6 +9,7 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
 
+  const [serviceType, setServiceType] = useState('Uy jihozlarini ta\'mirlash');
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [preferredDate, setPreferredDate] = useState('');
@@ -36,10 +37,10 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
         customer_phone: phone,
         user_id: user.id,
         user_role: user.role,
-        title: `${craftsman.name}ga to‘g‘ridan-to‘g‘ri shaxsiy buyurtma`,
-        category: 'Duradgorga Shaxsiy Buyurtma',
-        furniture_type: 'Shaxsiy mebel buyurtmasi',
-        notes: message,
+        title: `[${serviceType}] ${craftsman.name}ga shaxsiy murojaat`,
+        category: serviceType,
+        furniture_type: serviceType,
+        notes: `Xizmat: ${serviceType}\nIzoh: ${message}`,
         urgency: preferredDate,
         assigned_craftsman: craftsman.id,
         assigned_craftsman_name: craftsman.name,
@@ -112,14 +113,40 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
           <>
             <div style={{ marginBottom: '1.5rem' }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--wood-amber)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Shaxsiy Buyurtma
+                Shaxsiy Buyurtma va Bog‘lanish
               </div>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.2rem' }}>
                 {craftsman.name}ga Murojaat Qilish
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                O‘lchamlaringiz, mebel turi va istaklaringizni yozib qoldiring.
+                Jihozlarni ta‘mirlash, ko‘chirish va montaj yoki yangi buyurtma bo‘yicha ustaga to‘g‘ridan-to‘g‘ri murojaat qiling.
               </p>
+            </div>
+
+            {/* Craftsman Availability Banner */}
+            <div
+              style={{
+                backgroundColor: craftsman.schedule?.status === 'busy' ? '#fef2f2' : 'var(--bg-secondary)',
+                border: craftsman.schedule?.status === 'busy' ? '1px solid #fecaca' : '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.85rem 1rem',
+                marginBottom: '1.25rem',
+                fontSize: '0.85rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {craftsman.schedule?.status === 'busy' ? '🔴 Ayni paytda band' : craftsman.schedule?.status === 'partial' ? '🟡 Qisman band' : '🟢 Bo‘sh — Buyurtmaga tayyor'}
+                </span>
+                <span style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>
+                  🕒 {craftsman.schedule?.working_hours || '08:30 - 18:30'}
+                </span>
+              </div>
+              {craftsman.schedule?.busy_notes && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px dashed var(--border-subtle)', paddingTop: '0.35rem', marginTop: '0.35rem' }}>
+                  <strong>Izoh:</strong> {craftsman.schedule.busy_notes}
+                </div>
+              )}
             </div>
 
             {user && user.role !== 'customer' && (
@@ -147,6 +174,22 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
             )}
 
             <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Xizmat Turi *</label>
+                <select
+                  className="form-select"
+                  value={serviceType}
+                  onChange={(e) => setServiceType(e.target.value)}
+                  style={{ width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}
+                >
+                  <option value="Uy mebellari va jihozlarini ta'mirlash">🛠️ Uy mebellari va jihozlarini ta'mirlash</option>
+                  <option value="Mebellarni ko'chirish, demontaj va montaj (yig'ish)">🚚 Mebellarni ko'chirish, demontaj va montaj</option>
+                  <option value="Yangi mebel yasash (shaxsiy buyurtma)">🪚 Yangi mebel yasash (shaxsiy buyurtma)</option>
+                  <option value="Mebel restavratsiyasi va yangilash">✨ Mebel restavratsiyasi va yangilash</option>
+                  <option value="Boshqa duradgorlik xizmati">📦 Boshqa duradgorlik xizmati</option>
+                </select>
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Ismingiz</label>
                 <div style={{ position: 'relative' }}>

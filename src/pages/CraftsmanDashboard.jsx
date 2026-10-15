@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
 import { uploadProductImage, isSupabaseConfigured } from '../lib/supabase';
+import ImageUploadField from '../components/ImageUploadField';
 import {
   Hammer,
   DollarSign,
@@ -25,15 +26,31 @@ import {
   PieChart,
   User,
   Phone,
-  Briefcase
+  Briefcase,
+  Package,
+  Wrench,
+  CheckCircle2
 } from 'lucide-react';
 
 export const CraftsmanDashboard = () => {
   const { user, role, openAuthModal } = useAuth();
   const { addToast } = useNotification();
 
-  // Active view tab: 'works' (Portfolio ishlari) | 'finances' (Hisob-kitob daftari)
-  const [activeTab, setActiveTab] = useState('finances');
+  // Active view tab: 'schedule' (Jadval & Bandlik) | 'works' (Portfolio ishlari) | 'finances' (Hisob-kitob daftari) | 'requests' (Buyurtmalar)
+  const [activeTab, setActiveTab] = useState('schedule');
+
+  // Schedule & Availability State
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    status: 'available', // 'available' | 'busy' | 'partial'
+    working_hours: '08:30 - 18:30',
+    days: 'Dushanba - Shanba',
+    busy_notes: '',
+    service_repair: true,
+    service_moving: true,
+    service_custom: true,
+    service_restoration: true
+  });
 
   // Works / Portfolio State
   const [works, setWorks] = useState([]);
@@ -41,7 +58,7 @@ export const CraftsmanDashboard = () => {
   const [editingWork, setEditingWork] = useState(null);
   const [workForm, setWorkForm] = useState({
     title: '',
-    category: 'Oshxona',
+    category: 'Mebel ta\'mirlash',
     customer_name: '',
     customer_phone: '',
     completion_date: '',
@@ -79,13 +96,22 @@ export const CraftsmanDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [worksList, financesList, allCustomOrders] = await Promise.all([
+      const [worksList, financesList, allCustomOrders, craftProfile] = await Promise.all([
         dataService.getCraftsmanWorks(craftsmanId),
         dataService.getCraftsmanFinances(craftsmanId),
-        dataService.getCustomOrders()
+        dataService.getCustomOrders(),
+        dataService.getCraftsmanById(craftsmanId)
       ]);
       setWorks(worksList || []);
       setFinances(financesList || []);
+
+      if (craftProfile && craftProfile.schedule) {
+        setScheduleForm((prev) => ({
+          ...prev,
+          ...craftProfile.schedule
+        }));
+      }
+
       const myOrders = (allCustomOrders || []).filter((o) =>
         o.assigned_craftsman === craftsmanId ||
         (o.assigned_craftsman_name && user?.full_name && o.assigned_craftsman_name.toLowerCase().includes(user.full_name.toLowerCase())) ||
@@ -225,6 +251,21 @@ export const CraftsmanDashboard = () => {
     addToast('Rasm havolasi qo‘shildi!', 'success');
   };
 
+  const handleSaveSchedule = async (e) => {
+    e.preventDefault();
+    setIsSavingSchedule(true);
+    try {
+      await dataService.updateCraftsmanSchedule(craftsmanId, scheduleForm);
+      addToast('Ish vaqti va bandlik jadvali Supabase-ga muvaffaqiyatli saqlandi! Profilingizda yangilandi.', 'success');
+      loadData();
+    } catch (err) {
+      console.error(err);
+      addToast('Jadvalni saqlashda xatolik yuz berdi', 'error');
+    } finally {
+      setIsSavingSchedule(false);
+    }
+  };
+
   const handleSaveWork = async (e) => {
     e.preventDefault();
     if (!workForm.title) {
@@ -232,16 +273,25 @@ export const CraftsmanDashboard = () => {
       return;
     }
 
+    const primaryImg = workForm.images[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
     const payload = {
       ...(editingWork || {}),
       craftsman_id: craftsmanId,
       craftsman_name: user.full_name,
       ...workForm,
-      image_url: workForm.images[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+      image_url: primaryImg
     };
 
     await dataService.saveCraftsmanWork(payload);
-    addToast(editingWork ? 'Ish muvaffaqiyatli tahrirlandi!' : 'Yangi portfolio ishi qo‘shildi!', 'success');
+    await dataService.saveCraftsmanPortfolioItem(craftsmanId, {
+      id: editingWork?.id || `port-${Date.now()}`,
+      title: workForm.title,
+      image: primaryImg,
+      category: workForm.category || 'Mebel ta\'mirlash',
+      description: workForm.description || ''
+    });
+
+    addToast(editingWork ? 'Ish muvaffaqiyatli tahrirlandi!' : 'Yangi portfolio ishi qo‘shildi va Supabase-ga saqlandi!', 'success');
     setWorkModalOpen(false);
     loadData();
   };
@@ -249,6 +299,7 @@ export const CraftsmanDashboard = () => {
   const handleDeleteWork = async (id, title) => {
     if (window.confirm(`Rostdan ham "${title}" ishini o‘chirmoqchimisiz?`)) {
       await dataService.deleteCraftsmanWork(id);
+      await dataService.deleteCraftsmanPortfolioItem(craftsmanId, id);
       addToast('Ish o‘chirildi', 'info');
       loadData();
     }
@@ -382,7 +433,7 @@ export const CraftsmanDashboard = () => {
           <div className="no-scrollbar" style={{ display: 'flex', backgroundColor: 'var(--bg-secondary)', padding: '0.35rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', overflowX: 'auto', maxWidth: '100%', gap: '0.35rem' }}>
             <button
               type="button"
-              onClick={() => setActiveTab('finances')}
+              onClick={() => setActiveTab('schedule')}
               style={{
                 flex: '1 0 auto',
                 display: 'flex',
@@ -393,13 +444,13 @@ export const CraftsmanDashboard = () => {
                 fontWeight: 700,
                 fontSize: '0.88rem',
                 whiteSpace: 'nowrap',
-                backgroundColor: activeTab === 'finances' ? 'var(--wood-amber)' : 'transparent',
-                color: activeTab === 'finances' ? '#ffffff' : 'var(--text-muted)',
+                backgroundColor: activeTab === 'schedule' ? 'var(--wood-amber)' : 'transparent',
+                color: activeTab === 'schedule' ? '#ffffff' : 'var(--text-muted)',
                 transition: 'all 0.2s ease'
               }}
             >
-              <DollarSign size={17} />
-              <span>Hisob-Kitob Daftari</span>
+              <Clock size={17} />
+              <span>Jadval & Bandlik</span>
             </button>
             <button
               type="button"
@@ -420,7 +471,7 @@ export const CraftsmanDashboard = () => {
               }}
             >
               <Briefcase size={17} />
-              <span>Mening Ishlarim ({works.length})</span>
+              <span>Portfolio & Ishlarim ({works.length})</span>
             </button>
             <button
               type="button"
@@ -449,8 +500,235 @@ export const CraftsmanDashboard = () => {
                 </span>
               )}
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('finances')}
+              style={{
+                flex: '1 0 auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1.15rem',
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                whiteSpace: 'nowrap',
+                backgroundColor: activeTab === 'finances' ? 'var(--wood-amber)' : 'transparent',
+                color: activeTab === 'finances' ? '#ffffff' : 'var(--text-muted)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <DollarSign size={17} />
+              <span>Hisob-Kitob Daftari</span>
+            </button>
           </div>
         </div>
+
+        {/* ========================================================= */}
+        {/* TAB: ISH VAQTI VA BANDLIK JADVALI (SCHEDULE & STATUS)     */}
+        {/* ========================================================= */}
+        {activeTab === 'schedule' && (
+          <div className="glass-card" style={{ padding: '2rem 2.25rem', maxWidth: '850px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Clock color="var(--wood-amber)" /> Ish Vaqti va Bandlik Jadvalingiz
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
+                  Mijozlar sizning qachon bo‘sh bo‘lishingizni ko‘rib, jihozlarni ta‘mirlash yoki ko‘chirish uchun to‘g‘ri vaqtda murojaat qilishadi.
+                </p>
+              </div>
+              <span style={{
+                backgroundColor: scheduleForm.status === 'busy' ? '#fee2e2' : scheduleForm.status === 'partial' ? '#fef3c7' : '#dcfce7',
+                color: scheduleForm.status === 'busy' ? '#dc2626' : scheduleForm.status === 'partial' ? '#d97706' : '#16a34a',
+                padding: '0.35rem 0.85rem',
+                borderRadius: 'var(--radius-full)',
+                fontWeight: 700,
+                fontSize: '0.85rem'
+              }}>
+                {scheduleForm.status === 'busy' ? '🔴 Ayni paytda band' : scheduleForm.status === 'partial' ? '🟡 Qisman band' : '🟢 Bo‘sh (Buyurtmaga tayyor)'}
+              </span>
+            </div>
+
+            <form onSubmit={handleSaveSchedule}>
+              {/* Status Radio options */}
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>
+                  Hozirgi Ishchi Holatingiz:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.85rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: scheduleForm.status === 'available' ? '2px solid #16a34a' : '1px solid var(--border-subtle)',
+                      backgroundColor: scheduleForm.status === 'available' ? 'rgba(22, 163, 74, 0.08)' : 'var(--bg-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="schedule_status"
+                      value="available"
+                      checked={scheduleForm.status === 'available'}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, status: e.target.value })}
+                    />
+                    <div>
+                      <strong style={{ color: '#16a34a', fontSize: '0.92rem' }}>🟢 Bo‘sh (Qabul qilmoqda)</strong>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Mijozlar hoziroq bog‘lana oladi</div>
+                    </div>
+                  </label>
+
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.85rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: scheduleForm.status === 'busy' ? '2px solid #dc2626' : '1px solid var(--border-subtle)',
+                      backgroundColor: scheduleForm.status === 'busy' ? 'rgba(220, 38, 38, 0.08)' : 'var(--bg-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="schedule_status"
+                      value="busy"
+                      checked={scheduleForm.status === 'busy'}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, status: e.target.value })}
+                    />
+                    <div>
+                      <strong style={{ color: '#dc2626', fontSize: '0.92rem' }}>🔴 Ayni paytda band</strong>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Boshqa buyurtmada ishlamoqda</div>
+                    </div>
+                  </label>
+
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.85rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: scheduleForm.status === 'partial' ? '2px solid #d97706' : '1px solid var(--border-subtle)',
+                      backgroundColor: scheduleForm.status === 'partial' ? 'rgba(217, 119, 6, 0.08)' : 'var(--bg-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="schedule_status"
+                      value="partial"
+                      checked={scheduleForm.status === 'partial'}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, status: e.target.value })}
+                    />
+                    <div>
+                      <strong style={{ color: '#d97706', fontSize: '0.92rem' }}>🟡 Qisman band</strong>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Faqat ma‘lum soatlarda bo‘sh</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Working Hours & Days */}
+              <div className="dashboard-form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Kunlik Ish Soatlaringiz</label>
+                  <input
+                    type="text"
+                    required
+                    value={scheduleForm.working_hours}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, working_hours: e.target.value })}
+                    placeholder="Masalan: 08:30 - 18:30"
+                    className="form-input"
+                  />
+                  <small style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>Qaysi soatlar oralig‘ida murojaatlarni qabul qilasiz</small>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Haftalik Ish Kunlari</label>
+                  <input
+                    type="text"
+                    required
+                    value={scheduleForm.days}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, days: e.target.value })}
+                    placeholder="Masalan: Dushanba - Shanba"
+                    className="form-input"
+                  />
+                  <small style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>Dam olish kunlaringizni ham kiritishingiz mumkin</small>
+                </div>
+              </div>
+
+              {/* Busy Times Note */}
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Bandlik Vaqtlari / Mijozlarga Bildirishnoma (Ixtiyoriy)</label>
+                <textarea
+                  rows={2}
+                  value={scheduleForm.busy_notes}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, busy_notes: e.target.value })}
+                  placeholder="Masalan: Bugun soat 14:00 - 16:30 gacha mebel ta‘mirlashda bandman. Soat 17:00 dan keyin bo‘shman, murojaat qilishingiz mumkin."
+                  className="form-textarea"
+                />
+                <small style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>Ushbu yozuv profilingizda barcha mijozlarga darhol ko‘rinadi</small>
+              </div>
+
+              {/* Service categories offered */}
+              <div className="form-group" style={{ marginBottom: '1.75rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'block' }}>
+                  Siz Bajaradigan Asosiy Xizmatlar:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.65rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={scheduleForm.service_repair}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, service_repair: e.target.checked })}
+                    />
+                    <span>🛠️ Uy mebellari va jihozlarini ta‘mirlash</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={scheduleForm.service_moving}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, service_moving: e.target.checked })}
+                    />
+                    <span>🚚 Mebel ko‘chirish, demontaj va montaj</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={scheduleForm.service_custom}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, service_custom: e.target.checked })}
+                    />
+                    <span>🪚 Buyurtma asosida yangi mebel yasash</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={scheduleForm.service_restoration}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, service_restoration: e.target.checked })}
+                    />
+                    <span>✨ Mebel restavratsiyasi va loklash</span>
+                  </label>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSavingSchedule}
+                className="btn btn-primary"
+                style={{ width: '100%', padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                <Check size={18} />
+                <span>{isSavingSchedule ? 'Saqlanmoqda...' : 'Jadvalni Saqlash va E’lon Qilish'}</span>
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* ========================================================= */}
         {/* TAB 1: HISOB-KITOB DAFTARI & MOLIYAVIY ALGORITM           */}
