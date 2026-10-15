@@ -252,34 +252,40 @@ export const AdminDashboard = () => {
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     const form = e.target;
+    const name = form.name.value.trim();
+    const imgUrl = form.image_url?.value || editingProduct?.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
     const prodData = {
-      ...editingProduct,
-      name: form.name.value,
+      ...(editingProduct || {}),
+      name,
+      slug: editingProduct?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       price: Number(form.price.value),
       discount_price: form.discount_price.value ? Number(form.discount_price.value) : null,
-      category_id: form.category_id.value,
+      category_id: form.category_id.value || null,
       material: form.material.value,
       dimensions: form.dimensions.value,
-      stock: Number(form.stock.value),
+      stock: Number(form.stock.value) || 0,
       is_published: form.is_published.checked,
       is_featured: form.is_featured.checked,
       is_new: form.is_new.checked,
       description: form.description.value,
-      images: [form.image_url.value || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80']
+      images: [imgUrl],
+      image_url: imgUrl
     };
 
     setProductModalOpen(false);
     setEditingProduct(null);
-    addToast('Mahsulot muvaffaqiyatli saqlandi!', 'success');
+    addToast('Mahsulot saqlanmoqda...', 'info');
     const updated = await dataService.saveProduct(prodData);
     setProducts(updated);
+    addToast('Mahsulot muvaffaqiyatli saqlandi!', 'success');
   };
 
   const handleDeleteProduct = async (id) => {
     if (window.confirm("Rostdan ham ushbu mebelni o‘chirmoqchimisiz?")) {
-      addToast('Mahsulot o‘chirildi', 'info');
+      addToast('Mahsulot o‘chirilmoqda...', 'info');
       const updated = await dataService.deleteProduct(id);
       setProducts(updated);
+      addToast('Mahsulot o‘chirildi', 'success');
     }
   };
 
@@ -287,26 +293,29 @@ export const AdminDashboard = () => {
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     const form = e.target;
+    const name = form.name.value.trim();
     const catData = {
-      ...editingCategory,
-      name: form.name.value,
-      slug: form.slug.value || form.name.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      ...(editingCategory || {}),
+      name,
+      slug: form.slug.value.trim() || editingCategory?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       description: form.description.value,
-      image_url: form.image_url.value || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+      image_url: form.image_url.value || editingCategory?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
     };
 
     setCategoryModalOpen(false);
     setEditingCategory(null);
-    addToast('Kategoriya saqlandi!', 'success');
+    addToast('Kategoriya saqlanmoqda...', 'info');
     const updated = await dataService.saveCategory(catData);
     setCategories(updated);
+    addToast('Kategoriya muvaffaqiyatli saqlandi!', 'success');
   };
 
   const handleDeleteCategory = async (id) => {
     if (window.confirm("Kategoriyani o‘chirishni xohlaysizmi?")) {
-      addToast('Kategoriya o‘chirildi', 'info');
+      addToast('Kategoriya o‘chirilmoqda...', 'info');
       const updated = await dataService.deleteCategory(id);
       setCategories(updated);
+      addToast('Kategoriya o‘chirildi', 'success');
     }
   };
 
@@ -315,31 +324,33 @@ export const AdminDashboard = () => {
     e.preventDefault();
     const form = e.target;
     const craftData = {
-      ...editingCraftsman,
+      ...(editingCraftsman || {}),
       name: form.name.value.trim(),
       email: form.email.value.trim().toLowerCase(),
-      password: form.password.value.trim() || 'usta12345',
-      experience_years: Number(form.experience_years.value),
+      password: form.password.value.trim() || editingCraftsman?.password || 'usta12345',
+      experience_years: Number(form.experience_years.value) || 1,
       location: form.location.value,
       phone: form.phone.value,
       telegram: form.telegram.value,
       bio: form.bio.value,
-      photo_url: form.photo_url.value || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      specializations: form.specializations.value.split(',').map((s) => s.trim())
+      photo_url: form.photo_url.value || editingCraftsman?.photo_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      specializations: form.specializations.value.split(',').map((s) => s.trim()).filter(Boolean)
     };
 
     setCraftsmanModalOpen(false);
     setEditingCraftsman(null);
-    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
+    addToast('Usta ma‘lumotlari saqlanmoqda...', 'info');
     const updated = await dataService.saveCraftsman(craftData);
     setCraftsmen(updated);
+    addToast('Usta saqlandi! Endi u o‘z paroli bilan Usta paneliga (/craftsman) kira oladi.', 'success');
   };
 
   const handleDeleteCraftsman = async (id) => {
     if (window.confirm("Ustani o‘chirmoqchimisiz?")) {
-      addToast('Usta profili o‘chirildi', 'info');
+      addToast('Usta profili o‘chirilmoqda...', 'info');
       const updated = await dataService.deleteCraftsman(id);
       setCraftsmen(updated);
+      addToast('Usta profili o‘chirildi', 'success');
     }
   };
 
@@ -348,10 +359,10 @@ export const AdminDashboard = () => {
     e.preventDefault();
     const form = e.target;
     const mgrData = {
-      ...editingManager,
+      ...(editingManager || {}),
       full_name: form.full_name.value.trim(),
       email: form.email.value.trim().toLowerCase(),
-      password: form.password.value.trim(),
+      password: form.password.value.trim() || editingManager?.password || 'manager123',
       phone: form.phone.value.trim(),
       department: form.department.value.trim() || 'Katalog va Buyurtmalar'
     };
@@ -363,9 +374,10 @@ export const AdminDashboard = () => {
 
     setManagerModalOpen(false);
     setEditingManager(null);
-    addToast('Menedjer saqlandi! Endi u o‘z paroli bilan tizimga kira oladi.', 'success');
+    addToast('Menedjer saqlanmoqda...', 'info');
     const updated = await dataService.saveManager(mgrData);
     setManagers(updated);
+    addToast('Menedjer saqlandi! Endi u o‘z paroli bilan tizimga kira oladi.', 'success');
   };
 
   const handleDeleteManager = async (id) => {

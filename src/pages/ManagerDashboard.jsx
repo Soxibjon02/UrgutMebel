@@ -278,12 +278,15 @@ export const ManagerDashboard = () => {
       ? productForm.images
       : ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'];
 
+    const name = productForm.name.trim();
+    const slug = editingProduct?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const prodPayload = {
       ...(editingProduct || {}),
-      name: productForm.name.trim(),
+      name,
+      slug,
       price: Number(productForm.price),
       discount_price: productForm.discount_price ? Number(productForm.discount_price) : null,
-      category_id: productForm.category_id || categories[0]?.id,
+      category_id: productForm.category_id || categories[0]?.id || null,
       material: productForm.material,
       dimensions: productForm.dimensions,
       stock: Number(productForm.stock) || 0,

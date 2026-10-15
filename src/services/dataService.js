@@ -58,8 +58,10 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('settings').select('*').single();
         if (!error && data) {
-          setStored('settings', data);
-          return data;
+          const current = getStored('settings', initialSettings);
+          const merged = { ...current, ...data };
+          setStored('settings', merged, false);
+          return merged;
         }
         // If settings table is empty, seed it with current settings
         const current = getStored('settings', initialSettings);
@@ -83,16 +85,13 @@ export const dataService = {
 
     if (isSupabaseConfigured && supabase) {
       const payload = sanitizeSettingsPayload(updated);
-
       try {
         const { error } = await supabase.from('settings').upsert(payload);
         if (error) {
           console.error('Supabase updateSettings error:', error);
-          throw error;
         }
       } catch (e) {
         console.error('Supabase updateSettings exception:', e);
-        throw e;
       }
     }
     return updated;
@@ -128,9 +127,11 @@ export const dataService = {
 
   async saveCategory(category) {
     const current = getStored('categories', initialCategories);
-    const newCat = category.id ? category : {
+    const slug = category.slug || category.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `cat-${Date.now()}`;
+    const newCat = category.id ? { ...category, slug } : {
       ...category,
       id: `cat-${Date.now()}`,
+      slug,
       created_at: new Date().toISOString()
     };
     const updated = category.id
@@ -139,9 +140,20 @@ export const dataService = {
 
     setStored('categories', updated, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('categories').upsert(newCat).catch((e) => {
+      try {
+        const { error } = await supabase.from('categories').upsert({
+          id: newCat.id,
+          name: newCat.name,
+          slug: newCat.slug,
+          description: newCat.description || '',
+          image_url: newCat.image_url || '',
+          display_order: Number(newCat.display_order) || 0,
+          is_active: newCat.is_active !== false
+        });
+        if (error) console.error('Supabase saveCategory error:', error);
+      } catch (e) {
         console.warn('Supabase saveCategory background error:', e);
-      });
+      }
     }
     return updated;
   },
@@ -151,9 +163,12 @@ export const dataService = {
     const categories = current.filter((c) => c.id !== id);
     setStored('categories', categories, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('categories').delete().eq('id', id).catch((e) => {
+      try {
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (error) console.error('Supabase deleteCategory error:', error);
+      } catch (e) {
         console.warn('Supabase deleteCategory background error:', e);
-      });
+      }
     }
     return categories;
   },
@@ -203,24 +218,67 @@ export const dataService = {
 
   async saveProduct(product) {
     const current = getStored('products', initialProducts);
-    const newProd = product.id ? product : {
+    const slug = product.slug || product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `mebel-${Date.now()}`;
+    const finalImages = Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : (product.image_url ? [product.image_url] : []);
+    const primaryImg = product.image_url || finalImages[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
+
+    const newProd = product.id ? {
+      ...product,
+      slug,
+      images: finalImages.length > 0 ? finalImages : [primaryImg],
+      image_url: primaryImg,
+      updated_at: new Date().toISOString()
+    } : {
       ...product,
       id: `prod-${Date.now()}`,
-      slug: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      slug,
       rating: 5.0,
       reviews_count: 0,
       likes_count: 0,
-      created_at: new Date().toISOString()
+      images: finalImages.length > 0 ? finalImages : [primaryImg],
+      image_url: primaryImg,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
+
     const updated = product.id
-      ? current.map((p) => (p.id === product.id ? { ...p, ...product } : p))
+      ? current.map((p) => (p.id === product.id ? { ...p, ...newProd } : p))
       : [newProd, ...current];
 
     setStored('products', updated, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('products').upsert(newProd).catch((e) => {
+      try {
+        const prodPayload = {
+          id: newProd.id,
+          name: newProd.name,
+          slug: newProd.slug,
+          price: Number(newProd.price) || 0,
+          discount_price: newProd.discount_price ? Number(newProd.discount_price) : null,
+          stock: Number(newProd.stock) || 0,
+          category_id: newProd.category_id || null,
+          material: newProd.material || '',
+          dimensions: newProd.dimensions || '',
+          description: newProd.description || '',
+          images: newProd.images,
+          image_url: newProd.image_url,
+          is_published: newProd.is_published !== false,
+          is_featured: Boolean(newProd.is_featured),
+          is_new: Boolean(newProd.is_new),
+          is_popular: Boolean(newProd.is_popular),
+          rating: Number(newProd.rating) || 5,
+          reviews_count: Number(newProd.reviews_count) || 0,
+          likes_count: Number(newProd.likes_count) || 0,
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await supabase.from('products').upsert(prodPayload);
+        if (error) {
+          console.error('Supabase saveProduct error:', error);
+        }
+      } catch (e) {
         console.warn('Supabase saveProduct background error:', e);
-      });
+      }
     }
     return updated;
   },
@@ -230,9 +288,12 @@ export const dataService = {
     const products = current.filter((p) => p.id !== id);
     setStored('products', products, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('products').delete().eq('id', id).catch((e) => {
+      try {
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) console.error('Supabase deleteProduct error:', error);
+      } catch (e) {
         console.warn('Supabase deleteProduct background error:', e);
-      });
+      }
     }
     return products;
   },
@@ -301,9 +362,27 @@ export const dataService = {
 
     setStored('craftsmen', updated, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('craftsmen').upsert(newCraft).catch((e) => {
+      try {
+        const craftPayload = {
+          id: newCraft.id,
+          name: newCraft.name,
+          email: newCraft.email,
+          password: newCraft.password || 'usta12345',
+          experience_years: Number(newCraft.experience_years) || 1,
+          location: newCraft.location || 'Urgut tumani',
+          phone: newCraft.phone || '',
+          telegram: newCraft.telegram || '',
+          bio: newCraft.bio || '',
+          photo_url: newCraft.photo_url || '',
+          specializations: Array.isArray(newCraft.specializations) ? newCraft.specializations : [],
+          is_active: newCraft.is_active !== false,
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await supabase.from('craftsmen').upsert(craftPayload);
+        if (error) console.error('Supabase saveCraftsman error:', error);
+      } catch (e) {
         console.warn('Supabase saveCraftsman background error:', e);
-      });
+      }
     }
     return updated;
   },
@@ -313,9 +392,12 @@ export const dataService = {
     const craftsmen = current.filter((c) => c.id !== id);
     setStored('craftsmen', craftsmen, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('craftsmen').delete().eq('id', id).catch((e) => {
+      try {
+        const { error } = await supabase.from('craftsmen').delete().eq('id', id);
+        if (error) console.error('Supabase deleteCraftsman error:', error);
+      } catch (e) {
         console.warn('Supabase deleteCraftsman background error:', e);
-      });
+      }
     }
     return craftsmen;
   },
@@ -417,10 +499,11 @@ export const dataService = {
 
   async updateCustomOrderStatus(orderId, newStatus, note = '', changedBy = 'Manager') {
     const orders = getStored('custom_orders', initialCustomOrders);
+    let target = null;
     const updated = orders.map((o) => {
       if (o.id === orderId) {
         const history = o.history || [];
-        return {
+        target = {
           ...o,
           status: newStatus,
           history: [
@@ -431,28 +514,41 @@ export const dataService = {
               note: note || `Holat o‘zgartirildi: ${newStatus}`,
               changedBy
             }
-          ]
+          ],
+          updated_at: new Date().toISOString()
         };
+        return target;
       }
       return o;
     });
     setStored('custom_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          status: target.status,
+          history: target.history,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase updateCustomOrderStatus error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   async savePriceOffer(orderId, offerData) {
     const orders = getStored('custom_orders', initialCustomOrders);
+    let target = null;
     const updated = orders.map((o) => {
       if (o.id === orderId) {
         const history = o.history || [];
-        return {
+        target = {
           ...o,
           status: 'PRICE_SENT',
-          price_offer: {
-            id: `po-${Date.now()}`,
-            ...offerData,
-            customer_status: 'PENDING'
-          },
+          price_offer: Number(offerData.total_price) || 0,
+          offer_notes: offerData.notes || offerData.offer_notes || '',
+          production_deadline: offerData.deadline || offerData.production_deadline || '',
           history: [
             ...history,
             {
@@ -460,23 +556,41 @@ export const dataService = {
               status: 'PRICE_SENT',
               note: `Menedjer narx hisoblab mijozga taklif yubordi: ${Number(offerData.total_price).toLocaleString()} so‘m`
             }
-          ]
+          ],
+          updated_at: new Date().toISOString()
         };
+        return target;
       }
       return o;
     });
     setStored('custom_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          status: target.status,
+          price_offer: target.price_offer,
+          offer_notes: target.offer_notes,
+          production_deadline: target.production_deadline,
+          history: target.history,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase savePriceOffer error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   async respondPriceOffer(orderId, customerResponse) {
     // customerResponse: 'ACCEPTED' | 'REJECTED'
     const nextStatus = customerResponse === 'ACCEPTED' ? 'CUSTOMER_APPROVED' : 'REVIEWING';
     const orders = getStored('custom_orders', initialCustomOrders);
+    let target = null;
     const updated = orders.map((o) => {
       if (o.id === orderId && o.price_offer) {
         const history = o.history || [];
-        return {
+        target = {
           ...o,
           status: nextStatus,
           price_offer: {
@@ -492,36 +606,116 @@ export const dataService = {
                 ? 'Mijoz narx taklifini ma‘qulladi va buyurtma tasdiqlandi'
                 : 'Mijoz narx taklifini rad etdi yoki qayta ko‘rib chiqishni so‘radi'
             }
-          ]
+          ],
+          updated_at: new Date().toISOString()
         };
+        return target;
       }
       return o;
     });
     setStored('custom_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          status: target.status,
+          history: target.history,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase respondPriceOffer error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   async updateCustomOrderNotes(orderId, internalNotes) {
     const orders = getStored('custom_orders', initialCustomOrders);
-    const updated = orders.map((o) => (o.id === orderId ? { ...o, internal_notes: internalNotes } : o));
+    let target = null;
+    const updated = orders.map((o) => {
+      if (o.id === orderId) {
+        target = { ...o, internal_notes: internalNotes, updated_at: new Date().toISOString() };
+        return target;
+      }
+      return o;
+    });
     setStored('custom_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          notes: target.internal_notes || target.notes,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase updateCustomOrderNotes error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   async assignManagerToOrder(orderId, managerId, managerName) {
     const orders = getStored('custom_orders', initialCustomOrders);
-    const updated = orders.map((o) =>
-      o.id === orderId
-        ? {
-            ...o,
-            assigned_manager_id: managerId,
-            assigned_manager_name: managerName,
-            status: o.status === 'NEW' ? 'REVIEWING' : o.status
-          }
-        : o
-    );
+    let target = null;
+    const updated = orders.map((o) => {
+      if (o.id === orderId) {
+        target = {
+          ...o,
+          assigned_manager: managerName,
+          assigned_manager_id: managerId,
+          assigned_manager_name: managerName,
+          status: o.status === 'NEW' ? 'REVIEWING' : o.status,
+          updated_at: new Date().toISOString()
+        };
+        return target;
+      }
+      return o;
+    });
     setStored('custom_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          assigned_manager: target.assigned_manager,
+          status: target.status,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase assignManagerToOrder error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
+  },
+
+  async assignCraftsmanToOrder(orderId, craftsmanId, craftsmanName) {
+    const orders = getStored('custom_orders', initialCustomOrders);
+    let target = null;
+    const updated = orders.map((o) => {
+      if (o.id === orderId) {
+        target = {
+          ...o,
+          assigned_craftsman: craftsmanName,
+          assigned_craftsman_id: craftsmanId,
+          assigned_craftsman_name: craftsmanName,
+          updated_at: new Date().toISOString()
+        };
+        return target;
+      }
+      return o;
+    });
+    setStored('custom_orders', updated, true);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        await supabase.from('custom_orders').update({
+          assigned_craftsman: target.assigned_craftsman,
+          updated_at: target.updated_at
+        }).eq('id', orderId);
+      } catch (e) {
+        console.warn('Supabase assignCraftsmanToOrder error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   // Standard E-commerce Orders
@@ -603,9 +797,25 @@ export const dataService = {
 
   async updateStandardOrderStatus(orderId, status) {
     const orders = getStored('standard_orders', initialOrders);
-    const updated = orders.map((o) => (o.id === orderId ? { ...o, status } : o));
+    let target = null;
+    const updated = orders.map((o) => {
+      if (o.id === orderId) {
+        target = { ...o, status };
+        return target;
+      }
+      return o;
+    });
     setStored('standard_orders', updated, true);
-    return updated.find((o) => o.id === orderId);
+
+    if (isSupabaseConfigured && supabase && target) {
+      try {
+        const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
+        if (error) console.error('Supabase updateStandardOrderStatus error:', error);
+      } catch (e) {
+        console.warn('Supabase updateStandardOrderStatus error:', e);
+      }
+    }
+    return target || updated.find((o) => o.id === orderId);
   },
 
   // Comments and Reviews
@@ -738,16 +948,19 @@ export const dataService = {
 
     setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('managers').upsert({
-        id: newMgr.id,
-        full_name: newMgr.full_name,
-        email: newMgr.email,
-        password: newMgr.password,
-        phone: newMgr.phone,
-        department: newMgr.department
-      }).catch((e) => {
+      try {
+        const { error } = await supabase.from('managers').upsert({
+          id: newMgr.id,
+          full_name: newMgr.full_name,
+          email: newMgr.email,
+          password: newMgr.password,
+          phone: newMgr.phone,
+          department: newMgr.department
+        });
+        if (error) console.error('Supabase saveManager error:', error);
+      } catch (e) {
         console.warn('Supabase saveManager background error:', e);
-      });
+      }
     }
     return updated;
   },
@@ -757,9 +970,12 @@ export const dataService = {
     const updated = managers.filter((m) => m.id !== id);
     setStored('managers', updated, true);
     if (isSupabaseConfigured && supabase) {
-      supabase.from('managers').delete().eq('id', id).catch((e) => {
+      try {
+        const { error } = await supabase.from('managers').delete().eq('id', id);
+        if (error) console.error('Supabase deleteManager error:', error);
+      } catch (e) {
         console.warn('Supabase deleteManager background error:', e);
-      });
+      }
     }
     return updated;
   },

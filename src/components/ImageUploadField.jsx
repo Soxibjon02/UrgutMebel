@@ -110,7 +110,7 @@ export default function ImageUploadField({
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <input
-            type="url"
+            type="text"
             name={name}
             value={url}
             onChange={handleUrlChange}
