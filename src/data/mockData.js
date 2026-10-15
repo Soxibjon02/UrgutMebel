@@ -340,28 +340,7 @@ export const initialCraftsmen = [
   }
 ];
 
-export const initialBanners = [
-  {
-    id: "ban-1",
-    title: "Urgut Mebellari - Uyingizga Qulaylik Va Go‘zallik",
-    subtitle: "Yog‘ochning tabiiy nafisi va zamonaviy texnologiyalar uyg‘unligi. Tayyor mebellar va maxsus buyurtmalar.",
-    link: "/custom-order",
-    image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
-    button_text: "O‘z O‘lchamingizda Buyurtma Bering",
-    display_order: 1,
-    is_active: true
-  },
-  {
-    id: "ban-2",
-    title: "Mehmonxona Uchun Eksklyuziv To‘plamlar",
-    subtitle: "Royal to‘plami bilan mehmondorchilikda o‘zgacha muhit yarating. 15% chegirma bilan xarid qiling.",
-    link: "/furniture?category=mehmonxona",
-    image_url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=80",
-    button_text: "Katalogni Ko‘rish",
-    display_order: 2,
-    is_active: true
-  }
-];
+export const initialBanners = [];
 
 export const initialCustomOrders = [
   {

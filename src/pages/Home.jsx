@@ -63,13 +63,13 @@ export const Home = () => {
   const childrenProducts = products.filter((p) => p.category_id === 'cat-5' || p.tags?.includes('bolalar')).slice(0, 4);
   const discountedProducts = products.filter((p) => Boolean(p.discount_price)).slice(0, 4);
 
-  const activeBanner = banners[activeBannerIdx] || {
-    title: `${settings.site_name || "Urgut Mebel Markazi"} - Zamonaviy va Buyurtma Mebellar`,
-    subtitle: settings.site_tagline || "Urgutning asriy duradgorlik san'ati va eng so'nggi zamonaviy dizayn texnologiyalari birlashgan maskan.",
-    link: "/custom-order",
-    image_url: settings.hero_banner_image || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
-    button_text: "O‘z O‘lchamingizda Buyurtma Bering"
-  };
+  // Hero section is DIRECTLY driven by Admin settings (never overridden by stale mock banners)
+  const heroImage = settings.hero_banner_image || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80";
+  const heroTitle = settings.hero_title || `${settings.site_name || "Urgut Mebel Markazi"} - Zamonaviy va Buyurtma Mebellar`;
+  const heroSubtitle = settings.hero_subtitle || settings.site_tagline || "Urgutning asriy duradgorlik san'ati va eng so'nggi zamonaviy dizayn texnologiyalari birlashgan maskan.";
+  const heroBadge = settings.hero_badge || "Yangi 2026 To‘plami";
+  const heroBtnText = settings.hero_btn_text || "O‘z O‘lchamingizda Buyurtma Bering";
+  const heroBtnLink = settings.hero_btn_link || "/custom-order";
 
   const handleCraftsmanRequest = (craftsman) => {
     setSelectedCraftsman(craftsman);
@@ -95,7 +95,7 @@ export const Home = () => {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url('${activeBanner.image_url}')`,
+            backgroundImage: `url('${heroImage}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: 0.38,
@@ -130,7 +130,7 @@ export const Home = () => {
               }}
             >
               <Sparkles size={15} color="var(--gold-accent)" />
-              <span>{settings.hero_badge || "Urgut Hunarmandlari Markazi 2026"}</span>
+              <span>{heroBadge}</span>
             </div>
 
             <h1
@@ -143,7 +143,7 @@ export const Home = () => {
                 letterSpacing: '-0.02em'
               }}
             >
-              {activeBanner.title}
+              {heroTitle}
             </h1>
 
             <p
@@ -154,12 +154,12 @@ export const Home = () => {
                 marginBottom: '2rem'
               }}
             >
-              {activeBanner.subtitle}
+              {heroSubtitle}
             </p>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              <Link to={activeBanner.link || "/custom-order"} className="btn btn-primary btn-lg">
-                <span>{activeBanner.button_text || "Buyurtma Berish"}</span>
+              <Link to={heroBtnLink} className="btn btn-primary btn-lg">
+                <span>{heroBtnText}</span>
                 <ArrowRight size={18} />
               </Link>
               <Link

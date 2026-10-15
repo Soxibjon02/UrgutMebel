@@ -99,6 +99,8 @@ export const AdminDashboard = () => {
     feature3_title: settings.feature3_title || '',
     feature3_desc: settings.feature3_desc || '',
     hero_banner_image: settings.hero_banner_image || '',
+    hero_title: settings.hero_title || '',
+    hero_subtitle: settings.hero_subtitle || '',
     logo_url: settings.logo_url || '/pwa-icon.svg',
 
     // Biz Haqimizda (About Page) fields
@@ -236,6 +238,8 @@ export const AdminDashboard = () => {
       feature3_title: settings.feature3_title || 'Urgut Duradgorlari',
       feature3_desc: settings.feature3_desc || 'Asriy hunarmandchilik va zamonaviy texnologiya uyg‘unligi',
       hero_banner_image: settings.hero_banner_image || '',
+      hero_title: settings.hero_title || '',
+      hero_subtitle: settings.hero_subtitle || '',
       logo_url: settings.logo_url || '/pwa-icon.svg',
 
       about_title: settings.about_title || 'Urgut Mebel Markazi Haqida',
@@ -1714,6 +1718,36 @@ export const AdminDashboard = () => {
                 placeholder="https://images.unsplash.com/... yoki kompyuterdan yuklang"
                 helperText="Saytning bosh sahifasi fon rasmi. Havola kiriting yoki fayl tanlang (Supabase Storage ga saqlanadi)."
               />
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Hero Asosiy Sarlavhasi (Ixtiyoriy)</label>
+                  <input
+                    type="text"
+                    value={settingsForm.hero_title || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, hero_title: e.target.value })}
+                    placeholder={`${settingsForm.site_name || "Urgut Mebel Markazi"} - Zamonaviy va Buyurtma Mebellar`}
+                    className="form-input"
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Bo‘sh qoldirilsa: "{settingsForm.site_name || "Urgut Mebel Markazi"} - Zamonaviy va Buyurtma Mebellar" ko‘rsatiladi.
+                  </span>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Hero Ostidagi Matn / Shior (Ixtiyoriy)</label>
+                  <input
+                    type="text"
+                    value={settingsForm.hero_subtitle || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, hero_subtitle: e.target.value })}
+                    placeholder={settingsForm.site_tagline || "Urgutning asriy duradgorlik san'ati..."}
+                    className="form-input"
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Bo‘sh qoldirilsa sayt shiori ko‘rsatiladi.
+                  </span>
+                </div>
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
                 <div className="form-group">

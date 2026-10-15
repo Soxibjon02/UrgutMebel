@@ -25,6 +25,10 @@ export const defaultSettings = {
   feature3_title: "Urgut Duradgorlari",
   feature3_desc: "Asriy hunarmandchilik an'analari va zamonaviy texnologiya uyg'unligi",
   hero_banner_image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80",
+  hero_title: "",
+  hero_subtitle: "",
+  hero_btn_text: "O‘z O‘lchamingizda Buyurtma Bering",
+  hero_btn_link: "/custom-order",
   logo_url: "/pwa-icon.svg",
 
   // Biz Haqimizda (About Page) dynamic settings

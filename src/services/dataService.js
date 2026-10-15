@@ -82,7 +82,11 @@ const sanitizeSettingsPayload = (settingsObj = {}) => {
     about_val2_title: settingsObj.about_val2_title,
     about_val2_desc: settingsObj.about_val2_desc,
     about_val3_title: settingsObj.about_val3_title,
-    about_val3_desc: settingsObj.about_val3_desc
+    about_val3_desc: settingsObj.about_val3_desc,
+    hero_title: settingsObj.hero_title,
+    hero_subtitle: settingsObj.hero_subtitle,
+    hero_btn_text: settingsObj.hero_btn_text,
+    hero_btn_link: settingsObj.hero_btn_link
   };
   payload.footer_about = JSON.stringify(aboutBundle);
 
