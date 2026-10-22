@@ -32,11 +32,32 @@ const DEFAULT_SLIDES = [
 
 export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: propSlides }) => {
   const { settings } = useSettings();
-  const effectiveSlides = (propSlides && propSlides.length > 0)
+  const rawSlides = (propSlides && propSlides.length > 0)
     ? propSlides
     : (settings.collection_carousel_slides && settings.collection_carousel_slides.length > 0)
       ? settings.collection_carousel_slides
       : DEFAULT_SLIDES;
+
+  const effectiveSlides = (rawSlides || []).map((item, idx) => {
+    if (typeof item === 'string') {
+      return {
+        id: idx + 1,
+        title: `Autumn Collection #${idx + 1}`,
+        subtitle: 'Zamonaviy interyer va shinamlik',
+        badge: String(idx + 1).padStart(2, '0'),
+        image: item,
+        category: 'Kolleksiya'
+      };
+    }
+    return {
+      id: item?.id || idx + 1,
+      title: item?.title || `Autumn Collection #${idx + 1}`,
+      subtitle: item?.subtitle || 'Zamonaviy interyer va shinamlik',
+      badge: item?.badge || String(idx + 1).padStart(2, '0'),
+      image: item?.image || item?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80',
+      category: item?.category || 'Mebel'
+    };
+  });
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -58,7 +79,7 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
     return () => clearInterval(interval);
   }, [effectiveSlides.length]);
 
-  const activeSlide = effectiveSlides[currentIndex] || effectiveSlides[0];
+  const activeSlide = effectiveSlides[currentIndex] || effectiveSlides[0] || DEFAULT_SLIDES[0];
   const prevSlideItem = effectiveSlides[(currentIndex - 1 + effectiveSlides.length) % effectiveSlides.length] || activeSlide;
   const nextSlideItem = effectiveSlides[(currentIndex + 1) % effectiveSlides.length] || activeSlide;
 
@@ -283,7 +304,7 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
             marginTop: '2rem'
           }}
         >
-          {slides.map((_, idx) => (
+          {effectiveSlides.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}

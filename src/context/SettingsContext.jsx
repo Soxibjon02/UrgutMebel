@@ -71,14 +71,14 @@ export const SettingsProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Theme: Dark Mode / Light Mode
+  // Theme: Dark Mode by default
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('urgut_theme');
       if (saved) return saved;
-      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   });
 
