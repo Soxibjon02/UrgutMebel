@@ -1013,11 +1013,13 @@ export const ManagerDashboard = () => {
                     borderRadius: 'var(--radius-full)',
                     fontSize: '0.85rem',
                     fontWeight: 600,
-                    backgroundColor: selectedStatusTab === tab.key ? 'var(--wood-amber)' : '#ffffff',
+                    backgroundColor: selectedStatusTab === tab.key ? 'var(--wood-amber)' : 'var(--bg-card)',
                     color: selectedStatusTab === tab.key ? '#ffffff' : 'var(--text-main)',
-                    border: '1px solid var(--border-subtle)',
+                    border: selectedStatusTab === tab.key ? '1px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
                     boxShadow: selectedStatusTab === tab.key ? '0 2px 8px rgba(194, 109, 46, 0.3)' : 'none',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   {tab.label}

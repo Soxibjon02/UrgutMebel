@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { X, Lock, Mail, User, Phone, ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const AuthModal = () => {
   const { authModalState, closeAuthModal, login, register } = useAuth();
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [isLoginMode, setIsLoginMode] = useState(authModalState.mode !== 'register');
@@ -78,18 +80,23 @@ export const AuthModal = () => {
       >
         <button
           onClick={closeAuthModal}
+          type="button"
+          aria-label="Yopish"
           style={{
             position: 'absolute',
             top: '1.25rem',
             right: '1.25rem',
-            background: '#f4f1ea',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-muted)'
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
           }}
         >
           <X size={18} />
@@ -101,8 +108,8 @@ export const AuthModal = () => {
               display: 'inline-flex',
               padding: '0.75rem',
               borderRadius: '50%',
-              background: 'rgba(194, 109, 46, 0.1)',
-              color: 'var(--wood-amber)',
+              background: 'rgba(250, 109, 88, 0.12)',
+              color: 'var(--primary)',
               marginBottom: '0.75rem'
             }}
           >
@@ -112,7 +119,7 @@ export const AuthModal = () => {
             {settings.site_name}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-            {authModalState.reason || (isLoginMode ? 'Hisobingizga kiring' : 'Yangi hisob yaratish')}
+            {authModalState.reason || (isLoginMode ? t('auth.login_subtitle', 'Hisobingizga kiring') : t('auth.register_subtitle', 'Yangi hisob yaratish'))}
           </p>
         </div>
 
@@ -122,8 +129,9 @@ export const AuthModal = () => {
             display: 'flex',
             background: 'var(--bg-secondary)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.3rem',
-            marginBottom: '1.5rem'
+            padding: '0.35rem',
+            marginBottom: '1.5rem',
+            border: '1px solid var(--border-subtle)'
           }}
         >
           <button
@@ -131,32 +139,38 @@ export const AuthModal = () => {
             onClick={() => setIsLoginMode(true)}
             style={{
               flex: 1,
-              padding: '0.6rem',
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              fontSize: '0.88rem',
-              background: isLoginMode ? '#ffffff' : 'transparent',
-              color: isLoginMode ? 'var(--text-main)' : 'var(--text-muted)',
-              boxShadow: isLoginMode ? 'var(--shadow-sm)' : 'none'
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              background: isLoginMode ? 'var(--primary)' : 'transparent',
+              color: isLoginMode ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              boxShadow: isLoginMode ? '0 2px 8px rgba(250, 109, 88, 0.35)' : 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
             }}
           >
-            Kirish
+            {t('auth.login_tab', 'Kirish')}
           </button>
           <button
             type="button"
             onClick={() => setIsLoginMode(false)}
             style={{
               flex: 1,
-              padding: '0.6rem',
+              padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              fontSize: '0.88rem',
-              background: !isLoginMode ? '#ffffff' : 'transparent',
-              color: !isLoginMode ? 'var(--text-main)' : 'var(--text-muted)',
-              boxShadow: !isLoginMode ? 'var(--shadow-sm)' : 'none'
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              background: !isLoginMode ? 'var(--primary)' : 'transparent',
+              color: !isLoginMode ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              boxShadow: !isLoginMode ? '0 2px 8px rgba(250, 109, 88, 0.35)' : 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
             }}
           >
-            Ro‘yxatdan o‘tish
+            {t('auth.register_tab', 'Ro‘yxatdan o‘tish')}
           </button>
         </div>
 
@@ -164,7 +178,7 @@ export const AuthModal = () => {
           {!isLoginMode && (
             <>
               <div className="form-group">
-                <label className="form-label">To‘liq Ismingiz</label>
+                <label className="form-label">{t('auth.full_name', 'To‘liq Ismingiz')}</label>
                 <div style={{ position: 'relative' }}>
                   <User
                     size={18}
@@ -179,7 +193,7 @@ export const AuthModal = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Masalan: Sardor Rustamov"
+                    placeholder={t('auth.full_name_placeholder', 'Masalan: Sardor Rustamov')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="form-input"
@@ -189,7 +203,7 @@ export const AuthModal = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Telefon Raqamingiz</label>
+                <label className="form-label">{t('auth.phone', 'Telefon Raqamingiz')}</label>
                 <div style={{ position: 'relative' }}>
                   <Phone
                     size={18}
@@ -204,7 +218,7 @@ export const AuthModal = () => {
                   <input
                     type="tel"
                     required
-                    placeholder="+998 90 123 45 67"
+                    placeholder={t('auth.phone_placeholder', '+998 90 123 45 67')}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="form-input"
@@ -216,7 +230,7 @@ export const AuthModal = () => {
           )}
 
           <div className="form-group">
-            <label className="form-label">Elektron Pochta (Email)</label>
+            <label className="form-label">{t('auth.email', 'Elektron Pochta (Email)')}</label>
             <div style={{ position: 'relative' }}>
               <Mail
                 size={18}
@@ -231,7 +245,7 @@ export const AuthModal = () => {
               <input
                 type="email"
                 required
-                placeholder="misol@pochta.uz"
+                placeholder={t('auth.email_placeholder', 'misol@pochta.uz')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
@@ -241,7 +255,7 @@ export const AuthModal = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Parol</label>
+            <label className="form-label">{t('auth.password', 'Parol')}</label>
             <div style={{ position: 'relative' }}>
               <Lock
                 size={18}
@@ -256,7 +270,7 @@ export const AuthModal = () => {
               <input
                 type="password"
                 required
-                placeholder="Kamida 6 ta belgi"
+                placeholder={t('auth.password_placeholder', 'Kamida 6 ta belgi')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
@@ -271,7 +285,7 @@ export const AuthModal = () => {
             className="btn btn-primary"
             style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem' }}
           >
-            {loading ? 'Tekshirilmoqda...' : isLoginMode ? 'Tizimga Kirish' : 'Ro‘yxatdan O‘tish'}
+            {loading ? t('auth.checking', 'Tekshirilmoqda...') : isLoginMode ? t('auth.btn_login', 'Tizimga Kirish') : t('auth.btn_register', 'Ro‘yxatdan O‘tish')}
             <ArrowRight size={18} />
           </button>
         </form>
@@ -279,40 +293,40 @@ export const AuthModal = () => {
         {isLoginMode && (
           <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)' }}>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '0.6rem', textAlign: 'center' }}>
-              Sinov uchun tezkor kirish:
+              {t('auth.fast_demo_login', 'Sinov uchun tezkor kirish:')}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
               <button
                 type="button"
                 onClick={() => setDemoCredentials('customer')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
               >
-                Mijoz
+                {t('auth.demo_customer', 'Mijoz')}
               </button>
               <button
                 type="button"
                 onClick={() => setDemoCredentials('craftsman')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
               >
-                Usta
+                {t('auth.demo_craftsman', 'Usta')}
               </button>
               <button
                 type="button"
                 onClick={() => setDemoCredentials('manager')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
               >
-                Menedjer
+                {t('auth.demo_manager', 'Menedjer')}
               </button>
               <button
                 type="button"
                 onClick={() => setDemoCredentials('admin')}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.4rem 0.2rem' }}
+                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
               >
-                Admin
+                {t('auth.demo_admin', 'Admin')}
               </button>
             </div>
           </div>
@@ -321,3 +335,4 @@ export const AuthModal = () => {
     </div>
   );
 };
+

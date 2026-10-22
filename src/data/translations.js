@@ -270,6 +270,30 @@ export const translations = {
       lang_uz_required: "O‘zbekcha (Majburiy)",
       lang_en_optional: "English (Ixtiyoriy)",
       lang_ru_optional: "Русский (Ixtiyoriy)"
+    },
+
+    // Auth & Accounts
+    auth: {
+      login_tab: "Kirish",
+      register_tab: "Ro‘yxatdan o‘tish",
+      login_subtitle: "Hisobingizga kiring",
+      register_subtitle: "Yangi hisob yaratish",
+      full_name: "To‘liq Ismingiz",
+      full_name_placeholder: "Masalan: Sardor Rustamov",
+      phone: "Telefon Raqamingiz",
+      phone_placeholder: "+998 90 123 45 67",
+      email: "Elektron Pochta (Email)",
+      email_placeholder: "misol@pochta.uz",
+      password: "Parol",
+      password_placeholder: "Kamida 6 ta belgi",
+      btn_login: "Tizimga Kirish",
+      btn_register: "Ro‘yxatdan O‘tish",
+      checking: "Tekshirilmoqda...",
+      fast_demo_login: "Sinov uchun tezkor kirish:",
+      demo_customer: "Mijoz",
+      demo_craftsman: "Usta",
+      demo_manager: "Menedjer",
+      demo_admin: "Admin"
     }
   },
 
@@ -543,6 +567,30 @@ export const translations = {
       lang_uz_required: "Узбекский (Обязательно)",
       lang_en_optional: "Английский (По желанию)",
       lang_ru_optional: "Русский (По желанию)"
+    },
+
+    // Auth & Accounts
+    auth: {
+      login_tab: "Вход",
+      register_tab: "Регистрация",
+      login_subtitle: "Войдите в свой аккаунт",
+      register_subtitle: "Создать новый аккаунт",
+      full_name: "Полное имя",
+      full_name_placeholder: "Например: Сардор Рустамов",
+      phone: "Номер телефона",
+      phone_placeholder: "+998 90 123 45 67",
+      email: "Электронная почта (Email)",
+      email_placeholder: "example@mail.ru",
+      password: "Пароль",
+      password_placeholder: "Не менее 6 символов",
+      btn_login: "Войти в систему",
+      btn_register: "Зарегистрироваться",
+      checking: "Проверка...",
+      fast_demo_login: "Быстрый демо-вход для тестирования:",
+      demo_customer: "Клиент",
+      demo_craftsman: "Мастер",
+      demo_manager: "Менеджер",
+      demo_admin: "Админ"
     }
   },
 
@@ -816,6 +864,30 @@ export const translations = {
       lang_uz_required: "Uzbek (Required)",
       lang_en_optional: "English (Optional)",
       lang_ru_optional: "Russian (Optional)"
+    },
+
+    // Auth & Accounts
+    auth: {
+      login_tab: "Sign In",
+      register_tab: "Sign Up",
+      login_subtitle: "Sign in to your account",
+      register_subtitle: "Create a new account",
+      full_name: "Full Name",
+      full_name_placeholder: "e.g. John Doe",
+      phone: "Phone Number",
+      phone_placeholder: "+998 90 123 45 67",
+      email: "Email Address",
+      email_placeholder: "example@mail.com",
+      password: "Password",
+      password_placeholder: "At least 6 characters",
+      btn_login: "Sign In",
+      btn_register: "Register Now",
+      checking: "Verifying...",
+      fast_demo_login: "Quick demo access for testing:",
+      demo_customer: "Customer",
+      demo_craftsman: "Craftsman",
+      demo_manager: "Manager",
+      demo_admin: "Admin"
     }
   }
 };
