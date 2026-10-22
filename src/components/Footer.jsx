@@ -38,10 +38,11 @@ export const Footer = () => {
   return (
     <footer
       style={{
-        backgroundColor: '#FFFFFF',
-        color: '#18191D',
-        borderTop: '1px solid #ECECEC',
-        padding: '5rem 0 2.5rem'
+        backgroundColor: 'var(--bg-card)',
+        color: 'var(--text-main)',
+        borderTop: '1px solid var(--border-subtle)',
+        padding: '5rem 0 2.5rem',
+        transition: 'background-color 0.25s ease, color 0.25s ease'
       }}
     >
       <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1.5rem' }}>
@@ -60,7 +61,7 @@ export const Footer = () => {
               style={{
                 fontSize: '0.95rem',
                 fontWeight: 700,
-                color: '#18191D',
+                color: 'var(--text-main)',
                 marginBottom: '1.6rem',
                 letterSpacing: '-0.01em'
               }}
@@ -97,7 +98,7 @@ export const Footer = () => {
               style={{
                 fontSize: '0.95rem',
                 fontWeight: 700,
-                color: '#18191D',
+                color: 'var(--text-main)',
                 marginBottom: '1.6rem',
                 letterSpacing: '-0.01em'
               }}
@@ -106,22 +107,22 @@ export const Footer = () => {
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <li>
-                <Link to="/furniture" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                <Link to="/furniture" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
                   Furniture Catalog
                 </Link>
               </li>
               <li>
-                <Link to="/blog" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                <Link to="/blog" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
                   Magazine &amp; Interior Tips
                 </Link>
               </li>
               <li>
-                <Link to="/craftsmen" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                <Link to="/craftsmen" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
                   Master Craftsmen
                 </Link>
               </li>
               <li>
-                <Link to="/contact" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                <Link to="/contact" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
                   Contact Us
                 </Link>
               </li>
@@ -134,30 +135,30 @@ export const Footer = () => {
               style={{
                 fontSize: '0.95rem',
                 fontWeight: 700,
-                color: '#18191D',
+                color: 'var(--text-main)',
                 marginBottom: '1.6rem',
                 letterSpacing: '-0.01em'
               }}
             >
               Contact info
             </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.9rem', color: '#6B7280', lineHeight: 1.6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               <div>
-                <strong style={{ color: '#18191D', display: 'block', marginBottom: '0.2rem' }}>
+                <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
                   Urgut (Samarqand)
                 </strong>
                 <p style={{ margin: 0 }}>Dehqonobod ko‘chasi, 12-uy</p>
                 <p style={{ margin: 0 }}>Samarqand viloyati, Urgut</p>
-                <p style={{ margin: 0, color: '#18191D', fontWeight: 600 }}>+998 90 123 45 67</p>
+                <p style={{ margin: 0, color: 'var(--text-main)', fontWeight: 600 }}>+998 90 123 45 67</p>
               </div>
 
               <div>
-                <strong style={{ color: '#18191D', display: 'block', marginBottom: '0.2rem' }}>
+                <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
                   Toshkent filiali
                 </strong>
                 <p style={{ margin: 0 }}>Chilonzor 9-mavze, 45-bino</p>
                 <p style={{ margin: 0 }}>Toshkent shahri</p>
-                <p style={{ margin: 0, color: '#18191D', fontWeight: 600 }}>info@urgutmebel.uz</p>
+                <p style={{ margin: 0, color: 'var(--text-main)', fontWeight: 600 }}>info@urgutmebel.uz</p>
               </div>
             </div>
           </div>
@@ -168,7 +169,7 @@ export const Footer = () => {
               style={{
                 fontSize: '0.95rem',
                 fontWeight: 700,
-                color: '#18191D',
+                color: 'var(--text-main)',
                 marginBottom: '1.6rem',
                 letterSpacing: '-0.01em'
               }}
@@ -179,8 +180,8 @@ export const Footer = () => {
             {subscribed ? (
               <div
                 style={{
-                  backgroundColor: '#FFF3F0',
-                  border: '1px solid #FCD5CE',
+                  backgroundColor: 'var(--primary-light)',
+                  border: '1px solid var(--primary-border)',
                   padding: '1.25rem',
                   borderRadius: '2px',
                   color: 'var(--figma-coral)',
@@ -190,7 +191,7 @@ export const Footer = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
                   <Check size={18} /> Muvaffaqiyatli obuna bo‘ldingiz!
                 </div>
-                <p style={{ margin: 0, color: '#6B7280', fontSize: '0.85rem' }}>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                   Yangi chegirmalar va yangiliklar pochtangizga yuboriladi.
                 </p>
               </div>
@@ -233,7 +234,7 @@ export const Footer = () => {
         {/* Bottom Bar: Copyright & Socials */}
         <div
           style={{
-            borderTop: '1px solid #F0F0F0',
+            borderTop: '1px solid var(--border-subtle)',
             paddingTop: '2rem',
             display: 'flex',
             alignItems: 'center',
@@ -241,7 +242,7 @@ export const Footer = () => {
             flexWrap: 'wrap',
             gap: '1rem',
             fontSize: '0.85rem',
-            color: '#9CA3AF'
+            color: 'var(--text-light)'
           }}
         >
           <div>
@@ -253,7 +254,7 @@ export const Footer = () => {
               href="https://facebook.com"
               target="_blank"
               rel="noreferrer"
-              style={{ color: '#4B5563', textDecoration: 'none', transition: 'color 0.2s' }}
+              style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
               aria-label="Facebook"
             >
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">

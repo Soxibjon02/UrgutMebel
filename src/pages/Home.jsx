@@ -81,7 +81,7 @@ export const Home = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', color: '#18191D', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', minHeight: '100vh' }}>
       
       {/* ==============================================================
           1. FIGMA SPLIT HERO SECTION (Chairs & Stools)
@@ -93,7 +93,8 @@ export const Home = () => {
               display: 'grid',
               gridTemplateColumns: '1.2fr 1fr',
               minHeight: '460px',
-              backgroundColor: '#FAFAF8',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               overflow: 'hidden'
             }}
@@ -150,7 +151,7 @@ export const Home = () => {
                 style={{
                   fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.15,
                   margin: '0 0 1rem'
                 }}
@@ -159,7 +160,7 @@ export const Home = () => {
               </h1>
               <p
                 style={{
-                  color: '#6B7280',
+                  color: 'var(--text-muted)',
                   fontSize: '1rem',
                   lineHeight: 1.6,
                   maxWidth: '380px',
@@ -208,7 +209,7 @@ export const Home = () => {
                 style={{
                   fontSize: '2.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.2,
                   marginBottom: '1rem'
                 }}
@@ -251,14 +252,14 @@ export const Home = () => {
                         padding: 0,
                         fontSize: '0.95rem',
                         fontWeight: idx === 0 ? 700 : 500,
-                        color: idx === 0 ? '#18191D' : '#6B7280',
+                        color: idx === 0 ? 'var(--text-main)' : 'var(--text-muted)',
                         cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'color 0.2s'
                       }}
                       onMouseEnter={(e) => (e.target.style.color = 'var(--figma-coral)')}
                       onMouseLeave={(e) =>
-                        (e.target.style.color = idx === 0 ? '#18191D' : '#6B7280')
+                        (e.target.style.color = idx === 0 ? 'var(--text-main)' : 'var(--text-muted)')
                       }
                     >
                       {item.name}
@@ -299,14 +300,15 @@ export const Home = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.45rem 1rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     letterSpacing: '0.02em'
                   }}
                 >
@@ -346,20 +348,21 @@ export const Home = () => {
                 <div>
                   <div
                     style={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'var(--bg-card)',
                       padding: '0.45rem 1rem',
                       borderRadius: '2px',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      boxShadow: 'var(--shadow-card)',
+                      border: '1px solid var(--border-subtle)',
                       display: 'inline-block',
                       fontSize: '0.82rem',
                       fontWeight: 700,
-                      color: '#18191D',
+                      color: 'var(--text-main)',
                       marginBottom: '0.35rem'
                     }}
                   >
                     Sofas and Armchairs
                   </div>
-                  <p style={{ margin: '0.25rem 0 0', color: '#6B7280', fontSize: '0.8rem' }}>
+                  <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                     Yumshoq mebellar kolleksiyasi
                   </p>
                 </div>
@@ -376,7 +379,8 @@ export const Home = () => {
                 style={{
                   gridColumn: '1 / 3',
                   gridRow: '3 / 5',
-                  backgroundColor: '#ECECEC',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '1.75rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -392,20 +396,21 @@ export const Home = () => {
                 <div>
                   <div
                     style={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'var(--bg-card)',
                       padding: '0.45rem 1rem',
                       borderRadius: '2px',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      boxShadow: 'var(--shadow-card)',
+                      border: '1px solid var(--border-subtle)',
                       display: 'inline-block',
                       fontSize: '0.85rem',
                       fontWeight: 700,
-                      color: '#18191D',
+                      color: 'var(--text-main)',
                       marginBottom: '0.35rem'
                     }}
                   >
                     Chairs &amp; Stools
                   </div>
-                  <p style={{ margin: '0.35rem 0 0', color: '#6B7280', fontSize: '0.85rem' }}>
+                  <p style={{ margin: '0.35rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                     Tabiiy eman va metall karkas
                   </p>
                 </div>
@@ -437,14 +442,15 @@ export const Home = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.45rem 1rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Pouf
@@ -481,13 +487,14 @@ export const Home = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.35rem 0.85rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Bedding
@@ -519,14 +526,15 @@ export const Home = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.35rem 0.85rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Furniture
@@ -707,7 +715,7 @@ export const Home = () => {
                 style={{
                   fontSize: '2.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.2,
                   marginBottom: '1rem'
                 }}
@@ -722,7 +730,7 @@ export const Home = () => {
                   marginBottom: '1.5rem'
                 }}
               />
-              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
                 Xonadoningizni yanada shinam va zamonaviy qilish bo‘yicha tajribali usta va dizaynerlarimizdan tavsiyalar.
               </p>
               <Link to="/blog" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
@@ -739,7 +747,8 @@ export const Home = () => {
                 backgroundImage: `url(${featuredPost.image})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                boxShadow: '0 15px 35px rgba(0,0,0,0.08)'
+                boxShadow: 'var(--shadow-card)',
+                border: '1px solid var(--border-subtle)'
               }}
             />
 
@@ -749,14 +758,14 @@ export const Home = () => {
                 style={{
                   fontSize: '1.65rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.35,
                   marginBottom: '1rem'
                 }}
               >
                 {featuredPost.title}
               </h3>
-              <p style={{ color: '#6B7280', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
                 {featuredPost.excerpt}
               </p>
 
@@ -768,7 +777,7 @@ export const Home = () => {
                   style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
                 />
                 <div>
-                  <strong style={{ display: 'block', fontSize: '0.9rem', color: '#18191D' }}>
+                  <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-main)' }}>
                     {featuredPost.author}
                   </strong>
                   <span style={{ fontSize: '0.8rem', color: '#9CA3AF' }}>{featuredPost.date}</span>
@@ -787,7 +796,7 @@ export const Home = () => {
       {/* ==============================================================
           6. QUICK CUSTOM ORDER & CRAFTSMAN LINKAGE
           ============================================================== */}
-      <section style={{ padding: '3.5rem 1.5rem', backgroundColor: '#FFFFFF', borderTop: '1px solid #F0F0F0' }}>
+      <section style={{ padding: '3.5rem 1.5rem', backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-subtle)' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', textAlign: 'center' }}>
           <span
             style={{
@@ -802,10 +811,10 @@ export const Home = () => {
           >
             Maxsus Xizmat
           </span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#18191D', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1rem' }}>
             O‘z O‘lchamingizda Mebel Kerakmi?
           </h2>
-          <p style={{ color: '#6B7280', maxWidth: '600px', margin: '0 auto 2rem', fontSize: '0.95rem' }}>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 2rem', fontSize: '0.95rem' }}>
             Urgutning usta duradgorlari sizning xonadoningiz va istagingizga mos maxsus mebellarni yasab beradi.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>

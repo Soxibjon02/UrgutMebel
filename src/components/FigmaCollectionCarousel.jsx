@@ -45,11 +45,11 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides = 
   const nextSlideItem = slides[(currentIndex + 1) % slides.length];
 
   return (
-    <section style={{ padding: '5rem 0', overflow: 'hidden', backgroundColor: '#FAFAFA' }}>
+    <section style={{ padding: '5rem 0', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)', transition: 'background-color 0.25s ease' }}>
       <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1.5rem' }}>
         {/* Title */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#18191D', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
             {title}
           </h2>
         </div>
@@ -69,7 +69,8 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides = 
             onClick={prevSlide}
             style={{
               height: '320px',
-              backgroundColor: '#EBEBEB',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               backgroundImage: `url(${prevSlideItem.image})`,
               backgroundSize: 'cover',
@@ -170,7 +171,8 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides = 
             onClick={nextSlide}
             style={{
               height: '320px',
-              backgroundColor: '#EBEBEB',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               backgroundImage: `url(${nextSlideItem.image})`,
               backgroundSize: 'cover',

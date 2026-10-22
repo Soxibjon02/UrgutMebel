@@ -116,7 +116,7 @@ export const FurnitureCatalog = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)' }}>
       
       {/* ==============================================================
           1. FIGMA SPLIT HERO BANNER (Sale Off -35% Sofas and Armchairs)
@@ -128,7 +128,8 @@ export const FurnitureCatalog = () => {
               display: 'grid',
               gridTemplateColumns: '1.2fr 1fr',
               minHeight: '440px',
-              backgroundColor: '#FAFAF8',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               overflow: 'hidden'
             }}
@@ -206,14 +207,14 @@ export const FurnitureCatalog = () => {
                 style={{
                   fontSize: 'clamp(2.2rem, 4vw, 3rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.15,
                   margin: '0 0 1rem'
                 }}
               >
                 Sofas and<br />Armchairs
               </h1>
-              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', marginBottom: '2rem' }}>
                 Eng sara zamonaviy yumshoq mebellar to‘plami. Qulaylik va xonadon go‘zalligi bir joyda.
               </p>
               <button
@@ -245,12 +246,12 @@ export const FurnitureCatalog = () => {
               justifyContent: 'space-between',
               paddingBottom: '1.5rem',
               marginBottom: '2.5rem',
-              borderBottom: '1px solid #ECECEC',
+              borderBottom: '1px solid var(--border-subtle)',
               flexWrap: 'wrap',
               gap: '1rem'
             }}
           >
-            <div style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
               Jami <strong>{filteredProducts.length}</strong> ta mebel topildi
             </div>
 
@@ -260,11 +261,11 @@ export const FurnitureCatalog = () => {
                 onChange={(e) => setSortBy(e.target.value)}
                 style={{
                   padding: '0.6rem 1.25rem',
-                  border: '1px solid #D1D5DB',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '2px',
                   fontSize: '0.88rem',
-                  backgroundColor: '#FFFFFF',
-                  color: '#18191D',
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-main)',
                   outline: 'none',
                   cursor: 'pointer'
                 }}
@@ -300,7 +301,7 @@ export const FurnitureCatalog = () => {
             <aside className={`catalog-filter-sidebar ${mobileFilterOpen ? 'mobile-open' : ''}`}>
               {/* Categories */}
               <div style={{ marginBottom: '2.5rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
                   Kategoriyalar
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -313,7 +314,7 @@ export const FurnitureCatalog = () => {
                       textAlign: 'left',
                       fontSize: '0.9rem',
                       fontWeight: selectedCategory === 'all' ? 700 : 500,
-                      color: selectedCategory === 'all' ? 'var(--figma-coral)' : '#6B7280',
+                      color: selectedCategory === 'all' ? 'var(--figma-coral)' : 'var(--text-muted)',
                       cursor: 'pointer',
                       padding: 0
                     }}
@@ -331,7 +332,7 @@ export const FurnitureCatalog = () => {
                         textAlign: 'left',
                         fontSize: '0.9rem',
                         fontWeight: selectedCategory === cat.id ? 700 : 500,
-                        color: selectedCategory === cat.id ? 'var(--figma-coral)' : '#6B7280',
+                        color: selectedCategory === cat.id ? 'var(--figma-coral)' : 'var(--text-muted)',
                         cursor: 'pointer',
                         padding: 0
                       }}
@@ -344,7 +345,7 @@ export const FurnitureCatalog = () => {
 
               {/* Color Swatches */}
               <div style={{ marginBottom: '2.5rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
                   Ranglar
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
@@ -355,10 +356,10 @@ export const FurnitureCatalog = () => {
                       padding: '4px 10px',
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      border: '1px solid #D1D5DB',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '2px',
-                      backgroundColor: selectedColor === 'all' ? 'var(--figma-coral)' : '#FFFFFF',
-                      color: selectedColor === 'all' ? '#FFFFFF' : '#4B5563',
+                      backgroundColor: selectedColor === 'all' ? 'var(--figma-coral)' : 'var(--bg-card)',
+                      color: selectedColor === 'all' ? '#FFFFFF' : 'var(--text-main)',
                       cursor: 'pointer'
                     }}
                   >
@@ -374,7 +375,7 @@ export const FurnitureCatalog = () => {
                         height: '26px',
                         borderRadius: '50%',
                         backgroundColor: sw.color,
-                        border: selectedColor === sw.val ? '2px solid var(--figma-coral)' : '1px solid #D1D5DB',
+                        border: selectedColor === sw.val ? '2px solid var(--figma-coral)' : '1px solid var(--border-subtle)',
                         outline: selectedColor === sw.val ? '2px solid rgba(250, 109, 88, 0.4)' : 'none',
                         cursor: 'pointer'
                       }}
@@ -386,7 +387,7 @@ export const FurnitureCatalog = () => {
 
               {/* Price Filter Slider */}
               <div style={{ marginBottom: '2.5rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
                   Narx Bo‘yicha Filtrlash
                 </h4>
                 <input
@@ -398,7 +399,7 @@ export const FurnitureCatalog = () => {
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
                   style={{ width: '100%', accentColor: 'var(--figma-coral)', cursor: 'pointer' }}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#6B7280', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
                   <span>0 so‘m</span>
                   <span style={{ fontWeight: 700, color: 'var(--figma-coral)' }}>
                     {maxPrice.toLocaleString()} so‘m
@@ -415,7 +416,7 @@ export const FurnitureCatalog = () => {
                   alignItems: 'center',
                   gap: '0.5rem',
                   fontSize: '0.85rem',
-                  color: '#6B7280',
+                  color: 'var(--text-muted)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
@@ -429,7 +430,7 @@ export const FurnitureCatalog = () => {
             {/* Right Products Grid */}
             <main>
               {loading ? (
-                <div style={{ padding: '5rem 0', textAlign: 'center', color: '#6B7280' }}>
+                <div style={{ padding: '5rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Mebellar yuklanmoqda...
                 </div>
               ) : displayedProducts.length === 0 ? (
@@ -437,14 +438,15 @@ export const FurnitureCatalog = () => {
                   style={{
                     padding: '4rem 2rem',
                     textAlign: 'center',
-                    backgroundColor: '#F9FAFB',
-                    border: '1px solid #ECECEC'
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '4px'
                   }}
                 >
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#18191D', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                     Mos mebel topilmadi
                   </h3>
-                  <p style={{ color: '#6B7280', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                     Filtrlarni o‘zgartirib ko‘ring yoki tozalang.
                   </p>
                   <button type="button" onClick={resetFilters} className="btn-figma-coral">

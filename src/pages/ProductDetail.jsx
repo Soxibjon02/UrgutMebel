@@ -115,7 +115,7 @@ export const ProductDetail = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)' }}>
       
       {/* ==============================================================
           1. TOP PRODUCT PRESENTATION SECTION (EXACT FIGMA LAYOUT)
@@ -146,7 +146,8 @@ export const ProductDetail = () => {
               <div
                 style={{
                   height: '480px',
-                  backgroundColor: '#F8F9FA',
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '2px',
                   display: 'flex',
                   alignItems: 'center',
@@ -162,7 +163,7 @@ export const ProductDetail = () => {
                     maxWidth: '90%',
                     maxHeight: '400px',
                     objectFit: 'contain',
-                    filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.09))'
+                    filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.15))'
                   }}
                 />
 
@@ -177,14 +178,14 @@ export const ProductDetail = () => {
                     width: '38px',
                     height: '38px',
                     borderRadius: '50%',
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid #E5E7EB',
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
                     color: liked ? '#ef4444' : '#9CA3AF',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+                    boxShadow: 'var(--shadow-card)'
                   }}
                 >
                   <Heart size={18} fill={liked ? '#ef4444' : 'none'} />
@@ -199,9 +200,9 @@ export const ProductDetail = () => {
                     onClick={() => setSelectedImage(idx)}
                     style={{
                       height: '110px',
-                      backgroundColor: '#F8F9FA',
+                      backgroundColor: 'var(--bg-card)',
                       borderRadius: '2px',
-                      border: selectedImage === idx ? '2px solid var(--figma-coral)' : '1px solid #E5E7EB',
+                      border: selectedImage === idx ? '2px solid var(--figma-coral)' : '1px solid var(--border-subtle)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -237,7 +238,7 @@ export const ProductDetail = () => {
                 style={{
                   fontSize: 'clamp(2rem, 3.5vw, 2.75rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.15,
                   margin: '0 0 1rem'
                 }}
@@ -245,7 +246,7 @@ export const ProductDetail = () => {
                 {product.name}
               </h1>
 
-              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
                 {product.description || "Urgut duradgorlik an'analari asosida tayyorlangan yuqori sifatli va bejirim mebel to‘plami."}
               </p>
 
@@ -297,7 +298,7 @@ export const ProductDetail = () => {
       {/* ==============================================================
           2. MIDDLE 3-COLUMN SECTION (Description | Center Image | Mini Blog Card)
           ============================================================== */}
-      <section style={{ padding: '3.5rem 1.5rem', borderTop: '1px solid #F0F0F0', borderBottom: '1px solid #F0F0F0' }}>
+      <section style={{ padding: '3.5rem 1.5rem', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
           
           <div
@@ -324,7 +325,7 @@ export const ProductDetail = () => {
               >
                 Description
               </span>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
                 {product.name}
               </h2>
               <div
@@ -335,10 +336,10 @@ export const ProductDetail = () => {
                   marginBottom: '1.5rem'
                 }}
               />
-              <p style={{ color: '#6B7280', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
                 Mebelimiz tabiiy va ekologik toza materiallardan yasalgan bo‘lib, uzoq yillar davomida o‘zining jilosi va mustahkamligini yo‘qotmaydi.
               </p>
-              <p style={{ color: '#6B7280', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
                 Har bir detalga alohida mehr bilan ishlov berilgan. Uy va ofis interyerida o‘zgacha qulaylik va estetika baxsh etadi.
               </p>
             </div>
@@ -348,7 +349,7 @@ export const ProductDetail = () => {
               style={{
                 height: '440px',
                 borderRadius: '2px',
-                backgroundColor: '#E5E7EB',
+                backgroundColor: 'var(--bg-secondary)',
                 backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
@@ -359,11 +360,12 @@ export const ProductDetail = () => {
             <div
               style={{
                 padding: '2.5rem',
-                border: '1px solid #ECECEC',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '2px'
               }}
             >
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#18191D', lineHeight: 1.3, margin: '0 0 0.5rem' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.3, margin: '0 0 0.5rem' }}>
                 5 ideas for choosing the perfect furniture
               </h3>
               <div
@@ -374,7 +376,7 @@ export const ProductDetail = () => {
                   marginBottom: '1.25rem'
                 }}
               />
-              <p style={{ color: '#6B7280', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
                 Xonadon maydoni va mebel proporsiyalari o‘rtasidagi oltin qoidalarni o‘rganing va eng mos tanlovni qiling.
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -383,7 +385,7 @@ export const ProductDetail = () => {
                   alt="Author"
                   style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                 />
-                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#18191D' }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   Sherzod Aliyev
                 </span>
               </div>
@@ -412,7 +414,7 @@ export const ProductDetail = () => {
             >
               Our Suggestions
             </span>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
               You may also like
             </h2>
             <div
@@ -435,7 +437,7 @@ export const ProductDetail = () => {
           >
             {/* Left Suggestions Filter Sidebar */}
             <aside>
-              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#18191D', marginBottom: '1rem' }}>
+              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem' }}>
                 Kategoriyalar
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
@@ -448,7 +450,7 @@ export const ProductDetail = () => {
                     padding: 0,
                     fontSize: '0.88rem',
                     fontWeight: suggestionCategory === 'all' ? 700 : 500,
-                    color: suggestionCategory === 'all' ? 'var(--figma-coral)' : '#6B7280',
+                    color: suggestionCategory === 'all' ? 'var(--figma-coral)' : 'var(--text-muted)',
                     textAlign: 'left',
                     cursor: 'pointer'
                   }}
@@ -466,7 +468,7 @@ export const ProductDetail = () => {
                       padding: 0,
                       fontSize: '0.88rem',
                       fontWeight: suggestionCategory === c.id ? 700 : 500,
-                      color: suggestionCategory === c.id ? 'var(--figma-coral)' : '#6B7280',
+                      color: suggestionCategory === c.id ? 'var(--figma-coral)' : 'var(--text-muted)',
                       textAlign: 'left',
                       cursor: 'pointer'
                     }}
@@ -488,14 +490,19 @@ export const ProductDetail = () => {
                 className="suggestions-products-grid"
               >
                 {suggestions.map((p, idx) => {
-                  const pastelColors = ['#EEF2F6', '#FCF6ED', '#EAF3ED', '#FDF0E7'];
+                  const pastelColors = [
+                    'var(--figma-pastel-blue)',
+                    'var(--figma-pastel-peach)',
+                    'var(--figma-pastel-mint)',
+                    'var(--figma-pastel-sand)'
+                  ];
                   const bgColor = pastelColors[idx % pastelColors.length];
                   return (
                     <div
                       key={p.id}
                       style={{
-                        backgroundColor: '#FFFFFF',
-                        border: '1px solid #ECECEC',
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '2px',
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
@@ -537,10 +544,10 @@ export const ProductDetail = () => {
                           <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--figma-coral)', marginBottom: '0.25rem' }}>
                             {Number(p.discount_price || p.price).toLocaleString()} so‘m
                           </div>
-                          <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#18191D', margin: '0 0 0.5rem', lineHeight: 1.3 }}>
+                          <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.5rem', lineHeight: 1.3 }}>
                             {p.name}
                           </h4>
-                          <p style={{ fontSize: '0.78rem', color: '#6B7280', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {p.material || 'Tabiiy daraxt va sifatli mato'}
                           </p>
                         </div>

@@ -58,7 +58,7 @@ export const BlogPage = () => {
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)' }}>
       
       {/* ==============================================================
           1. FIGMA SPLIT HERO: Left Image with Search & Right Featured Post
@@ -70,9 +70,10 @@ export const BlogPage = () => {
               display: 'grid',
               gridTemplateColumns: '1.2fr 1fr',
               minHeight: '440px',
-              backgroundColor: '#FAFAF8',
+              backgroundColor: 'var(--bg-card)',
               borderRadius: '2px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              border: '1px solid var(--border-subtle)'
             }}
             className="figma-split-hero"
           >
@@ -80,7 +81,7 @@ export const BlogPage = () => {
             <div
               style={{
                 position: 'relative',
-                backgroundColor: '#EAEBEF',
+                backgroundColor: 'var(--bg-secondary)',
                 backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -96,7 +97,7 @@ export const BlogPage = () => {
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%)',
+                  background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%)',
                   zIndex: 1
                 }}
               />
@@ -111,14 +112,14 @@ export const BlogPage = () => {
                   style={{
                     width: '100%',
                     padding: '0.95rem 2.8rem 0.95rem 1.25rem',
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     border: '1px solid var(--figma-coral)',
                     borderRadius: '2px',
                     fontSize: '0.85rem',
                     letterSpacing: '0.04em',
                     fontWeight: 600,
                     outline: 'none',
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
                   }}
                 />
@@ -162,7 +163,7 @@ export const BlogPage = () => {
                 style={{
                   fontSize: 'clamp(2rem, 3.8vw, 2.85rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.2,
                   margin: '0 0 1.25rem'
                 }}
@@ -171,7 +172,7 @@ export const BlogPage = () => {
               </h1>
               <p
                 style={{
-                  color: '#6B7280',
+                  color: 'var(--text-muted)',
                   fontSize: '0.95rem',
                   lineHeight: 1.6,
                   maxWidth: '380px',
@@ -211,7 +212,7 @@ export const BlogPage = () => {
                 style={{
                   fontSize: '1.25rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   marginBottom: '1.5rem',
                   letterSpacing: '-0.01em'
                 }}
@@ -236,7 +237,7 @@ export const BlogPage = () => {
                         padding: '0.35rem 0',
                         fontSize: '0.92rem',
                         fontWeight: isActive ? 700 : 500,
-                        color: isActive ? 'var(--figma-coral)' : '#4B5563',
+                        color: isActive ? 'var(--figma-coral)' : 'var(--text-muted)',
                         textAlign: 'left',
                         cursor: 'pointer',
                         transition: 'color 0.2s'
@@ -253,7 +254,7 @@ export const BlogPage = () => {
             {/* Right: 2-Column Tall Blog Cards */}
             <main>
               {loading ? (
-                <div style={{ padding: '4rem 0', textAlign: 'center', color: '#6B7280' }}>
+                <div style={{ padding: '4rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Maqolalar yuklanmoqda...
                 </div>
               ) : displayedPosts.length === 0 ? (
@@ -261,14 +262,15 @@ export const BlogPage = () => {
                   style={{
                     padding: '4rem 2rem',
                     textAlign: 'center',
-                    backgroundColor: '#F9FAFB',
-                    border: '1px solid #ECECEC'
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '4px'
                   }}
                 >
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#18191D', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                     Maqolalar topilmadi
                   </h3>
-                  <p style={{ color: '#6B7280', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                     Boshqa toifa yoki kalit so‘z bilan qidirib ko‘ring.
                   </p>
                   <button
@@ -306,7 +308,7 @@ export const BlogPage = () => {
                             position: 'relative',
                             borderRadius: '2px',
                             overflow: 'hidden',
-                            backgroundColor: '#E5E7EB',
+                            backgroundColor: 'var(--bg-card)',
                             backgroundImage: `url(${post.cover_image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
@@ -318,20 +320,21 @@ export const BlogPage = () => {
                           }}
                           className="figma-tall-blog-card"
                         >
-                          {/* Floating White Inset Card */}
+                          {/* Floating Inset Card */}
                           <div
                             style={{
-                              backgroundColor: '#FFFFFF',
+                              backgroundColor: 'var(--bg-card)',
                               padding: '1.5rem 1.75rem',
                               borderRadius: '2px',
-                              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
+                              boxShadow: 'var(--shadow-card)',
+                              border: '1px solid var(--border-subtle)'
                             }}
                           >
                             <h3
                               style={{
                                 fontSize: '1.15rem',
                                 fontWeight: 700,
-                                color: '#18191D',
+                                color: 'var(--text-main)',
                                 lineHeight: 1.35,
                                 margin: '0 0 0.5rem',
                                 display: '-webkit-box',

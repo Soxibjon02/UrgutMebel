@@ -44,7 +44,7 @@ export const FaqPage = () => {
   const rightColFaqs = filteredFaqs.slice(midPoint);
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       
       {/* ==============================================================
           1. FIGMA SPLIT HERO: "How can We help You"
@@ -56,7 +56,8 @@ export const FaqPage = () => {
               display: 'grid',
               gridTemplateColumns: '1.1fr 1fr',
               minHeight: '420px',
-              backgroundColor: '#FAFAF8',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               overflow: 'hidden'
             }}
@@ -88,7 +89,7 @@ export const FaqPage = () => {
             {/* Right: Help Center text & Search input */}
             <div
               style={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'var(--bg-card)',
                 padding: '4rem 3.5rem',
                 display: 'flex',
                 flexDirection: 'column',
@@ -112,14 +113,14 @@ export const FaqPage = () => {
                 style={{
                   fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.15,
                   margin: '0 0 1rem'
                 }}
               >
                 How can We<br />help You
               </h1>
-              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '400px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '400px' }}>
                 Our help center can instantly give you answers to many frequently asked questions.
               </p>
 
@@ -138,8 +139,8 @@ export const FaqPage = () => {
                     fontSize: '0.85rem',
                     letterSpacing: '0.04em',
                     outline: 'none',
-                    backgroundColor: '#FFFFFF',
-                    color: '#18191D'
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-main)'
                   }}
                 />
                 <Search
@@ -176,7 +177,7 @@ export const FaqPage = () => {
                 style={{
                   fontSize: '1.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   marginBottom: '0.5rem',
                   letterSpacing: '-0.01em'
                 }}
@@ -198,7 +199,7 @@ export const FaqPage = () => {
                     <div
                       key={item.id}
                       style={{
-                        borderBottom: '1px solid #ECECEC',
+                        borderBottom: '1px solid var(--border-subtle)',
                         padding: '1.25rem 0',
                         transition: 'background-color 0.2s'
                       }}
@@ -222,7 +223,7 @@ export const FaqPage = () => {
                           style={{
                             fontSize: '1rem',
                             fontWeight: isOpen ? 700 : 500,
-                            color: isOpen ? '#18191D' : '#374151'
+                            color: isOpen ? 'var(--text-main)' : 'var(--text-muted)'
                           }}
                         >
                           {item.question}
@@ -236,7 +237,7 @@ export const FaqPage = () => {
                         <div
                           style={{
                             marginTop: '0.85rem',
-                            color: '#6B7280',
+                            color: 'var(--text-muted)',
                             fontSize: '0.92rem',
                             lineHeight: 1.6
                           }}
@@ -256,7 +257,7 @@ export const FaqPage = () => {
                 style={{
                   fontSize: '1.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   marginBottom: '0.5rem',
                   letterSpacing: '-0.01em'
                 }}
@@ -278,7 +279,7 @@ export const FaqPage = () => {
                     <div
                       key={item.id}
                       style={{
-                        borderBottom: '1px solid #ECECEC',
+                        borderBottom: '1px solid var(--border-subtle)',
                         padding: '1.25rem 0',
                         transition: 'background-color 0.2s'
                       }}
@@ -302,7 +303,7 @@ export const FaqPage = () => {
                           style={{
                             fontSize: '1rem',
                             fontWeight: isOpen ? 700 : 500,
-                            color: isOpen ? '#18191D' : '#374151'
+                            color: isOpen ? 'var(--text-main)' : 'var(--text-muted)'
                           }}
                         >
                           {item.question}
@@ -316,7 +317,7 @@ export const FaqPage = () => {
                         <div
                           style={{
                             marginTop: '0.85rem',
-                            color: '#6B7280',
+                            color: 'var(--text-muted)',
                             fontSize: '0.92rem',
                             lineHeight: 1.6
                           }}
@@ -345,9 +346,10 @@ export const FaqPage = () => {
             {/* Card 1: Ask in the Forums */}
             <div
               style={{
-                border: '1px solid #ECECEC',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
                 padding: '2.5rem',
-                borderRadius: '2px',
+                borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '1.5rem'
@@ -369,10 +371,10 @@ export const FaqPage = () => {
                 <LifeBuoy size={28} />
               </div>
               <div>
-                <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+                <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
                   Ask in the Forums
                 </h4>
-                <p style={{ color: '#6B7280', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
                   Savolingizga javob topa olmadingizmi? Mutaxassislarimiz bilan to‘g‘ridan-to‘g‘ri maslahatlashing.
                 </p>
                 <Link
@@ -393,9 +395,10 @@ export const FaqPage = () => {
             {/* Card 2: Visit our Blog */}
             <div
               style={{
-                border: '1px solid #ECECEC',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
                 padding: '2.5rem',
-                borderRadius: '2px',
+                borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '1.5rem'
@@ -417,10 +420,10 @@ export const FaqPage = () => {
                 <MessageSquare size={28} />
               </div>
               <div>
-                <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+                <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
                   Visit our Blog
                 </h4>
-                <p style={{ color: '#6B7280', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
                   Mebel tanlash, xonadon o‘lchamlari va interyer dizayni sirlari haqidagi maqolalarimizni o‘qing.
                 </p>
                 <Link

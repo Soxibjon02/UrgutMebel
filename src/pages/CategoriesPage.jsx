@@ -73,7 +73,7 @@ export const CategoriesPage = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', color: '#18191D', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', minHeight: '100vh' }}>
       
       {/* ==============================================================
           1. FIGMA SPLIT HERO SECTION (Chairs & Stools)
@@ -85,7 +85,8 @@ export const CategoriesPage = () => {
               display: 'grid',
               gridTemplateColumns: '1.2fr 1fr',
               minHeight: '440px',
-              backgroundColor: '#FAFAF8',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '2px',
               overflow: 'hidden'
             }}
@@ -142,7 +143,7 @@ export const CategoriesPage = () => {
                 style={{
                   fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.15,
                   margin: '0 0 1rem'
                 }}
@@ -151,7 +152,7 @@ export const CategoriesPage = () => {
               </h1>
               <p
                 style={{
-                  color: '#6B7280',
+                  color: 'var(--text-muted)',
                   fontSize: '0.95rem',
                   lineHeight: 1.6,
                   maxWidth: '380px',
@@ -201,7 +202,7 @@ export const CategoriesPage = () => {
                 style={{
                   fontSize: '2.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.2,
                   marginBottom: '1rem'
                 }}
@@ -244,14 +245,14 @@ export const CategoriesPage = () => {
                         padding: 0,
                         fontSize: '0.95rem',
                         fontWeight: idx === 0 ? 700 : 500,
-                        color: idx === 0 ? '#18191D' : '#6B7280',
+                        color: idx === 0 ? 'var(--text-main)' : 'var(--text-muted)',
                         cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'color 0.2s'
                       }}
                       onMouseEnter={(e) => (e.target.style.color = 'var(--figma-coral)')}
                       onMouseLeave={(e) =>
-                        (e.target.style.color = idx === 0 ? '#18191D' : '#6B7280')
+                        (e.target.style.color = idx === 0 ? 'var(--text-main)' : 'var(--text-muted)')
                       }
                     >
                       {item.name}
@@ -292,14 +293,15 @@ export const CategoriesPage = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.45rem 1rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     letterSpacing: '0.02em'
                   }}
                 >
@@ -339,20 +341,21 @@ export const CategoriesPage = () => {
                 <div>
                   <div
                     style={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'var(--bg-card)',
                       padding: '0.45rem 1rem',
                       borderRadius: '2px',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      boxShadow: 'var(--shadow-card)',
+                      border: '1px solid var(--border-subtle)',
                       display: 'inline-block',
                       fontSize: '0.82rem',
                       fontWeight: 700,
-                      color: '#18191D',
+                      color: 'var(--text-main)',
                       marginBottom: '0.35rem'
                     }}
                   >
                     Sofas and Armchairs
                   </div>
-                  <p style={{ margin: '0.25rem 0 0', color: '#6B7280', fontSize: '0.8rem' }}>
+                  <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                     Yumshoq mebellar kolleksiyasi
                   </p>
                 </div>
@@ -369,7 +372,8 @@ export const CategoriesPage = () => {
                 style={{
                   gridColumn: '1 / 3',
                   gridRow: '3 / 5',
-                  backgroundColor: '#ECECEC',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '1.75rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -385,20 +389,21 @@ export const CategoriesPage = () => {
                 <div>
                   <div
                     style={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: 'var(--bg-card)',
                       padding: '0.45rem 1rem',
                       borderRadius: '2px',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      boxShadow: 'var(--shadow-card)',
+                      border: '1px solid var(--border-subtle)',
                       display: 'inline-block',
                       fontSize: '0.85rem',
                       fontWeight: 700,
-                      color: '#18191D',
+                      color: 'var(--text-main)',
                       marginBottom: '0.35rem'
                     }}
                   >
                     Chairs &amp; Stools
                   </div>
-                  <p style={{ margin: '0.35rem 0 0', color: '#6B7280', fontSize: '0.85rem' }}>
+                  <p style={{ margin: '0.35rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                     Tabiiy eman va metall karkas
                   </p>
                 </div>
@@ -430,14 +435,15 @@ export const CategoriesPage = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.45rem 1rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Pouf
@@ -474,13 +480,14 @@ export const CategoriesPage = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.35rem 0.85rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Bedding
@@ -512,14 +519,15 @@ export const CategoriesPage = () => {
               >
                 <div
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: 'var(--bg-card)',
                     padding: '0.35rem 0.85rem',
                     borderRadius: '2px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
                     alignSelf: 'flex-start',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#18191D'
+                    color: 'var(--text-main)'
                   }}
                 >
                   Furniture
@@ -702,7 +710,7 @@ export const CategoriesPage = () => {
                 style={{
                   fontSize: '2.5rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.2,
                   marginBottom: '1rem'
                 }}
@@ -717,7 +725,7 @@ export const CategoriesPage = () => {
                   marginBottom: '1.5rem'
                 }}
               />
-              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
                 Eng so‘nggi interyer dizayni tendensiyalari, mebel tanlash sirlari va duradgorlik san’ati haqida foydali maqolalar.
               </p>
               <Link to="/blog" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
@@ -731,8 +739,9 @@ export const CategoriesPage = () => {
                 height: '420px',
                 borderRadius: '2px',
                 overflow: 'hidden',
-                backgroundColor: '#E5E7EB',
-                boxShadow: '0 15px 40px rgba(0,0,0,0.08)'
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-card)'
               }}
             >
               <img
@@ -748,7 +757,7 @@ export const CategoriesPage = () => {
                 style={{
                   fontSize: '1.45rem',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.35,
                   marginBottom: '1rem'
                 }}
@@ -757,7 +766,7 @@ export const CategoriesPage = () => {
               </h3>
               <p
                 style={{
-                  color: '#6B7280',
+                  color: 'var(--text-muted)',
                   fontSize: '0.9rem',
                   lineHeight: 1.6,
                   marginBottom: '1.5rem'
@@ -772,7 +781,7 @@ export const CategoriesPage = () => {
                   alt={featuredPost.author}
                   style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' }}
                 />
-                <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#18191D' }}>
+                <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   {featuredPost.author}
                 </span>
               </div>

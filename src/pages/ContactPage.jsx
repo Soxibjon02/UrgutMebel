@@ -45,7 +45,7 @@ export const ContactPage = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '80vh', padding: '2rem 1.5rem 6rem' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '80vh', padding: '2rem 1.5rem 6rem' }}>
       <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
         {/* Figma Split Hero & Contact Form */}
@@ -54,10 +54,11 @@ export const ContactPage = () => {
             display: 'grid',
             gridTemplateColumns: '1.2fr 1fr',
             minHeight: '620px',
-            backgroundColor: '#FAFAFA',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '2px',
             overflow: 'hidden',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.04)'
+            boxShadow: 'var(--shadow-card)',
+            border: '1px solid var(--border-subtle)'
           }}
           className="figma-split-hero"
         >
@@ -97,7 +98,7 @@ export const ContactPage = () => {
           <div
             style={{
               padding: '4.5rem 3.5rem',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--bg-card)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center'
@@ -120,7 +121,7 @@ export const ContactPage = () => {
               style={{
                 fontSize: 'clamp(2.4rem, 4vw, 3.2rem)',
                 fontWeight: 800,
-                color: '#18191D',
+                color: 'var(--text-main)',
                 margin: '0 0 1rem',
                 lineHeight: 1.15
               }}
@@ -129,7 +130,7 @@ export const ContactPage = () => {
             </h1>
             <p
               style={{
-                color: '#6B7280',
+                color: 'var(--text-muted)',
                 fontSize: '0.95rem',
                 lineHeight: 1.6,
                 marginBottom: '2.5rem'
@@ -141,17 +142,17 @@ export const ContactPage = () => {
             {sent ? (
               <div
                 style={{
-                  backgroundColor: '#FFF3F0',
-                  border: '1px solid #FCD5CE',
+                  backgroundColor: 'rgba(250, 109, 88, 0.1)',
+                  border: '1px solid rgba(250, 109, 88, 0.25)',
                   padding: '1.75rem',
-                  borderRadius: '2px',
+                  borderRadius: '4px',
                   color: 'var(--figma-coral)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                   <Check size={22} /> Xabaringiz muvaffaqiyatli yetkazildi!
                 </div>
-                <p style={{ margin: 0, color: '#4B5563', fontSize: '0.9rem' }}>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   Mutaxassislarimiz qisqa vaqt ichida siz bilan bog‘lanishadi.
                 </p>
                 <button

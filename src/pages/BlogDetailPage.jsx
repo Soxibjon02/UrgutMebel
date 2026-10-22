@@ -37,7 +37,7 @@ export const BlogDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '80px 20px', textAlign: 'center', color: '#6B7280' }}>
+      <div style={{ padding: '80px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
         Maqola yuklanmoqda...
       </div>
     );
@@ -46,10 +46,10 @@ export const BlogDetailPage = () => {
   if (!post) {
     return (
       <div style={{ maxWidth: '600px', margin: '80px auto', textAlign: 'center', padding: '0 20px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#18191D', marginBottom: '12px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px' }}>
           Maqola topilmadi
         </h2>
-        <p style={{ color: '#6B7280', marginBottom: '24px' }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
           Siz qidirgan maqola o‘chirilgan yoki manzili o‘zgargan bo‘lishi mumkin.
         </p>
         <Link to="/blog" className="btn-figma-coral">
@@ -73,7 +73,7 @@ export const BlogDetailPage = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)' }}>
       
       {/* ==============================================================
           1. ARTICLE HEADER (EXACT FIGMA LAYOUT: Title, Author Top-Right, Hero Image)
@@ -97,14 +97,14 @@ export const BlogDetailPage = () => {
                 style={{
                   fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)',
                   fontWeight: 800,
-                  color: '#18191D',
+                  color: 'var(--text-main)',
                   lineHeight: 1.18,
                   margin: '0 0 1rem'
                 }}
               >
                 {post.title}
               </h1>
-              <p style={{ color: '#6B7280', fontSize: '1rem', lineHeight: 1.6, maxWidth: '640px', margin: 0 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, maxWidth: '640px', margin: 0 }}>
                 {post.excerpt}
               </p>
             </div>
@@ -117,7 +117,7 @@ export const BlogDetailPage = () => {
                 style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
               />
               <div>
-                <strong style={{ fontSize: '0.95rem', color: '#18191D', display: 'block' }}>
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block' }}>
                   {author.name}
                 </strong>
                 <span style={{ fontSize: '0.78rem', color: '#9CA3AF' }}>
@@ -166,14 +166,14 @@ export const BlogDetailPage = () => {
                   style={{
                     fontSize: '1.6rem',
                     fontWeight: 800,
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     marginBottom: '1rem',
                     letterSpacing: '-0.01em'
                   }}
                 >
                   Grouping is the basic
                 </h2>
-                <p style={{ color: '#4B5563', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
                   Har qanday xonadon interyerida mebellarni guruhlash eng asosiy qoida hisoblanadi. Bir xil uslub, ranglar uyg‘unligi va geometrik o‘lchamlarga rioya qilish orqali xonada tartib va vizual erkinlik hissi paydo bo‘ladi.
                 </p>
                 <div
@@ -181,7 +181,7 @@ export const BlogDetailPage = () => {
                     width: '100%',
                     height: '360px',
                     borderRadius: '2px',
-                    backgroundColor: '#E5E7EB',
+                    backgroundColor: 'var(--bg-secondary)',
                     backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -195,14 +195,14 @@ export const BlogDetailPage = () => {
                   style={{
                     fontSize: '1.6rem',
                     fontWeight: 800,
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     marginBottom: '1rem',
                     letterSpacing: '-0.01em'
                   }}
                 >
                   Wall of frames
                 </h2>
-                <p style={{ color: '#4B5563', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
                   Devordagi kompozitsiyalar va javonlar orqali fazodan vertikal ravishda unumli foydalanish mumkin. Bo‘sh qolgan devorlarga o‘rnatilgan mebellar pol maydonini bo‘shatib, kenglik bag‘ishlaydi.
                 </p>
                 <div
@@ -210,7 +210,7 @@ export const BlogDetailPage = () => {
                     width: '100%',
                     height: '360px',
                     borderRadius: '2px',
-                    backgroundColor: '#E5E7EB',
+                    backgroundColor: 'var(--bg-secondary)',
                     backgroundImage: 'url(https://images.unsplash.com/photo-1540518614846-7ede433c4b4d?auto=format&fit=crop&w=1000&q=80)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -247,14 +247,14 @@ export const BlogDetailPage = () => {
                   style={{
                     fontSize: '1.6rem',
                     fontWeight: 800,
-                    color: '#18191D',
+                    color: 'var(--text-main)',
                     marginBottom: '1rem',
                     letterSpacing: '-0.01em'
                   }}
                 >
                   Wall of frames
                 </h2>
-                <p style={{ color: '#4B5563', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: 1.7, marginBottom: '1.75rem' }}>
                   Urgut duradgorlari aynan sizning xonangiz me’moriy tuzilishiga moslashtirilgan shaxsiy loyihalarni tayyorlab berishga hamisha tayyor.
                 </p>
                 <div
@@ -262,7 +262,7 @@ export const BlogDetailPage = () => {
                     width: '100%',
                     height: '360px',
                     borderRadius: '2px',
-                    backgroundColor: '#E5E7EB',
+                    backgroundColor: 'var(--bg-secondary)',
                     backgroundImage: 'url(https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1000&q=80)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -312,8 +312,9 @@ export const BlogDetailPage = () => {
               <div
                 style={{
                   padding: '2rem',
-                  border: '1px solid #ECECEC',
-                  borderRadius: '2px',
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '4px',
                   textAlign: 'center'
                 }}
               >
@@ -328,10 +329,10 @@ export const BlogDetailPage = () => {
                     margin: '0 auto 1rem'
                   }}
                 />
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.35rem' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.35rem' }}>
                   {author.name}
                 </h4>
-                <p style={{ color: '#6B7280', fontSize: '0.82rem', lineHeight: 1.5, margin: '0 0 1.25rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.5, margin: '0 0 1.25rem' }}>
                   {author.role}
                 </p>
                 <Link
