@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import { Search, Plus, Minus, LifeBuoy, MessageSquare } from 'lucide-react';
 
 export const FaqPage = () => {
   const { settings } = useSettings();
+  const { t, getLocalized, language } = useLanguage();
   const [faqItems, setFaqItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [openIds, setOpenIds] = useState(new Set(['faq-1']));
@@ -36,10 +38,12 @@ export const FaqPage = () => {
     });
   };
 
-  const filteredFaqs = faqItems.filter((item) =>
-    item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.answer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredFaqs = faqItems.filter((item) => {
+    const q = (getLocalized(item, 'question') || item.question || '').toLowerCase();
+    const a = (getLocalized(item, 'answer') || item.answer || '').toLowerCase();
+    const s = searchQuery.toLowerCase();
+    return q.includes(s) || a.includes(s);
+  });
 
   // Split into 2 columns like in Figma
   const midPoint = Math.ceil(filteredFaqs.length / 2);
@@ -101,7 +105,7 @@ export const FaqPage = () => {
                   display: 'block'
                 }}
               >
-                Help center
+                {t('hero.help_center', 'Yordam Markazi')}
               </span>
               <h1
                 style={{
@@ -112,10 +116,10 @@ export const FaqPage = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                How can We<br />help You
+                {t('hero.faq_hero_title', 'How can We help You')}
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '400px' }}>
-                Our help center can instantly give you answers to many frequently asked questions.
+                {t('hero.faq_hero_desc', 'Yordam markazimiz ko‘p beriladigan savollarga bir zumda aniq javob olishingizga yordam beradi.')}
               </p>
 
               {/* Exact Figma Rounded Search Input */}
@@ -124,7 +128,7 @@ export const FaqPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="WHAT CAN WE HELP YOU WITH?"
+                  placeholder={t('hero.search_help', 'Qanday yordam kerak? Savolingizni yozing...')}
                   style={{
                     width: '100%',
                     padding: '0.95rem 2.8rem 0.95rem 1.25rem',
@@ -176,7 +180,7 @@ export const FaqPage = () => {
                   letterSpacing: '-0.01em'
                 }}
               >
-                General Questions
+                {t('contact.faq_title', 'Ko‘p Beriladigan Savollar')}
               </h3>
               <div
                 style={{
@@ -189,6 +193,8 @@ export const FaqPage = () => {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {leftColFaqs.map((item) => {
                   const isOpen = openIds.has(item.id);
+                  const q = getLocalized(item, 'question') || item.question;
+                  const a = getLocalized(item, 'answer') || item.answer;
                   return (
                     <div
                       key={item.id}
@@ -220,7 +226,7 @@ export const FaqPage = () => {
                             color: isOpen ? 'var(--text-main)' : 'var(--text-muted)'
                           }}
                         >
-                          {item.question}
+                          {q}
                         </span>
                         <span style={{ color: isOpen ? 'var(--figma-coral)' : '#9CA3AF', flexShrink: 0 }}>
                           {isOpen ? <Minus size={18} /> : <Plus size={18} />}
@@ -236,7 +242,7 @@ export const FaqPage = () => {
                             lineHeight: 1.6
                           }}
                         >
-                          {item.answer}
+                          {a}
                         </div>
                       )}
                     </div>
@@ -256,7 +262,7 @@ export const FaqPage = () => {
                   letterSpacing: '-0.01em'
                 }}
               >
-                General Questions
+                {t('contact.faq_subtitle', 'Eng ko‘p so‘raladigan savollar')}
               </h3>
               <div
                 style={{
@@ -269,6 +275,8 @@ export const FaqPage = () => {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {rightColFaqs.map((item) => {
                   const isOpen = openIds.has(item.id);
+                  const q = getLocalized(item, 'question') || item.question;
+                  const a = getLocalized(item, 'answer') || item.answer;
                   return (
                     <div
                       key={item.id}
@@ -300,7 +308,7 @@ export const FaqPage = () => {
                             color: isOpen ? 'var(--text-main)' : 'var(--text-muted)'
                           }}
                         >
-                          {item.question}
+                          {q}
                         </span>
                         <span style={{ color: isOpen ? 'var(--figma-coral)' : '#9CA3AF', flexShrink: 0 }}>
                           {isOpen ? <Minus size={18} /> : <Plus size={18} />}
@@ -316,7 +324,7 @@ export const FaqPage = () => {
                             lineHeight: 1.6
                           }}
                         >
-                          {item.answer}
+                          {a}
                         </div>
                       )}
                     </div>
@@ -366,10 +374,10 @@ export const FaqPage = () => {
               </div>
               <div>
                 <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
-                  Ask in the Forums
+                  {t('contact.title', 'Biz bilan Bog‘lanish')}
                 </h4>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                  Savolingizga javob topa olmadingizmi? Mutaxassislarimiz bilan to‘g‘ridan-to‘g‘ri maslahatlashing.
+                  {t('contact.subtitle', 'Savollaringiz bormi? Mutaxassislarimiz har doim yordam berishga tayyor.')}
                 </p>
                 <Link
                   to="/contact"
@@ -381,7 +389,7 @@ export const FaqPage = () => {
                     letterSpacing: '0.05em'
                   }}
                 >
-                  ALOQAGA CHIQISH &gt;
+                  {t('contact.send_btn', 'Aloqaga Chiqish')} &gt;
                 </Link>
               </div>
             </div>
@@ -415,10 +423,10 @@ export const FaqPage = () => {
               </div>
               <div>
                 <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
-                  Visit our Blog
+                  {t('blog.title', 'Mebel va Interyer Blogi')}
                 </h4>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                  Mebel tanlash, xonadon o‘lchamlari va interyer dizayni sirlari haqidagi maqolalarimizni o‘qing.
+                  {t('blog.subtitle', 'Mebel tanlash, xonadon o‘lchamlari va interyer dizayni sirlari haqidagi maqolalarimizni o‘qing.')}
                 </p>
                 <Link
                   to="/blog"
@@ -430,7 +438,7 @@ export const FaqPage = () => {
                     letterSpacing: '0.05em'
                   }}
                 >
-                  MAQOLALARNI O‘QISH &gt;
+                  {t('blog.all_articles', 'Maqolalarni O‘qish')} &gt;
                 </Link>
               </div>
             </div>
@@ -441,7 +449,7 @@ export const FaqPage = () => {
       {/* ==============================================================
           4. SIGNATURE WINTER COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Winter Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Winter Collection')} />
     </div>
   );
 };

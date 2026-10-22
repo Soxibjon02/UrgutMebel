@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import {
   Calendar,
@@ -15,6 +16,7 @@ import {
 export const BlogDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, getLocalized } = useLanguage();
   const [post, setPost] = useState(null);
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export const BlogDetailPage = () => {
   if (loading) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Maqola yuklanmoqda...
+        ...
       </div>
     );
   }
@@ -47,13 +49,13 @@ export const BlogDetailPage = () => {
     return (
       <div style={{ maxWidth: '600px', margin: '80px auto', textAlign: 'center', padding: '0 20px' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px' }}>
-          Maqola topilmadi
+          {t('common.not_found', 'Maqola topilmadi')}
         </h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-          Siz qidirgan maqola o‘chirilgan yoki manzili o‘zgargan bo‘lishi mumkin.
+          {t('common.not_found_desc', 'Siz qidirgan sahifa mavjud emas yoki o‘chirilgan.')}
         </p>
         <Link to="/blog" className="btn-figma-coral">
-          <ArrowLeft size={16} /> Barcha maqolalarga qaytish
+          <ArrowLeft size={16} /> {t('blog.all_articles', 'Barcha maqolalarga qaytish')}
         </Link>
       </div>
     );
@@ -102,10 +104,10 @@ export const BlogDetailPage = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                {post.title}
+                {getLocalized(post, 'title') || post.title}
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, maxWidth: '640px', margin: 0 }}>
-                {post.excerpt}
+                {getLocalized(post, 'excerpt') || post.excerpt}
               </p>
             </div>
 
@@ -280,7 +282,7 @@ export const BlogDetailPage = () => {
                     type="text"
                     value={sidebarSearch}
                     onChange={(e) => setSidebarSearch(e.target.value)}
-                    placeholder="QIDIRUV..."
+                    placeholder={t('hero.search_help', 'Qidiruv...')}
                     className="figma-input-underline"
                     style={{
                       paddingRight: '2rem',
@@ -345,7 +347,7 @@ export const BlogDetailPage = () => {
                     textDecoration: 'none'
                   }}
                 >
-                  BARCHA MAQOLALARI &gt;
+                  {t('blog.all_articles', 'BARCHA MAQOLALARI')} &gt;
                 </Link>
               </div>
             </aside>
@@ -356,7 +358,7 @@ export const BlogDetailPage = () => {
       {/* ==============================================================
           3. SIGNATURE WINTER COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Winter Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Winter Collection')} />
 
       {/* Responsive layout styles */}
       <style>{`

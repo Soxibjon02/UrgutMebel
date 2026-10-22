@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { CraftsmanRequestModal } from '../components/CraftsmanRequestModal';
 import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
@@ -19,6 +20,7 @@ import {
 export const Home = () => {
   const { settings } = useSettings();
   const { addToast } = useNotification();
+  const { language, t, getLocalized } = useLanguage();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -139,7 +141,7 @@ export const Home = () => {
                   marginBottom: '0.75rem'
                 }}
               >
-                New Collection
+                {t('hero.new_collection', 'New Collection')}
               </span>
               <h1
                 style={{
@@ -150,7 +152,7 @@ export const Home = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                Chairs &amp; Stools
+                {t('hero.chairs_title', 'Chairs & Stools')}
               </h1>
               <p
                 style={{
@@ -161,10 +163,10 @@ export const Home = () => {
                   marginBottom: '2rem'
                 }}
               >
-                Uyingiz va ofisingiz uchun zamonaviy, qulay va uzoq yillik sifatga ega o‘rindiqlar to‘plami.
+                {t('hero.chairs_desc', 'Uyingiz va ofisingiz uchun zamonaviy, qulay va uzoq yillik sifatga ega o‘rindiqlar to‘plami.')}
               </p>
               <Link to="/furniture" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
-                SEE DETAILS &gt;
+                {t('hero.see_details', 'SEE DETAILS >')}
               </Link>
             </div>
           </div>
@@ -198,7 +200,7 @@ export const Home = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                On sale
+                {t('categories.on_sale', 'On sale')}
               </span>
               <h2
                 style={{
@@ -209,7 +211,7 @@ export const Home = () => {
                   marginBottom: '1rem'
                 }}
               >
-                Up to<br />20% off
+                {t('categories.up_to_discount', 'Up to 20% off')}
               </h2>
               <div
                 style={{
@@ -232,11 +234,11 @@ export const Home = () => {
                 }}
               >
                 {[
-                  { name: 'Chairs & Stools', query: 'stul' },
-                  { name: 'Accessories', query: 'aksessuar' },
-                  { name: 'Sofas and Armchairs', query: 'divan' },
-                  { name: 'Tables', query: 'stol' },
-                  { name: 'Outdoor', query: 'bog' }
+                  { name: t('categories.chairs', 'Chairs & Stools'), query: 'stul' },
+                  { name: t('categories.accessories', 'Accessories'), query: 'aksessuar' },
+                  { name: t('categories.sofas', 'Sofas and Armchairs'), query: 'divan' },
+                  { name: t('categories.tables', 'Tables'), query: 'stol' },
+                  { name: t('categories.outdoor', 'Outdoor'), query: 'bog' }
                 ].map((item, idx) => (
                   <li key={idx}>
                     <button
@@ -724,89 +726,95 @@ export const Home = () => {
             <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
                 <span style={{ color: 'var(--figma-coral)', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.35rem' }}>
-                  Aksiyalar &amp; E‘lonlar
+                  {t('banners.section_title', 'Aksiyalar & E‘lonlar')}
                 </span>
                 <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
-                  Maxsus Takliflar
+                  {t('banners.section_title', 'Maxsus Takliflar')}
                 </h2>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-              {banners.filter(b => b.is_active !== false).map((banner) => (
-                <div
-                  key={banner.id}
-                  onClick={() => navigate(banner.link || '/furniture')}
-                  style={{
-                    position: 'relative',
-                    borderRadius: '2px',
-                    overflow: 'hidden',
-                    minHeight: '260px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    padding: '2rem',
-                    cursor: 'pointer',
-                    boxShadow: 'var(--shadow-card)',
-                    border: '1px solid var(--border-subtle)',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-card)';
-                  }}
-                >
-                  {/* Background Image with Gradient Overlay */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      backgroundImage: `url(${banner.image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80'})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      zIndex: 1
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 100%)',
-                      zIndex: 2
-                    }}
-                  />
+              {banners.filter(b => b.is_active !== false).map((banner) => {
+                const localizedTitle = getLocalized(banner, 'title') || banner.title;
+                const localizedSubtitle = getLocalized(banner, 'subtitle') || banner.subtitle;
+                const localizedBtnText = getLocalized(banner, 'button_text') || banner.button_text || t('banners.learn_more', 'BATAFSIL');
 
-                  {/* Content */}
-                  <div style={{ position: 'relative', zIndex: 3, color: '#FFFFFF' }}>
-                    <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                      {banner.title}
-                    </h3>
-                    {banner.subtitle && (
-                      <p style={{ fontSize: '0.88rem', opacity: 0.92, marginBottom: '1.25rem', lineHeight: 1.4, maxWidth: '420px', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-                        {banner.subtitle}
-                      </p>
-                    )}
-                    <span
-                      className="btn-figma-coral"
+                return (
+                  <div
+                    key={banner.id}
+                    onClick={() => navigate(banner.link || '/furniture')}
+                    style={{
+                      position: 'relative',
+                      borderRadius: '2px',
+                      overflow: 'hidden',
+                      minHeight: '260px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-end',
+                      padding: '2rem',
+                      cursor: 'pointer',
+                      boxShadow: 'var(--shadow-card)',
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-card)';
+                    }}
+                  >
+                    {/* Background Image with Gradient Overlay */}
+                    <div
                       style={{
-                        padding: '0.5rem 1.25rem',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.08em',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundImage: `url(${banner.image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80'})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        zIndex: 1
                       }}
-                    >
-                      {banner.button_text || 'BATAFSIL'} &gt;
-                    </span>
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 100%)',
+                        zIndex: 2
+                      }}
+                    />
+
+                    {/* Content */}
+                    <div style={{ position: 'relative', zIndex: 3, color: '#FFFFFF' }}>
+                      <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                        {localizedTitle}
+                      </h3>
+                      {localizedSubtitle && (
+                        <p style={{ fontSize: '0.88rem', opacity: 0.92, marginBottom: '1.25rem', lineHeight: 1.4, maxWidth: '420px', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                          {localizedSubtitle}
+                        </p>
+                      )}
+                      <span
+                        className="btn-figma-coral"
+                        style={{
+                          padding: '0.5rem 1.25rem',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.08em',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        {localizedBtnText} &gt;
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -848,13 +856,13 @@ export const Home = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                Special Offer
+                {t('footer.join_newsletter_title', 'Special Offer')}
               </span>
               <h2 style={{ fontSize: '2.8rem', fontWeight: 800, margin: '0 0 1rem', lineHeight: 1.1 }}>
                 Join Us
               </h2>
               <p style={{ fontSize: '0.95rem', opacity: 0.92, lineHeight: 1.6, marginBottom: '2rem' }}>
-                Bizning klubimizga obuna bo‘ling va birinchi buyurtmangiz uchun eksklyuziv 10% chegirmaga ega bo‘ling.
+                {t('footer.join_newsletter_desc', 'Bizning klubimizga obuna bo‘ling va birinchi buyurtmangiz uchun eksklyuziv 10% chegirmaga ega bo‘ling.')}
               </p>
 
               {joinSubmitted ? (
@@ -869,7 +877,7 @@ export const Home = () => {
                     fontWeight: 700
                   }}
                 >
-                  <Check size={22} /> Tabriklaymiz! Sizga -10% promo kodi yuborildi.
+                  <Check size={22} /> {t('footer.subscribed_success', 'Tabriklaymiz! Sizga -10% promo kodi yuborildi.')}
                 </div>
               ) : (
                 <form onSubmit={handleJoinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
@@ -877,7 +885,7 @@ export const Home = () => {
                     type="text"
                     value={joinName}
                     onChange={(e) => setJoinName(e.target.value)}
-                    placeholder="Ismingiz"
+                    placeholder={t('contact.your_name', 'Ismingiz')}
                     style={{
                       width: '100%',
                       padding: '0.85rem 1rem',
@@ -893,7 +901,7 @@ export const Home = () => {
                     type="email"
                     value={joinEmail}
                     onChange={(e) => setJoinEmail(e.target.value)}
-                    placeholder="hello@urgutmebel.uz"
+                    placeholder={t('footer.enter_email', 'hello@urgutmebel.uz')}
                     required
                     style={{
                       width: '100%',
@@ -912,7 +920,7 @@ export const Home = () => {
                     className="btn-figma-dark"
                     style={{ width: '100%', marginTop: '0.4rem' }}
                   >
-                    {joinLoading ? 'Yuklanmoqda...' : 'SIGN UP NOW'}
+                    {joinLoading ? '...' : t('footer.subscribe_btn', 'SIGN UP NOW')}
                   </button>
                   <label
                     style={{
@@ -926,7 +934,11 @@ export const Home = () => {
                     }}
                   >
                     <input type="checkbox" defaultChecked required />
-                    Obuna orqali shaxsiy ma’lumotlarni qayta ishlashga rozilik bildiraman
+                    {language === 'ru'
+                      ? 'Согласен на обработку персональных данных'
+                      : language === 'en'
+                      ? 'I agree to the processing of personal data'
+                      : 'Obuna orqali shaxsiy ma’lumotlarni qayta ishlashga rozilik bildiraman'}
                   </label>
                 </form>
               )}
@@ -973,7 +985,7 @@ export const Home = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                Trending
+                {t('blog.title', 'Trending')}
               </span>
               <h2
                 style={{
@@ -984,7 +996,7 @@ export const Home = () => {
                   marginBottom: '1rem'
                 }}
               >
-                Latest News
+                {t('blog.subtitle', 'Latest News')}
               </h2>
               <div
                 style={{
@@ -995,10 +1007,10 @@ export const Home = () => {
                 }}
               />
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-                Xonadoningizni yanada shinam va zamonaviy qilish bo‘yicha tajribali usta va dizaynerlarimizdan tavsiyalar.
+                {t('blog.subtitle', 'Xonadoningizni yanada shinam va zamonaviy qilish bo‘yicha tajribali usta va dizaynerlarimizdan tavsiyalar.')}
               </p>
               <Link to="/blog" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
-                READ ALL ARTICLES &gt;
+                {t('blog.read_article', 'READ ALL ARTICLES >')}
               </Link>
             </div>
 
@@ -1055,7 +1067,7 @@ export const Home = () => {
       {/* ==============================================================
           5. FIGMA AUTUMN COLLECTION SIGNATURE CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Autumn Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
 
       {/* ==============================================================
           6. QUICK CUSTOM ORDER & CRAFTSMAN LINKAGE
@@ -1073,20 +1085,20 @@ export const Home = () => {
               marginBottom: '0.5rem'
             }}
           >
-            Maxsus Xizmat
+            {t('custom_order.title', 'Maxsus Xizmat')}
           </span>
           <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1rem' }}>
-            O‘z O‘lchamingizda Mebel Kerakmi?
+            {t('custom_order.subtitle', 'O‘z O‘lchamingizda Mebel Kerakmi?')}
           </h2>
           <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 2rem', fontSize: '0.95rem' }}>
-            Urgutning usta duradgorlari sizning xonadoningiz va istagingizga mos maxsus mebellarni yasab beradi.
+            {t('custom_order.subtitle', 'Urgutning usta duradgorlari sizning xonadoningiz va istagingizga mos maxsus mebellarni yasab beradi.')}
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/custom-order" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
-              MAXSUS BUYURTMA BERISH &gt;
+              {t('custom_order.send_request', 'MAXSUS BUYURTMA BERISH >')}
             </Link>
             <Link to="/craftsmen" className="btn-figma-dark" style={{ textDecoration: 'none' }}>
-              USTALAR RO‘YXATI &gt;
+              {t('craftsmen.title', 'USTALAR RO‘YXATI >')}
             </Link>
           </div>
         </div>

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Check } from 'lucide-react';
 
 export const Footer = () => {
   const { addToast } = useNotification();
+  const { t, language } = useLanguage();
   const [subName, setSubName] = useState('');
   const [subEmail, setSubEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -14,7 +16,7 @@ export const Footer = () => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!subEmail || !subEmail.includes('@')) {
-      addToast('Iltimos, to‘g‘ri elektron pochta manzilini kiriting!', 'warning');
+      addToast(language === 'ru' ? 'Введите корректный email!' : language === 'en' ? 'Please enter a valid email!' : 'Iltimos, to‘g‘ri elektron pochta manzilini kiriting!', 'warning');
       return;
     }
     setSubmitting(true);
@@ -23,9 +25,9 @@ export const Footer = () => {
       setSubscribed(true);
       setSubName('');
       setSubEmail('');
-      addToast('Rahmat! Siz muvaffaqiyatli obuna bo‘ldingiz.', 'success');
+      addToast(t('footer.subscribed_success', 'Rahmat! Siz muvaffaqiyatli obuna bo‘ldingiz.'), 'success');
     } catch (err) {
-      addToast('Xatolik yuz berdi, qaytadan urinib ko‘ring.', 'error');
+      addToast(language === 'ru' ? 'Произошла ошибка, попробуйте снова.' : language === 'en' ? 'An error occurred, please try again.' : 'Xatolik yuz berdi, qaytadan urinib ko‘ring.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -66,27 +68,27 @@ export const Footer = () => {
                 letterSpacing: '-0.01em'
               }}
             >
-              Helpful Links
+              {t('footer.quick_links', 'Helpful Links')}
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <li>
-                <Link to="/about" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  About us
+                <Link to="/about" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {t('nav.about', 'About us')}
                 </Link>
               </li>
               <li>
-                <Link to="/faq" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Delivery and Returns Policy
+                <Link to="/faq" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {t('footer.features_delivery_title', 'Delivery & Returns Policy')}
                 </Link>
               </li>
               <li>
-                <Link to="/faq" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Help &amp; FAQ
+                <Link to="/faq" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {t('nav.faq', 'Help & FAQ')}
                 </Link>
               </li>
               <li>
-                <Link to="/custom-order" onClick={smoothScrollToTop} style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Service for professionals
+                <Link to="/custom-order" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {t('nav.custom_order', 'Service for professionals')}
                 </Link>
               </li>
             </ul>
@@ -103,27 +105,27 @@ export const Footer = () => {
                 letterSpacing: '-0.01em'
               }}
             >
-              Collection &amp; Blog
+              {t('nav.categories', 'Collection & Blog')}
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <li>
                 <Link to="/furniture" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Furniture Catalog
+                  {t('nav.furniture', 'Furniture Catalog')}
                 </Link>
               </li>
               <li>
                 <Link to="/blog" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Magazine &amp; Interior Tips
+                  {t('nav.blog', 'Magazine & Interior Tips')}
                 </Link>
               </li>
               <li>
                 <Link to="/craftsmen" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Master Craftsmen
+                  {t('nav.craftsmen', 'Master Craftsmen')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" onClick={smoothScrollToTop} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  Contact Us
+                  {t('nav.contact', 'Contact Us')}
                 </Link>
               </li>
             </ul>
@@ -140,7 +142,7 @@ export const Footer = () => {
                 letterSpacing: '-0.01em'
               }}
             >
-              Contact info
+              {t('contact.title', 'Contact info')}
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               <div>
@@ -154,7 +156,7 @@ export const Footer = () => {
 
               <div>
                 <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
-                  Toshkent filiali
+                  {language === 'ru' ? 'Ташкентский филиал' : language === 'en' ? 'Tashkent Branch' : 'Toshkent filiali'}
                 </strong>
                 <p style={{ margin: 0 }}>Chilonzor 9-mavze, 45-bino</p>
                 <p style={{ margin: 0 }}>Toshkent shahri</p>
@@ -174,7 +176,7 @@ export const Footer = () => {
                 letterSpacing: '-0.01em'
               }}
             >
-              Sign Up Now
+              {t('footer.join_newsletter_title', 'Sign Up Now')}
             </h4>
 
             {subscribed ? (
@@ -189,10 +191,10 @@ export const Footer = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-                  <Check size={18} /> Muvaffaqiyatli obuna bo‘ldingiz!
+                  <Check size={18} /> {t('footer.subscribed_success', 'Muvaffaqiyatli obuna bo‘ldingiz!')}
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  Yangi chegirmalar va yangiliklar pochtangizga yuboriladi.
+                  {t('footer.join_newsletter_desc', 'Yangi chegirmalar va yangiliklar pochtangizga yuboriladi.')}
                 </p>
               </div>
             ) : (
@@ -202,7 +204,7 @@ export const Footer = () => {
                     type="text"
                     value={subName}
                     onChange={(e) => setSubName(e.target.value)}
-                    placeholder="Name"
+                    placeholder={t('contact.your_name', 'Name')}
                     className="figma-input-underline"
                     aria-label="Name"
                   />
@@ -212,7 +214,7 @@ export const Footer = () => {
                     type="email"
                     value={subEmail}
                     onChange={(e) => setSubEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder={t('footer.enter_email', 'Email')}
                     required
                     className="figma-input-underline"
                     aria-label="Email"
@@ -224,7 +226,7 @@ export const Footer = () => {
                   className="btn-figma-coral"
                   style={{ width: '100%', marginTop: '0.5rem' }}
                 >
-                  {submitting ? 'Yuborilmoqda...' : 'SIGN UP NOW'}
+                  {submitting ? '...' : t('footer.subscribe_btn', 'SIGN UP NOW')}
                 </button>
               </form>
             )}
@@ -246,7 +248,7 @@ export const Footer = () => {
           }}
         >
           <div>
-            &copy; {new Date().getFullYear()} urgutmebel.uz. Designed by community. All rights reserved.
+            &copy; {new Date().getFullYear()} urgutmebel.uz. {t('footer.rights_reserved', 'All rights reserved.')}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

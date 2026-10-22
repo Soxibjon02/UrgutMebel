@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import {
@@ -15,6 +16,7 @@ import {
 export const CategoriesPage = () => {
   const { settings } = useSettings();
   const { addToast } = useNotification();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
@@ -128,7 +130,7 @@ export const CategoriesPage = () => {
                   marginBottom: '0.75rem'
                 }}
               >
-                New Collection
+                {t('hero.new_arrival', 'Yangi To‘plam')}
               </span>
               <h1
                 style={{
@@ -139,7 +141,7 @@ export const CategoriesPage = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                Chairs &amp; Stools
+                {t('categories.chairs', 'Stul va Kreslolar')}
               </h1>
               <p
                 style={{
@@ -150,10 +152,10 @@ export const CategoriesPage = () => {
                   marginBottom: '2rem'
                 }}
               >
-                Uyingiz va ofisingiz uchun zamonaviy, qulay va uzoq yillik sifatga ega o‘rindiqlar to‘plami.
+                {t('categories.chairs_desc', 'Uyingiz va ofisingiz uchun zamonaviy, qulay va uzoq yillik sifatga ega o‘rindiqlar to‘plami.')}
               </p>
               <Link to="/furniture" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
-                SEE DETAILS &gt;
+                {t('catalog.view_details', 'Batafsil')} &gt;
               </Link>
             </div>
           </div>
@@ -187,7 +189,7 @@ export const CategoriesPage = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                On sale
+                {t('categories.on_sale', 'Aksiyada')}
               </span>
               <h2
                 style={{
@@ -198,7 +200,7 @@ export const CategoriesPage = () => {
                   marginBottom: '1rem'
                 }}
               >
-                Up to<br />20% off
+                {t('categories.up_to_discount', '20% gacha chegirma')}
               </h2>
               <div
                 style={{
@@ -221,11 +223,11 @@ export const CategoriesPage = () => {
                 }}
               >
                 {[
-                  { name: 'Chairs & Stools', query: 'stul' },
-                  { name: 'Accessories', query: 'aksessuar' },
-                  { name: 'Sofas and Armchairs', query: 'divan' },
-                  { name: 'Tables', query: 'stol' },
-                  { name: 'Outdoor', query: 'bog' }
+                  { name: t('categories.chairs', 'Stul va Kreslolar'), query: 'stul' },
+                  { name: t('categories.accessories', 'Aksessuarlar'), query: 'aksessuar' },
+                  { name: t('categories.sofas', 'Divan va Yumshoq Mebellar'), query: 'divan' },
+                  { name: t('categories.tables', 'Stollar va Partalar'), query: 'stol' },
+                  { name: t('categories.outdoor', 'Bog‘ va Ochiq Maydon'), query: 'bog' }
                 ].map((item, idx) => (
                   <li key={idx}>
                     <button
@@ -296,7 +298,7 @@ export const CategoriesPage = () => {
                     letterSpacing: '0.02em'
                   }}
                 >
-                  Accessories
+                  {t('categories.accessories', 'Aksessuarlar')}
                 </div>
                 <img
                   src="https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=400&q=80"
@@ -344,10 +346,10 @@ export const CategoriesPage = () => {
                       marginBottom: '0.35rem'
                     }}
                   >
-                    Sofas and Armchairs
+                    {t('categories.sofas', 'Divan va Yumshoq Mebellar')}
                   </div>
                   <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                    Yumshoq mebellar kolleksiyasi
+                    {t('hero.sofas_desc', 'Eng sara zamonaviy yumshoq mebellar to‘plami')}
                   </p>
                 </div>
                 <img
@@ -392,10 +394,10 @@ export const CategoriesPage = () => {
                       marginBottom: '0.35rem'
                     }}
                   >
-                    Chairs &amp; Stools
+                    {t('categories.chairs', 'Stul va Kreslolar')}
                   </div>
                   <p style={{ margin: '0.35rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Tabiiy eman va metall karkas
+                    {t('hero.quality_materials', 'Tabiiy eman va mustahkam karkas')}
                   </p>
                 </div>
                 <img
@@ -437,7 +439,7 @@ export const CategoriesPage = () => {
                     color: 'var(--text-main)'
                   }}
                 >
-                  Pouf
+                  {t('categories.tables', 'Stollar va Partalar')}
                 </div>
                 <img
                   src="https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=400&q=80"
@@ -481,7 +483,7 @@ export const CategoriesPage = () => {
                     color: 'var(--text-main)'
                   }}
                 >
-                  Bedding
+                  {t('categories.bedrooms', 'Yotoqxona To‘plamlari')}
                 </div>
                 <img
                   src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=200&q=80"
@@ -521,7 +523,7 @@ export const CategoriesPage = () => {
                     color: 'var(--text-main)'
                   }}
                 >
-                  Furniture
+                  {t('categories.outdoor', 'Bog‘ va Ochiq Maydon')}
                 </div>
                 <img
                   src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=300&q=80"
@@ -570,13 +572,13 @@ export const CategoriesPage = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                Special Offer
+                {t('hero.special_offer', 'Maxsus Taklif')}
               </span>
               <h2 style={{ fontSize: '2.8rem', fontWeight: 800, margin: '0 0 1rem', lineHeight: 1.1 }}>
-                Join Us
+                {t('hero.join_us', 'Bizga Qo‘shiling')}
               </h2>
               <p style={{ fontSize: '0.95rem', opacity: 0.92, lineHeight: 1.6, marginBottom: '2rem' }}>
-                Bizning klubimizga obuna bo‘ling va birinchi buyurtmangiz uchun eksklyuziv 10% chegirmaga ega bo‘ling.
+                {t('footer.join_newsletter_desc', 'Bizning klubimizga obuna bo‘ling va birinchi buyurtmangiz uchun eksklyuziv 10% chegirmaga ega bo‘ling.')}
               </p>
 
               {joinSubmitted ? (
@@ -591,7 +593,7 @@ export const CategoriesPage = () => {
                     fontWeight: 700
                   }}
                 >
-                  <Check size={22} /> Tabriklaymiz! Sizga -10% promo kodi yuborildi.
+                  <Check size={22} /> {t('footer.subscribed_success', 'Tabriklaymiz! Sizga -10% promo kodi yuborildi.')}
                 </div>
               ) : (
                 <form onSubmit={handleJoinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
@@ -599,7 +601,7 @@ export const CategoriesPage = () => {
                     type="text"
                     value={joinName}
                     onChange={(e) => setJoinName(e.target.value)}
-                    placeholder="Name"
+                    placeholder={t('contact.your_name', 'Ismingiz')}
                     style={{
                       width: '100%',
                       padding: '0.85rem 1rem',
@@ -615,7 +617,7 @@ export const CategoriesPage = () => {
                     type="email"
                     value={joinEmail}
                     onChange={(e) => setJoinEmail(e.target.value)}
-                    placeholder="hello@abcdef.com"
+                    placeholder={t('footer.enter_email', 'Elektron pochtangizni kiriting...')}
                     required
                     style={{
                       width: '100%',
@@ -634,7 +636,7 @@ export const CategoriesPage = () => {
                     className="btn-figma-dark"
                     style={{ width: '100%', marginTop: '0.4rem' }}
                   >
-                    {joinLoading ? 'Yuklanmoqda...' : 'SIGN UP NOW'}
+                    {joinLoading ? '...' : t('footer.subscribe_btn', 'Obuna bo‘lish')}
                   </button>
                   <label
                     style={{
@@ -648,7 +650,7 @@ export const CategoriesPage = () => {
                     }}
                   >
                     <input type="checkbox" defaultChecked required />
-                    Obuna orqali shaxsiy ma’lumotlarni qayta ishlashga rozilik bildiraman
+                    {t('common.privacy_consent', 'Obuna orqali shaxsiy ma’lumotlarni qayta ishlashga rozilik bildiraman')}
                   </label>
                 </form>
               )}
@@ -695,7 +697,7 @@ export const CategoriesPage = () => {
                   marginBottom: '0.5rem'
                 }}
               >
-                Trending
+                {t('blog.title', 'Blog va Yangiliklar')}
               </span>
               <h2
                 style={{
@@ -706,7 +708,7 @@ export const CategoriesPage = () => {
                   marginBottom: '1rem'
                 }}
               >
-                Latest News
+                {t('blog.latest_news', 'So‘nggi Yangiliklar')}
               </h2>
               <div
                 style={{
@@ -717,10 +719,10 @@ export const CategoriesPage = () => {
                 }}
               />
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-                Eng so‘nggi interyer dizayni tendensiyalari, mebel tanlash sirlari va duradgorlik san’ati haqida foydali maqolalar.
+                {t('blog.subtitle', 'Eng so‘nggi interyer dizayni tendensiyalari, mebel tanlash sirlari va duradgorlik san’ati haqida foydali maqolalar.')}
               </p>
               <Link to="/blog" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
-                CHECK ALL ARTICLES &gt;
+                {t('blog.all_articles', 'Barcha Maqolalar')} &gt;
               </Link>
             </div>
 
@@ -784,7 +786,7 @@ export const CategoriesPage = () => {
       {/* ==============================================================
           5. SIGNATURE AUTUMN COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Autumn Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
 
       {/* Responsive Styles */}
       <style>{`

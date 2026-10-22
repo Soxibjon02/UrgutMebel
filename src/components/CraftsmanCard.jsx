@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { Star, MapPin, Award, Send, Phone, ArrowRight } from 'lucide-react';
 
 export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
+  const { t } = useLanguage();
   if (!craftsman) return null;
 
   return (
@@ -39,20 +41,20 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#d97706', fontSize: '0.85rem', marginBottom: '0.2rem' }}>
             <Star size={15} fill="#d97706" />
             <span style={{ fontWeight: 700 }}>{craftsman.rating || 5.0}</span>
-            <span style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>({craftsman.reviews_count || 18} baho)</span>
+            <span style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>({craftsman.reviews_count || 18} {t('catalog.reviews_count', 'baho')})</span>
             
             {/* Status Badge */}
             {craftsman.schedule?.status === 'busy' ? (
               <span style={{ marginLeft: 'auto', backgroundColor: '#fee2e2', color: '#dc2626', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
-                🔴 Band
+                🔴 {t('common.status_busy', 'Band')}
               </span>
             ) : craftsman.schedule?.status === 'partial' ? (
               <span style={{ marginLeft: 'auto', backgroundColor: '#fef3c7', color: '#d97706', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
-                🟡 Qisman band
+                🟡 {t('common.status_partial', 'Qisman band')}
               </span>
             ) : (
               <span style={{ marginLeft: 'auto', backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-full)' }}>
-                🟢 Bo‘sh (Buyurtmaga tayyor)
+                🟢 {t('common.status_available', 'Bo‘sh')}
               </span>
             )}
           </div>
@@ -66,7 +68,7 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <Award size={14} color="var(--wood-amber)" />
-              {craftsman.experience_years} yil tajriba
+              {craftsman.experience_years} {t('craftsmen.experience', 'yil tajriba')}
             </span>
             <span>•</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -116,7 +118,7 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
           {craftsman.portfolio?.length > 0 && (
             <div style={{ marginBottom: '1.25rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-light)', display: 'block', marginBottom: '0.4rem' }}>
-                NAMUNAVIY ISHLAR:
+                {t('craftsmen.portfolio', 'NAMUNAVIY ISHLAR')}:
               </span>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
                 {craftsman.portfolio.slice(0, 3).map((item, i) => (
@@ -140,7 +142,7 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
             className="btn btn-primary"
             style={{ flex: '1 1 140px', padding: '0.65rem 0.75rem', fontSize: '0.85rem' }}
           >
-            <span>Buyurtma Berish</span>
+            <span>{t('craftsmen.order_now', 'Buyurtma Berish')}</span>
             <ArrowRight size={15} />
           </button>
 
@@ -149,7 +151,7 @@ export const CraftsmanCard = ({ craftsman, onRequestClick }) => {
             className="btn btn-secondary"
             style={{ padding: '0.65rem 0.9rem', fontSize: '0.85rem' }}
           >
-            Profil
+            {t('catalog.view_details', 'Profil')}
           </Link>
 
           {craftsman.telegram && (

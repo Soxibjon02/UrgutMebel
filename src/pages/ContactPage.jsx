@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { dataService } from '../services/dataService';
 import { Check, Phone, Mail, MapPin } from 'lucide-react';
 
 export const ContactPage = () => {
   const { settings } = useSettings();
   const { addToast } = useNotification();
+  const { t } = useLanguage();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -103,7 +105,7 @@ export const ContactPage = () => {
                 display: 'block'
               }}
             >
-              Contact Us
+              {t('contact.title', 'Biz bilan Bog‘lanish')}
             </span>
             <h1
               style={{
@@ -114,7 +116,7 @@ export const ContactPage = () => {
                 lineHeight: 1.15
               }}
             >
-              Let’s talk
+              {t('contact.send_message', 'Xabar Yuborish')}
             </h1>
             <p
               style={{
@@ -124,7 +126,7 @@ export const ContactPage = () => {
                 marginBottom: '2.5rem'
               }}
             >
-              Our friendly customer service team always responds to enquiries within 24 hours.
+              {t('contact.subtitle', 'Savollaringiz bormi? Mutaxassislarimiz har doim yordam berishga tayyor.')}
             </p>
 
             {sent ? (
@@ -138,10 +140,10 @@ export const ContactPage = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                  <Check size={22} /> Xabaringiz muvaffaqiyatli yetkazildi!
+                  <Check size={22} /> {t('common.message_sent_success', 'Xabaringiz muvaffaqiyatli yetkazildi!')}
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  Mutaxassislarimiz qisqa vaqt ichida siz bilan bog‘lanishadi.
+                  {t('common.reply_soon', 'Mutaxassislarimiz qisqa vaqt ichida siz bilan bog‘lanishadi.')}
                 </p>
                 <button
                   type="button"
@@ -149,7 +151,7 @@ export const ContactPage = () => {
                   className="btn-figma-coral"
                   style={{ marginTop: '1.25rem', padding: '0.6rem 1.25rem', fontSize: '0.75rem' }}
                 >
-                  Yana xabar yozish
+                  {t('common.send_another_message', 'Yana xabar yozish')}
                 </button>
               </div>
             ) : (
@@ -159,7 +161,7 @@ export const ContactPage = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Name"
+                    placeholder={t('contact.your_name', 'Ismingiz')}
                     required
                     className="figma-input"
                     aria-label="Name"
@@ -182,7 +184,7 @@ export const ContactPage = () => {
                     rows={4}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Message..."
+                    placeholder={t('contact.your_message', 'Xabaringiz...')}
                     required
                     className="figma-input"
                     style={{ resize: 'vertical' }}
@@ -195,7 +197,7 @@ export const ContactPage = () => {
                   className="btn-figma-dark"
                   style={{ width: '100%', padding: '1rem', marginTop: '0.5rem' }}
                 >
-                  {loading ? 'Yuborilmoqda...' : 'SIGN UP NOW'}
+                  {loading ? '...' : t('contact.send_btn', 'Xabarni Yuborish')}
                 </button>
               </form>
             )}

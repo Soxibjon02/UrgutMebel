@@ -550,17 +550,34 @@ export const AdminDashboard = () => {
     loadAllData();
   };
 
-  // Banners & Announcements CRUD
+  // Banners & Announcements CRUD (3 tilda: UZ majburiy, RU & EN ixtiyoriy)
   const handleSaveBanner = async (e) => {
     e.preventDefault();
     const form = e.target;
+    const uzTitle = form.title.value.trim();
+    const uzSubtitle = form.subtitle?.value?.trim() || '';
+    const uzButtonText = form.button_text?.value?.trim() || 'Batafsil';
+
     const bannerData = {
       ...(editingBanner || {}),
-      title: form.title.value.trim(),
-      subtitle: form.subtitle?.value?.trim() || '',
+      // Uzbek (Majburiy)
+      title: uzTitle,
+      subtitle: uzSubtitle,
+      button_text: uzButtonText,
+      title_uz: uzTitle,
+      subtitle_uz: uzSubtitle,
+      button_text_uz: uzButtonText,
+      // Russian (Ixtiyoriy)
+      title_ru: form.title_ru?.value?.trim() || '',
+      subtitle_ru: form.subtitle_ru?.value?.trim() || '',
+      button_text_ru: form.button_text_ru?.value?.trim() || '',
+      // English (Ixtiyoriy)
+      title_en: form.title_en?.value?.trim() || '',
+      subtitle_en: form.subtitle_en?.value?.trim() || '',
+      button_text_en: form.button_text_en?.value?.trim() || '',
+      // General
       link: form.link?.value?.trim() || '/furniture',
       image_url: form.image_url?.value?.trim() || editingBanner?.image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
-      button_text: form.button_text?.value?.trim() || 'Batafsil',
       is_active: form.is_active ? form.is_active.checked : true,
       display_order: Number(form.display_order?.value) || 0
     };
@@ -570,7 +587,7 @@ export const AdminDashboard = () => {
     addToast('E‘lon saqlanmoqda...', 'info');
     const updated = await dataService.saveBanner(bannerData);
     setBanners(updated);
-    addToast('E‘lon / Banner saqlandi va Supabase-ga yuborildi!', 'success');
+    addToast('E‘lon / Banner 3 tilda saqlandi va Supabase-ga yuborildi!', 'success');
   };
 
   const handleDeleteBanner = async (id) => {
@@ -2635,11 +2652,23 @@ export const AdminDashboard = () => {
                           </span>
                         </div>
                         {ban.subtitle && (
-                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem', lineHeight: 1.4 }}>
                             {ban.subtitle}
                           </p>
                         )}
-                        <div style={{ fontSize: '0.78rem', color: 'var(--wood-amber)', marginBottom: '1rem', wordBreak: 'break-all' }}>
+                        {/* 3-Language status pills */}
+                        <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.65rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 700 }}>
+                            🇺🇿 UZ (Asosiy)
+                          </span>
+                          <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: ban.title_ru ? 'rgba(59, 130, 246, 0.15)' : 'rgba(156, 163, 175, 0.12)', color: ban.title_ru ? '#3b82f6' : 'var(--text-muted)', fontWeight: 600 }}>
+                            🇷🇺 RU: {ban.title_ru ? '✓ Kiritilgan' : '— Ixtiyoriy'}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: ban.title_en ? 'rgba(139, 92, 246, 0.15)' : 'rgba(156, 163, 175, 0.12)', color: ban.title_en ? '#8b5cf6' : 'var(--text-muted)', fontWeight: 600 }}>
+                            🇬🇧 EN: {ban.title_en ? '✓ Kiritilgan' : '— Ixtiyoriy'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--wood-amber)', marginBottom: '0.75rem', wordBreak: 'break-all' }}>
                           🔗 Havola: <strong>{ban.link || '/furniture'}</strong> ({ban.button_text || 'Batafsil'})
                         </div>
                       </div>
@@ -3071,30 +3100,139 @@ export const AdminDashboard = () => {
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
               {editingBanner ? 'E‘lonni Tahrirlash' : 'Yangi E‘lon Qo‘shish'}
             </h3>
+            <div style={{ backgroundColor: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.25)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', marginBottom: '1.25rem', fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: 1.45 }}>
+              💡 <strong>Ko‘p tilli e‘lon:</strong> O‘zbekcha matn <u>majburiy</u> (*). Ruscha va Inglizcha tarjimalari esa <u>ixtiyoriy</u>. Agar ruscha/inglizcha kiritilmasa, saytda avtomatik ravishda o‘zbekcha e‘lon ko‘rinadi.
+            </div>
+
             <form onSubmit={handleSaveBanner}>
-              <div className="form-group">
-                <label className="form-label">E‘lon Sarlavhasi *</label>
-                <input
-                  type="text"
-                  required
-                  name="title"
-                  defaultValue={editingBanner?.title || ''}
-                  placeholder="Masalan: Bahorgi Yangi To‘plam Aksiyasi"
-                  className="form-input"
-                />
+              {/* 1. O'ZBEKCHA (MAJBURITY) */}
+              <div style={{ border: '1.5px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem', backgroundColor: 'var(--bg-secondary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>🇺🇿</span>
+                  <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>O‘zbekcha (Majburiy *)</strong>
+                  <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: '#10b981', color: '#fff', fontWeight: 700 }}>Asosiy</span>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">E‘lon Sarlavhasi (UZ) *</label>
+                  <input
+                    type="text"
+                    required
+                    name="title"
+                    defaultValue={editingBanner?.title_uz || editingBanner?.title || ''}
+                    placeholder="Masalan: Bahorgi Yangi To‘plam Aksiyasi"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">Qisqa Tavsif / Tagline (UZ)</label>
+                  <textarea
+                    rows={2}
+                    name="subtitle"
+                    defaultValue={editingBanner?.subtitle_uz || editingBanner?.subtitle || ''}
+                    placeholder="Barcha mebellarga 20% gacha chegirma..."
+                    className="form-textarea"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Tugma Matni (UZ)</label>
+                  <input
+                    type="text"
+                    name="button_text"
+                    defaultValue={editingBanner?.button_text_uz || editingBanner?.button_text || 'Batafsil'}
+                    placeholder="Batafsil"
+                    className="form-input"
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Qisqa Tavsif / Tagline</label>
-                <textarea
-                  rows={2}
-                  name="subtitle"
-                  defaultValue={editingBanner?.subtitle || ''}
-                  placeholder="Barcha mebellarga 20% gacha chegirma..."
-                  className="form-textarea"
-                />
+              {/* 2. RUSCHA (IXTIYORIY) */}
+              <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem', backgroundColor: 'var(--bg-card)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>🇷🇺</span>
+                  <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>Русский (Ixtiyoriy / Необязательно)</strong>
+                  <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>Ixtiyoriy</span>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">Заголовок объявления (RU)</label>
+                  <input
+                    type="text"
+                    name="title_ru"
+                    defaultValue={editingBanner?.title_ru || ''}
+                    placeholder="Например: Весенняя коллекция мебели"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">Описание / Подзаголовок (RU)</label>
+                  <textarea
+                    rows={2}
+                    name="subtitle_ru"
+                    defaultValue={editingBanner?.subtitle_ru || ''}
+                    placeholder="Скидки до 20% на весь ассортимент..."
+                    className="form-textarea"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Текст кнопки (RU)</label>
+                  <input
+                    type="text"
+                    name="button_text_ru"
+                    defaultValue={editingBanner?.button_text_ru || ''}
+                    placeholder="Подробнее"
+                    className="form-input"
+                  />
+                </div>
               </div>
 
+              {/* 3. INGLIZCHA (IXTIYORIY) */}
+              <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem', backgroundColor: 'var(--bg-card)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>🇬🇧</span>
+                  <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>English (Ixtiyoriy / Optional)</strong>
+                  <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>Optional</span>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">Announcement Title (EN)</label>
+                  <input
+                    type="text"
+                    name="title_en"
+                    defaultValue={editingBanner?.title_en || ''}
+                    placeholder="E.g.: Spring Special Sale & New Collection"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">Subtitle / Description (EN)</label>
+                  <textarea
+                    rows={2}
+                    name="subtitle_en"
+                    defaultValue={editingBanner?.subtitle_en || ''}
+                    placeholder="Up to 20% discount on modern furniture..."
+                    className="form-textarea"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Button Text (EN)</label>
+                  <input
+                    type="text"
+                    name="button_text_en"
+                    defaultValue={editingBanner?.button_text_en || ''}
+                    placeholder="Learn More"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* 4. UMUMIY SOZLAMALAR */}
               <ImageUploadField
                 label="Banner Rasmi (URL yoki Supabase Storage)"
                 name="image_url"
@@ -3116,19 +3254,6 @@ export const AdminDashboard = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Tugma Matni</label>
-                  <input
-                    type="text"
-                    name="button_text"
-                    defaultValue={editingBanner?.button_text || 'Batafsil'}
-                    placeholder="Batafsil, Xarid qilish..."
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              <div className="dashboard-form-row">
-                <div className="form-group">
                   <label className="form-label">Tartib Raqami</label>
                   <input
                     type="number"
@@ -3137,16 +3262,17 @@ export const AdminDashboard = () => {
                     className="form-input"
                   />
                 </div>
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', marginTop: '1.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                    <input
-                      type="checkbox"
-                      name="is_active"
-                      defaultChecked={editingBanner ? editingBanner.is_active !== false : true}
-                    />
-                    <span>E‘lon saytda faol ko‘rinsin</span>
-                  </label>
-                </div>
+              </div>
+
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    defaultChecked={editingBanner ? editingBanner.is_active !== false : true}
+                  />
+                  <span>E‘lon saytda faol ko‘rinsin</span>
+                </label>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>

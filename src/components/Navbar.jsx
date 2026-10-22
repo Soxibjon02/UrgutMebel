@@ -26,8 +26,12 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+
 export const Navbar = () => {
   const { settings, theme, toggleTheme, isDark } = useSettings();
+  const { t, language } = useLanguage();
   const { user, isGuest, role, isManager, isAdmin, logout, openAuthModal } = useAuth();
   const { totalItemsCount } = useCart();
   const { favoritesCount } = useWishlist();
@@ -92,14 +96,14 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/', label: 'Bosh sahifa' },
-    { to: '/furniture', label: 'Mebellar' },
-    { to: '/categories', label: 'Kategoriyalar' },
-    { to: '/custom-order', label: 'Maxsus Buyurtma' },
-    { to: '/craftsmen', label: 'Ustalar' },
-    { to: '/blog', label: 'Blog' },
-    { to: '/faq', label: 'FAQ' },
-    { to: '/contact', label: 'Bog‘lanish' }
+    { to: '/', label: t('nav.home', 'Bosh sahifa') },
+    { to: '/furniture', label: t('nav.furniture', 'Mebellar') },
+    { to: '/categories', label: t('nav.categories', 'Kategoriyalar') },
+    { to: '/custom-order', label: t('nav.custom_order', 'Maxsus Buyurtma') },
+    { to: '/craftsmen', label: t('nav.craftsmen', 'Ustalar') },
+    { to: '/blog', label: t('nav.blog', 'Blog') },
+    { to: '/faq', label: t('nav.faq', 'FAQ') },
+    { to: '/contact', label: t('nav.contact', 'Bog‘lanish') }
   ];
 
   return (
@@ -327,8 +331,11 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          {/* Actions: Theme Toggle, Search, Wishlist, Cart, User Account */}
+          {/* Actions: Language Switcher, Theme Toggle, Search, Wishlist, Cart, User Account */}
           <div className="navbar-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+
+            {/* Language Switcher (UZ / RU / EN) */}
+            <LanguageSwitcher />
 
             {/* Dark Mode / Light Mode Toggle Button */}
             <button
@@ -760,8 +767,15 @@ export const Navbar = () => {
             flexDirection: 'column',
             gap: '0.75rem'
           }}
-          onClick={() => setMobileMenuOpen(false)}
         >
+          {/* Mobile Language Switcher */}
+          <div style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 700 }}>
+              TIL / LANGUAGE / ЯЗЫК:
+            </div>
+            <LanguageSwitcher isMobile={true} />
+          </div>
+
           {navLinks.map((link) => (
             <NavLink
               key={link.to}

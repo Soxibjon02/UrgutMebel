@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import {
   Star,
@@ -28,6 +29,7 @@ export const ProductDetail = () => {
   const { toggleLike, isLiked } = useWishlist();
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
+  const { t, language, getLocalized } = useLanguage();
 
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
@@ -231,7 +233,7 @@ export const ProductDetail = () => {
                   marginBottom: '0.65rem'
                 }}
               >
-                {Number(effectivePrice).toLocaleString()} so‘m
+                {Number(effectivePrice).toLocaleString()} {t('catalog.price_currency', 'so‘m')}
               </div>
 
               <h1
@@ -243,11 +245,11 @@ export const ProductDetail = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                {product.name}
+                {getLocalized(product, 'name') || product.name}
               </h1>
 
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-                {product.description || "Urgut duradgorlik an'analari asosida tayyorlangan yuqori sifatli va bejirim mebel to‘plami."}
+                {getLocalized(product, 'description') || product.description || "Urgut duradgorlik an'analari asosida tayyorlangan yuqori sifatli va bejirim mebel to‘plami."}
               </p>
 
               {/* Color Swatch Dots */}
@@ -287,7 +289,7 @@ export const ProductDetail = () => {
                   padding: '1.15rem'
                 }}
               >
-                <span>Add To Cart</span>
+                <span>{t('catalog.add_to_cart', 'Add To Cart')}</span>
                 <ChevronRight size={18} />
               </button>
             </div>
@@ -412,10 +414,10 @@ export const ProductDetail = () => {
                 marginBottom: '0.4rem'
               }}
             >
-              Our Suggestions
+              {t('product_detail.similar_products', 'Our Suggestions')}
             </span>
             <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
-              You may also like
+              {t('product_detail.similar_products', 'You may also like')}
             </h2>
             <div
               style={{
@@ -438,7 +440,7 @@ export const ProductDetail = () => {
             {/* Left Suggestions Filter Sidebar */}
             <aside>
               <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem' }}>
-                Kategoriyalar
+                {t('categories.all_categories', 'Kategoriyalar')}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                 <button
@@ -455,7 +457,7 @@ export const ProductDetail = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  Barchasi
+                  {t('catalog.all', 'Barchasi')}
                 </button>
                 {categories.map((c) => (
                   <button
@@ -473,7 +475,7 @@ export const ProductDetail = () => {
                       cursor: 'pointer'
                     }}
                   >
-                    {c.name}
+                    {getLocalized(c, 'name') || c.name}
                   </button>
                 ))}
               </div>
@@ -522,7 +524,7 @@ export const ProductDetail = () => {
                       >
                         <img
                           src={p.images?.[0] || p.image_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80'}
-                          alt={p.name}
+                          alt={getLocalized(p, 'name') || p.name}
                           style={{
                             maxWidth: '100%',
                             maxHeight: '150px',
@@ -542,10 +544,10 @@ export const ProductDetail = () => {
                       >
                         <div>
                           <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--figma-coral)', marginBottom: '0.25rem' }}>
-                            {Number(p.discount_price || p.price).toLocaleString()} so‘m
+                            {Number(p.discount_price || p.price).toLocaleString()} {t('catalog.price_currency', 'so‘m')}
                           </div>
                           <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 0.5rem', lineHeight: 1.3 }}>
-                            {p.name}
+                            {getLocalized(p, 'name') || p.name}
                           </h4>
                           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {p.material || 'Tabiiy daraxt va sifatli mato'}
@@ -564,7 +566,7 @@ export const ProductDetail = () => {
                             marginTop: '1rem'
                           }}
                         >
-                          VIEW ITEM &gt;
+                          {t('catalog.view_details', 'VIEW ITEM >')}
                         </Link>
                       </div>
                     </div>
@@ -579,7 +581,7 @@ export const ProductDetail = () => {
       {/* ==============================================================
           4. SIGNATURE AUTUMN COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Autumn Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
 
       {/* Responsive layout styles */}
       <style>{`

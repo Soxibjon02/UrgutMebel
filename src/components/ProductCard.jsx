@@ -2,11 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Star, Heart, ShoppingBag, Eye, CheckCircle2 } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { toggleLike, isLiked } = useWishlist();
+  const { t, getLocalized } = useLanguage();
 
   if (!product) return null;
 
@@ -21,6 +23,8 @@ export const ProductCard = ({ product }) => {
     'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80';
 
   const liked = isLiked(product.id);
+  const localizedName = getLocalized(product, 'name') || product.name;
+  const currency = t('catalog.price_currency', 'so‘m');
 
   return (
     <div
@@ -75,7 +79,7 @@ export const ProductCard = ({ product }) => {
           {discountPercent && (
             <span className="badge badge-discount">-{discountPercent}%</span>
           )}
-          {product.is_new && <span className="badge badge-new">Yangi</span>}
+          {product.is_new && <span className="badge badge-new">{t('common.new', 'Yangi')}</span>}
         </div>
 
         {/* Like Button */}
@@ -143,7 +147,7 @@ export const ProductCard = ({ product }) => {
               }}
             >
               <CheckCircle2 size={12} />
-              {(product.stock ?? 10) > 0 ? 'Omborda mavjud' : 'Buyurtmaga'}
+              {(product.stock ?? 10) > 0 ? t('catalog.in_stock', 'Omborda mavjud') : t('catalog.out_of_stock', 'Buyurtmaga')}
             </span>
           </div>
 
@@ -158,7 +162,7 @@ export const ProductCard = ({ product }) => {
             }}
           >
             <Link to={`/furniture/${product.id}`} style={{ color: 'inherit' }}>
-              {product.name}
+              {localizedName}
             </Link>
           </h3>
 
@@ -192,7 +196,7 @@ export const ProductCard = ({ product }) => {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  {Number(product.discount_price).toLocaleString()} so‘m
+                  {Number(product.discount_price).toLocaleString()} {currency}
                 </span>
                 <span
                   style={{
@@ -202,7 +206,7 @@ export const ProductCard = ({ product }) => {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  {Number(product.price).toLocaleString()} so‘m
+                  {Number(product.price).toLocaleString()} {currency}
                 </span>
               </>
             ) : (
@@ -214,7 +218,7 @@ export const ProductCard = ({ product }) => {
                   whiteSpace: 'nowrap'
                 }}
               >
-                {Number(product.price).toLocaleString()} so‘m
+                {Number(product.price).toLocaleString()} {currency}
               </span>
             )}
           </div>
@@ -232,7 +236,7 @@ export const ProductCard = ({ product }) => {
               }}
             >
               <ShoppingBag size={15} />
-              <span>Savatga</span>
+              <span>{t('catalog.add_to_cart', 'Savatga')}</span>
             </button>
 
             <Link
@@ -245,7 +249,7 @@ export const ProductCard = ({ product }) => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-              title="Batafsil ma'lumot"
+              title={t('catalog.view_details', 'Batafsil')}
             >
               <Eye size={17} />
             </Link>

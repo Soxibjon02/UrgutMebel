@@ -958,21 +958,36 @@ export const dataService = {
 
   async saveBanner(banner) {
     const banners = getStored('banners', initialBanners);
+    const uzTitle = banner.title_uz || banner.title || '';
+    const uzSubtitle = banner.subtitle_uz || banner.subtitle || '';
+    const uzButtonText = banner.button_text_uz || banner.button_text || 'Batafsil';
+
     const newBan = {
       ...banner,
       id: banner.id || `ban-${Date.now()}`,
-      title: banner.title || '',
-      subtitle: banner.subtitle || '',
+      title: uzTitle,
+      subtitle: uzSubtitle,
       link: banner.link || '/furniture',
       image_url: banner.image_url || '',
-      button_text: banner.button_text || 'Batafsil',
+      button_text: uzButtonText,
+      // 3-language fields
+      title_uz: uzTitle,
+      subtitle_uz: uzSubtitle,
+      button_text_uz: uzButtonText,
+      title_en: banner.title_en || '',
+      subtitle_en: banner.subtitle_en || '',
+      button_text_en: banner.button_text_en || '',
+      title_ru: banner.title_ru || '',
+      subtitle_ru: banner.subtitle_ru || '',
+      button_text_ru: banner.button_text_ru || '',
       is_active: banner.is_active !== false,
       display_order: Number(banner.display_order) || 0
     };
 
     if (isSupabaseConfigured && supabase) {
       try {
-        const { error } = await supabase.from('banners').upsert({
+        // Try saving with full payload first, fallback to base columns if schema lacks localization columns
+        const basePayload = {
           id: newBan.id,
           title: newBan.title,
           subtitle: newBan.subtitle,
@@ -981,8 +996,24 @@ export const dataService = {
           button_text: newBan.button_text,
           is_active: newBan.is_active,
           display_order: newBan.display_order
-        });
-        if (error) console.error('Supabase saveBanner error:', error);
+        };
+        const fullPayload = {
+          ...basePayload,
+          title_uz: newBan.title_uz,
+          subtitle_uz: newBan.subtitle_uz,
+          button_text_uz: newBan.button_text_uz,
+          title_en: newBan.title_en,
+          subtitle_en: newBan.subtitle_en,
+          button_text_en: newBan.button_text_en,
+          title_ru: newBan.title_ru,
+          subtitle_ru: newBan.subtitle_ru,
+          button_text_ru: newBan.button_text_ru
+        };
+        const { error } = await supabase.from('banners').upsert(fullPayload);
+        if (error) {
+          // If error is about missing columns, fallback to basePayload
+          await supabase.from('banners').upsert(basePayload);
+        }
       } catch (e) {
         console.warn('Supabase saveBanner exception:', e);
       }

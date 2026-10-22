@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { X, Send, Calendar, Phone, User, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 import { dataService } from '../services/dataService';
@@ -8,6 +9,7 @@ import { dataService } from '../services/dataService';
 export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
+  const { t } = useLanguage();
 
   const [serviceType, setServiceType] = useState('Uy jihozlarini ta\'mirlash');
   const [fullName, setFullName] = useState(user?.full_name || '');
@@ -100,23 +102,23 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
               <CheckCircle2 size={36} />
             </div>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-              Buyurtmangiz Qabul Qilindi!
+              {t('checkout.order_success', 'Buyurtmangiz Qabul Qilindi!')}
             </h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Usta {craftsman.name} buyurtmangizni oldi va ko‘rsatilgan telefon raqami orqali bog‘lanadi.
+              {t('custom_order.request_sent', 'Usta tez orada siz bilan bog‘lanadi.')}
             </p>
           </div>
         ) : (
           <>
             <div style={{ marginBottom: '1.5rem' }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--wood-amber)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Shaxsiy Buyurtma va Bog‘lanish
+                {t('custom_order.title', 'Shaxsiy Buyurtma va Bog‘lanish')}
               </div>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.2rem' }}>
-                {craftsman.name}ga Murojaat Qilish
+                {craftsman.name}
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                Jihozlarni ta‘mirlash, ko‘chirish va montaj yoki yangi buyurtma bo‘yicha ustaga to‘g‘ridan-to‘g‘ri murojaat qiling.
+                {t('craftsmen.subtitle', 'Usta bilan to‘g‘ridan-to‘g‘ri bog‘laning')}
               </p>
             </div>
 
@@ -172,23 +174,23 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label">Xizmat Turi *</label>
+                <label className="form-label">{t('custom_order.furniture_type', 'Xizmat Turi *')}</label>
                 <select
                   className="form-select"
                   value={serviceType}
                   onChange={(e) => setServiceType(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}
                 >
-                  <option value="Uy mebellari va jihozlarini ta'mirlash">🛠️ Uy mebellari va jihozlarini ta'mirlash</option>
-                  <option value="Mebellarni ko'chirish, demontaj va montaj (yig'ish)">🚚 Mebellarni ko'chirish, demontaj va montaj</option>
-                  <option value="Yangi mebel yasash (shaxsiy buyurtma)">🪚 Yangi mebel yasash (shaxsiy buyurtma)</option>
-                  <option value="Mebel restavratsiyasi va yangilash">✨ Mebel restavratsiyasi va yangilash</option>
-                  <option value="Boshqa duradgorlik xizmati">📦 Boshqa duradgorlik xizmati</option>
+                  <option value="Uy mebellari va jihozlarini ta'mirlash">🛠️ {t('craftsmen.service_repair', 'Uy mebellari va jihozlarini ta\'mirlash')}</option>
+                  <option value="Mebellarni ko'chirish, demontaj va montaj (yig'ish)">🚚 {t('craftsmen.service_assembly', 'Mebellarni ko\'chirish, demontaj va montaj')}</option>
+                  <option value="Yangi mebel yasash (shaxsiy buyurtma)">🪚 {t('craftsmen.service_custom', 'Yangi mebel yasash (shaxsiy buyurtma)')}</option>
+                  <option value="Mebel restavratsiyasi va yangilash">✨ {t('craftsmen.service_restore', 'Mebel restavratsiyasi va yangilash')}</option>
+                  <option value="Boshqa duradgorlik xizmati">📦 {t('common.other', 'Boshqa duradgorlik xizmati')}</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Ismingiz</label>
+                <label className="form-label">{t('checkout.full_name', 'Ismingiz')}</label>
                 <div style={{ position: 'relative' }}>
                   <User size={17} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
@@ -196,7 +198,7 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Ismingiz va familiyangiz"
+                    placeholder={t('contact.your_name', 'Ismingiz va familiyangiz')}
                     className="form-input"
                     style={{ paddingLeft: '2.5rem' }}
                   />
@@ -204,7 +206,7 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Telefon Raqamingiz</label>
+                <label className="form-label">{t('checkout.phone', 'Telefon Raqamingiz')}</label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={17} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
@@ -220,7 +222,7 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Kutilayotgan Muddati (Ixtiyoriy)</label>
+                <label className="form-label">{t('custom_order.preferred_date', 'Kutilayotgan Muddati (Ixtiyoriy)')}</label>
                 <div style={{ position: 'relative' }}>
                   <Calendar size={17} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
@@ -234,13 +236,13 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Mebel Talablari va Tavsifi</label>
+                <label className="form-label">{t('custom_order.dimensions', 'Mebel Talablari va Tavsifi')}</label>
                 <textarea
                   required
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Qanday mebel yasatmoqchisiz? Taxminiy o‘lchamlari, materiali va maxsus talablaringizni yozing..."
+                  placeholder={t('custom_order.dimensions', 'Qanday mebel yasatmoqchisiz?')}
                   className="form-textarea"
                 />
               </div>
@@ -257,7 +259,7 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
                 }}
               >
                 <Send size={16} />
-                <span>{user && user.role !== 'customer' ? 'Xodim hisobidan buyurtma taqiqlangan' : 'Ustaga Yuborish'}</span>
+                <span>{user && user.role !== 'customer' ? t('common.customers_only_order', 'Xodim hisobidan buyurtma taqiqlangan') : t('craftsmen.order_now', 'Ustaga Yuborish')}</span>
               </button>
             </form>
           </>

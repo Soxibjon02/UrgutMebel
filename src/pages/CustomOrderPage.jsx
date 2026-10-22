@@ -25,10 +25,12 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { uploadImageToSupabase } from '../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export const CustomOrderPage = () => {
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   // Form States
@@ -197,10 +199,10 @@ export const CustomOrderPage = () => {
             </div>
 
             <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-              Buyurtmangiz Qabul Qilindi!
+              {t('checkout.order_success', 'Buyurtmangiz Qabul Qilindi!')}
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '2rem' }}>
-              Usta-muhandislarimiz sizning chizma va o‘lchamlaringizni ko‘rib chiqib, narx kalkulyatsiyasini tayyorlaydi.
+              {t('custom_order.request_sent', 'Usta-muhandislarimiz sizning chizma va o‘lchamlaringizni ko‘rib chiqib, narx kalkulyatsiyasini tayyorlaydi.')}
             </p>
 
             <div
@@ -213,22 +215,22 @@ export const CustomOrderPage = () => {
               }}
             >
               <span style={{ fontSize: '0.82rem', color: 'var(--text-light)', display: 'block', marginBottom: '0.3rem' }}>
-                BUYURTMA RAQAMI:
+                {t('checkout.order_number', 'BUYURTMA RAQAMI')}:
               </span>
               <strong style={{ fontSize: '1.5rem', color: 'var(--wood-amber)', letterSpacing: '0.05em' }}>
                 {completedOrder.order_number}
               </strong>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-                Holati: <span className="badge badge-wood" style={{ marginLeft: '0.35rem' }}>Yangi (NEW)</span>
+                {t('account.order_status', 'Holati')}: <span className="badge badge-wood" style={{ marginLeft: '0.35rem' }}>{t('account.status_new', 'Yangi')} (NEW)</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link to="/account?tab=custom" className="btn btn-primary">
-                Buyurtmalarimda Kuzatish
+                {t('nav.my_orders', 'Buyurtmalarimda Kuzatish')}
               </Link>
               <Link to="/" className="btn btn-secondary">
-                Bosh Sahifaga Qaytish
+                {t('nav.home', 'Bosh Sahifaga Qaytish')}
               </Link>
             </div>
           </div>
@@ -256,13 +258,13 @@ export const CustomOrderPage = () => {
               marginBottom: '0.5rem'
             }}
           >
-            <Sliders size={16} /> Individual Ishlab Chiqarish
+            <Sliders size={16} /> {t('custom_order.individual_manufacturing', 'Individual Ishlab Chiqarish')}
           </div>
           <h1 style={{ fontSize: '2.6rem', fontWeight: 800, marginBottom: '0.85rem' }}>
-            Maxsus O‘lchamdagi Mebel Buyurtmasi
+            {t('custom_order.title', 'Maxsus O‘lchamdagi Mebel Buyurtmasi')}
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto' }}>
-            Xonadon o‘lchamlari, siz yoqtirgan yog‘och turi, mato va ranglarni ko‘rsating. Menedjerlarimiz narxni hisoblab taklif yuborishadi.
+          <p style={{ color: 'var(--text-muted)', fontSize: '105rem', maxWidth: '650px', margin: '0 auto' }}>
+            {t('custom_order.subtitle', 'Xonadoningiz o‘lchami va o‘z didingizga mos mebel loyihasini yarating. Urgut ustalari buni amalga oshiradi!')}
           </p>
         </div>
 
@@ -358,25 +360,25 @@ export const CustomOrderPage = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <User size={20} color="var(--wood-amber)" />
-              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>1. Mijoz Ma'lumotlari</h2>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>{t('checkout.contact_info', '1. Mijoz Ma\'lumotlari')}</h2>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
               <div className="form-group">
-                <label className="form-label">To‘liq Ismingiz *</label>
+                <label className="form-label">{t('checkout.full_name', 'To‘liq Ismingiz *')}</label>
                 <input
                   type="text"
                   required
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  placeholder="Masalan: Jamshid Aliyev"
+                  placeholder={t('contact.your_name', 'Ismingiz')}
                   className="form-input"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Telefon Raqamingiz *</label>
+                <label className="form-label">{t('checkout.phone', 'Telefon Raqamingiz *')}</label>
                 <input
                   type="tel"
                   required
@@ -389,7 +391,7 @@ export const CustomOrderPage = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Elektron Pochta (Email)</label>
+                <label className="form-label">{t('common.email', 'Elektron Pochta (Email)')}</label>
                 <input
                   type="email"
                   name="email"
@@ -401,14 +403,14 @@ export const CustomOrderPage = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Yetkazib Berish Manzili *</label>
+                <label className="form-label">{t('checkout.delivery_address', 'Yetkazib Berish Manzili *')}</label>
                 <input
                   type="text"
                   required
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  placeholder="Shahar, tuman, ko‘cha va uy raqami"
+                  placeholder={t('checkout.street', 'Shahar, tuman, ko‘cha va uy raqami')}
                   className="form-input"
                 />
               </div>
@@ -430,26 +432,26 @@ export const CustomOrderPage = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
               <Ruler size={20} color="var(--wood-amber)" />
-              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>2. Mebel Turi va O‘lchamlari</h2>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>2. {t('custom_order.furniture_type', 'Mebel Turi')} &amp; {t('catalog.dimensions', 'O‘lchamlari')}</h2>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
               <div className="form-group">
-                <label className="form-label">Mebel Turi *</label>
+                <label className="form-label">{t('custom_order.furniture_type', 'Mebel Turi *')}</label>
                 <select
                   name="furniture_type"
                   value={formData.furniture_type}
                   onChange={handleInputChange}
                   className="form-select"
                 >
-                  <option value="Oshxona Garnituri">Oshxona Garnituri</option>
-                  <option value="Mehmonxona Divani">Mehmonxona Divani</option>
-                  <option value="Yotoqxona Krovati">Yotoqxona Krovati</option>
+                  <option value="Oshxona Garnituri">{t('categories.kitchen', 'Oshxona Garnituri')}</option>
+                  <option value="Mehmonxona Divani">{t('categories.sofas', 'Mehmonxona Divani')}</option>
+                  <option value="Yotoqxona Krovati">{t('categories.bedrooms', 'Yotoqxona Krovati')}</option>
                   <option value="Shkaf-Kupe va Garderob">Shkaf-Kupe va Garderob</option>
-                  <option value="Bolalar Mebeli">Bolalar Mebeli</option>
-                  <option value="Ofis Ish Stoli">Ofis Ish Stoli</option>
-                  <option value="Kofe va Ovqatlanish Stoli">Kofe va Ovqatlanish Stoli</option>
-                  <option value="Boshqa maxsus mebel">Boshqa maxsus mebel</option>
+                  <option value="Bolalar Mebeli">{t('categories.kids', 'Bolalar Mebeli')}</option>
+                  <option value="Ofis Ish Stoli">{t('categories.office', 'Ofis Ish Stoli')}</option>
+                  <option value="Kofe va Ovqatlanish Stoli">{t('categories.tables', 'Kofe va Ovqatlanish Stoli')}</option>
+                  <option value="Boshqa maxsus mebel">{t('common.other', 'Boshqa maxsus mebel')}</option>
                 </select>
               </div>
 
@@ -843,10 +845,10 @@ export const CustomOrderPage = () => {
                 }}
               >
                 {user && user.role !== 'customer'
-                  ? 'Xodimlar hisobidan buyurtma berilmaydi (Faqat mijoz)'
+                  ? t('common.customers_only_order', 'Xodimlar hisobidan buyurtma berilmaydi (Faqat mijoz)')
                   : submitting
-                  ? 'Yuborilmoqda...'
-                  : 'Buyurtmani Yuborish va Hisoblash'}
+                  ? t('common.submitting', 'Yuborilmoqda...')
+                  : t('custom_order.send_request', 'Buyurtma So‘rovini Yuborish')}
                 <ArrowRight size={20} />
               </button>
             </div>

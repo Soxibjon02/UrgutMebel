@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { ProductCard } from '../components/ProductCard';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
@@ -15,6 +16,7 @@ import {
 
 export const FurnitureCatalog = () => {
   const { settings } = useSettings();
+  const { t, language, getLocalized } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -195,7 +197,7 @@ export const FurnitureCatalog = () => {
                   marginBottom: '0.75rem'
                 }}
               >
-                Sale Off
+                {t('hero.sale_off', 'Sale Off')}
               </span>
               <h1
                 style={{
@@ -206,10 +208,10 @@ export const FurnitureCatalog = () => {
                   margin: '0 0 1rem'
                 }}
               >
-                Sofas and<br />Armchairs
+                {t('hero.sofas_title', 'Sofas and Armchairs')}
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', marginBottom: '2rem' }}>
-                Eng sara zamonaviy yumshoq mebellar to‘plami. Qulaylik va xonadon go‘zalligi bir joyda.
+                {t('hero.sofas_desc', 'Eng sara zamonaviy yumshoq mebellar to‘plami. Qulaylik va xonadon go‘zalligi bir joyda.')}
               </p>
               <button
                 type="button"
@@ -219,7 +221,7 @@ export const FurnitureCatalog = () => {
                 }}
                 className="btn-figma-coral"
               >
-                CHECK ALL ITEMS &gt;
+                {t('hero.check_all_items', 'CHECK ALL ITEMS >')}
               </button>
             </div>
           </div>
@@ -246,7 +248,11 @@ export const FurnitureCatalog = () => {
             }}
           >
             <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Jami <strong>{filteredProducts.length}</strong> ta mebel topildi
+              {language === 'ru'
+                ? <>Найдено всего <strong>{filteredProducts.length}</strong> товаров</>
+                : language === 'en'
+                ? <>Total <strong>{filteredProducts.length}</strong> items found</>
+                : <>Jami <strong>{filteredProducts.length}</strong> ta mebel topildi</>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -264,10 +270,10 @@ export const FurnitureCatalog = () => {
                   cursor: 'pointer'
                 }}
               >
-                <option value="newest">Yangi qo‘shilganlar</option>
-                <option value="price_asc">Narx: Arzondan qimmatga</option>
-                <option value="price_desc">Narx: Qimmatdan arzonga</option>
-                <option value="name_asc">Nomi bo‘yicha (A-Z)</option>
+                <option value="newest">{t('catalog.sort_default', 'Yangi qo‘shilganlar')}</option>
+                <option value="price_asc">{t('catalog.sort_price_asc', 'Narx: Arzondan qimmatga')}</option>
+                <option value="price_desc">{t('catalog.sort_price_desc', 'Narx: Qimmatdan arzonga')}</option>
+                <option value="name_asc">{t('catalog.sort_name_asc', 'Nomi bo‘yicha (A-Z)')}</option>
               </select>
 
               <button
@@ -276,7 +282,7 @@ export const FurnitureCatalog = () => {
                 className="btn-figma-dark catalog-mobile-filter-btn"
                 style={{ padding: '0.6rem 1rem', fontSize: '0.78rem' }}
               >
-                <Filter size={16} /> Filtrlar
+                <Filter size={16} /> {t('catalog.filter_by_category', 'Filtrlar')}
               </button>
             </div>
           </div>
@@ -296,7 +302,7 @@ export const FurnitureCatalog = () => {
               {/* Categories */}
               <div style={{ marginBottom: '2.5rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-                  Kategoriyalar
+                  {t('categories.all_categories', 'Kategoriyalar')}
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <button
@@ -313,7 +319,7 @@ export const FurnitureCatalog = () => {
                       padding: 0
                     }}
                   >
-                    Barcha Mebellar
+                    {t('catalog.all', 'Barcha Mebellar')}
                   </button>
                   {categories.map((cat) => (
                     <button
@@ -331,7 +337,7 @@ export const FurnitureCatalog = () => {
                         padding: 0
                       }}
                     >
-                      {cat.name}
+                      {getLocalized(cat, 'name') || cat.name}
                     </button>
                   ))}
                 </div>
@@ -340,7 +346,7 @@ export const FurnitureCatalog = () => {
               {/* Color Swatches */}
               <div style={{ marginBottom: '2.5rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-                  Ranglar
+                  {t('catalog.filter_by_color', 'Ranglar')}
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
                   <button
@@ -357,7 +363,7 @@ export const FurnitureCatalog = () => {
                       cursor: 'pointer'
                     }}
                   >
-                    Barchasi
+                    {t('catalog.all', 'Barchasi')}
                   </button>
                   {figmaColorSwatches.map((sw, idx) => (
                     <button
@@ -382,7 +388,7 @@ export const FurnitureCatalog = () => {
               {/* Price Filter Slider */}
               <div style={{ marginBottom: '2.5rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
-                  Narx Bo‘yicha Filtrlash
+                  {t('catalog.filter_by_price', 'Narx Bo‘yicha Filtrlash')}
                 </h4>
                 <input
                   type="range"
@@ -394,9 +400,9 @@ export const FurnitureCatalog = () => {
                   style={{ width: '100%', accentColor: 'var(--figma-coral)', cursor: 'pointer' }}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                  <span>0 so‘m</span>
+                  <span>0 {t('catalog.price_currency', 'so‘m')}</span>
                   <span style={{ fontWeight: 700, color: 'var(--figma-coral)' }}>
-                    {maxPrice.toLocaleString()} so‘m
+                    {maxPrice.toLocaleString()} {t('catalog.price_currency', 'so‘m')}
                   </span>
                 </div>
               </div>
@@ -417,7 +423,7 @@ export const FurnitureCatalog = () => {
                   padding: 0
                 }}
               >
-                <RotateCcw size={15} /> Filtrlarni tozalash
+                <RotateCcw size={15} /> {t('catalog.reset_filters', 'Filtrlarni tozalash')}
               </button>
             </aside>
 
@@ -425,7 +431,7 @@ export const FurnitureCatalog = () => {
             <main>
               {loading ? (
                 <div style={{ padding: '5rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  Mebellar yuklanmoqda...
+                  {language === 'ru' ? 'Загрузка мебели...' : language === 'en' ? 'Loading furniture...' : 'Mebellar yuklanmoqda...'}
                 </div>
               ) : displayedProducts.length === 0 ? (
                 <div
@@ -438,13 +444,13 @@ export const FurnitureCatalog = () => {
                   }}
                 >
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                    Mos mebel topilmadi
+                    {t('catalog.no_products_found', 'Mos mebel topilmadi')}
                   </h3>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                    Filtrlarni o‘zgartirib ko‘ring yoki tozalang.
+                    {t('catalog.no_products_desc', 'Filtrlarni o‘zgartirib ko‘ring yoki tozalang.')}
                   </p>
                   <button type="button" onClick={resetFilters} className="btn-figma-coral">
-                    Filtrlarni Tozalash
+                    {t('catalog.reset_filters', 'Filtrlarni Tozalash')}
                   </button>
                 </div>
               ) : (
@@ -469,7 +475,7 @@ export const FurnitureCatalog = () => {
                         onClick={() => setVisibleCount((prev) => prev + 12)}
                         className="btn-figma-coral"
                       >
-                        LOAD MORE PRODUCTS
+                        {language === 'ru' ? 'ЗАГРУЗИТЬ ЕЩЁ' : language === 'en' ? 'LOAD MORE PRODUCTS' : 'KO‘PROQ MAHSULOTLARNI YUKLASH'}
                       </button>
                     </div>
                   )}
@@ -483,7 +489,7 @@ export const FurnitureCatalog = () => {
       {/* ==============================================================
           3. SIGNATURE AUTUMN COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Autumn Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
 
       {/* Responsive layout styles */}
       <style>{`

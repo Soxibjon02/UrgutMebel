@@ -3,22 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, Truck, ShieldAlert } from 'lucide-react';
 
 export const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart, totalAmount } = useCart();
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const handleCheckoutClick = () => {
     if (isGuest || !user) {
-      openAuthModal('login', 'Buyurtmani rasmiylashtirish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
+      openAuthModal('login', language === 'ru' ? 'Оформление заказа доступно клиентам! Войдите или зарегистрируйтесь.' : language === 'en' ? 'Checkout is available for clients! Log in or sign up.' : 'Buyurtmani rasmiylashtirish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
       return;
     }
     if (user.role !== 'customer') {
-      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
-      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
+      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? (language === 'ru' ? 'Менеджер' : language === 'en' ? 'Manager' : 'Menedjer') : (language === 'ru' ? 'Мастер' : language === 'en' ? 'Craftsman' : 'Usta');
+      addToast(language === 'ru' ? `Заказ разрешен только клиентам! С аккаунта сотрудника (${roleTitle}) заказ запрещен.` : language === 'en' ? `Orders are only permitted for customers! Employee (${roleTitle}) checkout is forbidden.` : `Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
       return;
     }
     navigate('/checkout');
@@ -44,13 +46,13 @@ export const CartPage = () => {
             <ShoppingBag size={40} />
           </div>
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-            Savatingiz Bo‘sh
+            {t('cart.empty_title', 'Savatingiz Bo‘sh')}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '2rem' }}>
-            Siz hali hech qanday mebel tanlamadingiz. Bizning katalogimizda xonadoningiz uchun mos mahsulotlarni kashf eting!
+            {t('cart.empty_desc', 'Siz hali hech qanday mebel tanlamadingiz. Bizning katalogimizda xonadoningiz uchun mos mahsulotlarni kashf eting!')}
           </p>
           <Link to="/furniture" className="btn btn-primary btn-lg">
-            Mebellarni Ko‘rish <ArrowRight size={18} />
+            {t('cart.go_shopping', 'Mebellarni Ko‘rish')} <ArrowRight size={18} />
           </Link>
         </div>
       </div>
@@ -60,16 +62,15 @@ export const CartPage = () => {
   return (
     <div style={{ padding: '3.5rem 0 6rem' }}>
       <div className="container">
-        
         {/* Title */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800 }}>Xarid Savati</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 800 }}>{t('cart.title', 'Xarid Savati')}</h1>
           <button
             type="button"
             onClick={clearCart}
             style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 600 }}
           >
-            Savatni tozalash
+            {t('cart.clear_cart', 'Savatni tozalash')}
           </button>
         </div>
 
@@ -105,7 +106,6 @@ export const CartPage = () => {
                     flexShrink: 0
                   }}
                 />
-
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem' }}>
                     <Link to={`/furniture/${item.product_id}`} style={{ color: 'inherit' }}>
@@ -114,11 +114,11 @@ export const CartPage = () => {
                   </h3>
 
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    Rang: <strong>{item.selected_color}</strong>
+                    {language === 'ru' ? 'Цвет' : language === 'en' ? 'Color' : 'Rang'}: <strong>{item.selected_color}</strong>
                   </div>
 
                   <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--wood-amber)' }}>
-                    {Number(item.price).toLocaleString()} so‘m
+                    {Number(item.price).toLocaleString()} {t('catalog.price_currency', 'so‘m')}
                   </div>
                 </div>
 
@@ -178,21 +178,21 @@ export const CartPage = () => {
             className="glass-card"
           >
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
-              Buyurtma Xulosasi
+              {t('cart.order_summary', 'Buyurtma Xulosasi')}
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.5rem', fontSize: '0.92rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Mahsulotlar summasi:</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{Number(totalAmount).toLocaleString()} so‘m</span>
+                <span>{t('cart.subtotal', 'Mahsulotlar summasi:')}</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{Number(totalAmount).toLocaleString()} {t('catalog.price_currency', 'so‘m')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Yetkazib berish:</span>
-                <span style={{ fontWeight: 600, color: 'var(--status-success)' }}>Bepul (Aksiya)</span>
+                <span>{t('cart.delivery_fee', 'Yetkazib berish:')}</span>
+                <span style={{ fontWeight: 600, color: 'var(--status-success)' }}>{t('cart.free_delivery', 'Bepul (Aksiya)')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>O‘rnatish xizmati:</span>
-                <span style={{ fontWeight: 600, color: 'var(--status-success)' }}>Bepul</span>
+                <span>{language === 'ru' ? 'Установка:' : language === 'en' ? 'Assembly:' : 'O‘rnatish xizmati:'}</span>
+                <span style={{ fontWeight: 600, color: 'var(--status-success)' }}>{language === 'ru' ? 'Бесплатно' : language === 'en' ? 'Free' : 'Bepul'}</span>
               </div>
             </div>
 
@@ -206,9 +206,9 @@ export const CartPage = () => {
                 alignItems: 'baseline'
               }}
             >
-              <span style={{ fontSize: '1.05rem', fontWeight: 700 }}>Jami to‘lov:</span>
+              <span style={{ fontSize: '1.05rem', fontWeight: 700 }}>{t('cart.total_amount', 'Jami to‘lov:')}</span>
               <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--wood-amber)' }}>
-                {Number(totalAmount).toLocaleString()} so‘m
+                {Number(totalAmount).toLocaleString()} {t('catalog.price_currency', 'so‘m')}
               </span>
             </div>
 
@@ -230,8 +230,11 @@ export const CartPage = () => {
               >
                 <ShieldAlert size={18} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
                 <span>
-                  Siz <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz.
-                  Chalkashliklarning oldini olish uchun faqatgina <strong>oddiy mijozlar</strong> buyurtma bera oladi.
+                  {language === 'ru'
+                    ? `Вы в аккаунте ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Менеджера' : 'Мастера'}. Заказ разрешен только клиентам.`
+                    : language === 'en'
+                    ? `You are logged in as ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Manager' : 'Craftsman'}. Checkout is restricted to regular customers.`
+                    : `Siz ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'} hisobidasiz. Chalkashliklarning oldini olish uchun faqatgina oddiy mijozlar buyurtma bera oladi.`}
                 </span>
               </div>
             )}
@@ -249,7 +252,7 @@ export const CartPage = () => {
                 cursor: (user && user.role !== 'customer') ? 'not-allowed' : 'pointer'
               }}
             >
-              <span>{user && user.role !== 'customer' ? 'Xodim hisobidan xarid taqiqlangan' : 'Rasmiylashtirish'}</span>
+              <span>{user && user.role !== 'customer' ? (language === 'ru' ? 'Покупка для сотрудников запрещена' : language === 'en' ? 'Employee checkout restricted' : 'Xodim hisobidan xarid taqiqlangan') : t('cart.checkout_btn', 'Rasmiylashtirish')}</span>
               <ArrowRight size={18} />
             </button>
 

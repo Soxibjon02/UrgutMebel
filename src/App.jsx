@@ -9,6 +9,8 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { PwaProvider } from './context/PwaContext';
 
+import { LanguageProvider } from './context/LanguageContext';
+
 // Components
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -46,7 +48,8 @@ function App() {
           <CartProvider>
             <WishlistProvider>
               <PwaProvider>
-                <Router>
+                <LanguageProvider>
+                  <Router>
                   <ScrollToTop />
                   <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                     <Navbar />
@@ -96,7 +99,8 @@ function App() {
                     <InstallPromptModal />
                   </div>
                 </Router>
-              </PwaProvider>
+              </LanguageProvider>
+            </PwaProvider>
             </WishlistProvider>
           </CartProvider>
         </SettingsProvider>

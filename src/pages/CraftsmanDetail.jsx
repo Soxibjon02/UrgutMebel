@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { useLanguage } from '../context/LanguageContext';
 import { CraftsmanRequestModal } from '../components/CraftsmanRequestModal';
 import {
   Star,
@@ -16,6 +17,7 @@ import {
 
 export const CraftsmanDetail = () => {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [craftsman, setCraftsman] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,9 +45,9 @@ export const CraftsmanDetail = () => {
   if (!craftsman) {
     return (
       <div className="container" style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
-        <h2>Usta topilmadi</h2>
+        <h2>{t('common.not_found', 'Usta topilmadi')}</h2>
         <Link to="/craftsmen" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-          Ustalar katalogiga qaytish
+          {t('craftsmen.title', 'Ustalar katalogiga qaytish')}
         </Link>
       </div>
     );
@@ -60,7 +62,7 @@ export const CraftsmanDetail = () => {
           to="/craftsmen"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}
         >
-          <ArrowLeft size={16} /> Barcha ustalarga qaytish
+          <ArrowLeft size={16} /> {t('craftsmen.title', 'Barcha ustalarga qaytish')}
         </Link>
 
         {/* Profile Header Card */}
@@ -97,20 +99,20 @@ export const CraftsmanDetail = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#d97706', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
               <Star size={18} fill="#d97706" />
               <strong style={{ fontSize: '1.1rem' }}>{craftsman.rating || 5.0}</strong>
-              <span style={{ color: 'var(--text-light)', fontSize: '0.85rem' }}>({craftsman.reviews_count || 32} ta mijoz bahosi)</span>
+              <span style={{ color: 'var(--text-light)', fontSize: '0.85rem' }}>({craftsman.reviews_count || 32} {t('catalog.reviews_count', 'ta baho')})</span>
 
               {/* Live Availability Status */}
               {craftsman.schedule?.status === 'busy' ? (
                 <span style={{ marginLeft: 'auto', backgroundColor: '#fee2e2', color: '#dc2626', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fca5a5' }}>
-                  🔴 Ayni paytda band
+                  🔴 {t('common.status_busy', 'Band')}
                 </span>
               ) : craftsman.schedule?.status === 'partial' ? (
                 <span style={{ marginLeft: 'auto', backgroundColor: '#fef3c7', color: '#d97706', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde68a' }}>
-                  🟡 Qisman band
+                  🟡 {t('common.status_partial', 'Qisman band')}
                 </span>
               ) : (
                 <span style={{ marginLeft: 'auto', backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #86efac' }}>
-                  🟢 Bo‘sh (Buyurtmalarni qabul qilmoqda)
+                  🟢 {t('common.status_available', 'Bo‘sh')}
                 </span>
               )}
             </div>
@@ -122,7 +124,7 @@ export const CraftsmanDetail = () => {
             <div style={{ display: 'flex', gap: '1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Award size={16} color="var(--wood-amber)" />
-                {craftsman.experience_years} yillik duradgorlik tajribasi
+                {craftsman.experience_years} {t('craftsmen.experience', 'yillik tajriba')}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <MapPin size={16} color="var(--wood-amber)" />
@@ -156,7 +158,7 @@ export const CraftsmanDetail = () => {
               className="btn btn-primary"
               style={{ width: '100%', padding: '0.85rem' }}
             >
-              <span>Ustani Yollash / Buyurtma</span>
+              <span>{t('craftsmen.order_now', 'Ustani Yollash / Buyurtma')}</span>
             </button>
 
             {craftsman.phone && (

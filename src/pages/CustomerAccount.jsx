@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useNotification } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 import { dataService } from '../services/dataService';
 import { ProductCard } from '../components/ProductCard';
 import { AppInstallCard } from '../components/AppInstallCard';
@@ -43,6 +44,7 @@ export const CustomerAccount = () => {
   const { user, isGuest, openAuthModal, logout, updateProfile } = useAuth();
   const { favorites } = useWishlist();
   const { addToast } = useNotification();
+  const { t, getLocalized, language } = useLanguage();
 
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(
@@ -314,7 +316,7 @@ export const CustomerAccount = () => {
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
           >
             <User size={18} />
-            <span>Mening Hisobim</span>
+            <span>{t('account.title', 'Mening Hisobim')}</span>
           </button>
 
           <button
@@ -324,7 +326,7 @@ export const CustomerAccount = () => {
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
           >
             <ShoppingBag size={18} />
-            <span>Buyurtmalarim</span>
+            <span>{t('nav.my_orders', 'Buyurtmalarim')}</span>
             <span
               style={{
                 fontSize: '0.75rem',
@@ -345,7 +347,7 @@ export const CustomerAccount = () => {
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
           >
             <Heart size={18} />
-            <span>Sevimlilar</span>
+            <span>{t('nav.wishlist', 'Sevimlilar')}</span>
             <span
               style={{
                 fontSize: '0.75rem',
@@ -421,7 +423,7 @@ export const CustomerAccount = () => {
                     style={{ padding: '0.75rem 1.4rem' }}
                   >
                     <ShoppingBag size={16} />
-                    <span>Buyurtmalarimga O‘tish</span>
+                    <span>{t('nav.my_orders', 'Buyurtmalarimga O‘tish')}</span>
                   </button>
 
                   <button
@@ -429,10 +431,10 @@ export const CustomerAccount = () => {
                     onClick={() => setShowLogoutConfirm(true)}
                     className="btn btn-secondary"
                     style={{ padding: '0.75rem 1rem', color: '#ef4444' }}
-                    title="Hisobdan chiqish"
+                    title={t('nav.logout', 'Hisobdan chiqish')}
                   >
                     <LogOut size={16} />
-                    <span style={{ fontSize: '0.85rem' }}>Chiqish</span>
+                    <span style={{ fontSize: '0.85rem' }}>{t('nav.logout', 'Chiqish')}</span>
                   </button>
                 </div>
               </div>
@@ -1336,10 +1338,10 @@ export const CustomerAccount = () => {
             </div>
 
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-              Hisobdan chiqishni tasdiqlaysizmi?
+              {t('nav.logout_confirm', 'Hisobdan chiqishni tasdiqlaysizmi?')}
             </h3>
             <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1.75rem' }}>
-              To‘satdan bosilib ketishining oldini olish uchun tasdiqlang. Chiqqaningizdan so‘ng qayta kirish uchun telefon raqamingiz yoki emailingiz zarur bo‘ladi.
+              {t('common.logout_desc', 'To‘satdan bosilib ketishining oldini olish uchun tasdiqlang. Chiqqaningizdan so‘ng qayta kirish uchun telefon raqamingiz yoki emailingiz zarur bo‘ladi.')}
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
@@ -1355,7 +1357,7 @@ export const CustomerAccount = () => {
                   justifyContent: 'center'
                 }}
               >
-                Bekor qilish
+                {t('catalog.reset_filters', 'Bekor qilish')}
               </button>
               <button
                 type="button"
@@ -1380,7 +1382,7 @@ export const CustomerAccount = () => {
                 }}
               >
                 <LogOut size={16} />
-                <span>Ha, chiqish</span>
+                <span>{t('nav.logout', 'Ha, chiqish')}</span>
               </button>
             </div>
           </div>

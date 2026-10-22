@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import { Search, ArrowRight, Calendar, User } from 'lucide-react';
 
 export const BlogPage = () => {
   const { settings } = useSettings();
+  const { t, getLocalized, language } = useLanguage();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +33,11 @@ export const BlogPage = () => {
 
   // Categories list
   const categoriesList = [
-    { id: 'all', name: 'Barcha Maqolalar', count: posts.length },
-    { id: 'Dizayn', name: 'Interyer Dizayni', count: posts.filter(p => p.category === 'Dizayn').length },
-    { id: 'Maslahatlar', name: 'Mebel Tanlash Maslahatlari', count: posts.filter(p => p.category === 'Maslahatlar').length },
-    { id: 'Parvarish', name: 'Yog‘och va Mebel Parvarishi', count: posts.filter(p => p.category === 'Parvarish').length },
-    { id: 'Urgut San‘ati', name: 'Urgut Duradgorlik Maktabi', count: posts.filter(p => p.category === 'Urgut San‘ati').length }
+    { id: 'all', name: t('blog.all_articles', 'Barcha Maqolalar'), count: posts.length },
+    { id: 'Dizayn', name: t('categories.design', 'Interyer Dizayni'), count: posts.filter(p => p.category === 'Dizayn').length },
+    { id: 'Maslahatlar', name: t('categories.tips', 'Mebel Tanlash Maslahatlari'), count: posts.filter(p => p.category === 'Maslahatlar').length },
+    { id: 'Parvarish', name: t('categories.care', 'Yog‘och va Mebel Parvarishi'), count: posts.filter(p => p.category === 'Parvarish').length },
+    { id: 'Urgut San‘ati', name: t('categories.craft', 'Urgut Duradgorlik Maktabi'), count: posts.filter(p => p.category === 'Urgut San‘ati').length }
   ];
 
   const featuredPost = posts[0] || {
@@ -51,12 +53,13 @@ export const BlogPage = () => {
   const filteredPosts = useMemo(() => {
     return posts.filter((p) => {
       const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
-      const matchSearch =
-        p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+      const title = (getLocalized(p, 'title') || p.title || '').toLowerCase();
+      const excerpt = (getLocalized(p, 'excerpt') || p.excerpt || '').toLowerCase();
+      const s = searchQuery.toLowerCase();
+      const matchSearch = title.includes(s) || excerpt.includes(s);
       return matchCat && matchSearch;
     });
-  }, [posts, selectedCategory, searchQuery]);
+  }, [posts, selectedCategory, searchQuery, language]);
 
   const displayedPosts = filteredPosts.slice(0, visibleCount);
 
@@ -100,7 +103,7 @@ export const BlogPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="WHAT ARE YOU LOOKING FOR?"
+                  placeholder={t('hero.search_help', 'Qidiruv...')}
                   style={{
                     width: '100%',
                     padding: '0.95rem 2.8rem 0.95rem 1.25rem',
@@ -149,7 +152,7 @@ export const BlogPage = () => {
                   marginBottom: '0.85rem'
                 }}
               >
-                Featured Post
+                {t('hero.featured_post', 'Tavsiya Etilgan Maqola')}
               </span>
               <h1
                 style={{
@@ -160,7 +163,7 @@ export const BlogPage = () => {
                   margin: '0 0 1.25rem'
                 }}
               >
-                {featuredPost.title}
+                {getLocalized(featuredPost, 'title') || featuredPost.title}
               </h1>
               <p
                 style={{
@@ -171,13 +174,13 @@ export const BlogPage = () => {
                   marginBottom: '2rem'
                 }}
               >
-                {featuredPost.excerpt}
+                {getLocalized(featuredPost, 'excerpt') || featuredPost.excerpt}
               </p>
               <Link
                 to={`/blog/${featuredPost.id || featuredPost.slug}`}
                 className="btn-figma-coral"
               >
-                READ MORE &gt;
+                {t('blog.read_article', 'Batafsil o‘qish')} &gt;
               </Link>
             </div>
           </div>
@@ -209,7 +212,7 @@ export const BlogPage = () => {
                   letterSpacing: '-0.01em'
                 }}
               >
-                Categories
+                {t('catalog.filter_by_category', 'Kategoriyalar')}
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -335,7 +338,7 @@ export const BlogPage = () => {
                                 overflow: 'hidden'
                               }}
                             >
-                              {post.title}
+                              {getLocalized(post, 'title') || post.title}
                             </h3>
                             <div style={{ fontSize: '0.8rem', color: '#9CA3AF' }}>
                               {post.created_at ? new Date(post.created_at).toLocaleDateString() : '12 Oct 2026'}
@@ -354,7 +357,7 @@ export const BlogPage = () => {
                         onClick={() => setVisibleCount((prev) => prev + 6)}
                         className="btn-figma-coral"
                       >
-                        LOAD MORE
+                        {t('catalog.view_details', 'Yana ko‘rish')}
                       </button>
                     </div>
                   )}
@@ -368,7 +371,7 @@ export const BlogPage = () => {
       {/* ==============================================================
           3. SIGNATURE AUTUMN COLLECTION CAROUSEL
           ============================================================== */}
-      <FigmaCollectionCarousel title="Autumn Collection" />
+      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
 
       {/* Responsive layout styles */}
       <style>{`

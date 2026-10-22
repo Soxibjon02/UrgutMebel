@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { dataService } from '../services/dataService';
+import { useLanguage } from '../context/LanguageContext';
 import { CraftsmanCard } from '../components/CraftsmanCard';
 import { CraftsmanRequestModal } from '../components/CraftsmanRequestModal';
 import { Sparkles, Search, Award, MapPin } from 'lucide-react';
 
 export const CraftsmenDirectory = () => {
+  const { t } = useLanguage();
   const [craftsmen, setCraftsmen] = useState([]);
   const [selectedCraftsman, setSelectedCraftsman] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,12 +55,12 @@ export const CraftsmenDirectory = () => {
       <div className="container">
         {/* Page Header */}
         <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 2.5rem' }}>
-          <span className="section-tag"><Sparkles size={14} /> Asriy An'analar</span>
+          <span className="section-tag"><Sparkles size={14} /> {t('craftsmen.title', 'Mohir Ustalar')}</span>
           <h1 style={{ fontSize: 'clamp(1.4rem, 5.5vw, 2.3rem)', fontWeight: 800, marginBottom: '0.85rem', wordBreak: 'break-word', lineHeight: 1.25 }}>
-            Urgut Duradgorlari va Ustaxonalar Katalogi
+            {t('craftsmen.title', 'Urgut Duradgorlari va Ustaxonalar Katalogi')}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.9rem, 2.5vw, 1rem)', lineHeight: 1.6 }}>
-            Urgut qadimdan yog‘och o‘ymakorligi va sifatli mebelchilik markazi bo‘lib kelgan. Bu yerda siz eng sara ustalar portfolio va narxlari bilan tanishib, to‘g‘ridan-to‘g‘ri buyurtma bera olasiz.
+            {t('craftsmen.subtitle', 'Ko‘p yillik tajribaga ega mohir duradgorlar va hunarmandlar bilan to‘g‘ridan-to‘g‘ri bog‘laning')}
           </p>
         </div>
 
@@ -88,7 +90,7 @@ export const CraftsmenDirectory = () => {
             />
             <input
               type="text"
-              placeholder="Usta ismi, sohasi yoki joylashuvi..."
+              placeholder={t('catalog.search_results', 'Usta ismi, sohasi yoki joylashuvi...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="form-input"
@@ -98,14 +100,16 @@ export const CraftsmenDirectory = () => {
 
           {/* Specialization selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', maxWidth: '100%' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Ixtisosligi:</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              {t('craftsmen.specialty', 'Ixtisosligi')}:
+            </span>
             <select
               value={selectedSpec}
               onChange={(e) => setSelectedSpec(e.target.value)}
               className="form-select"
               style={{ width: 'auto', maxWidth: '100%' }}
             >
-              <option value="all">Barcha sohalar</option>
+              <option value="all">{t('catalog.all', 'Barcha sohalar')}</option>
               {allSpecs.map((s, i) => (
                 <option key={i} value={s}>{s}</option>
               ))}
