@@ -23,7 +23,8 @@ import {
   Sun,
   Download,
   Smartphone,
-  AlertTriangle
+  AlertTriangle,
+  LayoutGrid
 } from 'lucide-react';
 
 import { useLanguage } from '../context/LanguageContext';
@@ -299,40 +300,60 @@ export const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links - Fixed Single Line & Responsive */}
-          <nav
+          {/* Desktop Search Bar (Row 1 Center) */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="navbar-center-search"
             style={{
-              display: 'none',
-              alignItems: 'center',
-              gap: '0.75rem',
-              flexWrap: 'nowrap',
-              flexShrink: 1,
-              minWidth: 0
+              flex: 1,
+              maxWidth: '520px',
+              margin: '0 1.25rem'
             }}
-            className="desktop-nav-container"
           >
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={smoothScrollToTop}
-                style={({ isActive }) => ({
-                  fontSize: '0.85rem',
-                  fontWeight: isActive ? 700 : 500,
-                  color: isActive ? 'var(--wood-amber)' : 'var(--text-main)',
-                  position: 'relative',
-                  padding: '0.35rem 0.15rem',
-                  whiteSpace: 'nowrap',
-                  transition: 'color 0.2s ease',
-                  borderBottom: isActive ? '2px solid var(--wood-amber)' : '2px solid transparent'
-                })}
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder={t('nav.search_placeholder', 'Qanday mebel qidiryapsiz? (Masalan: Divan, Yotoqxona...)')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.55rem 2.8rem 0.55rem 1.1rem',
+                  borderRadius: 'var(--radius-full)',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1.5px solid var(--border-subtle)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.86rem',
+                  outline: 'none',
+                  transition: 'all 0.2s ease'
+                }}
+                className="navbar-search-input-field"
+              />
+              <button
+                type="submit"
+                aria-label="Qidirish"
+                style={{
+                  position: 'absolute',
+                  right: '5px',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--figma-coral, var(--wood-amber))',
+                  color: '#ffffff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s ease'
+                }}
               >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
+                <Search size={15} />
+              </button>
+            </div>
+          </form>
 
-          {/* Actions: Language Switcher, Theme Toggle, Search, Wishlist, Cart, User Account */}
+          {/* Actions: Language Switcher, Theme Toggle, Search (Mobile), Wishlist, Cart, User Account */}
           <div className="navbar-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
 
             {/* Language Switcher (UZ / RU / EN) */}
@@ -361,8 +382,8 @@ export const Navbar = () => {
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            {/* Search Toggle */}
-            <div style={{ position: 'relative' }}>
+            {/* Search Toggle (Mobile/Tablet Only) */}
+            <div className="navbar-mobile-search-toggle" style={{ position: 'relative' }}>
               <button
                 type="button"
                 onClick={() => setSearchOpen(!searchOpen)}
@@ -757,6 +778,103 @@ export const Navbar = () => {
         </div>
       </div>
 
+      {/* Row 2: Secondary Desktop Navigation Bar (Ikki qator navbar pastki qismi) */}
+      <div
+        className="navbar-sub-row"
+        style={{
+          borderTop: '1px solid var(--border-subtle)',
+          backgroundColor: 'var(--bg-secondary)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <div
+          className="container navbar-sub-container"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            padding: '0.45rem 1.25rem'
+          }}
+        >
+          {/* Barcha Toifalar Button */}
+          <Link
+            to="/categories"
+            onClick={smoothScrollToTop}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.42rem 0.95rem',
+              borderRadius: '8px',
+              backgroundColor: 'var(--figma-coral, #FA6D58)',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '0.84rem',
+              textDecoration: 'none',
+              flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(250, 109, 88, 0.25)',
+              transition: 'all 0.2s ease'
+            }}
+            className="navbar-categories-pill"
+          >
+            <LayoutGrid size={15} />
+            <span>{t('nav.all_categories', 'Barcha Toifalar')}</span>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              flexWrap: 'nowrap',
+              overflowX: 'auto',
+              flex: 1
+            }}
+            className="navbar-sub-navlinks"
+          >
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                onClick={smoothScrollToTop}
+                style={({ isActive }) => ({
+                  fontSize: '0.86rem',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? 'var(--figma-coral, var(--wood-amber))' : 'var(--text-main)',
+                  position: 'relative',
+                  padding: '0.35rem 0.2rem',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s ease',
+                  borderBottom: isActive ? '2px solid var(--figma-coral, var(--wood-amber))' : '2px solid transparent'
+                })}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Right Trust Info */}
+          <div
+            className="navbar-sub-extra"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.78rem',
+              color: 'var(--text-muted)',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            <Sparkles size={14} color="#f59e0b" />
+            <span>Kafolatlangan Sifat</span>
+          </div>
+        </div>
+      </div>
+
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
         <div
@@ -855,23 +973,53 @@ export const Navbar = () => {
 
       {/* Responsive CSS helper */}
       <style>{`
-        @media (min-width: 1100px) {
-          .desktop-nav-container {
+        .navbar-sub-row {
+          display: block;
+        }
+        .navbar-center-search {
+          display: block;
+        }
+        .navbar-mobile-search-toggle {
+          display: none !important;
+        }
+        .mobile-hamburger-btn {
+          display: none !important;
+        }
+        .navbar-search-input-field:focus {
+          border-color: var(--figma-coral, #FA6D58) !important;
+          box-shadow: 0 0 0 3px rgba(250, 109, 88, 0.15) !important;
+        }
+        .navbar-categories-pill:hover {
+          filter: brightness(1.08);
+          transform: translateY(-1px);
+        }
+        .navbar-sub-navlinks a:hover {
+          color: var(--figma-coral, #FA6D58) !important;
+        }
+
+        @media (max-width: 991px) {
+          .navbar-sub-row {
+            display: none !important;
+          }
+          .navbar-center-search {
+            display: none !important;
+          }
+          .navbar-mobile-search-toggle {
             display: flex !important;
           }
-        }
-        @media (max-width: 1099px) {
           .mobile-hamburger-btn {
             display: flex !important;
           }
         }
-        @media (min-width: 1100px) and (max-width: 1280px) {
-          .desktop-nav-container {
-            gap: 0.55rem !important;
+        @media (min-width: 992px) and (max-width: 1200px) {
+          .navbar-sub-navlinks {
+            gap: 0.85rem !important;
           }
-          .desktop-nav-container a {
+          .navbar-sub-navlinks a {
             font-size: 0.82rem !important;
-            padding: 0.3rem 0.15rem !important;
+          }
+          .navbar-center-search {
+            max-width: 360px !important;
           }
         }
         @media (max-width: 768px) {
