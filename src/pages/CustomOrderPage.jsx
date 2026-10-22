@@ -263,7 +263,7 @@ export const CustomOrderPage = () => {
           <h1 style={{ fontSize: '2.6rem', fontWeight: 800, marginBottom: '0.85rem' }}>
             {t('custom_order.title', 'Maxsus O‘lchamdagi Mebel Buyurtmasi')}
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '105rem', maxWidth: '650px', margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6 }}>
             {t('custom_order.subtitle', 'Xonadoningiz o‘lchami va o‘z didingizga mos mebel loyihasini yarating. Urgut ustalari buni amalga oshiradi!')}
           </p>
         </div>
