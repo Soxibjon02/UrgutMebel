@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { useSettings } from '../context/SettingsContext';
 import { ProductCard } from '../components/ProductCard';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
+import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import {
   Search,
   Filter,
@@ -12,6 +14,7 @@ import {
 } from 'lucide-react';
 
 export const FurnitureCatalog = () => {
+  const { settings } = useSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -135,7 +138,7 @@ export const FurnitureCatalog = () => {
             }}
             className="figma-split-hero"
           >
-            {/* Left: Soft Pastel Blue with Furniture Image */}
+            {/* Left: Soft Pastel Blue with Slideshow */}
             <div
               style={{
                 backgroundColor: 'var(--figma-pastel-blue)',
@@ -143,18 +146,20 @@ export const FurnitureCatalog = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '2.5rem',
-                minHeight: '340px'
+                minHeight: '340px',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80"
+              <HeaderAfishaSlideshow
+                images={settings.sofas_hero_slides && settings.sofas_hero_slides.length > 0 ? settings.sofas_hero_slides : [
+                  "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80",
+                  "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1000&q=80",
+                  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80"
+                ]}
                 alt="Sofas and Armchairs"
-                style={{
-                  maxWidth: '85%',
-                  maxHeight: '320px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 15px 35px rgba(0,0,0,0.12))'
-                }}
+                interval={3500}
+                objectFit="contain"
               />
             </div>
 

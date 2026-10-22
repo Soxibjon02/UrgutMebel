@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
 
 const DEFAULT_SLIDES = [
   {
@@ -29,30 +30,37 @@ const DEFAULT_SLIDES = [
   }
 ];
 
-export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides = DEFAULT_SLIDES }) => {
+export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: propSlides }) => {
+  const { settings } = useSettings();
+  const effectiveSlides = (propSlides && propSlides.length > 0)
+    ? propSlides
+    : (settings.collection_carousel_slides && settings.collection_carousel_slides.length > 0)
+      ? settings.collection_carousel_slides
+      : DEFAULT_SLIDES;
+
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? effectiveSlides.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === effectiveSlides.length - 1 ? 0 : prev + 1));
   };
 
-  // Automatic slideshow interval (almashib turishi lozim)
+  // Continuous automatic slideshow interval (3.5 soniyada uzluksiz almashadi)
   useEffect(() => {
-    if (isPaused) return;
+    if (effectiveSlides.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [isPaused, slides.length]);
+      setCurrentIndex((prev) => (prev === effectiveSlides.length - 1 ? 0 : prev + 1));
+    }, 3500);
 
-  const activeSlide = slides[currentIndex];
-  const prevSlideItem = slides[(currentIndex - 1 + slides.length) % slides.length];
-  const nextSlideItem = slides[(currentIndex + 1) % slides.length];
+    return () => clearInterval(interval);
+  }, [effectiveSlides.length]);
+
+  const activeSlide = effectiveSlides[currentIndex] || effectiveSlides[0];
+  const prevSlideItem = effectiveSlides[(currentIndex - 1 + effectiveSlides.length) % effectiveSlides.length] || activeSlide;
+  const nextSlideItem = effectiveSlides[(currentIndex + 1) % effectiveSlides.length] || activeSlide;
 
   return (
     <section
@@ -62,8 +70,6 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides = 
         backgroundColor: 'var(--bg-secondary)',
         transition: 'background-color 0.25s ease'
       }}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1.5rem' }}>
         {/* Title */}

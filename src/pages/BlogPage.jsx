@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { useSettings } from '../context/SettingsContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
+import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import { Search, ArrowRight, Calendar, User } from 'lucide-react';
 
 export const BlogPage = () => {
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,29 +80,29 @@ export const BlogPage = () => {
             }}
             className="figma-split-hero"
           >
-            {/* Left: Soft Grey Image Box with Bottom Search Bar */}
+            {/* Left: Slideshow Box with Bottom Search Bar */}
             <div
               style={{
                 position: 'relative',
                 backgroundColor: 'var(--bg-secondary)',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
                 minHeight: '340px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-end',
-                padding: '2rem 2.5rem'
+                padding: '2rem 2.5rem',
+                overflow: 'hidden'
               }}
             >
-              {/* Overlay for contrast */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%)',
-                  zIndex: 1
-                }}
+              <HeaderAfishaSlideshow
+                mode="background"
+                images={settings.blog_hero_slides && settings.blog_hero_slides.length > 0 ? settings.blog_hero_slides : [
+                  "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80",
+                  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80",
+                  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80"
+                ]}
+                alt="Blog Afishasi"
+                interval={3500}
+                overlay="linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%)"
               />
 
               {/* Exact Figma Search Input embedded inside left image */}

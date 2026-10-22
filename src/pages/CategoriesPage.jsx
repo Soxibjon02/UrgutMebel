@@ -4,6 +4,7 @@ import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
+import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import {
   ArrowRight,
   Sparkles,
@@ -92,7 +93,7 @@ export const CategoriesPage = () => {
             }}
             className="figma-split-hero"
           >
-            {/* Left Column: Soft Pastel Blue with Furniture Image */}
+            {/* Left Column: Soft Pastel Blue with Slideshow */}
             <div
               style={{
                 backgroundColor: 'var(--figma-pastel-blue)',
@@ -101,18 +102,19 @@ export const CategoriesPage = () => {
                 justifyContent: 'center',
                 position: 'relative',
                 padding: '2.5rem',
-                minHeight: '340px'
+                minHeight: '340px',
+                overflow: 'hidden'
               }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=1000&q=80"
-                alt="Chairs and Stools"
-                style={{
-                  maxWidth: '85%',
-                  maxHeight: '360px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.12))'
-                }}
+              <HeaderAfishaSlideshow
+                images={settings.chairs_hero_slides && settings.chairs_hero_slides.length > 0 ? settings.chairs_hero_slides : [
+                  "https://images.unsplash.com/photo-1580481077195-c9233634e70e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=800&q=80"
+                ]}
+                alt="Chairs & Stools"
+                interval={3500}
+                objectFit="contain"
               />
             </div>
 

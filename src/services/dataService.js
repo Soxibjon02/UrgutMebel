@@ -91,7 +91,12 @@ const sanitizeSettingsPayload = (settingsObj = {}) => {
     hero_title: settingsObj.hero_title,
     hero_subtitle: settingsObj.hero_subtitle,
     hero_btn_text: settingsObj.hero_btn_text,
-    hero_btn_link: settingsObj.hero_btn_link
+    hero_btn_link: settingsObj.hero_btn_link,
+    chairs_hero_slides: settingsObj.chairs_hero_slides,
+    sofas_hero_slides: settingsObj.sofas_hero_slides,
+    blog_hero_slides: settingsObj.blog_hero_slides,
+    faq_hero_slides: settingsObj.faq_hero_slides,
+    collection_carousel_slides: settingsObj.collection_carousel_slides
   };
   payload.footer_about = JSON.stringify(aboutBundle);
 

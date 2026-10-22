@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { useSettings } from '../context/SettingsContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
+import { HeaderAfishaSlideshow } from '../components/HeaderAfishaSlideshow';
 import { Search, Plus, Minus, LifeBuoy, MessageSquare } from 'lucide-react';
 
 export const FaqPage = () => {
+  const { settings } = useSettings();
   const [faqItems, setFaqItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [openIds, setOpenIds] = useState(new Set(['faq-1']));
@@ -63,7 +66,7 @@ export const FaqPage = () => {
             }}
             className="figma-split-hero"
           >
-            {/* Left: Soft Pastel Blue Card */}
+            {/* Left: Soft Pastel Blue Card with Slideshow */}
             <div
               style={{
                 backgroundColor: 'var(--figma-pastel-blue)',
@@ -71,18 +74,20 @@ export const FaqPage = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '2.5rem',
-                minHeight: '320px'
+                minHeight: '320px',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=700&q=80"
+              <HeaderAfishaSlideshow
+                images={settings.faq_hero_slides && settings.faq_hero_slides.length > 0 ? settings.faq_hero_slides : [
+                  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=800&q=80"
+                ]}
                 alt="Help Center"
-                style={{
-                  maxWidth: '80%',
-                  maxHeight: '300px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.08))'
-                }}
+                interval={3500}
+                objectFit="contain"
               />
             </div>
 

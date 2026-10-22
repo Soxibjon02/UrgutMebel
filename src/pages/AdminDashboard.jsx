@@ -10,7 +10,8 @@ import {
   initialOrders,
   initialCustomOrders,
   initialComments,
-  initialBanners
+  initialBanners,
+  initialSettings
 } from '../data/mockData';
 import {
   Shield,
@@ -129,8 +130,23 @@ export const AdminDashboard = () => {
     about_val2_title: settings.about_val2_title || 'Rasmiy Kafolat',
     about_val2_desc: settings.about_val2_desc || 'Har bir ishlab chiqarilgan mebel uchun 3 yildan 5 yilgacha rasmiy kafolat va servis xizmati beriladi.',
     about_val3_title: settings.about_val3_title || '200+ Mohir Usta',
-    about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.'
+    about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.',
+
+    // Header Afishalari va Slayder Rasmlari
+    chairs_hero_slides: settings.chairs_hero_slides || initialSettings.chairs_hero_slides || [],
+    sofas_hero_slides: settings.sofas_hero_slides || initialSettings.sofas_hero_slides || [],
+    blog_hero_slides: settings.blog_hero_slides || initialSettings.blog_hero_slides || [],
+    faq_hero_slides: settings.faq_hero_slides || initialSettings.faq_hero_slides || [],
+    collection_carousel_slides: settings.collection_carousel_slides || [
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80'
+    ]
   });
+
+  const [selectedAfishaKey, setSelectedAfishaKey] = useState('chairs_hero_slides');
+  const [newSlideUrl, setNewSlideUrl] = useState('');
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [supabaseHealth, setSupabaseHealth] = useState(null);
@@ -267,7 +283,18 @@ export const AdminDashboard = () => {
       about_val2_title: settings.about_val2_title || 'Rasmiy Kafolat',
       about_val2_desc: settings.about_val2_desc || 'Har bir ishlab chiqarilgan mebel uchun 3 yildan 5 yilgacha rasmiy kafolat va servis xizmati beriladi.',
       about_val3_title: settings.about_val3_title || '200+ Mohir Usta',
-      about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.'
+      about_val3_desc: settings.about_val3_desc || 'Platformamiz orqali Urgutning eng sara mebel ustalari bilan bevosita bog‘lanib, buyurtma berishingiz mumkin.',
+
+      chairs_hero_slides: settings.chairs_hero_slides || initialSettings.chairs_hero_slides || [],
+      sofas_hero_slides: settings.sofas_hero_slides || initialSettings.sofas_hero_slides || [],
+      blog_hero_slides: settings.blog_hero_slides || initialSettings.blog_hero_slides || [],
+      faq_hero_slides: settings.faq_hero_slides || initialSettings.faq_hero_slides || [],
+      collection_carousel_slides: settings.collection_carousel_slides || [
+        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80'
+      ]
     });
   }, [settings]);
 
@@ -555,6 +582,93 @@ export const AdminDashboard = () => {
     }
   };
 
+  // AFISHA SLIDE SHOW CONFIGURATIONS & HANDLERS
+  const AFISHA_SLIDE_CONFIGS = [
+    {
+      key: 'chairs_hero_slides',
+      title: 'Chairs & Stools Afishasi',
+      page: 'Bosh sahifa & Mahsulot toifalari',
+      badge: 'NEW COLLECTION',
+      heading: 'Chairs & Stools',
+      desc: 'Oq hashamatli stul va kreslo afishasining avtomatik almashib turuvchi slayd suratlari.',
+      accent: '#ff6b4a'
+    },
+    {
+      key: 'sofas_hero_slides',
+      title: 'Sofas and Armchairs (-35%) Afishasi',
+      page: 'Mebellar katalogi sahifasi',
+      badge: '-35% SALE OFF',
+      heading: 'Sofas and Armchairs',
+      desc: 'Yashil baxmal divan va yumshoq mebellar aksiyasi afishasining slayd suratlari.',
+      accent: '#ef4444'
+    },
+    {
+      key: 'blog_hero_slides',
+      title: 'Kichik xonadonlarda mebeldan unumli foydalanish (Blog)',
+      page: 'Blog & Interyer maslahatlari sahifasi',
+      badge: 'FEATURED POST',
+      heading: 'Kichik xonadonlarda mebeldan unumli foydalanishning 7 siri',
+      desc: 'Blog maqolasi muqovasi va interyer foni bo‘lib almashib turuvchi slayd suratlari.',
+      accent: '#3b82f6'
+    },
+    {
+      key: 'faq_hero_slides',
+      title: 'How can We help You (Yordam Markazi)',
+      page: 'FAQ & Savol-javoblar sahifasi',
+      badge: 'HELP CENTER',
+      heading: 'How can We help You',
+      desc: 'Yordam markazi sarlavhasining avtomatik almashib turuvchi slayd suratlari.',
+      accent: '#10b981'
+    },
+    {
+      key: 'collection_carousel_slides',
+      title: 'Autumn Collection Bosh Sahifa Slayderi',
+      page: 'Bosh sahifa asosiy karuseli',
+      badge: 'AUTUMN COLLECTION',
+      heading: 'Zamonaviy Mebellar Kolleksiyasi',
+      desc: 'Bosh sahifadagi 4-slaydli Figma karuselining avtomatik almashib turuvchi kartalari.',
+      accent: '#f59e0b'
+    }
+  ];
+
+  const handleAddSlideImage = (key, customUrl = null) => {
+    const urlToAdd = (customUrl || newSlideUrl).trim();
+    if (!urlToAdd) {
+      addToast('Iltimos, rasm havolasini kiriting yoki fayl tanlang!', 'error');
+      return;
+    }
+    const currentList = settingsForm[key] || [];
+    const updated = [...currentList, urlToAdd];
+    setSettingsForm(prev => ({ ...prev, [key]: updated }));
+    setNewSlideUrl('');
+    addToast('Yangi slayd rasm qo‘shildi! "Saqlash va Saytda Yangilash" tugmasini bosing.', 'info');
+  };
+
+  const handleRemoveSlideImage = (key, index) => {
+    const currentList = settingsForm[key] || [];
+    if (currentList.length <= 1) {
+      if (!window.confirm("Ushbu afishada oxirgi slayd rasm qolmoqda. Uni ham o‘chirmoqchimisiz?")) {
+        return;
+      }
+    }
+    const updated = currentList.filter((_, idx) => idx !== index);
+    setSettingsForm(prev => ({ ...prev, [key]: updated }));
+    addToast('Slayd rasm ro‘yxatdan olib tashlandi.', 'info');
+  };
+
+  const handleQuickSaveSlides = async () => {
+    setIsSavingSettings(true);
+    try {
+      await updateSettings(settingsForm);
+      addToast('Barcha afisha va slayd rasmlari Supabase-ga saqlandi hamda saytda yangilandi!', 'success');
+    } catch (err) {
+      console.error(err);
+      addToast(`Xatolik: ${err.message || 'Saqlashda xatolik yuz berdi'}`, 'error');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   // Total revenue calc
   const totalRevenue = standardOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
 
@@ -564,6 +678,7 @@ export const AdminDashboard = () => {
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
     { id: 'banners', label: `E'lonlar & Bannerlar (${banners.length})`, shortLabel: `E'lonlar (${banners.length})`, icon: ImageIcon },
+    { id: 'slides', label: 'Header Slayd Shou Boshqaruvi', shortLabel: 'Slaydlar', icon: ImageIcon },
     { id: 'custom_orders', label: `Maxsus Buyurtmalar (${customOrders.length})`, shortLabel: `Maxsus (${customOrders.length})`, icon: Sliders },
     { id: 'orders', label: `Do‘kon Buyurtmalari (${standardOrders.length})`, shortLabel: `Do‘kon (${standardOrders.length})`, icon: ShoppingBag },
     { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
@@ -573,6 +688,260 @@ export const AdminDashboard = () => {
     { id: 'about', label: 'Biz Haqimizda Boshqaruvi', shortLabel: 'Biz Haqimizda', icon: Info },
     { id: 'settings', label: 'Tizim & Sayt Nomi', shortLabel: 'Sozlamalar', icon: SettingsIcon }
   ];
+
+  const renderSlideManagementContent = () => {
+    const activeConfig = AFISHA_SLIDE_CONFIGS.find(c => c.key === selectedAfishaKey) || AFISHA_SLIDE_CONFIGS[0];
+    const currentSlides = settingsForm[selectedAfishaKey] || [];
+
+    return (
+      <div style={{ maxWidth: '1000px' }}>
+        <div style={{ marginBottom: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(217, 119, 6, 0.12)', color: 'var(--wood-amber)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+              <ImageIcon size={14} /> SUPER ADMIN • SLAYD SHOU SOZLAMALARI
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+              Header Afishalari va Slayd Rasmlari Boshqaruvi
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '0.4rem', maxWidth: '720px' }}>
+              Saytdagi 4 ta asosiy header afishasi va bosh sahifa karuselining rasmlari har 3.5 soniyada avtomatik ravishda almashib turadi. Quyida kerakli afishani tanlab, yangi slayd rasmlarni qo‘shishingiz yoki keraksizlarini o‘chirishingiz mumkin.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleQuickSaveSlides}
+            disabled={isSavingSettings}
+            className="btn btn-primary"
+            style={{ padding: '0.75rem 1.4rem', fontWeight: 700, gap: '0.5rem', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)' }}
+          >
+            {isSavingSettings ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Supabase-ga Saqlanmoqda...</span>
+              </>
+            ) : (
+              <>
+                <Check size={16} />
+                <span>Slayd O‘zgarishlarini Saqlash</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* AFISHA SELECTOR TABS */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '0.75rem',
+          marginBottom: '1.75rem'
+        }}>
+          {AFISHA_SLIDE_CONFIGS.map((cfg) => {
+            const isSelected = selectedAfishaKey === cfg.key;
+            const slideCount = (settingsForm[cfg.key] || []).length;
+            return (
+              <button
+                key={cfg.key}
+                type="button"
+                onClick={() => setSelectedAfishaKey(cfg.key)}
+                style={{
+                  textAlign: 'left',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-lg)',
+                  border: isSelected ? '2px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
+                  background: isSelected ? 'var(--bg-secondary)' : 'var(--bg-card)',
+                  boxShadow: isSelected ? '0 4px 16px rgba(217, 119, 6, 0.15)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '4px',
+                    backgroundColor: isSelected ? cfg.accent : 'var(--bg-secondary)',
+                    color: isSelected ? '#fff' : 'var(--text-muted)'
+                  }}>
+                    {cfg.badge}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                    {slideCount} ta slayd
+                  </span>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: '0.92rem', color: isSelected ? 'var(--wood-amber)' : 'var(--text-main)', lineHeight: 1.3 }}>
+                  {cfg.title}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                  📍 {cfg.page}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ACTIVE AFISHA DETAILS CARD */}
+        <div className="glass-card" style={{
+          padding: '1.75rem',
+          borderRadius: 'var(--radius-xl)',
+          border: '1.5px solid var(--border-subtle)',
+          backgroundColor: 'var(--bg-card)',
+          marginBottom: '2rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: activeConfig.accent, fontWeight: 800, letterSpacing: '1px' }}>
+                {activeConfig.badge}
+              </span>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.15rem 0 0.3rem' }}>
+                {activeConfig.title}
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                {activeConfig.desc}
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--bg-secondary)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-full)' }}>
+              <span>⏱️ Avtomatik almashish: <strong>3.5 soniya</strong></span>
+              <span>•</span>
+              <span>Jami: <strong>{currentSlides.length} ta rasm</strong></span>
+            </div>
+          </div>
+
+          {/* SLIDES THUMBNAIL GALLERY */}
+          <div style={{ marginBottom: '2rem' }}>
+            <label style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)', display: 'block', marginBottom: '0.75rem' }}>
+              Mavjud Slayd Rasmlari (Avtomatik 3.5 soniyada aylanadi):
+            </label>
+
+            {currentSlides.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)' }}>
+                Hozircha slayd rasmlar yo‘q. Quyidagi forma orqali rasm qo‘shing.
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+                {currentSlides.map((url, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      position: 'relative',
+                      borderRadius: 'var(--radius-md)',
+                      overflow: 'hidden',
+                      border: '1.5px solid var(--border-subtle)',
+                      background: 'var(--bg-secondary)',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    <div style={{ aspectRatio: '4/3', width: '100%', overflow: 'hidden', position: 'relative' }}>
+                      <img
+                        src={url}
+                        alt={`Slayd ${idx + 1}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80';
+                        }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        top: '8px',
+                        left: '8px',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: '#fff',
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '4px'
+                      }}>
+                        #{idx + 1}-slayd
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '0.6rem 0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '110px' }}>
+                        {url.split('/').pop()?.split('?')[0] || `Rasm ${idx + 1}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSlideImage(activeConfig.key, idx)}
+                        title="Ushbu slaydni o‘chirish"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.12)',
+                          color: '#ef4444',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '0.35rem 0.45rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ADD NEW SLIDE FORM */}
+          <div style={{ background: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+            <h4 style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+              + Ushbu Afishaga Yangi Slayd Rasm Qo‘shish
+            </h4>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              Kompyuterdan rasm yuklashingiz yoki internetdagi to‘g‘ridan-to‘g‘ri rasm havolasini (URL) kiritishingiz mumkin.
+            </p>
+
+            <ImageUploadField
+              label="Yangi Slayd Rasmi (Fayl tanlang yoki URL kiriting)"
+              value={newSlideUrl}
+              onChange={(val) => setNewSlideUrl(val)}
+              folder="slides"
+              name="slide_uploader"
+              placeholder="https://images.unsplash.com/... yoki faylni tanlang"
+              helperText="Rasm tanlanganda u darhol tayyorlanadi va quyidagi tugma orqali ro‘yxatga qo‘shiladi."
+            />
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleAddSlideImage(activeConfig.key)}
+                className="btn btn-secondary"
+                style={{ fontWeight: 700, gap: '0.4rem' }}
+              >
+                <Plus size={16} /> Slaydga Qo‘shish
+              </button>
+
+              <button
+                type="button"
+                onClick={handleQuickSaveSlides}
+                disabled={isSavingSettings}
+                className="btn btn-primary"
+                style={{ fontWeight: 700, gap: '0.4rem', marginLeft: 'auto' }}
+              >
+                {isSavingSettings ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Saqlanmoqda...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} />
+                    <span>O‘zgarishlarni Saqlash</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="admin-layout">
@@ -1972,6 +2341,11 @@ export const AdminDashboard = () => {
                 )}
               </button>
             </form>
+
+            {/* AFISHA VA SLAYD RASMLARI SOZLAMALARI */}
+            <div style={{ marginTop: '3rem', paddingTop: '2.5rem', borderTop: '2px dashed var(--border-subtle)' }}>
+              {renderSlideManagementContent()}
+            </div>
           </div>
         )}
 
@@ -2183,6 +2557,42 @@ export const AdminDashboard = () => {
               </button>
             </div>
 
+            {/* Quick Link to Slide Shows */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem 1.25rem',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'rgba(217, 119, 6, 0.08)',
+              border: '1.5px solid rgba(217, 119, 6, 0.25)',
+              marginBottom: '1.5rem',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                  <ImageIcon size={18} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                    Header Afishalari va Slayd Shou Rasmlari Boshqaruvi
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    Chairs & Stools, Sofas (-35%), Blog, FAQ va Kolleksiya afishalari slaydlarini tahrirlash
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('slides')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontWeight: 700, gap: '0.4rem', borderColor: 'var(--wood-amber)', color: 'var(--wood-amber)' }}
+              >
+                Slaydlarni Boshqarish →
+              </button>
+            </div>
+
             {banners.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📢</div>
@@ -2260,6 +2670,13 @@ export const AdminDashboard = () => {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB: HEADER AFISHALARI & SLAYD SHOU BOSHQARUVI */}
+        {activeTab === 'slides' && (
+          <div>
+            {renderSlideManagementContent()}
           </div>
         )}
       </main>
