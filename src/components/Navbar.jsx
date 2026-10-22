@@ -22,7 +22,8 @@ import {
   Moon,
   Sun,
   Download,
-  Smartphone
+  Smartphone,
+  AlertTriangle
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -36,6 +37,7 @@ export const Navbar = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -593,7 +595,7 @@ export const Navbar = () => {
                       </div>
 
                       <Link
-                        to="/account"
+                        to="/account?tab=profile"
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -693,7 +695,11 @@ export const Navbar = () => {
                       <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '0.35rem', paddingTop: '0.35rem' }}>
                         <button
                           type="button"
-                          onClick={logout}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUserDropdownOpen(false);
+                            setShowLogoutConfirm(true);
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -703,7 +709,10 @@ export const Navbar = () => {
                             fontSize: '0.85rem',
                             color: '#ef4444',
                             borderRadius: 'var(--radius-sm)',
-                            textAlign: 'left'
+                            textAlign: 'left',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer'
                           }}
                         >
                           <LogOut size={15} />
@@ -909,6 +918,105 @@ export const Navbar = () => {
           }
         }
       `}</style>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              borderRadius: 'var(--radius-xl, 18px)',
+              padding: '2rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+              border: '1px solid var(--border-subtle)',
+              position: 'relative',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem'
+              }}
+            >
+              <AlertTriangle size={28} />
+            </div>
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+              Hisobdan chiqishni tasdiqlaysizmi?
+            </h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1.75rem' }}>
+              To‘satdan bosilib ketishining oldini olish uchun tasdiqlang. Chiqqaningizdan so‘ng qayta kirish uchun telefon raqamingiz yoki emailingiz zarur bo‘ladi.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  justifyContent: 'center'
+                }}
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                }}
+                style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  transition: 'opacity 0.2s ease'
+                }}
+              >
+                <LogOut size={16} />
+                <span>Ha, chiqish</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
     {/* Spacer to prevent layout shift and keep content visible below fixed navbar */}
     <div style={{ height: `${headerHeight}px`, flexShrink: 0 }} aria-hidden="true" />

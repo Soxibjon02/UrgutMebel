@@ -281,272 +281,442 @@ export const Home = () => {
                 gap: '1.25rem'
               }}
             >
-              {/* Card 1: Green Sage (Accessories) */}
+              {/* Card 1: Large Vertical (Accessories) */}
               <div
-                onClick={() => navigate('/furniture')}
+                onClick={() => navigate('/furniture?search=aksessuar')}
                 style={{
                   gridColumn: '1 / 2',
                   gridRow: '1 / 3',
-                  backgroundColor: 'var(--figma-pastel-mint)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
                   padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  transition: 'transform 0.25s ease'
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
               >
+                <img
+                  src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80"
+                  alt="Accessories"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
                 <div
                   style={{
-                    backgroundColor: 'var(--bg-card)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
                     padding: '0.45rem 1rem',
-                    borderRadius: '2px',
-                    boxShadow: 'var(--shadow-card)',
-                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                     alignSelf: 'flex-start',
-                    fontSize: '0.82rem',
+                    fontSize: '0.85rem',
                     fontWeight: 700,
-                    color: 'var(--text-main)',
                     letterSpacing: '0.02em'
                   }}
                 >
                   Accessories
                 </div>
-                <img
-                  src="https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=400&q=80"
-                  alt="Accessories"
-                  style={{
-                    width: '90%',
-                    height: '180px',
-                    objectFit: 'contain',
-                    alignSelf: 'center'
-                  }}
-                />
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Interyer aksessuarlari va dekor
+                  </p>
+                </div>
               </div>
 
-              {/* Card 2: Sky Blue (Sofas & Armchairs) */}
+              {/* Card 2: Wide Horizontal (Sofas & Armchairs) */}
               <div
-                onClick={() => navigate('/furniture')}
+                onClick={() => navigate('/furniture?search=divan')}
                 style={{
                   gridColumn: '2 / 4',
                   gridRow: '1 / 2',
-                  backgroundColor: 'var(--figma-pastel-blue)',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderRadius: '2px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
                   cursor: 'pointer',
-                  transition: 'transform 0.25s ease',
-                  position: 'relative'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-              >
-                <div>
-                  <div
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      padding: '0.45rem 1rem',
-                      borderRadius: '2px',
-                      boxShadow: 'var(--shadow-card)',
-                      border: '1px solid var(--border-subtle)',
-                      display: 'inline-block',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      color: 'var(--text-main)',
-                      marginBottom: '0.35rem'
-                    }}
-                  >
-                    Sofas and Armchairs
-                  </div>
-                  <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                    Yumshoq mebellar kolleksiyasi
-                  </p>
-                </div>
-                <img
-                  src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80"
-                  alt="Sofas"
-                  style={{ width: '130px', height: '100px', objectFit: 'contain' }}
-                />
-              </div>
-
-              {/* Card 3: Large Light Grey (Chairs & Stools) */}
-              <div
-                onClick={() => navigate('/furniture')}
-                style={{
-                  gridColumn: '1 / 3',
-                  gridRow: '3 / 5',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-subtle)',
-                  padding: '1.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.25s ease',
-                  position: 'relative'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-              >
-                <div>
-                  <div
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      padding: '0.45rem 1rem',
-                      borderRadius: '2px',
-                      boxShadow: 'var(--shadow-card)',
-                      border: '1px solid var(--border-subtle)',
-                      display: 'inline-block',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      color: 'var(--text-main)',
-                      marginBottom: '0.35rem'
-                    }}
-                  >
-                    Chairs &amp; Stools
-                  </div>
-                  <p style={{ margin: '0.35rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Tabiiy eman va metall karkas
-                  </p>
-                </div>
-                <img
-                  src="https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80"
-                  alt="Chairs"
-                  style={{ width: '150px', height: '140px', objectFit: 'contain' }}
-                />
-              </div>
-
-              {/* Card 4: Soft Peach/Sand (Pouf / Tables) */}
-              <div
-                onClick={() => navigate('/furniture')}
-                style={{
-                  gridColumn: '3 / 4',
-                  gridRow: '2 / 4',
-                  backgroundColor: 'var(--figma-pastel-sand)',
                   padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.25s ease',
-                  position: 'relative'
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
               >
+                <img
+                  src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80"
+                  alt="Sofas and Armchairs"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
                 <div
                   style={{
-                    backgroundColor: 'var(--bg-card)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
                     padding: '0.45rem 1rem',
-                    borderRadius: '2px',
-                    boxShadow: 'var(--shadow-card)',
-                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                     alignSelf: 'flex-start',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    color: 'var(--text-main)'
+                    fontSize: '0.85rem',
+                    fontWeight: 700
+                  }}
+                >
+                  Sofas and Armchairs
+                </div>
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Yumshoq mebellar kolleksiyasi
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Large 2x2 Block (Chairs & Stools) */}
+              <div
+                onClick={() => navigate('/furniture?search=stul')}
+                style={{
+                  gridColumn: '1 / 3',
+                  gridRow: '3 / 5',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  padding: '1.75rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                }}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1000&q=80"
+                  alt="Chairs and Stools"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    padding: '0.45rem 1rem',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    alignSelf: 'flex-start',
+                    fontSize: '0.88rem',
+                    fontWeight: 700
+                  }}
+                >
+                  Chairs &amp; Stools
+                </div>
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Tabiiy eman va metall karkasli o‘rindiqlar
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 4: Vertical Right (Pouf / Tables) */}
+              <div
+                onClick={() => navigate('/furniture?search=stol')}
+                style={{
+                  gridColumn: '3 / 4',
+                  gridRow: '2 / 4',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                }}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80"
+                  alt="Pouf"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    padding: '0.45rem 1rem',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    alignSelf: 'flex-start',
+                    fontSize: '0.85rem',
+                    fontWeight: 700
                   }}
                 >
                   Pouf
                 </div>
-                <img
-                  src="https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=400&q=80"
-                  alt="Tables"
-                  style={{
-                    width: '90%',
-                    height: '140px',
-                    objectFit: 'contain',
-                    alignSelf: 'center'
-                  }}
-                />
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Qulay pufik va kofe stollari
+                  </p>
+                </div>
               </div>
 
-              {/* Card 5: Soft Peach (Bedding / Kitchen) */}
+              {/* Card 5: Soft Peach (Bedding / Yotoqxona) */}
               <div
-                onClick={() => navigate('/furniture')}
+                onClick={() => navigate('/furniture?search=yotoq')}
                 style={{
                   gridColumn: '2 / 3',
                   gridRow: '5 / 6',
-                  backgroundColor: 'var(--figma-pastel-peach)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
                   padding: '1.25rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.25s ease'
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
               >
+                <img
+                  src="https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?auto=format&fit=crop&w=800&q=80"
+                  alt="Bedding"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
                 <div
                   style={{
-                    backgroundColor: 'var(--bg-card)',
-                    padding: '0.35rem 0.85rem',
-                    borderRadius: '2px',
-                    boxShadow: 'var(--shadow-card)',
-                    border: '1px solid var(--border-subtle)',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: 'var(--text-main)'
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    fontSize: '0.85rem',
+                    fontWeight: 700
                   }}
                 >
                   Bedding
                 </div>
-                <img
-                  src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=200&q=80"
-                  alt="Bedding"
-                  style={{ width: '60px', height: '50px', objectFit: 'contain' }}
-                />
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Yotoqxona to‘plamlari &gt;
+                  </span>
+                </div>
               </div>
 
-              {/* Card 6: Soft Cyan (Furniture / Outdoor) */}
+              {/* Card 6: Furniture / Outdoor */}
               <div
                 onClick={() => navigate('/furniture')}
                 style={{
                   gridColumn: '3 / 4',
                   gridRow: '4 / 6',
-                  backgroundColor: 'var(--figma-pastel-blue)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
                   padding: '1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.25s ease'
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                className="mosaic-card-hover"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
               >
+                <img
+                  src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80"
+                  alt="Furniture"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease'
+                  }}
+                />
                 <div
                   style={{
-                    backgroundColor: 'var(--bg-card)',
-                    padding: '0.35rem 0.85rem',
-                    borderRadius: '2px',
-                    boxShadow: 'var(--shadow-card)',
-                    border: '1px solid var(--border-subtle)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%)',
+                    zIndex: 1
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 2,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: '3px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                     alignSelf: 'flex-start',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: 'var(--text-main)'
+                    fontSize: '0.85rem',
+                    fontWeight: 700
                   }}
                 >
                   Furniture
                 </div>
-                <img
-                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=300&q=80"
-                  alt="Outdoor"
-                  style={{ width: '80%', height: '80px', objectFit: 'contain', alignSelf: 'center' }}
-                />
+                <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
+                  <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, textShadow: '0 2px 4px rgba(0,0,0,0.7)' }}>
+                    Barcha zamonaviy mebellar &gt;
+                  </p>
+                </div>
               </div>
             </div>
           </div>

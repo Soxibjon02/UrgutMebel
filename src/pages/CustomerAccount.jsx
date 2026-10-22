@@ -34,7 +34,8 @@ import {
   Settings,
   Save,
   PackageCheck,
-  Hammer
+  Hammer,
+  AlertTriangle
 } from 'lucide-react';
 
 export const CustomerAccount = () => {
@@ -43,7 +44,12 @@ export const CustomerAccount = () => {
   const { favorites } = useWishlist();
   const { addToast } = useNotification();
 
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'custom');
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(
+    tabParam === 'orders' || tabParam === 'custom' ? 'orders' : tabParam === 'wishlist' ? 'wishlist' : 'profile'
+  );
+  const [orderSubTab, setOrderSubTab] = useState(tabParam === 'orders' ? 'standard' : 'custom');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [customOrders, setCustomOrders] = useState([]);
   const [standardOrders, setStandardOrders] = useState([]);
   const [selectedOfferOrder, setSelectedOfferOrder] = useState(null);
@@ -72,7 +78,15 @@ export const CustomerAccount = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab) setActiveTab(tab);
+    if (tab === 'orders' || tab === 'custom') {
+      setActiveTab('orders');
+      if (tab === 'orders') setOrderSubTab('standard');
+      if (tab === 'custom') setOrderSubTab('custom');
+    } else if (tab === 'wishlist') {
+      setActiveTab('wishlist');
+    } else if (tab === 'profile') {
+      setActiveTab('profile');
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -281,134 +295,7 @@ export const CustomerAccount = () => {
     <div style={{ padding: '3.5rem 0 6rem', minHeight: '85vh' }}>
       <div className="container">
 
-        {/* 1. HERO PROFILE CARD */}
-        <div className="account-hero-card">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.4rem', flexWrap: 'wrap' }}>
-              <div className="account-avatar">
-                {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
-                  <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                    {user.full_name || 'Hurmatli Mijoz'}
-                  </h1>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem',
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '999px',
-                      backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                      color: '#10b981',
-                      fontSize: '0.75rem',
-                      fontWeight: 700
-                    }}
-                  >
-                    <ShieldCheck size={14} />
-                    Tasdiqlangan Mijoz
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: 'var(--text-muted)', fontSize: '0.86rem', flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Mail size={14} /> {user.email || 'Email kiritilmagan'}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Phone size={14} /> {user.phone || 'Telefon kiritilmagan'}
-                  </span>
-                  {user.address && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <MapPin size={14} /> {user.address}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <Link to="/custom-order" className="btn btn-figma-primary" style={{ padding: '0.75rem 1.4rem' }}>
-                <Sliders size={16} />
-                <span>Yangi Maxsus Buyurtma</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="btn btn-secondary"
-                style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}
-                title="Hisobdan chiqish"
-              >
-                <LogOut size={16} />
-                <span style={{ fontSize: '0.85rem' }}>Chiqish</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. STATS ROW */}
-        <div className="account-stat-grid">
-          <div className="account-stat-card">
-            <div className="account-stat-icon" style={{ backgroundColor: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)' }}>
-              <Sliders size={26} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
-                {customOrders.length}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                Maxsus Loyihalarim
-              </div>
-            </div>
-          </div>
-
-          <div className="account-stat-card">
-            <div className="account-stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
-              <ShoppingBag size={26} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
-                {standardOrders.length}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                Do‘kon Xaridlari
-              </div>
-            </div>
-          </div>
-
-          <div className="account-stat-card" style={pendingOffersCount > 0 ? { borderColor: 'rgba(250, 109, 88, 0.5)', background: 'rgba(250, 109, 88, 0.05)' } : {}}>
-            <div className="account-stat-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
-              <DollarSign size={26} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: pendingOffersCount > 0 ? 'var(--figma-coral)' : 'var(--text-main)', lineHeight: 1.2 }}>
-                {pendingOffersCount}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: pendingOffersCount > 0 ? 'var(--figma-coral)' : 'var(--text-muted)', fontWeight: 600 }}>
-                {pendingOffersCount > 0 ? 'Kutilayotgan Takliflar!' : 'Narx Takliflari'}
-              </div>
-            </div>
-          </div>
-
-          <div className="account-stat-card">
-            <div className="account-stat-icon" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
-              <Heart size={26} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
-                {favorites.length}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                Sevimlilar Ro‘yxati
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. FIGMA-GRADE TAB NAVIGATION */}
+        {/* 1. TOP TAB NAVIGATION */}
         <div
           className="no-scrollbar"
           style={{
@@ -422,43 +309,32 @@ export const CustomerAccount = () => {
         >
           <button
             type="button"
-            onClick={() => handleTabChange('custom')}
-            className={`customer-tab-button ${activeTab === 'custom' ? 'active' : ''}`}
+            onClick={() => handleTabChange('profile')}
+            className={`customer-tab-button ${activeTab === 'profile' ? 'active' : ''}`}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
           >
-            <Sliders size={18} />
-            <span>Maxsus Buyurtmalarim</span>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.15rem 0.5rem',
-                borderRadius: '999px',
-                backgroundColor: activeTab === 'custom' ? 'var(--figma-coral)' : 'var(--bg-secondary)',
-                color: activeTab === 'custom' ? '#fff' : 'var(--text-muted)'
-              }}
-            >
-              {customOrders.length}
-            </span>
+            <User size={18} />
+            <span>Mening Hisobim</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabChange('orders')}
-            className={`customer-tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+            className={`customer-tab-button ${activeTab === 'orders' || activeTab === 'custom' ? 'active' : ''}`}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
           >
             <ShoppingBag size={18} />
-            <span>Do‘kon Xaridlari</span>
+            <span>Buyurtmalarim</span>
             <span
               style={{
                 fontSize: '0.75rem',
                 padding: '0.15rem 0.5rem',
                 borderRadius: '999px',
-                backgroundColor: activeTab === 'orders' ? 'var(--figma-coral)' : 'var(--bg-secondary)',
-                color: activeTab === 'orders' ? '#fff' : 'var(--text-muted)'
+                backgroundColor: (activeTab === 'orders' || activeTab === 'custom') ? 'var(--figma-coral)' : 'var(--bg-secondary)',
+                color: (activeTab === 'orders' || activeTab === 'custom') ? '#fff' : 'var(--text-muted)'
               }}
             >
-              {standardOrders.length}
+              {customOrders.length + standardOrders.length}
             </span>
           </button>
 
@@ -482,55 +358,364 @@ export const CustomerAccount = () => {
               {favorites.length}
             </span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabChange('profile')}
-            className={`customer-tab-button ${activeTab === 'profile' ? 'active' : ''}`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
-          >
-            <Settings size={18} />
-            <span>Profil Sozlamalari</span>
-          </button>
         </div>
 
         {/* =========================================================================
-            TAB 1: CUSTOM ORDERS (MAXSUS CHIZMALI VA O'LCHAMLI BUYURTMALAR)
+            TAB: PROFILE (MENING HISOBIM - FAQAT O'ZI HAQIDAGI MA'LUMOTLAR)
             ========================================================================= */}
-        {activeTab === 'custom' && (
-          <div>
-            {/* Filter Pills */}
-            {customOrders.length > 0 && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
-                {[
-                  { id: 'ALL', label: 'Barchasi' },
-                  { id: 'PENDING', label: 'Ko‘rib chiqilmoqda' },
-                  { id: 'PRICE_SENT', label: 'Narx taklifi berilgan' },
-                  { id: 'IN_PRODUCTION', label: 'Ishlab chiqarishda' },
-                  { id: 'DELIVERING', label: 'Yetkazilmoqda' },
-                  { id: 'COMPLETED', label: 'Bajarilgan' }
-                ].map((f) => (
+        {activeTab === 'profile' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* HERO PROFILE CARD */}
+            <div className="account-hero-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.4rem', flexWrap: 'wrap' }}>
+                  <div className="account-avatar">
+                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                      <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                        {user.full_name || 'Hurmatli Mijoz'}
+                      </h1>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.25rem 0.65rem',
+                          borderRadius: '999px',
+                          backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                          color: '#10b981',
+                          fontSize: '0.75rem',
+                          fontWeight: 700
+                        }}
+                      >
+                        <ShieldCheck size={14} />
+                        Tasdiqlangan Profil
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: 'var(--text-muted)', fontSize: '0.86rem', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Mail size={14} /> {user.email || 'Email kiritilmagan'}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Phone size={14} /> {user.phone || 'Telefon kiritilmagan'}
+                      </span>
+                      {user.address && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <MapPin size={14} /> {user.address}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <button
-                    key={f.id}
                     type="button"
-                    onClick={() => setCustomFilter(f.id)}
-                    style={{
-                      padding: '0.45rem 1rem',
-                      borderRadius: '999px',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      border: customFilter === f.id ? '1.5px solid var(--figma-coral)' : '1px solid var(--border-subtle)',
-                      backgroundColor: customFilter === f.id ? 'rgba(250, 109, 88, 0.12)' : 'var(--bg-card)',
-                      color: customFilter === f.id ? 'var(--figma-coral)' : 'var(--text-muted)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
+                    onClick={() => handleTabChange('orders')}
+                    className="btn btn-figma-primary"
+                    style={{ padding: '0.75rem 1.4rem' }}
                   >
-                    {f.label}
+                    <ShoppingBag size={16} />
+                    <span>Buyurtmalarimga O‘tish</span>
                   </button>
-                ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="btn btn-secondary"
+                    style={{ padding: '0.75rem 1rem', color: '#ef4444' }}
+                    title="Hisobdan chiqish"
+                  >
+                    <LogOut size={16} />
+                    <span style={{ fontSize: '0.85rem' }}>Chiqish</span>
+                  </button>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Profile Info Overview Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+              <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.65rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <User size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Shaxsiy Ma‘lumotlar</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>{user.full_name || 'Kiritilmagan'}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Email: <strong style={{ color: 'var(--text-main)' }}>{user.email}</strong></div>
+              </div>
+
+              <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.65rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Phone size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Bog‘lanish Telefoni</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>{user.phone || 'Kiritilmagan'}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Yetkazish manzili: <strong style={{ color: 'var(--text-main)' }}>{user.address || 'Kiritilmagan'}</strong></div>
+              </div>
+
+              <div className="glass-card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.65rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Hisob Holati</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: '#10b981' }}>Faol & Tasdiqlangan</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Foydalanuvchi darajasi: <strong style={{ color: 'var(--text-main)' }}>Mijoz ({user.role || 'customer'})</strong></div>
+              </div>
+            </div>
+
+            {/* Profile Edit Form */}
+            <div
+              className="glass-card"
+              style={{
+                padding: '2.5rem',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                Profil Ma‘lumotlarini Tahrirlash
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                Buyurtmalarni tezkor rasmiylashtirish va yetkazish uchun aloqa ma‘lumotlaringizni yangilab boring.
+              </p>
+
+              <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                      To‘liq Ism-Sharifingiz
+                    </label>
+                    <input
+                      type="text"
+                      className="figma-input"
+                      value={profileForm.full_name}
+                      onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                      Telefon Raqamingiz
+                    </label>
+                    <input
+                      type="tel"
+                      className="figma-input"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                      placeholder="+998 90 123 45 67"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                    Asosiy Yetkazib Berish Manzili
+                  </label>
+                  <input
+                    type="text"
+                    className="figma-input"
+                    value={profileForm.address}
+                    onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
+                    placeholder="Viloyat, shahar/tuman, ko'cha, uy raqami"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
+                    Qo‘shimcha Izoh yoki Mo‘ljal
+                  </label>
+                  <textarea
+                    className="figma-input"
+                    rows="3"
+                    value={profileForm.notes}
+                    onChange={(e) => setProfileForm({ ...profileForm, notes: e.target.value })}
+                    placeholder="Masalan: 3-qavat, domofon kodi yoki mo'ljal..."
+                  ></textarea>
+                </div>
+
+                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    type="submit"
+                    disabled={isSavingProfile}
+                    className="btn btn-figma-primary"
+                    style={{ padding: '0.9rem 2rem' }}
+                  >
+                    <Save size={18} />
+                    <span>{isSavingProfile ? 'Saqlanmoqda...' : 'Ma‘lumotlarni Saqlash'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB: ORDERS (BUYURTMALARIM - FAQAT BUYURTMALAR)
+            ========================================================================= */}
+        {(activeTab === 'orders' || activeTab === 'custom') && (
+          <div>
+            {/* Orders Stats Row */}
+            <div className="account-stat-grid" style={{ marginBottom: '2rem' }}>
+              <div className="account-stat-card">
+                <div className="account-stat-icon" style={{ backgroundColor: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)' }}>
+                  <Sliders size={26} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                    {customOrders.length}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    Maxsus Loyihalarim
+                  </div>
+                </div>
+              </div>
+
+              <div className="account-stat-card">
+                <div className="account-stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
+                  <ShoppingBag size={26} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                    {standardOrders.length}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    Do‘kon Xaridlari
+                  </div>
+                </div>
+              </div>
+
+              <div className="account-stat-card" style={pendingOffersCount > 0 ? { borderColor: 'rgba(250, 109, 88, 0.5)', background: 'rgba(250, 109, 88, 0.05)' } : {}}>
+                <div className="account-stat-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+                  <DollarSign size={26} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: pendingOffersCount > 0 ? 'var(--figma-coral)' : 'var(--text-main)', lineHeight: 1.2 }}>
+                    {pendingOffersCount}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: pendingOffersCount > 0 ? 'var(--figma-coral)' : 'var(--text-muted)', fontWeight: 600 }}>
+                    {pendingOffersCount > 0 ? 'Kutilayotgan Takliflar!' : 'Narx Takliflari'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-Tabs: Maxsus Buyurtmalar vs Do'kon Xaridlari */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-secondary)', padding: '0.35rem', borderRadius: 'var(--radius-lg)' }}>
+                <button
+                  type="button"
+                  onClick={() => setOrderSubTab('custom')}
+                  style={{
+                    padding: '0.55rem 1.1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: orderSubTab === 'custom' ? 'var(--bg-card)' : 'transparent',
+                    color: orderSubTab === 'custom' ? 'var(--figma-coral)' : 'var(--text-muted)',
+                    boxShadow: orderSubTab === 'custom' ? 'var(--shadow-sm)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Sliders size={16} />
+                  <span>Maxsus Buyurtmalar</span>
+                  <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.45rem', borderRadius: '999px', backgroundColor: orderSubTab === 'custom' ? 'rgba(250, 109, 88, 0.15)' : 'rgba(0,0,0,0.06)' }}>
+                    {customOrders.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setOrderSubTab('standard')}
+                  style={{
+                    padding: '0.55rem 1.1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: orderSubTab === 'standard' ? 'var(--bg-card)' : 'transparent',
+                    color: orderSubTab === 'standard' ? 'var(--figma-coral)' : 'var(--text-muted)',
+                    boxShadow: orderSubTab === 'standard' ? 'var(--shadow-sm)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <ShoppingBag size={16} />
+                  <span>Do‘kon Xaridlari</span>
+                  <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.45rem', borderRadius: '999px', backgroundColor: orderSubTab === 'standard' ? 'rgba(250, 109, 88, 0.15)' : 'rgba(0,0,0,0.06)' }}>
+                    {standardOrders.length}
+                  </span>
+                </button>
+              </div>
+
+              <Link to="/custom-order" className="btn btn-figma-primary" style={{ padding: '0.65rem 1.25rem' }}>
+                <Sliders size={16} />
+                <span>+ Yangi Maxsus Buyurtma</span>
+              </Link>
+            </div>
+
+            {/* SUB-SECTION 1: MAXSUS BUYURTMALAR */}
+            {orderSubTab === 'custom' && (
+              <div>
+                {/* Filter Pills */}
+                {customOrders.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
+                    {[
+                      { id: 'ALL', label: 'Barchasi' },
+                      { id: 'PENDING', label: 'Ko‘rib chiqilmoqda' },
+                      { id: 'PRICE_SENT', label: 'Narx taklifi berilgan' },
+                      { id: 'IN_PRODUCTION', label: 'Ishlab chiqarishda' },
+                      { id: 'DELIVERING', label: 'Yetkazilmoqda' },
+                      { id: 'COMPLETED', label: 'Bajarilgan' }
+                    ].map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setCustomFilter(f.id)}
+                        style={{
+                          padding: '0.45rem 1rem',
+                          borderRadius: '999px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          border: customFilter === f.id ? '1.5px solid var(--figma-coral)' : '1px solid var(--border-subtle)',
+                          backgroundColor: customFilter === f.id ? 'rgba(250, 109, 88, 0.12)' : 'var(--bg-card)',
+                          color: customFilter === f.id ? 'var(--figma-coral)' : 'var(--text-muted)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
             {filteredCustomOrders.length === 0 ? (
               <div
@@ -769,10 +954,8 @@ export const CustomerAccount = () => {
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 2: STANDARD STORE ORDERS (DO'KON XARIDLARI)
-            ========================================================================= */}
-        {activeTab === 'orders' && (
+        {/* SUB-SECTION 2: STANDARD STORE ORDERS (DO'KON XARIDLARI) */}
+        {orderSubTab === 'standard' && (
           <div>
             {standardOrders.length === 0 ? (
               <div
@@ -916,148 +1099,59 @@ export const CustomerAccount = () => {
             )}
           </div>
         )}
+      </div>
+    )}
 
-        {/* =========================================================================
-            TAB 3: WISHLIST (SEVIMLI MEBELLAR)
-            ========================================================================= */}
-        {activeTab === 'wishlist' && (
-          <div>
-            {favorites.length === 0 ? (
-              <div
-                className="glass-card"
-                style={{
-                  padding: '4.5rem 2rem',
-                  textAlign: 'center',
-                  borderRadius: 'var(--radius-xl)',
-                  border: '1px solid var(--border-subtle)'
-                }}
-              >
-                <div
-                  style={{
-                    width: '68px',
-                    height: '68px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    color: '#ef4444',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 1.25rem'
-                  }}
-                >
-                  <Heart size={32} />
-                </div>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                  Sevimlilar ro‘yxati bo‘sh
-                </h3>
-                <p style={{ color: 'var(--text-muted)', maxWidth: '460px', margin: '0 auto 1.75rem', fontSize: '0.92rem' }}>
-                  Katalogimizdagi mahsulotlarning yurakchasini bosib, ularni keyinchalik qulay ko‘rish uchun saqlab qo‘yishingiz mumkin.
-                </p>
-                <Link to="/furniture" className="btn btn-figma-primary" style={{ padding: '0.85rem 1.75rem' }}>
-                  <Heart size={18} />
-                  <span>Mebellarni Ko‘rish</span>
-                </Link>
-              </div>
-            ) : (
-              <div className="grid-products">
-                {favorites.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* =========================================================================
-            TAB 4: PROFILE SETTINGS
-            ========================================================================= */}
-        {activeTab === 'profile' && (
-          <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    {/* =========================================================================
+        TAB 3: WISHLIST (SEVIMLI MEBELLAR)
+        ========================================================================= */}
+    {activeTab === 'wishlist' && (
+      <div>
+        {favorites.length === 0 ? (
+          <div
+            className="glass-card"
+            style={{
+              padding: '4.5rem 2rem',
+              textAlign: 'center',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
             <div
-              className="glass-card"
               style={{
-                padding: '2.5rem',
-                borderRadius: 'var(--radius-xl)',
-                border: '1px solid var(--border-subtle)',
-                boxShadow: 'var(--shadow-sm)'
+                width: '68px',
+                height: '68px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem'
               }}
             >
-              <h2 style={{ fontSize: '1.45rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-                Profil va Yetkazish Sozlamalari
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                Buyurtmalarni tezkor rasmiylashtirish va yetkazish uchun aloqa ma‘lumotlaringizni to‘g‘ri saqlang.
-              </p>
-
-              <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
-                    To‘liq Ism-Sharifingiz
-                  </label>
-                  <input
-                    type="text"
-                    className="figma-input"
-                    value={profileForm.full_name}
-                    onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
-                    Telefon Raqamingiz
-                  </label>
-                  <input
-                    type="tel"
-                    className="figma-input"
-                    value={profileForm.phone}
-                    onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                    placeholder="+998 90 123 45 67"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
-                    Asosiy Yetkazib Berish Manzili
-                  </label>
-                  <input
-                    type="text"
-                    className="figma-input"
-                    value={profileForm.address}
-                    onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
-                    placeholder="Viloyat, shahar/tuman, ko'cha, uy raqami"
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.4rem' }}>
-                    Qo‘shimcha Izoh yoki Mo‘ljal
-                  </label>
-                  <textarea
-                    className="figma-input"
-                    rows="3"
-                    value={profileForm.notes}
-                    onChange={(e) => setProfileForm({ ...profileForm, notes: e.target.value })}
-                    placeholder="Masalan: 3-qavat, domofon kodi yoki mo'ljal..."
-                  ></textarea>
-                </div>
-
-                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    type="submit"
-                    disabled={isSavingProfile}
-                    className="btn btn-figma-primary"
-                    style={{ padding: '0.9rem 2rem' }}
-                  >
-                    <Save size={18} />
-                    <span>{isSavingProfile ? 'Saqlanmoqda...' : 'Ma‘lumotlarni Saqlash'}</span>
-                  </button>
-                </div>
-              </form>
+              <Heart size={32} />
             </div>
+            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+              Sevimlilar ro‘yxati bo‘sh
+            </h3>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '460px', margin: '0 auto 1.75rem', fontSize: '0.92rem' }}>
+              Katalogimizdagi mahsulotlarning yurakchasini bosib, ularni keyinchalik qulay ko‘rish uchun saqlab qo‘yishingiz mumkin.
+            </p>
+            <Link to="/furniture" className="btn btn-figma-primary" style={{ padding: '0.85rem 1.75rem' }}>
+              <Heart size={18} />
+              <span>Mebellarni Ko‘rish</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid-products">
+            {favorites.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         )}
+      </div>
+    )}
 
         {/* =========================================================================
             PRICE OFFER REVIEW & APPROVAL MODAL
@@ -1193,6 +1287,105 @@ export const CustomerAccount = () => {
         </div>
 
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              borderRadius: 'var(--radius-xl, 18px)',
+              padding: '2.25rem 2rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+              border: '1px solid var(--border-subtle)',
+              position: 'relative',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem'
+              }}
+            >
+              <AlertTriangle size={30} />
+            </div>
+
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+              Hisobdan chiqishni tasdiqlaysizmi?
+            </h3>
+            <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1.75rem' }}>
+              To‘satdan bosilib ketishining oldini olish uchun tasdiqlang. Chiqqaningizdan so‘ng qayta kirish uchun telefon raqamingiz yoki emailingiz zarur bo‘ladi.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.8rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
+                  fontSize: '0.92rem',
+                  justifyContent: 'center'
+                }}
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                }}
+                style={{
+                  padding: '0.8rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'opacity 0.2s ease'
+                }}
+              >
+                <LogOut size={16} />
+                <span>Ha, chiqish</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
