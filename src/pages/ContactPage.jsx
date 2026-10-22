@@ -49,19 +49,7 @@ export const ContactPage = () => {
       <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
         {/* Figma Split Hero & Contact Form */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.2fr 1fr',
-            minHeight: '620px',
-            backgroundColor: 'var(--bg-card)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-            boxShadow: 'var(--shadow-card)',
-            border: '1px solid var(--border-subtle)'
-          }}
-          className="figma-split-hero"
-        >
+        <div className="figma-split-hero">
           {/* Left: Clean Visual Area (Showroom / Workshop Photo) */}
           <div
             style={{

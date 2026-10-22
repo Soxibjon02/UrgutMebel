@@ -103,19 +103,12 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
           </span>
         </div>
 
-        {/* 3-Column Carousel Showcase with Navigation */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 2.4fr 1fr',
-            gap: '1.5rem',
-            alignItems: 'center',
-            position: 'relative'
-          }}
-        >
+        {/* 3-Column Carousel Showcase with Responsive Layout */}
+        <div className="figma-carousel-grid">
           {/* Left Preview Card */}
           <div
             onClick={prevSlide}
+            className="figma-carousel-prev-card"
             style={{
               height: '320px',
               backgroundColor: 'var(--bg-card)',
@@ -161,6 +154,7 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
 
           {/* Active Center Card with Coral Number Badge */}
           <div
+            className="figma-carousel-center-card"
             style={{
               height: '420px',
               position: 'relative',
@@ -183,12 +177,33 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
               }}
             />
 
+            {/* Mobile Navigation Arrows (Visible only on mobile/tablet) */}
+            <div className="figma-carousel-mobile-arrows">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                className="figma-carousel-mobile-arrow-btn"
+                aria-label="Oldingi slayd"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                className="figma-carousel-mobile-arrow-btn"
+                aria-label="Keyingi slayd"
+              >
+                <ArrowRight size={16} />
+              </button>
+            </div>
+
             {/* Gradient Overlay for Text */}
             <div
+              className="figma-carousel-text-overlay"
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%)',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-end',
@@ -207,10 +222,10 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
               >
                 {activeSlide.category}
               </span>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.85rem', fontWeight: 800, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
+              <h3 style={{ color: '#FFFFFF', fontSize: 'clamp(1.3rem, 3.5vw, 1.85rem)', fontWeight: 800, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
                 {activeSlide.title}
               </h3>
-              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem', margin: '0.4rem 0 1.25rem', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(0.82rem, 2vw, 0.95rem)', margin: '0.4rem 0 1.25rem', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
                 {activeSlide.subtitle}
               </p>
               <div>
@@ -226,6 +241,7 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
 
             {/* Signature Coral Square Number Badge (Figma 01/02/03) */}
             <div
+              className="figma-carousel-badge"
               style={{
                 position: 'absolute',
                 bottom: 0,
@@ -250,6 +266,7 @@ export const FigmaCollectionCarousel = ({ title = 'Autumn Collection', slides: p
           {/* Right Preview Card */}
           <div
             onClick={nextSlide}
+            className="figma-carousel-next-card"
             style={{
               height: '320px',
               backgroundColor: 'var(--bg-card)',

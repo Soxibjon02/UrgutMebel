@@ -92,18 +92,7 @@ export const Home = () => {
           ============================================================== */}
       <section style={{ padding: '2rem 1.5rem 4rem' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.2fr 1fr',
-              minHeight: '460px',
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '2px',
-              overflow: 'hidden'
-            }}
-            className="figma-split-hero"
-          >
+          <div className="figma-split-hero">
             {/* Left Column: Soft Pastel Blue with Slideshow */}
             <div
               style={{
@@ -194,6 +183,7 @@ export const Home = () => {
               gap: '3.5rem',
               alignItems: 'flex-start'
             }}
+            className="category-mosaic-layout"
           >
             {/* Left Column: Heading & Category Navigation */}
             <div>
@@ -835,6 +825,7 @@ export const Home = () => {
               overflow: 'hidden',
               boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
             }}
+            className="join-us-split"
           >
             {/* Left: Vibrant Coral Block with Form */}
             <div
@@ -967,6 +958,7 @@ export const Home = () => {
               gap: '2.5rem',
               alignItems: 'center'
             }}
+            className="trending-news-grid"
           >
             {/* Col 1: Header & Read All Articles Button */}
             <div>

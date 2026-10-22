@@ -54,18 +54,7 @@ export const FaqPage = () => {
           ============================================================== */}
       <section style={{ padding: '2rem 1.5rem 3.5rem' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.1fr 1fr',
-              minHeight: '420px',
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '2px',
-              overflow: 'hidden'
-            }}
-            className="figma-split-hero"
-          >
+          <div className="figma-split-hero">
             {/* Left: Soft Pastel Blue Card with Slideshow */}
             <div
               style={{

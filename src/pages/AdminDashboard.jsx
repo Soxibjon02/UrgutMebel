@@ -732,8 +732,8 @@ export const AdminDashboard = () => {
         {/* AFISHA SELECTOR TABS */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '0.75rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+          gap: '0.65rem',
           marginBottom: '1.75rem'
         }}>
           {AFISHA_SLIDE_CONFIGS.map((cfg) => {
@@ -820,7 +820,7 @@ export const AdminDashboard = () => {
                 Hozircha slayd rasmlar yo‘q. Quyidagi forma orqali rasm qo‘shing.
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.85rem' }}>
                 {currentSlides.map((url, idx) => (
                   <div
                     key={idx}

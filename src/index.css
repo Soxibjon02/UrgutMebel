@@ -1016,6 +1016,161 @@ img {
   }
 }
 
+/* ====================================================================
+   GLOBAL GRID & LAYOUT RESPONSIVE SYSTEM (< 900px, < 640px, < 380px)
+   ==================================================================== */
+@media (max-width: 900px) {
+  /* Category Mosaic Layout */
+  .category-mosaic-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  .category-mosaic-layout > div:last-child {
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-rows: 170px !important;
+    gap: 1rem !important;
+  }
+  .category-mosaic-layout > div:last-child > div:first-child {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    min-height: 200px !important;
+  }
+
+  /* Join Us Split Banner */
+  .join-us-split {
+    grid-template-columns: 1fr !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .join-us-split > div:first-child {
+    padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem) !important;
+  }
+  .join-us-split > div:last-child {
+    min-height: 260px !important;
+    max-height: 320px !important;
+  }
+
+  /* Trending News 3-Column Grid */
+  .trending-news-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem !important;
+  }
+  .trending-news-grid > div > div[style*="height: '480px'"],
+  .trending-news-grid > div > div[style*="height: 480px"] {
+    height: clamp(320px, 60vw, 420px) !important;
+  }
+
+  /* Cart & Checkout Page Layouts */
+  .cart-layout,
+  .checkout-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem !important;
+  }
+  .cart-layout > div:last-child,
+  .checkout-layout > div:last-child {
+    position: static !important;
+    width: 100% !important;
+  }
+
+  /* Product Detail Page Grids */
+  .product-top-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  .product-images-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .product-images-layout > div:first-child {
+    min-height: 280px !important;
+  }
+  .product-images-layout > div:last-child {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+    padding-bottom: 0.5rem !important;
+    gap: 0.75rem !important;
+  }
+  .product-images-layout > div:last-child > div {
+    flex-shrink: 0 !important;
+    width: 75px !important;
+    height: 75px !important;
+  }
+  .product-mid-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  .suggestions-layout {
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem !important;
+  }
+  .suggestions-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Blog Layout & Article Detail */
+  .blog-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  .blog-layout > aside > div {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding-bottom: 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+  .blog-layout > aside > div > button {
+    white-space: nowrap !important;
+    padding: 0.4rem 0.9rem !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-full) !important;
+  }
+  .blog-posts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  .article-detail-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2.5rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .category-mosaic-layout > div:last-child {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto !important;
+  }
+  .category-mosaic-layout > div:last-child > div {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    min-height: 180px !important;
+  }
+  .suggestions-products-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Extra small devices (<= 380px) */
+@media (max-width: 380px) {
+  .container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  h1 {
+    font-size: 1.65rem !important;
+  }
+  h2 {
+    font-size: 1.35rem !important;
+  }
+  .btn {
+    padding: 0.65rem 0.95rem !important;
+    font-size: 0.85rem !important;
+  }
+}
+
 /* Utilities */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -1353,18 +1508,97 @@ img {
   transform: translateY(-2px);
 }
 
+/* ====================================================================
+   FIGMA COLLECTION CAROUSEL RESPONSIVE STYLES
+   ==================================================================== */
+.figma-carousel-grid {
+  display: grid;
+  grid-template-columns: 1fr 2.4fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.figma-carousel-mobile-arrows {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .figma-carousel-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .figma-carousel-prev-card,
+  .figma-carousel-next-card {
+    display: none !important;
+  }
+  .figma-carousel-center-card {
+    height: clamp(320px, 60vw, 420px) !important;
+  }
+  .figma-carousel-mobile-arrows {
+    display: flex !important;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    gap: 8px;
+    z-index: 5;
+  }
+  .figma-carousel-mobile-arrow-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+  .figma-carousel-mobile-arrow-btn:active {
+    transform: scale(0.92);
+    background-color: var(--figma-coral);
+  }
+  .figma-carousel-text-overlay {
+    padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 3.5vw, 1.75rem) clamp(1.25rem, 4vw, 2rem) clamp(4.5rem, 12vw, 5.5rem) !important;
+  }
+  .figma-carousel-badge {
+    width: clamp(52px, 12vw, 70px) !important;
+    height: clamp(52px, 12vw, 70px) !important;
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem) !important;
+  }
+}
+
+/* ====================================================================
+   FIGMA SPLIT HERO RESPONSIVE STYLES
+   ==================================================================== */
 .figma-split-hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   min-height: 420px;
-  border-radius: 0;
+  border-radius: var(--radius-md, 12px);
   overflow: hidden;
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
 }
+
 @media (max-width: 900px) {
   .figma-split-hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+    margin-bottom: 2rem !important;
+  }
+  .figma-split-hero > div {
+    padding: clamp(1.5rem, 4vw, 2.5rem) !important;
+    min-height: auto !important;
+  }
+  .figma-split-hero > div:first-child {
+    min-height: clamp(260px, 48vw, 360px) !important;
+    padding: 1.5rem !important;
   }
 }
 
