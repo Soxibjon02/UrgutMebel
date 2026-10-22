@@ -5,6 +5,7 @@ export const translations = {
     nav: {
       home: "Bosh sahifa",
       furniture: "Mebellar",
+      stores: "Do'konlar",
       categories: "Kategoriyalar",
       custom_order: "Maxsus Buyurtma",
       craftsmen: "Ustalar",
@@ -294,6 +295,34 @@ export const translations = {
       demo_craftsman: "Usta",
       demo_manager: "Menedjer",
       demo_admin: "Admin"
+    },
+
+    // Mebel Do'konlari
+    stores: {
+      title: "Urgut Mebel Do'konlari",
+      subtitle: "Urgut tumanidagi eng yirik va ishonchli mebel salonlari hamda fabrikalari",
+      all: "Barchasi",
+      top_rated: "Top Reytingli",
+      verified: "Tasdiqlangan",
+      search_placeholder: "Do'kon nomi yoki manzil bo'yicha qidiring...",
+      store_label: "Mebel Do'koni",
+      call_btn: "Bog'lanish",
+      view_store: "Do'konga o'tish",
+      products_count: "ta mebel",
+      rating_label: "Reyting",
+      address_label: "Manzil",
+      working_hours_label: "Ish vaqti",
+      manager_label: "Menedjer"
+    },
+
+    // Top 10 Trenddagi mebellar
+    trending: {
+      title: "Top 10 Trend Mebellar",
+      subtitle: "Xaridorlar tomonidan eng yuqori baholangan va tanlangan saralangan Urgut mebellari reytingi",
+      rank_label: "O'rin",
+      quick_buy: "1 daqiqada xarid qilish",
+      view_details: "Batafsil ko'rish",
+      in_stock: "Mavjud"
     }
   },
 
@@ -302,6 +331,7 @@ export const translations = {
     nav: {
       home: "Главная",
       furniture: "Мебель",
+      stores: "Магазины",
       categories: "Категории",
       custom_order: "Индивидуальный заказ",
       craftsmen: "Мастера",
@@ -591,6 +621,34 @@ export const translations = {
       demo_craftsman: "Мастер",
       demo_manager: "Менеджер",
       demo_admin: "Админ"
+    },
+
+    // Магазины мебели
+    stores: {
+      title: "Мебельные магазины Ургута",
+      subtitle: "Крупнейшие и самые надежные мебельные салоны и фабрики Ургутского района",
+      all: "Все",
+      top_rated: "Топ рейтинг",
+      verified: "Проверенные",
+      search_placeholder: "Поиск по названию магазина или адресу...",
+      store_label: "Мебельный магазин",
+      call_btn: "Связаться",
+      view_store: "В магазин",
+      products_count: "товаров",
+      rating_label: "Рейтинг",
+      address_label: "Адрес",
+      working_hours_label: "Режим работы",
+      manager_label: "Менеджер"
+    },
+
+    // Топ 10 трендовой мебели
+    trending: {
+      title: "Топ 10 трендовой мебели",
+      subtitle: "Рейтинг самой популярной и высокооцененной ургутской мебели по отзывам покупателей",
+      rank_label: "Место",
+      quick_buy: "Купить за 1 минуту",
+      view_details: "Подробнее",
+      in_stock: "В наличии"
     }
   },
 
@@ -599,6 +657,7 @@ export const translations = {
     nav: {
       home: "Home",
       furniture: "Furniture",
+      stores: "Stores",
       categories: "Categories",
       custom_order: "Custom Order",
       craftsmen: "Craftsmen",
@@ -888,6 +947,34 @@ export const translations = {
       demo_craftsman: "Craftsman",
       demo_manager: "Manager",
       demo_admin: "Admin"
+    },
+
+    // Furniture Stores
+    stores: {
+      title: "Urgut Furniture Stores",
+      subtitle: "The premier furniture showrooms and manufacturing factories in Urgut district",
+      all: "All Stores",
+      top_rated: "Top Rated",
+      verified: "Verified",
+      search_placeholder: "Search by store name or address...",
+      store_label: "Furniture Store",
+      call_btn: "Call Now",
+      view_store: "Visit Store",
+      products_count: "items",
+      rating_label: "Rating",
+      address_label: "Address",
+      working_hours_label: "Working Hours",
+      manager_label: "Manager"
+    },
+
+    // Top 10 Trending Furniture
+    trending: {
+      title: "Top 10 Trending Furniture",
+      subtitle: "Highest rated and most popular handcrafted furniture selections in Urgut",
+      rank_label: "Rank",
+      quick_buy: "Quick Buy in 1 Min",
+      view_details: "View Details",
+      in_stock: "In Stock"
     }
   }
 };

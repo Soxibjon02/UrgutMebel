@@ -98,6 +98,7 @@ export const Navbar = () => {
   const navLinks = [
     { to: '/', label: t('nav.home', 'Bosh sahifa') },
     { to: '/furniture', label: t('nav.furniture', 'Mebellar') },
+    { to: '/stores', label: t('nav.stores', "Do'konlar") },
     { to: '/categories', label: t('nav.categories', 'Kategoriyalar') },
     { to: '/custom-order', label: t('nav.custom_order', 'Maxsus Buyurtma') },
     { to: '/craftsmen', label: t('nav.craftsmen', 'Ustalar') },

@@ -11,7 +11,9 @@ import {
   initialCustomOrders,
   initialComments,
   initialBanners,
-  initialSettings
+  initialSettings,
+  initialStores,
+  initialDiscountRequests
 } from '../data/mockData';
 import {
   Shield,
@@ -40,7 +42,17 @@ import {
   Copy,
   Menu,
   Loader2,
-  Info
+  Info,
+  Store,
+  Star,
+  Trophy,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle2,
+  Clock,
+  Phone,
+  MapPin,
+  Send
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
@@ -60,10 +72,19 @@ export const AdminDashboard = () => {
   const [craftsmen, setCraftsmen] = useState(() => getStored('craftsmen', initialCraftsmen));
   const [comments, setComments] = useState(() => getStored('comments', initialComments));
   const [banners, setBanners] = useState(() => getStored('banners', initialBanners));
+  const [stores, setStores] = useState(() => getStored('stores', initialStores));
+  const [discountRequests, setDiscountRequests] = useState(() => getStored('discount_requests', initialDiscountRequests));
   const [managers, setManagers] = useState(() => getStored('managers', []));
   const [usersList, setUsersList] = useState(() => getStored('urgut_mebel_registered_users', []));
 
   // Modals & Forms
+  const [storeModalOpen, setStoreModalOpen] = useState(false);
+  const [editingStore, setEditingStore] = useState(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [reviewPlacement, setReviewPlacement] = useState('discount_section');
+  const [reviewFeedback, setReviewFeedback] = useState('');
+
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -191,7 +212,7 @@ export const AdminDashboard = () => {
   const loadAllData = async () => {
     try {
       checkHealth();
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
@@ -200,7 +221,9 @@ export const AdminDashboard = () => {
         dataService.getComments(),
         dataService.getBanners(),
         dataService.getManagers(),
-        dataService.getUsers()
+        dataService.getUsers(),
+        dataService.getStores(),
+        dataService.getDiscountRequests()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -211,6 +234,8 @@ export const AdminDashboard = () => {
       setBanners(bans || []);
       setManagers(mgrs || []);
       setUsersList(usrs || []);
+      setStores(strs || []);
+      setDiscountRequests(dReqs || []);
     } catch (e) {
       console.error(e);
     }
@@ -224,6 +249,9 @@ export const AdminDashboard = () => {
     window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
     window.addEventListener('urgut_store_managers_updated', handleUpdate);
     window.addEventListener('urgut_store_craftsmen_updated', handleUpdate);
+    window.addEventListener('urgut_store_stores_updated', handleUpdate);
+    window.addEventListener('urgut_store_discount_requests_updated', handleUpdate);
+    window.addEventListener('urgut_store_products_updated', handleUpdate);
     const interval = setInterval(loadAllData, 10000);
     return () => {
       window.removeEventListener('urgut_store_orders_updated', handleUpdate);
@@ -231,6 +259,9 @@ export const AdminDashboard = () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
       window.removeEventListener('urgut_store_managers_updated', handleUpdate);
       window.removeEventListener('urgut_store_craftsmen_updated', handleUpdate);
+      window.removeEventListener('urgut_store_stores_updated', handleUpdate);
+      window.removeEventListener('urgut_store_discount_requests_updated', handleUpdate);
+      window.removeEventListener('urgut_store_products_updated', handleUpdate);
       clearInterval(interval);
     };
   }, []);
@@ -356,6 +387,9 @@ export const AdminDashboard = () => {
     const form = e.target;
     const name = form.name.value.trim();
     const imgUrl = form.image_url?.value || editingProduct?.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
+    const selectedStoreId = form.store_id?.value || editingProduct?.store_id || (stores[0]?.id || 'store-1');
+    const matchedStore = stores.find(s => s.id === selectedStoreId);
+
     const prodData = {
       ...(editingProduct || {}),
       name,
@@ -363,6 +397,9 @@ export const AdminDashboard = () => {
       price: Number(form.price.value),
       discount_price: form.discount_price.value ? Number(form.discount_price.value) : null,
       category_id: form.category_id.value || null,
+      store_id: selectedStoreId,
+      store_name: matchedStore?.name || editingProduct?.store_name || "Urgut Shahar Mebel Markazi",
+      store_phone: matchedStore?.phone || editingProduct?.store_phone || "+998 90 123 45 67",
       material: form.material.value,
       dimensions: form.dimensions.value,
       stock: Number(form.stock.value) || 0,
@@ -434,6 +471,140 @@ export const AdminDashboard = () => {
       setProducts(updatedList);
       addToast('Chegirma bekor qilindi', 'success');
     }
+  };
+
+  // ==========================================
+  // STORES MANAGEMENT HANDLERS (DO'KONLAR)
+  // ==========================================
+  const handleOpenStoreModal = (store = null) => {
+    setEditingStore(store);
+    setStoreModalOpen(true);
+  };
+
+  const handleSaveStore = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.name.value.trim();
+    if (!name) return;
+
+    const payload = {
+      ...(editingStore || {}),
+      name,
+      slug: editingStore?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      address: form.address.value.trim(),
+      phone: form.phone.value.trim(),
+      working_hours: form.working_hours.value.trim() || '08:30 - 20:00',
+      manager_name: form.manager_name.value.trim(),
+      description: form.description.value.trim(),
+      rating: Number(form.rating.value) || 4.9,
+      verified: form.verified.checked,
+      banner: form.banner?.value || editingStore?.banner || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+      logo: form.logo?.value || editingStore?.logo || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=200&q=80'
+    };
+
+    addToast("Do'kon saqlanmoqda...", 'info');
+    const updated = await dataService.saveStore(payload);
+    setStores(updated);
+    setStoreModalOpen(false);
+    setEditingStore(null);
+    addToast("Do'kon muvaffaqiyatli saqlandi!", 'success');
+  };
+
+  const handleDeleteStore = async (id, name) => {
+    if (window.confirm(`Rostdan ham "${name}" do'konini tizimdan o'chirmoqchimisiz?`)) {
+      addToast("Do'kon o'chirilmoqda...", 'info');
+      const updated = await dataService.deleteStore(id);
+      setStores(updated);
+      addToast("Do'kon o'chirildi", 'info');
+    }
+  };
+
+  // ==========================================
+  // DISCOUNT REQUESTS REVIEW HANDLERS
+  // ==========================================
+  const handleOpenReviewModal = (req) => {
+    setSelectedRequest(req);
+    setReviewPlacement(req.placement || 'discount_section');
+    setReviewFeedback(req.admin_feedback || '');
+    setReviewModalOpen(true);
+  };
+
+  const handleApproveRequest = async (e) => {
+    e.preventDefault();
+    if (!selectedRequest) return;
+    addToast("So'rov tasdiqlanmoqda...", 'info');
+    const updatedRequests = await dataService.approveDiscountRequest(
+      selectedRequest.id,
+      reviewPlacement,
+      reviewFeedback || 'Super Admin tomonidan tasdiqlandi va saytga joylandi.'
+    );
+    setDiscountRequests(updatedRequests);
+    setReviewModalOpen(false);
+    setSelectedRequest(null);
+    const updatedProducts = await dataService.getProducts();
+    setProducts(updatedProducts);
+    addToast("Menedjer so'rovi tasdiqlandi va mebel saytga joylashtirildi!", 'success');
+  };
+
+  const handleRejectRequest = async () => {
+    if (!selectedRequest) return;
+    addToast("So'rov rad etilmoqda...", 'info');
+    const updatedRequests = await dataService.rejectDiscountRequest(
+      selectedRequest.id,
+      reviewFeedback || "Talab qilingan shartlar bajarilmaganligi sababli rad etildi."
+    );
+    setDiscountRequests(updatedRequests);
+    setReviewModalOpen(false);
+    setSelectedRequest(null);
+    addToast("So'rov rad etildi va menedjerga xabar qoldirildi", 'info');
+  };
+
+  const handleDeleteDiscountRequest = async (id) => {
+    if (window.confirm("Ushbu so'rovni o'chirib tashlamoqchimisiz?")) {
+      const updated = await dataService.deleteDiscountRequest(id);
+      setDiscountRequests(updated);
+      addToast("So'rov o'chirildi", 'info');
+    }
+  };
+
+  // ==========================================
+  // TOP 10 TRENDING MANAGEMENT HANDLERS
+  // ==========================================
+  const handleMoveTrending = async (index, direction) => {
+    const trendingProducts = [...products]
+      .filter(p => p.is_trending)
+      .sort((a, b) => (Number(a.trending_rank) || 999) - (Number(b.trending_rank) || 999));
+
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= trendingProducts.length) return;
+
+    // Swap ranks
+    const tempRank = trendingProducts[index].trending_rank;
+    trendingProducts[index].trending_rank = trendingProducts[targetIndex].trending_rank;
+    trendingProducts[targetIndex].trending_rank = tempRank;
+
+    const rankUpdates = trendingProducts.map((p, idx) => ({
+      id: p.id,
+      trending_rank: idx + 1
+    }));
+
+    addToast("Top 10 tartibi yangilanmoqda...", 'info');
+    const updated = await dataService.updateTrendingRanking(rankUpdates);
+    setProducts(updated);
+    addToast("Top 10 reyting tartibi muvaffaqiyatli saqlandi!", 'success');
+  };
+
+  const handleToggleTrending = async (product) => {
+    const isNowTrending = !product.is_trending;
+    const currentTrendingCount = products.filter(p => p.is_trending).length;
+    const updatedProd = {
+      ...product,
+      is_trending: isNowTrending,
+      trending_rank: isNowTrending ? currentTrendingCount + 1 : null
+    };
+    addToast(isNowTrending ? "Mebel Top 10 Trendga qo'shildi!" : "Mebel Top 10 Trenddan chiqarildi", 'info');
+    const updated = await dataService.saveProduct(updatedProd);
+    setProducts(updated);
   };
 
   // Categories CRUD
@@ -691,6 +862,9 @@ export const AdminDashboard = () => {
 
   const adminTabs = [
     { id: 'overview', label: 'Umumiy Statistika', shortLabel: 'Statistika', icon: LayoutDashboard },
+    { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
+    { id: 'trending', label: `Top 10 Trend (${products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
+    { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
     { id: 'products', label: `Mahsulotlar (${products.length})`, shortLabel: `Mebellar (${products.length})`, icon: Package },
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
@@ -1254,6 +1428,500 @@ export const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: STORES MANAGEMENT (MEBEL DO'KONLARI) */}
+        {activeTab === 'stores' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Mebel Do‘konlari Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
+                  Urgut tumanidagi barcha rasmiy mebel do‘konlari, salonlar va fabrikalar profillarini boshqaring.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenStoreModal(null)}
+                className="btn btn-primary"
+                style={{ gap: '0.5rem' }}
+              >
+                <Plus size={16} /> Yangi Do‘kon Qo‘shish
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+              {stores.map((s) => {
+                const storeProductCount = products.filter((p) => p.store_id === s.id).length;
+                return (
+                  <div
+                    key={s.id}
+                    className="glass-card"
+                    style={{
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--border-subtle)',
+                      backgroundColor: 'var(--bg-card)',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    {/* Cover Banner */}
+                    <div style={{ height: '140px', position: 'relative', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
+                      <img
+                        src={s.banner || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80'}
+                        alt={s.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 70%)'
+                        }}
+                      />
+                      {s.verified && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '0.75rem',
+                            right: '0.75rem',
+                            backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                            backdropFilter: 'blur(4px)',
+                            color: '#ffffff',
+                            padding: '0.25rem 0.6rem',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.35rem'
+                          }}
+                        >
+                          <CheckCircle2 size={13} />
+                          <span>Tasdiqlangan</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Store Info Body */}
+                    <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', marginTop: '-2.5rem', marginBottom: '0.75rem' }}>
+                        <img
+                          src={s.logo || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=150&q=80'}
+                          alt={s.name}
+                          style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '12px',
+                            objectFit: 'cover',
+                            border: '3px solid var(--bg-card)',
+                            boxShadow: 'var(--shadow-md)',
+                            backgroundColor: 'var(--bg-primary)'
+                          }}
+                        />
+                        <div style={{ paddingTop: '1.5rem', minWidth: 0, flex: 1 }}>
+                          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {s.name}
+                          </h3>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem' }}>
+                            <Star size={13} fill="#fbbf24" color="#fbbf24" />
+                            <span style={{ fontWeight: 750, fontSize: '0.82rem' }}>{Number(s.rating || 4.9).toFixed(1)}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>• {storeProductCount} ta e‘lon</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.5, margin: '0 0 1rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {s.description || "Urgut tumanidagi zamonaviy va sifatli mebellar markazi."}
+                      </p>
+
+                      <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <MapPin size={13} color="var(--figma-coral)" />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.address}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <Phone size={13} color="var(--wood-amber)" />
+                          <span>{s.phone}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <Clock size={13} />
+                          <span>{s.working_hours || '08:30 - 20:00'}</span>
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.85rem' }}>
+                        <a
+                          href={`/stores/${s.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-secondary btn-sm"
+                          style={{ flex: 1, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                        >
+                          <Eye size={13} /> Ko‘rish
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenStoreModal(s)}
+                          className="btn btn-secondary btn-sm"
+                          title="Tahrirlash"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteStore(s.id, s.name)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: '#ef4444' }}
+                          title="O‘chirish"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: TOP 10 TREND MEBELLAR BOSHQARUVI */}
+        {activeTab === 'trending' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  <Trophy size={14} /> SUPER ADMIN • TRENDING REYT沢NG
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Top 10 Trend Mebellari Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '750px' }}>
+                  Bosh sahifadagi eng ko‘p ko‘riladigan Top 10 Trend mebellar reytingini boshqaring. O‘rinlarni Yuqoriga/Pastga surish orqali tartiblang yoki yangi mebellarni trendga qo‘shing.
+                </p>
+              </div>
+            </div>
+
+            {/* Active Top 10 Ranking List */}
+            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)', marginBottom: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trophy size={18} color="#f59e0b" />
+                <span>Hozirgi Top 10 Trend Ro‘yxati (Bosh Sahifada Chiqadi)</span>
+              </h3>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {products
+                  .filter((p) => p.is_trending)
+                  .sort((a, b) => (Number(a.trending_rank) || 999) - (Number(b.trending_rank) || 999))
+                  .slice(0, 10)
+                  .map((p, idx) => {
+                    const rank = idx + 1;
+                    const isGold = rank === 1;
+                    const isSilver = rank === 2;
+                    const isBronze = rank === 3;
+                    const effectivePrice = p.discount_price || p.price;
+
+                    return (
+                      <div
+                        key={p.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '1rem',
+                          padding: '0.85rem 1.25rem',
+                          borderRadius: '10px',
+                          backgroundColor: 'var(--bg-card)',
+                          border: isGold ? '2px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-subtle)',
+                          boxShadow: isGold ? '0 4px 15px rgba(245, 158, 11, 0.1)' : 'none',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '240px' }}>
+                          {/* Rank Medal */}
+                          <div
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 900,
+                              fontSize: '1rem',
+                              flexShrink: 0,
+                              background: isGold
+                                ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+                                : isSilver
+                                ? 'linear-gradient(135deg, #94A3B8, #64748B)'
+                                : isBronze
+                                ? 'linear-gradient(135deg, #B45309, #78350F)'
+                                : 'var(--bg-secondary)',
+                              color: isGold || isSilver || isBronze ? '#ffffff' : 'var(--text-main)',
+                              boxShadow: isGold ? '0 4px 10px rgba(245, 158, 11, 0.35)' : 'none'
+                            }}
+                          >
+                            #{rank}
+                          </div>
+
+                          <img
+                            src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=150&q=80'}
+                            alt={p.name}
+                            style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }}
+                          />
+
+                          <div>
+                            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{p.name}</div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                              Do‘kon: <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{p.store_name || "Urgut Mebel Markazi"}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Rating & Price */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem' }}>
+                            <Star size={14} fill="#fbbf24" color="#fbbf24" />
+                            <span style={{ fontWeight: 800 }}>{Number(p.rating || 5.0).toFixed(1)}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({p.reviews_count || 12})</span>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 800, color: 'var(--figma-coral)', fontSize: '0.95rem' }}>
+                              {Number(effectivePrice).toLocaleString()} so‘m
+                            </div>
+                            {p.discount_price && (
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                {Number(p.price).toLocaleString()} so‘m
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Order & Remove Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveTrending(idx, -1)}
+                            className="btn btn-secondary btn-sm"
+                            title="Yuqoriga surish"
+                            style={{ opacity: idx === 0 ? 0.35 : 1 }}
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === products.filter((p) => p.is_trending).length - 1}
+                            onClick={() => handleMoveTrending(idx, 1)}
+                            className="btn btn-secondary btn-sm"
+                            title="Pastga surish"
+                            style={{ opacity: idx === products.filter((p) => p.is_trending).length - 1 ? 0.35 : 1 }}
+                          >
+                            <ArrowDown size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleTrending(p)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ color: '#ef4444' }}
+                            title="Trenddan chiqarish"
+                          >
+                            <X size={14} /> Chiqarish
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Other Products to Add to Trending */}
+            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+                Katalogdagi Boshqa Mebellarni Trendga Qo‘shish
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                Reytingi yuqori bo‘lgan mebellarni "+ Trendga Qo‘shish" tugmasini bosib yuqoridagi Top 10 ro‘yxatiga kiritishingiz mumkin.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                {products
+                  .filter((p) => !p.is_trending)
+                  .map((p) => (
+                    <div
+                      key={p.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        backgroundColor: 'var(--bg-card)',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-subtle)',
+                        gap: '0.75rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                        <img
+                          src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                          alt=""
+                          style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
+                        />
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {p.name}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            ⭐ {Number(p.rating || 4.5).toFixed(1)} • {Number(p.discount_price || p.price).toLocaleString()} so‘m
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTrending(p)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', whiteSpace: 'nowrap' }}
+                      >
+                        <Plus size={13} /> Qo‘shish
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: DISCOUNT & PLACEMENT REQUESTS (MENEDJERLAR SO'ROVLARI) */}
+        {activeTab === 'discount_requests' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Do‘kon Menedjerlarining Chegirma So‘rovlari</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
+                  Do‘kon menejerlari o‘z mebellarini chegirmaga yoki trend kolleksiyasiga chiqarish uchun Super Adminga yo‘llagan so‘rovlari.
+                </p>
+              </div>
+            </div>
+
+            <div className="table-responsive glass-card">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Mebel & Do‘kon</th>
+                    <th style={{ padding: '0.85rem' }}>Asl Narx</th>
+                    <th style={{ padding: '0.85rem' }}>Taklif Qilingan Chegirma</th>
+                    <th style={{ padding: '0.85rem' }}>So‘ralgan Joylashtirish</th>
+                    <th style={{ padding: '0.85rem' }}>Menejer Izohi</th>
+                    <th style={{ padding: '0.85rem' }}>Holat</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {discountRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📬</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha hech qanday chegirma so‘rovi yo‘q</h4>
+                        <p style={{ fontSize: '0.85rem' }}>Do‘kon menejerlari so‘rov yuborganda bu yerda ko‘rinadi.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    discountRequests.map((req) => {
+                      const isPending = req.status === 'PENDING';
+                      const isApproved = req.status === 'APPROVED';
+                      const isRejected = req.status === 'REJECTED';
+
+                      const placementLabels = {
+                        discount_section: "Chegirmalar Bo'limi",
+                        hero_collection: "Asosiy Sahifa Kolleksiyasi",
+                        trending: "Top 10 Trend Mebellari"
+                      };
+
+                      return (
+                        <tr key={req.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: '0.85rem 1.25rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <img
+                                src={req.product_image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                                alt=""
+                                style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'cover' }}
+                              />
+                              <div>
+                                <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{req.product_name}</div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--figma-coral)', fontWeight: 600 }}>
+                                  {req.store_name} • {req.manager_phone}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                            {Number(req.current_price).toLocaleString()} so‘m
+                          </td>
+                          <td style={{ padding: '0.85rem', fontWeight: 800, color: 'var(--wood-amber)' }}>
+                            {Number(req.proposed_discount_price).toLocaleString()} so‘m
+                          </td>
+                          <td style={{ padding: '0.85rem' }}>
+                            <span style={{ backgroundColor: 'rgba(250, 109, 88, 0.1)', color: 'var(--figma-coral)', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem' }}>
+                              {placementLabels[req.placement] || req.placement}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.85rem', maxWidth: '220px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            {req.notes || "—"}
+                            {req.admin_feedback && (
+                              <div style={{ marginTop: '0.25rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '0.78rem' }}>
+                                Admin javobi: {req.admin_feedback}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.85rem' }}>
+                            {isPending && (
+                              <span style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <Clock size={12} /> Kutilmoqda
+                              </span>
+                            )}
+                            {isApproved && (
+                              <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <CheckCircle2 size={12} /> Tasdiqlangan
+                              </span>
+                            )}
+                            {isRejected && (
+                              <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                <X size={12} /> Rad etilgan
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenReviewModal(req)}
+                                  className="btn btn-primary btn-sm"
+                                  style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                                >
+                                  Ko‘rib chiqish
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDiscountRequest(req.id)}
+                                className="btn btn-secondary btn-sm"
+                                style={{ color: '#ef4444' }}
+                                title="O‘chirish"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -2722,6 +3390,14 @@ export const AdminDashboard = () => {
                 <label className="form-label">Mebel Nomi *</label>
                 <input type="text" required name="name" defaultValue={editingProduct?.name || ''} className="form-input" />
               </div>
+              <div className="form-group">
+                <label className="form-label">Tegishli Mebel Do‘koni *</label>
+                <select name="store_id" defaultValue={editingProduct?.store_id || stores[0]?.id} className="form-select">
+                  {stores.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.address})</option>
+                  ))}
+                </select>
+              </div>
               <div className="dashboard-form-row">
                 <div className="form-group">
                   <label className="form-label">Narxi (so‘m) *</label>
@@ -3290,6 +3966,246 @@ export const AdminDashboard = () => {
                   style={{ flex: 1 }}
                 >
                   Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* STORE CREATE/EDIT MODAL */}
+      {storeModalOpen && (
+        <div className="modal-overlay" onClick={() => setStoreModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '600px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingStore ? 'Do‘kon Profilini Tahrirlash' : 'Yangi Mebel Do‘koni Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveStore}>
+              <div className="form-group">
+                <label className="form-label">Do‘kon / Fabrika Nomi *</label>
+                <input
+                  type="text"
+                  required
+                  name="name"
+                  defaultValue={editingStore?.name || ''}
+                  placeholder="Masalan: Urgut Shahar Mebel Markazi"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Telefon Raqami *</label>
+                  <input
+                    type="text"
+                    required
+                    name="phone"
+                    defaultValue={editingStore?.phone || '+998 90 '}
+                    placeholder="+998 90 123 45 67"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Mas‘ul Menedjer Ismi</label>
+                  <input
+                    type="text"
+                    name="manager_name"
+                    defaultValue={editingStore?.manager_name || ''}
+                    placeholder="Masalan: Jamshid Rustamov"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Manzil *</label>
+                <input
+                  type="text"
+                  required
+                  name="address"
+                  defaultValue={editingStore?.address || ''}
+                  placeholder="Masalan: Urgut shahri, Navoiy shoh ko‘chasi, 45-uy"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Ish Vaqti</label>
+                  <input
+                    type="text"
+                    name="working_hours"
+                    defaultValue={editingStore?.working_hours || '08:30 - 20:00 (Dam olish kunlarisiz)'}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Reyting (1.0 dan 5.0 gacha)</label>
+                  <input
+                    type="number"
+                    step="0.05"
+                    min="1"
+                    max="5"
+                    name="rating"
+                    defaultValue={editingStore?.rating || 4.95}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <ImageUploadField
+                label="Do‘kon Banner Rasmi"
+                name="banner"
+                value={editingStore?.banner || ''}
+                folder="stores"
+                placeholder="https://... yoki faylni tanlab yuklang"
+                helperText="Do'kon sahifasi tepasidagi keng formatdagi rasm."
+              />
+
+              <ImageUploadField
+                label="Do‘kon Logotipi"
+                name="logo"
+                value={editingStore?.logo || ''}
+                folder="stores"
+                placeholder="https://... yoki faylni tanlab yuklang"
+                helperText="Do'konning dumaloq/kvadrat logotipi."
+              />
+
+              <div className="form-group">
+                <label className="form-label">Do‘kon Haqida Tavsif</label>
+                <textarea
+                  rows={3}
+                  name="description"
+                  defaultValue={editingStore?.description || ''}
+                  placeholder="Do'kon ixtisosligi, assortimenti va xizmatlari..."
+                  className="form-textarea"
+                />
+              </div>
+
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input
+                    type="checkbox"
+                    name="verified"
+                    defaultChecked={editingStore ? editingStore.verified !== false : true}
+                  />
+                  <span>Rasmiy Tasdiqlangan Do‘kon nishoni (Verified)</span>
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setStoreModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REVIEW & APPROVE DISCOUNT REQUEST MODAL */}
+      {reviewModalOpen && selectedRequest && (
+        <div className="modal-overlay" onClick={() => setReviewModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '560px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+              Menejer So‘rovini Ko‘rib Chiqish
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+              Ushbu so‘rovni tasdiqlashingiz bilan mebel avtomatik ravishda tanlangan bo‘limga joylashtiriladi va narxi yangilanadi.
+            </p>
+
+            <div style={{ display: 'flex', gap: '1rem', padding: '1rem', borderRadius: '10px', backgroundColor: 'var(--bg-secondary)', marginBottom: '1.25rem' }}>
+              <img
+                src={selectedRequest.product_image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=150&q=80'}
+                alt=""
+                style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }}
+              />
+              <div>
+                <h4 style={{ margin: '0 0 0.25rem', fontSize: '1rem', fontWeight: 850 }}>{selectedRequest.product_name}</h4>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Do‘kon: <strong>{selectedRequest.store_name}</strong>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Menejer: <strong>{selectedRequest.manager_name} ({selectedRequest.manager_phone})</strong>
+                </div>
+                <div style={{ marginTop: '0.4rem', fontSize: '0.88rem' }}>
+                  <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', marginRight: '0.5rem' }}>
+                    {Number(selectedRequest.current_price).toLocaleString()} so‘m
+                  </span>
+                  <span style={{ fontWeight: 800, color: 'var(--wood-amber)' }}>
+                    → {Number(selectedRequest.proposed_discount_price).toLocaleString()} so‘m
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {selectedRequest.notes && (
+              <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', backgroundColor: 'rgba(250, 109, 88, 0.08)', border: '1px solid rgba(250, 109, 88, 0.2)', marginBottom: '1.25rem', fontSize: '0.85rem' }}>
+                <strong style={{ color: 'var(--figma-coral)', display: 'block', marginBottom: '0.2rem' }}>Menejer Murojaati:</strong>
+                {selectedRequest.notes}
+              </div>
+            )}
+
+            <form onSubmit={handleApproveRequest}>
+              <div className="form-group">
+                <label className="form-label">Qaysi Bo‘limga Joylashtirishni Tasdiqlaysiz? *</label>
+                <select
+                  value={reviewPlacement}
+                  onChange={(e) => setReviewPlacement(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="discount_section">Chegirmalar Bo‘limi (Katalogda chegirma)</option>
+                  <option value="hero_collection">Asosiy Sahifa Karuseli (Figma Collection)</option>
+                  <option value="trending">Top 10 Trend Mebellari Reytingi</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Super Admin Javobi / Izohi (Menejer ko‘radi)</label>
+                <textarea
+                  rows={2}
+                  value={reviewFeedback}
+                  onChange={(e) => setReviewFeedback(e.target.value)}
+                  placeholder="Masalan: So‘rov ma'qullandi, mahsulot bosh sahifa trend mebellariga joylashtirildi."
+                  className="form-textarea"
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setReviewModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRejectRequest}
+                  className="btn"
+                  style={{ flex: 1, backgroundColor: '#ef4444', color: '#ffffff', fontWeight: 700 }}
+                >
+                  Rad Etish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1.2, fontWeight: 750 }}
+                >
+                  Tasdiqlash & Joylash
                 </button>
               </div>
             </form>

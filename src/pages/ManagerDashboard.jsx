@@ -33,7 +33,8 @@ import {
   X,
   Hammer,
   Tag,
-  Percent
+  Percent,
+  Store
 } from 'lucide-react';
 
 export const ManagerDashboard = () => {
@@ -42,6 +43,19 @@ export const ManagerDashboard = () => {
 
   // Navigation tab for Manager: 'furniture' | 'custom_orders' | 'craftsmen' | 'discounts'
   const [activeMainTab, setActiveMainTab] = useState('furniture');
+
+  // Stores & Requests state
+  const [stores, setStores] = useState([]);
+  const [discountRequests, setDiscountRequests] = useState([]);
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    product_id: '',
+    store_id: '',
+    proposed_discount_price: '',
+    placement: 'discount_section',
+    manager_phone: user?.phone || '+998 90 123 45 67',
+    notes: ''
+  });
 
   // Discount Management State (Menedjer ham chegirmalarni boshqaradi)
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
@@ -68,6 +82,9 @@ export const ManagerDashboard = () => {
     price: '',
     discount_price: '',
     category_id: '',
+    store_id: '',
+    store_name: '',
+    store_phone: '',
     material: '',
     dimensions: '',
     stock: 10,
@@ -121,7 +138,9 @@ export const ManagerDashboard = () => {
         stdOrders,
         craftReqs,
         contactMsgs,
-        subs
+        subs,
+        storeList,
+        dReqs
       ] = await Promise.all([
         dataService.getCustomOrders(),
         dataService.getProducts(),
@@ -130,7 +149,9 @@ export const ManagerDashboard = () => {
         dataService.getStandardOrders(),
         dataService.getCraftsmanRequests(),
         dataService.getContactMessages(),
-        dataService.getNewsletterSubscribers()
+        dataService.getNewsletterSubscribers(),
+        dataService.getStores(),
+        dataService.getDiscountRequests()
       ]);
       setOrders(orderList || []);
       setProducts(prodList || []);
@@ -140,6 +161,8 @@ export const ManagerDashboard = () => {
       setCraftsmanRequests(craftReqs || []);
       setContactMessages(contactMsgs || []);
       setNewsletterSubs(subs || []);
+      setStores(storeList || []);
+      setDiscountRequests(dReqs || []);
     } finally {
       setLoading(false);
     }
@@ -155,6 +178,8 @@ export const ManagerDashboard = () => {
     window.addEventListener('urgut_store_craftsman_requests_updated', handleCustomOrdersUpdate);
     window.addEventListener('urgut_store_contact_messages_updated', handleCustomOrdersUpdate);
     window.addEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
+    window.addEventListener('urgut_store_discount_requests_updated', handleProductsUpdate);
+    window.addEventListener('urgut_store_stores_updated', handleProductsUpdate);
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_products_updated', handleProductsUpdate);
@@ -162,6 +187,8 @@ export const ManagerDashboard = () => {
       window.removeEventListener('urgut_store_craftsman_requests_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_contact_messages_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
+      window.removeEventListener('urgut_store_discount_requests_updated', handleProductsUpdate);
+      window.removeEventListener('urgut_store_stores_updated', handleProductsUpdate);
     };
   }, []);
 
@@ -198,6 +225,9 @@ export const ManagerDashboard = () => {
       price: '',
       discount_price: '',
       category_id: categories[0]?.id || '',
+      store_id: stores[0]?.id || 'store-1',
+      store_name: stores[0]?.name || "Urgut Shahar Mebel Markazi",
+      store_phone: stores[0]?.phone || '+998 90 123 45 67',
       material: 'Eman / MDF',
       dimensions: '200x90x75 sm',
       stock: 10,
@@ -218,6 +248,9 @@ export const ManagerDashboard = () => {
       price: prod.price || '',
       discount_price: prod.discount_price || '',
       category_id: prod.category_id || (categories[0]?.id || ''),
+      store_id: prod.store_id || (stores[0]?.id || 'store-1'),
+      store_name: prod.store_name || stores.find(s => s.id === prod.store_id)?.name || "Urgut Shahar Mebel Markazi",
+      store_phone: prod.store_phone || stores.find(s => s.id === prod.store_id)?.phone || '+998 90 123 45 67',
       material: prod.material || '',
       dimensions: prod.dimensions || '',
       stock: prod.stock ?? 10,
@@ -334,6 +367,9 @@ export const ManagerDashboard = () => {
       price: Number(productForm.price),
       discount_price: productForm.discount_price ? Number(productForm.discount_price) : null,
       category_id: productForm.category_id || categories[0]?.id || null,
+      store_id: productForm.store_id || editingProduct?.store_id || (stores[0]?.id || 'store-1'),
+      store_name: stores.find(s => s.id === (productForm.store_id || editingProduct?.store_id))?.name || editingProduct?.store_name || "Urgut Shahar Mebel Markazi",
+      store_phone: stores.find(s => s.id === (productForm.store_id || editingProduct?.store_id))?.phone || editingProduct?.store_phone || '+998 90 123 45 67',
       material: productForm.material,
       dimensions: productForm.dimensions,
       stock: Number(productForm.stock) || 0,
@@ -367,6 +403,71 @@ export const ManagerDashboard = () => {
     const matchesCategory = selectedCategory === 'ALL' || p.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // ==========================================
+  // DISCOUNTS REQUEST TO SUPER ADMIN HANDLERS
+  // ==========================================
+  const handleOpenRequestModal = (product = null) => {
+    setRequestForm({
+      product_id: product?.id || products[0]?.id || '',
+      store_id: product?.store_id || stores[0]?.id || '',
+      proposed_discount_price: product?.discount_price || (product ? Math.round(product.price * 0.85) : ''),
+      placement: 'discount_section',
+      manager_phone: user?.phone || '+998 90 123 45 67',
+      notes: ''
+    });
+    setRequestModalOpen(true);
+  };
+
+  const handleSendDiscountRequest = async (e) => {
+    e.preventDefault();
+    const product = products.find(p => p.id === requestForm.product_id);
+    if (!product) {
+      addToast('Iltimos, mahsulotni tanlang', 'warning');
+      return;
+    }
+    const propPrice = Number(requestForm.proposed_discount_price);
+    if (!propPrice || propPrice >= product.price) {
+      addToast("Taklif qilinayotgan chegirma narxi asl narxdan past bo'lishi lozim!", 'warning');
+      return;
+    }
+    const matchedStore = stores.find(s => s.id === (requestForm.store_id || product.store_id));
+    const req = {
+      product_id: product.id,
+      product_name: product.name,
+      product_image: product.images?.[0] || '',
+      current_price: product.price,
+      proposed_discount_price: propPrice,
+      store_id: matchedStore?.id || product.store_id || stores[0]?.id || 'store-1',
+      store_name: matchedStore?.name || product.store_name || "Urgut Mebel Do'koni",
+      manager_name: user?.name || "Do'kon Menejeri",
+      manager_phone: requestForm.manager_phone || '+998 90 123 45 67',
+      placement: requestForm.placement || 'discount_section',
+      notes: requestForm.notes || '',
+      status: 'PENDING'
+    };
+    addToast("Super Adminga so'rov yuborilmoqda...", 'info');
+    await dataService.saveDiscountRequest(req);
+    setRequestModalOpen(false);
+    setRequestForm({
+      product_id: '',
+      store_id: '',
+      proposed_discount_price: '',
+      placement: 'discount_section',
+      manager_phone: user?.phone || '+998 90 123 45 67',
+      notes: ''
+    });
+    addToast("Super Adminga so'rov muvaffaqiyatli yo'llandi!", 'success');
+    loadData();
+  };
+
+  const handleDeleteDiscountRequest = async (id) => {
+    if (window.confirm("Ushbu so'rovni bekor qilmoqchimisiz?")) {
+      await dataService.deleteDiscountRequest(id);
+      addToast("So'rov o'chirildi", 'info');
+      loadData();
+    }
+  };
 
   // ==========================================
   // CRAFTSMEN HANDLERS (MENEDJER QO'SHADI VA BOSHQARADI)
@@ -1205,24 +1306,153 @@ export const ManagerDashboard = () => {
         )}
 
         {/* ========================================================= */}
-        {/* TAB: CHEGIRMALAR VA AKSIYALAR BOSHQARUVI                  */}
+        {/* TAB: CHEGIRMALAR VA SUPER ADMINGA SO'ROVLAR               */}
         {/* ========================================================= */}
         {activeMainTab === 'discounts' && (
           <div>
-            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '1.25rem 1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+            {/* 1. SUPER ADMINGA SO'ROV YUBORISH SECTION */}
+            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)', marginBottom: '2rem', backgroundColor: 'var(--bg-card)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.2rem 0.65rem', borderRadius: 'var(--radius-full)', backgroundColor: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+                    <Send size={13} /> DO‘KON MENEJERI • SUPER ADMINGA MUROJAAT
+                  </div>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                    Chegirmalar & Joylashtirish So‘rovlari
+                  </h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.3rem', maxWidth: '650px' }}>
+                    Mebelingizni chegirmalar bo‘limiga yoki bosh sahifadagi Top 10 Trend hamda saralangan kolleksiyalarga joylashtirish uchun Super Adminga rasmiy so‘rov yuboring.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenRequestModal(null)}
+                  className="btn btn-primary"
+                  style={{ gap: '0.5rem', fontWeight: 700 }}
+                >
+                  <Plus size={16} /> Super Adminga So‘rov Yuborish
+                </button>
+              </div>
+
+              {/* Submitted Requests Table */}
+              <div className="table-responsive">
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+                  <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <tr>
+                      <th style={{ padding: '0.75rem 1rem' }}>Mebel nomi</th>
+                      <th style={{ padding: '0.75rem' }}>Asl Narx</th>
+                      <th style={{ padding: '0.75rem' }}>Taklif Qilingan Chegirma</th>
+                      <th style={{ padding: '0.75rem' }}>So‘ralgan Joy</th>
+                      <th style={{ padding: '0.75rem' }}>Izoh & Admin Javobi</th>
+                      <th style={{ padding: '0.75rem' }}>Holat</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Amal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {discountRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                          <div style={{ fontSize: '2rem', marginBottom: '0.35rem' }}>📝</div>
+                          <div style={{ fontWeight: 700 }}>Hozircha hech qanday so‘rov yuborilmagan</div>
+                          <div style={{ fontSize: '0.8rem' }}>Yuqoridagi tugma orqali mahsulotingizni chegirma yoki trendga chiqarishni so‘rang</div>
+                        </td>
+                      </tr>
+                    ) : (
+                      discountRequests.map((req) => {
+                        const isPending = req.status === 'PENDING';
+                        const isApproved = req.status === 'APPROVED';
+                        const isRejected = req.status === 'REJECTED';
+
+                        const placementNames = {
+                          discount_section: "Chegirmalar bo‘limi",
+                          hero_collection: "Asosiy Sahifa Karuseli",
+                          trending: "Top 10 Trend Mebellari"
+                        };
+
+                        return (
+                          <tr key={req.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '0.75rem 1rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                                <img
+                                  src={req.product_image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                                  alt=""
+                                  style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover' }}
+                                />
+                                <div style={{ fontWeight: 700 }}>{req.product_name}</div>
+                              </div>
+                            </td>
+                            <td style={{ padding: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                              {Number(req.current_price).toLocaleString()} so‘m
+                            </td>
+                            <td style={{ padding: '0.75rem', fontWeight: 800, color: 'var(--wood-amber)' }}>
+                              {Number(req.proposed_discount_price).toLocaleString()} so‘m
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span style={{ backgroundColor: 'rgba(250, 109, 88, 0.1)', color: 'var(--figma-coral)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700, fontSize: '0.74rem' }}>
+                                {placementNames[req.placement] || req.placement}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem', maxWidth: '240px', fontSize: '0.8rem' }}>
+                              {req.notes && <div style={{ color: 'var(--text-muted)' }}>{req.notes}</div>}
+                              {req.admin_feedback && (
+                                <div style={{ marginTop: '0.25rem', color: isApproved ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                                  Admin: {req.admin_feedback}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {isPending && (
+                                <span style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#d97706', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <Clock size={11} /> Kutilmoqda
+                                </span>
+                              )}
+                              {isApproved && (
+                                <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <CheckCircle2 size={11} /> Tasdiqlangan
+                                </span>
+                              )}
+                              {isRejected && (
+                                <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', fontWeight: 700, fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <X size={11} /> Rad etilgan
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDiscountRequest(req.id)}
+                                className="btn btn-secondary btn-sm"
+                                style={{ color: '#ef4444' }}
+                                title="So‘rovni o‘chirish"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 2. AMALDAGI CHEGIRMALAR JADVALI */}
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '1.25rem 1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
               <div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Chegirmalar & Aksiyalar Boshqaruvi</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                  Katalogdagi mebellarga chegirmali narx belgilang va aksiyalarni boshqaring.
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>Saytda Faol Chegirmalar</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  Katalogda ayni paytda chegirma bilan sotilayotgan barcha mebellar ro‘yxati.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleOpenAddDiscount(null)}
-                className="btn btn-primary"
+                className="btn btn-secondary"
                 style={{ gap: '0.5rem' }}
               >
-                <Plus size={16} /> Mebelga Chegirma Qo‘shish
+                <Plus size={16} /> Chegirmali Narx Belgilash
               </button>
             </div>
 
@@ -1243,7 +1473,7 @@ export const ManagerDashboard = () => {
                       <td colSpan={5} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                         <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏷️</div>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>Hozirda chegirmadagi mebellar yo‘q</h4>
-                        <p style={{ fontSize: '0.85rem' }}>Yuqoridagi tugma orqali istalgan mebelga aksiya yoki chegirma belgilang</p>
+                        <p style={{ fontSize: '0.85rem' }}>Super Adminga so‘rov yuborish orqali aksiyalarni faollashtiring</p>
                       </td>
                     </tr>
                   ) : (
@@ -1761,6 +1991,30 @@ export const ManagerDashboard = () => {
                   onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                   className="form-input"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Tegishli Mebel Do‘koni *</label>
+                <select
+                  value={productForm.store_id || ''}
+                  onChange={(e) => {
+                    const sel = stores.find((s) => s.id === e.target.value);
+                    setProductForm({
+                      ...productForm,
+                      store_id: e.target.value,
+                      store_name: sel?.name || '',
+                      store_phone: sel?.phone || ''
+                    });
+                  }}
+                  className="form-select"
+                >
+                  <option value="">Do‘konni tanlang</option>
+                  {stores.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.address})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -2386,6 +2640,151 @@ export const ManagerDashboard = () => {
                   style={{ flex: 1 }}
                 >
                   Chegirmani Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: SUPER ADMINGA CHEGIRMA VA JOYLASHTIRISH SO'ROVI    */}
+      {/* ========================================================= */}
+      {requestModalOpen && (
+        <div className="modal-overlay" onClick={() => setRequestModalOpen(false)}>
+          <div
+            className="modal-content"
+            style={{ maxWidth: '580px', padding: '2rem' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Send size={18} color="var(--figma-coral)" />
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                  Super Adminga Chegirma So‘rovi Yuborish
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRequestModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+              Do‘koningiz mebeliga chegirma berish yoki uni Bosh sahifadagi Top 10 Trend hamda saralangan kolleksiyalarga joylashtirish bo‘yicha Super Adminga murojaat qiling.
+            </p>
+
+            <form onSubmit={handleSendDiscountRequest}>
+              <div className="form-group">
+                <label className="form-label">Mebelni Tanlang *</label>
+                <select
+                  required
+                  value={requestForm.product_id}
+                  onChange={(e) => {
+                    const selected = products.find((p) => p.id === e.target.value);
+                    setRequestForm({
+                      ...requestForm,
+                      product_id: e.target.value,
+                      proposed_discount_price: selected?.discount_price || (selected ? Math.round(selected.price * 0.85) : '')
+                    });
+                  }}
+                  className="form-select"
+                >
+                  <option value="">Mebelni tanlang</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — Asl narxi: {Number(p.price).toLocaleString()} so‘m
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Qaysi Do‘kon Nomidan? *</label>
+                <select
+                  required
+                  value={requestForm.store_id}
+                  onChange={(e) => setRequestForm({ ...requestForm, store_id: e.target.value })}
+                  className="form-select"
+                >
+                  <option value="">Do‘konni tanlang</option>
+                  {stores.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.address})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Taklif Qilinayotgan Chegirma Narxi (so‘m) *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1000"
+                    placeholder="Masalan: 8500000"
+                    value={requestForm.proposed_discount_price}
+                    onChange={(e) => setRequestForm({ ...requestForm, proposed_discount_price: e.target.value })}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Qayerga Joylashtirishni So‘raysiz? *</label>
+                  <select
+                    value={requestForm.placement}
+                    onChange={(e) => setRequestForm({ ...requestForm, placement: e.target.value })}
+                    className="form-select"
+                  >
+                    <option value="discount_section">Chegirmalar bo‘limiga</option>
+                    <option value="hero_collection">Bosh sahifa karuseliga (Autumn Collection)</option>
+                    <option value="trending">Top 10 Trend Mebellari Reytingiga</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Menedjer Bog‘lanish Telefoni *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="+998 90 123 45 67"
+                  value={requestForm.manager_phone}
+                  onChange={(e) => setRequestForm({ ...requestForm, manager_phone: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Super Adminga Murojaat Xati / Izoh</label>
+                <textarea
+                  rows={3}
+                  placeholder="Masalan: Ushbu modelimizga 15% chegirma berib, xaridorlar oqimini oshirish maqsadida Top 10 Trend mebellariga joylashtirishingizni so‘raymiz..."
+                  value={requestForm.notes}
+                  onChange={(e) => setRequestForm({ ...requestForm, notes: e.target.value })}
+                  className="form-textarea"
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setRequestModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1.5, gap: '0.5rem', fontWeight: 750 }}
+                >
+                  <Send size={15} /> So‘rovni Yuborish
                 </button>
               </div>
             </form>

@@ -11,7 +11,9 @@ import {
   Filter,
   X,
   SlidersHorizontal,
-  RotateCcw
+  RotateCcw,
+  Store,
+  Star
 } from 'lucide-react';
 
 export const FurnitureCatalog = () => {
@@ -20,14 +22,17 @@ export const FurnitureCatalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedStore, setSelectedStore] = useState(searchParams.get('store') || 'all');
   const [maxPrice, setMaxPrice] = useState(30000000);
   const [selectedColor, setSelectedColor] = useState('all');
-  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  // Default sort is by accumulated star ratings (Highest stars first)
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'rating_desc');
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Mobile filter sidebar toggle
@@ -36,12 +41,14 @@ export const FurnitureCatalog = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [prodList, catList] = await Promise.all([
+        const [prodList, catList, storeList] = await Promise.all([
           dataService.getProducts(),
-          dataService.getCategories()
+          dataService.getCategories(),
+          dataService.getStores()
         ]);
         setProducts(prodList || []);
         setCategories(catList || []);
+        setStores(storeList || []);
       } catch (e) {
         console.error('Error loading products:', e);
       } finally {
@@ -90,6 +97,10 @@ export const FurnitureCatalog = () => {
       result = result.filter((p) => p.colors?.some((c) => c.toLowerCase().includes(selectedColor)));
     }
 
+    if (selectedStore !== 'all') {
+      result = result.filter((p) => p.store_id === selectedStore);
+    }
+
     result = result.filter((p) => (p.discount_price || p.price) <= maxPrice);
 
     switch (sortBy) {
@@ -102,21 +113,33 @@ export const FurnitureCatalog = () => {
       case 'name_asc':
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
+      case 'newest':
+        result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        break;
+      case 'rating_desc':
       default:
+        // "mebellar bo'limidagi elonlar yig'ilgan yulduzlar bo'yicha reyting shaklida chiqadi eng kam yulduz to'plagan elon pastga tushib ketaveradi"
+        result.sort((a, b) => {
+          const ratingA = Number(a.rating) || 0;
+          const ratingB = Number(b.rating) || 0;
+          if (ratingB !== ratingA) return ratingB - ratingA;
+          return (Number(b.reviews_count) || 0) - (Number(a.reviews_count) || 0);
+        });
         break;
     }
 
     return result;
-  }, [products, searchQuery, selectedCategory, selectedColor, maxPrice, sortBy]);
+  }, [products, searchQuery, selectedCategory, selectedStore, selectedColor, maxPrice, sortBy]);
 
   const displayedProducts = filteredProducts.slice(0, visibleCount);
 
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
+    setSelectedStore('all');
     setSelectedColor('all');
     setMaxPrice(30000000);
-    setSortBy('newest');
+    setSortBy('rating_desc');
     setSearchParams({});
   };
 
@@ -262,18 +285,20 @@ export const FurnitureCatalog = () => {
                 style={{
                   padding: '0.6rem 1.25rem',
                   border: '1px solid var(--border-subtle)',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius-sm)',
                   fontSize: '0.88rem',
                   backgroundColor: 'var(--bg-card)',
                   color: 'var(--text-main)',
                   outline: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontWeight: 600
                 }}
               >
-                <option value="newest">{t('catalog.sort_default', 'Yangi qo‘shilganlar')}</option>
+                <option value="rating_desc">⭐ {t('catalog.sort_rating', 'Yulduzlar bo‘yicha (Reyting: Yuqoridan pastga)')}</option>
                 <option value="price_asc">{t('catalog.sort_price_asc', 'Narx: Arzondan qimmatga')}</option>
                 <option value="price_desc">{t('catalog.sort_price_desc', 'Narx: Qimmatdan arzonga')}</option>
                 <option value="name_asc">{t('catalog.sort_name_asc', 'Nomi bo‘yicha (A-Z)')}</option>
+                <option value="newest">{t('catalog.sort_default', 'Yangi qo‘shilganlar')}</option>
               </select>
 
               <button
@@ -300,11 +325,11 @@ export const FurnitureCatalog = () => {
             {/* Left Filter Sidebar */}
             <aside className={`catalog-filter-sidebar ${mobileFilterOpen ? 'mobile-open' : ''}`}>
               {/* Categories */}
-              <div style={{ marginBottom: '2.5rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1.25rem' }}>
+              <div style={{ marginBottom: '2rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem' }}>
                   {t('categories.all_categories', 'Kategoriyalar')}
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   <button
                     type="button"
                     onClick={() => setSelectedCategory('all')}
@@ -342,6 +367,62 @@ export const FurnitureCatalog = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Stores Filter */}
+              {stores.length > 0 && (
+                <div style={{ marginBottom: '2rem' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Store size={16} style={{ color: 'var(--primary)' }} />
+                    {t('catalog.filter_by_store', 'Mebel Do‘konlari')}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStore('all')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        textAlign: 'left',
+                        fontSize: '0.88rem',
+                        fontWeight: selectedStore === 'all' ? 700 : 500,
+                        color: selectedStore === 'all' ? 'var(--figma-coral)' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      {t('catalog.all_stores', 'Barcha Do‘konlar')}
+                    </button>
+                    {stores.map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => setSelectedStore(st.id)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          textAlign: 'left',
+                          fontSize: '0.86rem',
+                          fontWeight: selectedStore === st.id ? 700 : 500,
+                          color: selectedStore === st.id ? 'var(--figma-coral)' : 'var(--text-muted)',
+                          cursor: 'pointer',
+                          padding: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {st.name}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, flexShrink: 0 }}>
+                          ★ {st.rating}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Color Swatches */}
               <div style={{ marginBottom: '2.5rem' }}>

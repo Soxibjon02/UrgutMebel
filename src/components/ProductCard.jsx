@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Star, Heart, ShoppingBag, Eye, CheckCircle2 } from 'lucide-react';
+import { Star, Heart, ShoppingBag, Eye, CheckCircle2, Store } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -120,6 +120,27 @@ export const ProductCard = ({ product }) => {
         }}
       >
         <div>
+          {/* Store Name Badge */}
+          {product.store_name && (
+            <div style={{ marginBottom: '0.35rem' }}>
+              <Link
+                to={product.store_id ? `/stores/${product.store_id}` : '/stores'}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  color: 'var(--primary)',
+                  textDecoration: 'none'
+                }}
+              >
+                <Store size={12} />
+                <span>{product.store_name}</span>
+              </Link>
+            </div>
+          )}
+
           {/* Rating & Availability */}
           <div
             style={{

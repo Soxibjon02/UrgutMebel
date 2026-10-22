@@ -12,7 +12,9 @@ import {
   initialFaqItems,
   initialCraftsmanRequests,
   initialContactMessages,
-  initialNewsletterSubscribers
+  initialNewsletterSubscribers,
+  initialStores,
+  initialDiscountRequests
 } from '../data/mockData';
 
 // Helper to get from local storage or fallback to initial
@@ -339,6 +341,171 @@ export const dataService = {
     );
     setStored('products', updated);
     return updated.find((p) => p.id === productId);
+  },
+
+  // Stores (Mebel Do'konlari)
+  async getStores() {
+    return getStored('stores', initialStores);
+  },
+
+  async getStoreById(id) {
+    const stores = await this.getStores();
+    return stores.find((s) => s.id === id || s.slug === id) || null;
+  },
+
+  async saveStore(store) {
+    const current = getStored('stores', initialStores);
+    const slug = store.slug || store.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `store-${Date.now()}`;
+    const newStore = store.id
+      ? { ...store, slug, updated_at: new Date().toISOString() }
+      : {
+          ...store,
+          id: `store-${Date.now()}`,
+          slug,
+          rating: store.rating || 5.0,
+          reviews_count: store.reviews_count || 0,
+          created_at: new Date().toISOString()
+        };
+
+    const updated = store.id
+      ? current.map((s) => (s.id === store.id ? { ...s, ...newStore } : s))
+      : [newStore, ...current];
+
+    setStored('stores', updated, true);
+    return updated;
+  },
+
+  async deleteStore(id) {
+    const current = getStored('stores', initialStores);
+    const updated = current.filter((s) => s.id !== id);
+    setStored('stores', updated, true);
+    return updated;
+  },
+
+  // Discount & Placement Requests (Do'kon Managerlari -> Super Admin)
+  async getDiscountRequests() {
+    return getStored('discount_requests', initialDiscountRequests);
+  },
+
+  async saveDiscountRequest(req) {
+    const current = getStored('discount_requests', initialDiscountRequests);
+    const newReq = req.id
+      ? { ...req, updated_at: new Date().toISOString() }
+      : {
+          ...req,
+          id: `dreq-${Date.now()}`,
+          status: 'PENDING',
+          created_at: new Date().toISOString()
+        };
+
+    const updated = req.id
+      ? current.map((r) => (r.id === req.id ? { ...r, ...newReq } : r))
+      : [newReq, ...current];
+
+    setStored('discount_requests', updated, true);
+    return updated;
+  },
+
+  async approveDiscountRequest(id, placement = 'discount_section', adminFeedback = '') {
+    const requests = getStored('discount_requests', initialDiscountRequests);
+    const target = requests.find((r) => r.id === id);
+    if (!target) return requests;
+
+    const updatedRequests = requests.map((r) =>
+      r.id === id
+        ? {
+            ...r,
+            status: 'APPROVED',
+            requested_placement: placement || r.requested_placement,
+            admin_feedback: adminFeedback || 'Tasdiqlandi va saytga joylandi.',
+            approved_at: new Date().toISOString()
+          }
+        : r
+    );
+    setStored('discount_requests', updatedRequests, true);
+
+    // Also update the target product's discount and promotion
+    if (target.product_id) {
+      const products = getStored('products', initialProducts);
+      const updatedProducts = products.map((p) => {
+        if (p.id === target.product_id) {
+          const updatedProd = {
+            ...p,
+            discount_price: target.requested_discount_price || p.discount_price,
+            is_featured: placement === 'hero_collection' ? true : p.is_featured,
+            is_trending: placement === 'trending_top10' ? true : p.is_trending
+          };
+          return updatedProd;
+        }
+        return p;
+      });
+      setStored('products', updatedProducts, true);
+    }
+
+    return updatedRequests;
+  },
+
+  async rejectDiscountRequest(id, adminFeedback = '') {
+    const requests = getStored('discount_requests', initialDiscountRequests);
+    const updated = requests.map((r) =>
+      r.id === id
+        ? {
+            ...r,
+            status: 'REJECTED',
+            admin_feedback: adminFeedback || 'Rad etildi.',
+            rejected_at: new Date().toISOString()
+          }
+        : r
+    );
+    setStored('discount_requests', updated, true);
+    return updated;
+  },
+
+  async deleteDiscountRequest(id) {
+    const requests = getStored('discount_requests', initialDiscountRequests);
+    const updated = requests.filter((r) => r.id !== id);
+    setStored('discount_requests', updated, true);
+    return updated;
+  },
+
+  // Top 10 Trending Products
+  async getTrendingTop10() {
+    const products = await this.getProducts();
+    // Prioritize products marked is_trending sorted by trending_rank or rating
+    const trending = products
+      .filter((p) => p.is_trending || p.trending_rank)
+      .sort((a, b) => (Number(a.trending_rank) || 99) - (Number(b.trending_rank) || 99));
+
+    if (trending.length >= 10) {
+      return trending.slice(0, 10);
+    }
+
+    // If less than 10 marked, fill with highest rated products
+    const otherProducts = products
+      .filter((p) => !trending.some((t) => t.id === p.id))
+      .sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+
+    return [...trending, ...otherProducts].slice(0, 10);
+  },
+
+  async updateTrendingRanking(orderedProductIds) {
+    const products = getStored('products', initialProducts);
+    const updated = products.map((p) => {
+      const rankIdx = orderedProductIds.indexOf(p.id);
+      if (rankIdx !== -1) {
+        return {
+          ...p,
+          is_trending: true,
+          trending_rank: rankIdx + 1
+        };
+      }
+      return {
+        ...p,
+        trending_rank: null
+      };
+    });
+    setStored('products', updated, true);
+    return updated;
   },
 
   // Craftsmen

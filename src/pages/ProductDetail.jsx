@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
 import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
+import { QuickBuyModal } from '../components/QuickBuyModal';
 import {
   Star,
   Heart,
@@ -19,7 +20,9 @@ import {
   MessageSquare,
   Send,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Store,
+  Phone
 } from 'lucide-react';
 
 export const ProductDetail = () => {
@@ -38,6 +41,7 @@ export const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [quickBuyOpen, setQuickBuyOpen] = useState(false);
 
   // Suggestions filter state
   const [suggestionCategory, setSuggestionCategory] = useState('all');
@@ -276,22 +280,124 @@ export const ProductDetail = () => {
               </div>
 
               {/* Exact Figma Full-Width Coral Button: Add To Cart > */}
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="btn-figma-coral"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  padding: '1.15rem'
-                }}
-              >
-                <span>{t('catalog.add_to_cart', 'Add To Cart')}</span>
-                <ChevronRight size={18} />
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="btn-figma-coral"
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    padding: '1.15rem'
+                  }}
+                >
+                  <span>{t('catalog.add_to_cart', 'Add To Cart')}</span>
+                  <ChevronRight size={18} />
+                </button>
+
+                {/* Quick Buy Button */}
+                <button
+                  type="button"
+                  onClick={() => setQuickBuyOpen(true)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    padding: '0.9rem',
+                    borderRadius: '2px',
+                    backgroundColor: 'rgba(250, 109, 88, 0.1)',
+                    color: 'var(--figma-coral)',
+                    border: '1.5px solid var(--figma-coral)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Zap size={18} />
+                  <span>{t('trending.quick_buy', '1 daqiqada xarid qilish')}</span>
+                </button>
+              </div>
+
+              {/* Store info card */}
+              {product.store_id && (
+                <div
+                  style={{
+                    marginTop: '1.5rem',
+                    padding: '1rem 1.15rem',
+                    backgroundColor: 'var(--bg-card)',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                    <div
+                      style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(250, 109, 88, 0.1)',
+                        color: 'var(--figma-coral)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <Store size={22} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {t('stores.store_label', "Mebel Do'koni")}
+                      </div>
+                      <Link
+                        to={`/stores/${product.store_id}`}
+                        style={{
+                          fontWeight: 750,
+                          fontSize: '0.95rem',
+                          color: 'var(--text-main)',
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem'
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {product.store_name || "Urgut Mebel Markazi"}
+                        </span>
+                        <ChevronRight size={14} color="var(--figma-coral)" />
+                      </Link>
+                    </div>
+                  </div>
+                  {product.store_phone && (
+                    <a
+                      href={`tel:${product.store_phone}`}
+                      className="btn btn-outline"
+                      style={{
+                        padding: '0.5rem 0.85rem',
+                        fontSize: '0.8rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        textDecoration: 'none',
+                        flexShrink: 0
+                      }}
+                    >
+                      <Phone size={13} />
+                      <span>{t('stores.call_btn', 'Aloqa')}</span>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -600,6 +706,13 @@ export const ProductDetail = () => {
           }
         }
       `}</style>
+
+      {/* Quick Buy Modal */}
+      <QuickBuyModal
+        isOpen={quickBuyOpen}
+        onClose={() => setQuickBuyOpen(false)}
+        product={product}
+      />
     </div>
   );
 };
