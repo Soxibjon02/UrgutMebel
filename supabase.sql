@@ -225,6 +225,78 @@ CREATE TABLE IF NOT EXISTS public.craftsman_finances (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 14. USTAGA TO'G'RIDAN-TO'G'RI BUYURTMA (CRAFTSMAN DIRECT REQUESTS)
+CREATE TABLE IF NOT EXISTS public.craftsman_requests (
+  id TEXT PRIMARY KEY,
+  request_number TEXT NOT NULL UNIQUE,
+  craftsman_id TEXT NOT NULL,
+  craftsman_name TEXT,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  customer_telegram TEXT,
+  furniture_type TEXT,
+  description TEXT NOT NULL,
+  preferred_date TEXT,
+  estimated_budget TEXT,
+  files JSONB DEFAULT '[]'::jsonb,
+  status TEXT NOT NULL DEFAULT 'NEW', -- NEW, IN_PROGRESS, COMPLETED, CANCELLED
+  craftsman_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 15. BOG'LANISH VA MUROJAATLAR (CONTACT FORM MESSAGES)
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'NEW', -- NEW, READ, REPLIED, ARCHIVED
+  reply_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 16. OBUNACHILAR / JOIN US (NEWSLETTER SUBSCRIBERS)
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  full_name TEXT,
+  source TEXT DEFAULT 'figma_join_us',
+  discount_code TEXT DEFAULT 'URGUT10',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 17. BLOG MAQOLALARI (BLOG POSTS - FIGMA INTERIOR NEWS)
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  excerpt TEXT NOT NULL,
+  content TEXT NOT NULL,
+  cover_image TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'Dizayn',
+  author_name TEXT NOT NULL DEFAULT 'Urgut Mebel Dizayneri',
+  author_avatar TEXT,
+  read_time TEXT DEFAULT '5 daqiqa',
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 18. TEZ-TEZ SO'RALADIGAN SAVOLLAR (FAQ ITEMS)
+CREATE TABLE IF NOT EXISTS public.faq_items (
+  id TEXT PRIMARY KEY,
+  category TEXT NOT NULL DEFAULT 'Umumiy savollar',
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  display_order INT NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ====================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES - PERMISSIVE FOR APPLICATION
 -- ====================================================================
@@ -240,6 +312,11 @@ ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.craftsman_works ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.craftsman_finances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.craftsman_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.faq_items ENABLE ROW LEVEL SECURITY;
 
 -- Drop old policies if they exist
 DO $$ BEGIN
@@ -255,6 +332,11 @@ DO $$ BEGIN
   DROP POLICY IF EXISTS "Public users access" ON public.users;
   DROP POLICY IF EXISTS "Public craftsman_works access" ON public.craftsman_works;
   DROP POLICY IF EXISTS "Public craftsman_finances access" ON public.craftsman_finances;
+  DROP POLICY IF EXISTS "Public craftsman_requests access" ON public.craftsman_requests;
+  DROP POLICY IF EXISTS "Public contact_messages access" ON public.contact_messages;
+  DROP POLICY IF EXISTS "Public newsletter_subscribers access" ON public.newsletter_subscribers;
+  DROP POLICY IF EXISTS "Public blog_posts access" ON public.blog_posts;
+  DROP POLICY IF EXISTS "Public faq_items access" ON public.faq_items;
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- Create open application policies
@@ -270,6 +352,11 @@ CREATE POLICY "Public banners access" ON public.banners FOR ALL USING (true) WIT
 CREATE POLICY "Public users access" ON public.users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public craftsman_works access" ON public.craftsman_works FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public craftsman_finances access" ON public.craftsman_finances FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public craftsman_requests access" ON public.craftsman_requests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public contact_messages access" ON public.contact_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public newsletter_subscribers access" ON public.newsletter_subscribers FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public blog_posts access" ON public.blog_posts FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public faq_items access" ON public.faq_items FOR ALL USING (true) WITH CHECK (true);
 
 -- Grant privileges to anon and authenticated roles
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;

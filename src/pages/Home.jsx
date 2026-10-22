@@ -1,549 +1,829 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { useSettings } from '../context/SettingsContext';
-import { ProductCard } from '../components/ProductCard';
-import { CategoryCard } from '../components/CategoryCard';
-import { CraftsmanCard } from '../components/CraftsmanCard';
+import { useNotification } from '../context/NotificationContext';
+import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import { CraftsmanRequestModal } from '../components/CraftsmanRequestModal';
 import {
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   Truck,
-  PenTool,
-  CheckCircle,
-  Star,
-  Quote,
-  Sliders,
-  ChevronRight
+  Sparkles,
+  Hammer,
+  CheckCircle2,
+  Check
 } from 'lucide-react';
 
 export const Home = () => {
   const { settings } = useSettings();
+  const { addToast } = useNotification();
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [craftsmen, setCraftsmen] = useState([]);
-  const [banners, setBanners] = useState([]);
-  const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+  const [blogPosts, setBlogPosts] = useState([]);
   const [selectedCraftsman, setSelectedCraftsman] = useState(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+
+  // Join Us Newsletter State
+  const [joinName, setJoinName] = useState('');
+  const [joinEmail, setJoinEmail] = useState('');
+  const [joinSubmitted, setJoinSubmitted] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
 
   useEffect(() => {
     const loadHomeData = async () => {
       try {
-        const [prodList, catList, craftList, banList] = await Promise.all([
+        const [prodList, catList, blogList] = await Promise.all([
           dataService.getProducts(),
           dataService.getCategories(),
-          dataService.getCraftsmen(),
-          dataService.getBanners()
+          dataService.getBlogPosts()
         ]);
         setProducts(prodList || []);
         setCategories(catList || []);
-        setCraftsmen(craftList || []);
-        setBanners(banList || []);
+        setBlogPosts(blogList || []);
       } catch (err) {
-        console.error("Error loading home data:", err);
-      } finally {
-        setLoading(false);
+        console.error('Error loading home data:', err);
       }
     };
-
     loadHomeData();
   }, []);
 
-  // Filter product groups
-  const newArrivals = products.filter((p) => p.is_new).slice(0, 4);
-  const popularProducts = products.filter((p) => p.is_popular).slice(0, 4);
-  const livingRoomProducts = products.filter((p) => p.category_id === 'cat-1' || p.tags?.includes('mehmonxona')).slice(0, 4);
-  const bedroomProducts = products.filter((p) => p.category_id === 'cat-2' || p.tags?.includes('yotoqxona')).slice(0, 4);
-  const kitchenProducts = products.filter((p) => p.category_id === 'cat-3' || p.tags?.includes('oshxona')).slice(0, 4);
-  const officeProducts = products.filter((p) => p.category_id === 'cat-4' || p.tags?.includes('ofis')).slice(0, 4);
-  const childrenProducts = products.filter((p) => p.category_id === 'cat-5' || p.tags?.includes('bolalar')).slice(0, 4);
-  const discountedProducts = products.filter((p) => Boolean(p.discount_price)).slice(0, 4);
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    if (!joinEmail || !joinEmail.includes('@')) {
+      addToast('Iltimos, haqiqiy email kiriting!', 'warning');
+      return;
+    }
+    setJoinLoading(true);
+    try {
+      await dataService.subscribeNewsletter(joinEmail, joinName || 'Mijoz', 'home_join_us');
+      setJoinSubmitted(true);
+      setJoinEmail('');
+      setJoinName('');
+      addToast('Ajoyib! Sizga 10% chegirma kodi taqdim etildi.', 'success');
+    } catch (err) {
+      addToast('Xatolik yuz berdi. Qaytadan urinib ko‘ring.', 'error');
+    } finally {
+      setJoinLoading(false);
+    }
+  };
 
-  // Hero section is DIRECTLY driven by Admin settings (never overridden by stale mock banners)
-  const heroImage = settings.hero_banner_image || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80";
-  const heroTitle = settings.hero_title || `${settings.site_name || "Urgut Mebel Markazi"} - Zamonaviy va Buyurtma Mebellar`;
-  const heroSubtitle = settings.hero_subtitle || settings.site_tagline || "Urgutning asriy duradgorlik san'ati va eng so'nggi zamonaviy dizayn texnologiyalari birlashgan maskan.";
-  const heroBadge = settings.hero_badge || "Yangi 2026 To‘plami";
-  const heroBtnText = settings.hero_btn_text || "O‘z O‘lchamingizda Buyurtma Bering";
-  const heroBtnLink = settings.hero_btn_link || "/custom-order";
-
-  const handleCraftsmanRequest = (craftsman) => {
-    setSelectedCraftsman(craftsman);
-    setIsRequestModalOpen(true);
+  const featuredPost = blogPosts[0] || {
+    id: 'post-1',
+    title: 'Living room and lighting ideas that will inspire you this Winter.',
+    excerpt: 'Yashash xonangizni yorug‘lik va qulay mebellar bilan shinam qilish sirlari...',
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80',
+    author: 'Soxibjon Usta',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
+    date: '14 Jun 2026'
   };
 
   return (
-    <div>
-      {/* 1. PREMIUM HERO SECTION */}
-      <section
-        style={{
-          position: 'relative',
-          minHeight: '580px',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: 'var(--bg-dark)',
-          overflow: 'hidden',
-          color: '#ffffff'
-        }}
-      >
-        {/* Background Image with Overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url('${heroImage}')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.38,
-            transition: 'background-image 0.5s ease-in-out'
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to right, rgba(20,20,19,0.95) 0%, rgba(20,20,19,0.7) 60%, rgba(20,20,19,0.4) 100%)'
-          }}
-        />
-
-        <div className="container" style={{ position: 'relative', zIndex: 2, padding: '4.5rem 1.5rem' }}>
-          <div style={{ maxWidth: '680px' }}>
+    <div style={{ backgroundColor: '#FFFFFF', color: '#18191D', minHeight: '100vh' }}>
+      
+      {/* ==============================================================
+          1. FIGMA SPLIT HERO SECTION (Chairs & Stools)
+          ============================================================== */}
+      <section style={{ padding: '2rem 1.5rem 4rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr',
+              minHeight: '460px',
+              backgroundColor: '#FAFAF8',
+              borderRadius: '2px',
+              overflow: 'hidden'
+            }}
+            className="figma-split-hero"
+          >
+            {/* Left Column: Soft Pastel Blue with Furniture Image */}
             <div
               style={{
-                display: 'inline-flex',
+                backgroundColor: 'var(--figma-pastel-blue)',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: 'rgba(194, 109, 46, 0.25)',
-                backdropFilter: 'blur(6px)',
-                padding: '0.4rem 1rem',
-                borderRadius: 'var(--radius-full)',
-                color: 'var(--wood-light)',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                marginBottom: '1.25rem',
-                border: '1px solid rgba(212, 163, 89, 0.4)'
+                justifyContent: 'center',
+                position: 'relative',
+                padding: '2.5rem',
+                minHeight: '360px'
               }}
             >
-              <Sparkles size={15} color="var(--gold-accent)" />
-              <span>{heroBadge}</span>
-            </div>
-
-            <h1
-              style={{
-                fontSize: 'clamp(2.3rem, 5vw, 3.8rem)',
-                fontWeight: 800,
-                lineHeight: 1.15,
-                color: '#ffffff',
-                marginBottom: '1.25rem',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              {heroTitle}
-            </h1>
-
-            <p
-              style={{
-                fontSize: 'clamp(1rem, 1.8vw, 1.18rem)',
-                color: '#d6d3d1',
-                lineHeight: 1.6,
-                marginBottom: '2rem'
-              }}
-            >
-              {heroSubtitle}
-            </p>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              <Link to={heroBtnLink} className="btn btn-primary btn-lg">
-                <span>{heroBtnText}</span>
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/furniture"
-                className="btn btn-secondary btn-lg"
+              <img
+                src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=1000&q=80"
+                alt="Chairs and Stools"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  color: '#fff',
-                  borderColor: 'rgba(255,255,255,0.2)'
+                  maxWidth: '85%',
+                  maxHeight: '380px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.12))'
                 }}
-              >
-                <span>Katalogni Ko‘rish</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. FURNITURE CATEGORIES */}
-      <section style={{ padding: '4.5rem 0 3rem' }}>
-        <div className="container">
-          <div className="section-header">
-            <div>
-              <span className="section-tag"><Sparkles size={14} /> To‘plamlar</span>
-              <h2 className="section-title">Mebel Kategoriyalari</h2>
-              <p className="section-subtitle">Xonadoningizning har bir burchagi uchun maxsus loyihalashtirilgan mebel turlari</p>
-            </div>
-            <Link to="/categories" className="btn btn-secondary btn-sm">
-              Barcha kategoriyalar <ChevronRight size={16} />
-            </Link>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {categories.map((cat) => (
-              <CategoryCard key={cat.id} category={cat} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. NEW ARRIVALS */}
-      {newArrivals.length > 0 && (
-        <section style={{ padding: '3.5rem 0' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Yangi to‘plam</span>
-                <h2 className="section-title">Yangi Chiqqan Mebellar</h2>
-                <p className="section-subtitle">Urgut ustalarining eng so‘nggi dizayndagi mebel namunalari</p>
-              </div>
-              <Link to="/furniture?sort=newest" className="btn btn-secondary btn-sm">
-                Hammasini ko‘rish <ChevronRight size={16} />
-              </Link>
+              />
             </div>
 
-            <div className="grid-products">
-              {newArrivals.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 4. POPULAR FURNITURE */}
-      {popularProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Eng ko‘p tanlangan</span>
-                <h2 className="section-title">Ommabop va Mashhur Mebellar</h2>
-                <p className="section-subtitle">Mijozlarimiz eng ko‘p buyurtma berayotgan va yuqori baholagan modellar</p>
-              </div>
-              <Link to="/furniture?sort=popular" className="btn btn-secondary btn-sm">
-                Hammasini ko‘rish <ChevronRight size={16} />
-              </Link>
-            </div>
-
-            <div className="grid-products">
-              {popularProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 11. CUSTOM ORDER PROMOTIONAL SECTION */}
-      <section style={{ padding: '4.5rem 0' }}>
-        <div className="container">
-          <div className="custom-order-promo-card">
-            <div style={{ padding: 'clamp(1.5rem, 5vw, 3.5rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div
+            {/* Right Column: Soft Warm Cream with Text and Coral Button */}
+            <div
+              style={{
+                backgroundColor: 'var(--figma-pastel-peach)',
+                padding: '4rem 3.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'flex-start'
+              }}
+            >
+              <span
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  color: 'var(--gold-accent)',
-                  fontSize: '0.82rem',
+                  color: 'var(--figma-coral)',
+                  fontSize: '0.85rem',
                   fontWeight: 700,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: '0.12em',
                   marginBottom: '0.75rem'
                 }}
               >
-                <Sliders size={16} /> Individual Loyihalar
-              </div>
-              <h2
+                New Collection
+              </span>
+              <h1
                 style={{
-                  fontSize: 'clamp(1.5rem, 3.5vw, 2.5rem)',
+                  fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
                   fontWeight: 800,
-                  color: 'var(--text-main)',
-                  marginBottom: '1rem',
-                  lineHeight: 1.25
+                  color: '#18191D',
+                  lineHeight: 1.15,
+                  margin: '0 0 1rem'
                 }}
               >
-                O‘zingiz Istagan O‘lchamda Mebel Yasating
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-                Xonangiz o‘lchamiga to‘liq mos tushadigan, sifatli tabiiy yog‘och yoki MDF materialidan individual buyurtma bering. Mutaxassislarimiz narxni tezkor hisoblab berishadi.
+                Chairs &amp; Stools
+              </h1>
+              <p
+                style={{
+                  color: '#6B7280',
+                  fontSize: '1rem',
+                  lineHeight: 1.6,
+                  maxWidth: '380px',
+                  marginBottom: '2rem'
+                }}
+              >
+                Uyingiz va ofisingiz uchun zamonaviy, qulay va uzoq yillik sifatga ega o‘rindiqlar to‘plami.
               </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
-                  <CheckCircle size={18} color="var(--status-success)" />
-                  <span>Xonadon o‘lchami va chizmalarni yuklash imkoniyati</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
-                  <CheckCircle size={18} color="var(--status-success)" />
-                  <span>Menedjer tomonidan shaffof narx kalkulyatsiyasi</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
-                  <CheckCircle size={18} color="var(--status-success)" />
-                  <span>Ishlab chiqarish jarayonini onlayn kuzatish</span>
-                </div>
-              </div>
-
-              <div>
-                <Link to="/custom-order" className="btn btn-primary btn-lg" style={{ width: 'fit-content', maxWidth: '100%' }}>
-                  <PenTool size={18} />
-                  <span>Maxsus Buyurtma Shaklini To‘ldirish</span>
-                </Link>
-              </div>
+              <Link to="/furniture" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
+                SEE DETAILS &gt;
+              </Link>
             </div>
-
-            <div className="custom-order-promo-img" />
           </div>
         </div>
       </section>
 
-      {/* 5. LIVING ROOM FURNITURE */}
-      {livingRoomProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Mehmonxona</span>
-                <h2 className="section-title">Mehmonxona Mebellari</h2>
-                <p className="section-subtitle">Shinamlik va hashamat baxsh etuvchi divanlar va garniturlar</p>
-              </div>
-              <Link to="/furniture?category=mehmonxona" className="btn btn-secondary btn-sm">
-                Barcha mehmonxona mebellari <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {livingRoomProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 6. BEDROOM FURNITURE */}
-      {bedroomProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Yotoqxona</span>
-                <h2 className="section-title">Yotoqxona Mebellari</h2>
-                <p className="section-subtitle">Sokin va orombaxsh uyqu uchun ortopedik karavotlar va shkaflar</p>
-              </div>
-              <Link to="/furniture?category=yotoqxona" className="btn btn-secondary btn-sm">
-                Barcha yotoqxona mebellari <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {bedroomProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 7. KITCHEN FURNITURE */}
-      {kitchenProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Oshxona</span>
-                <h2 className="section-title">Oshxona Mebellari</h2>
-                <p className="section-subtitle">Zamonaviy kvarts va akril fasadli garniturlar hamda stollar</p>
-              </div>
-              <Link to="/furniture?category=oshxona" className="btn btn-secondary btn-sm">
-                Barcha oshxona mebellari <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {kitchenProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 8. OFFICE FURNITURE */}
-      {officeProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Ofis & Ish</span>
-                <h2 className="section-title">Ofis va Ish Mebellari</h2>
-                <p className="section-subtitle">Ergonomik stollar va qulay kreslolar</p>
-              </div>
-              <Link to="/furniture?category=ofis" className="btn btn-secondary btn-sm">
-                Barcha ofis mebellari <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {officeProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 9. CHILDREN'S FURNITURE */}
-      {childrenProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag">Bolalar xonasi</span>
-                <h2 className="section-title">Bolalar Mebellari</h2>
-                <p className="section-subtitle">Ekologik toza va xavfsiz materiallardan tayyorlangan modellar</p>
-              </div>
-              <Link to="/furniture?category=bolalar" className="btn btn-secondary btn-sm">
-                Barcha bolalar mebellari <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {childrenProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 10. DISCOUNTED FURNITURE */}
-      {discountedProducts.length > 0 && (
-        <section style={{ padding: '3.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <span className="section-tag" style={{ color: '#ef4444' }}>Maxsus Narxlar</span>
-                <h2 className="section-title">Chegirmadagi Mebellar</h2>
-                <p className="section-subtitle">Cheklangan muddatli qulay takliflar va aksiyadagi to‘plamlar</p>
-              </div>
-              <Link to="/furniture?discount=true" className="btn btn-secondary btn-sm">
-                Barcha chegirmalar <ChevronRight size={16} />
-              </Link>
-            </div>
-            <div className="grid-products">
-              {discountedProducts.map((prod) => (
-                <ProductCard key={prod.id} product={prod} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 12. CRAFTSMEN PREVIEW */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-secondary)' }}>
-        <div className="container">
-          <div className="section-header">
+      {/* ==============================================================
+          2. FIGMA ASYMMETRIC PASTEL CATEGORY MOSAIC ("Up to 20% off")
+          ============================================================== */}
+      <section style={{ padding: '3rem 1.5rem 5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '320px 1fr',
+              gap: '3.5rem',
+              alignItems: 'flex-start'
+            }}
+          >
+            {/* Left Column: Heading & Category Navigation */}
             <div>
-              <span className="section-tag"><Sparkles size={14} /> Mohir Ustalar</span>
-              <h2 className="section-title">Urgut Duradgorlari va Ustaxonalar</h2>
-              <p className="section-subtitle">Ko‘p yillik tajribaga ega hunarmandlarimiz bilan to‘g‘ridan-to‘g‘ri hamkorlik qiling</p>
-            </div>
-            <Link to="/craftsmen" className="btn btn-secondary btn-sm">
-              Barcha ustalarni ko‘rish <ChevronRight size={16} />
-            </Link>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
-            {craftsmen.slice(0, 3).map((craftsman) => (
-              <CraftsmanCard
-                key={craftsman.id}
-                craftsman={craftsman}
-                onRequestClick={handleCraftsmanRequest}
+              <span
+                style={{
+                  color: 'var(--figma-coral)',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                On sale
+              </span>
+              <h2
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  color: '#18191D',
+                  lineHeight: 1.2,
+                  marginBottom: '1rem'
+                }}
+              >
+                Up to<br />20% off
+              </h2>
+              <div
+                style={{
+                  width: '45px',
+                  height: '2px',
+                  backgroundColor: 'var(--figma-coral)',
+                  marginBottom: '2rem'
+                }}
               />
-            ))}
+
+              {/* Categories list links from Figma */}
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}
+              >
+                {[
+                  { name: 'Chairs & Stools', query: 'stul' },
+                  { name: 'Accessories', query: 'aksessuar' },
+                  { name: 'Sofas and Armchairs', query: 'divan' },
+                  { name: 'Tables', query: 'stol' },
+                  { name: 'Outdoor', query: 'bog' }
+                ].map((item, idx) => (
+                  <li key={idx}>
+                    <button
+                      onClick={() => navigate(`/furniture?search=${encodeURIComponent(item.query)}`)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        fontSize: '0.95rem',
+                        fontWeight: idx === 0 ? 700 : 500,
+                        color: idx === 0 ? '#18191D' : '#6B7280',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = 'var(--figma-coral)')}
+                      onMouseLeave={(e) =>
+                        (e.target.style.color = idx === 0 ? '#18191D' : '#6B7280')
+                      }
+                    >
+                      {item.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right Column: Asymmetric Mosaic of Pastel Furniture Cards with White Badge Tags */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridAutoRows: '190px',
+                gap: '1.25rem'
+              }}
+            >
+              {/* Card 1: Green Sage (Accessories) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '1 / 2',
+                  gridRow: '1 / 3',
+                  backgroundColor: 'var(--figma-pastel-mint)',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'transform 0.25s ease'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.45rem 1rem',
+                    borderRadius: '2px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    alignSelf: 'flex-start',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#18191D',
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  Accessories
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=400&q=80"
+                  alt="Accessories"
+                  style={{
+                    width: '90%',
+                    height: '180px',
+                    objectFit: 'contain',
+                    alignSelf: 'center'
+                  }}
+                />
+              </div>
+
+              {/* Card 2: Sky Blue (Sofas & Armchairs) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '2 / 4',
+                  gridRow: '1 / 2',
+                  backgroundColor: 'var(--figma-pastel-blue)',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div>
+                  <div
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      padding: '0.45rem 1rem',
+                      borderRadius: '2px',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      display: 'inline-block',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      color: '#18191D',
+                      marginBottom: '0.35rem'
+                    }}
+                  >
+                    Sofas and Armchairs
+                  </div>
+                  <p style={{ margin: '0.25rem 0 0', color: '#6B7280', fontSize: '0.8rem' }}>
+                    Yumshoq mebellar kolleksiyasi
+                  </p>
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80"
+                  alt="Sofas"
+                  style={{ width: '130px', height: '100px', objectFit: 'contain' }}
+                />
+              </div>
+
+              {/* Card 3: Large Light Grey (Chairs & Stools) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '1 / 3',
+                  gridRow: '3 / 5',
+                  backgroundColor: '#ECECEC',
+                  padding: '1.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div>
+                  <div
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      padding: '0.45rem 1rem',
+                      borderRadius: '2px',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                      display: 'inline-block',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: '#18191D',
+                      marginBottom: '0.35rem'
+                    }}
+                  >
+                    Chairs &amp; Stools
+                  </div>
+                  <p style={{ margin: '0.35rem 0 0', color: '#6B7280', fontSize: '0.85rem' }}>
+                    Tabiiy eman va metall karkas
+                  </p>
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80"
+                  alt="Chairs"
+                  style={{ width: '150px', height: '140px', objectFit: 'contain' }}
+                />
+              </div>
+
+              {/* Card 4: Soft Peach/Sand (Pouf / Tables) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '3 / 4',
+                  gridRow: '2 / 4',
+                  backgroundColor: 'var(--figma-pastel-sand)',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.45rem 1rem',
+                    borderRadius: '2px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    alignSelf: 'flex-start',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#18191D'
+                  }}
+                >
+                  Pouf
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=400&q=80"
+                  alt="Tables"
+                  style={{
+                    width: '90%',
+                    height: '140px',
+                    objectFit: 'contain',
+                    alignSelf: 'center'
+                  }}
+                />
+              </div>
+
+              {/* Card 5: Soft Peach (Bedding / Kitchen) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '2 / 3',
+                  gridRow: '5 / 6',
+                  backgroundColor: 'var(--figma-pastel-peach)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '2px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: '#18191D'
+                  }}
+                >
+                  Bedding
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=200&q=80"
+                  alt="Bedding"
+                  style={{ width: '60px', height: '50px', objectFit: 'contain' }}
+                />
+              </div>
+
+              {/* Card 6: Soft Cyan (Furniture / Outdoor) */}
+              <div
+                onClick={() => navigate('/furniture')}
+                style={{
+                  gridColumn: '3 / 4',
+                  gridRow: '4 / 6',
+                  backgroundColor: 'var(--figma-pastel-blue)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.25s ease'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-4px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '2px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                    alignSelf: 'flex-start',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: '#18191D'
+                  }}
+                >
+                  Furniture
+                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=300&q=80"
+                  alt="Outdoor"
+                  style={{ width: '80%', height: '80px', objectFit: 'contain', alignSelf: 'center' }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 13. CUSTOMER REVIEWS */}
-      <section style={{ padding: '4.5rem 0' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 3rem' }}>
-            <span className="section-tag">Mijozlarimiz Fikri</span>
-            <h2 className="section-title">Ishonchli va Sifatli Xizmat</h2>
-            <p className="section-subtitle">Bizdan mebel xarid qilgan va buyurtma bergan mijozlarimizning haqiqiy fikrlari</p>
+      {/* ==============================================================
+          3. FIGMA SPECIAL OFFER: "JOIN US" & LIFESTYLE PHOTO
+          ============================================================== */}
+      <section style={{ padding: '3rem 1.5rem 5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '45% 55%',
+              borderRadius: '2px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
+            }}
+          >
+            {/* Left: Vibrant Coral Block with Form */}
+            <div
+              style={{
+                backgroundColor: 'var(--figma-coral)',
+                padding: '4.5rem 3.5rem',
+                color: '#FFFFFF',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  opacity: 0.9,
+                  marginBottom: '0.5rem'
+                }}
+              >
+                Special Offer
+              </span>
+              <h2 style={{ fontSize: '2.8rem', fontWeight: 800, margin: '0 0 1rem', lineHeight: 1.1 }}>
+                Join Us
+              </h2>
+              <p style={{ fontSize: '0.95rem', opacity: 0.92, lineHeight: 1.6, marginBottom: '2rem' }}>
+                Bizning klubimizga obuna bo‘ling va birinchi buyurtmangiz uchun eksklyuziv 10% chegirmaga ega bo‘ling.
+              </p>
+
+              {joinSubmitted ? (
+                <div
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    padding: '1.25rem',
+                    borderRadius: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    fontWeight: 700
+                  }}
+                >
+                  <Check size={22} /> Tabriklaymiz! Sizga -10% promo kodi yuborildi.
+                </div>
+              ) : (
+                <form onSubmit={handleJoinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                  <input
+                    type="text"
+                    value={joinName}
+                    onChange={(e) => setJoinName(e.target.value)}
+                    placeholder="Ismingiz"
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      backgroundColor: 'rgba(255,255,255,0.22)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: '#FFFFFF',
+                      borderRadius: '2px',
+                      outline: 'none',
+                      fontSize: '0.95rem'
+                    }}
+                  />
+                  <input
+                    type="email"
+                    value={joinEmail}
+                    onChange={(e) => setJoinEmail(e.target.value)}
+                    placeholder="hello@urgutmebel.uz"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem 1rem',
+                      backgroundColor: 'rgba(255,255,255,0.22)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: '#FFFFFF',
+                      borderRadius: '2px',
+                      outline: 'none',
+                      fontSize: '0.95rem'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={joinLoading}
+                    className="btn-figma-dark"
+                    style={{ width: '100%', marginTop: '0.4rem' }}
+                  >
+                    {joinLoading ? 'Yuklanmoqda...' : 'SIGN UP NOW'}
+                  </button>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.78rem',
+                      opacity: 0.85,
+                      marginTop: '0.5rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input type="checkbox" defaultChecked required />
+                    Obuna orqali shaxsiy ma’lumotlarni qayta ishlashga rozilik bildiraman
+                  </label>
+                </form>
+              )}
+            </div>
+
+            {/* Right: Modern Interior Photography */}
+            <div
+              style={{
+                backgroundImage:
+                  'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                minHeight: '400px'
+              }}
+            />
           </div>
+        </div>
+      </section>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
-              <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
-              <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                "Urgut mebellari haqiqatdan ham boshqacha! Oshxona garniturimizni yasatdik, har bir burchagi va fitinglari ajoyib ishlangan. Rahmat ustalarga!"
+      {/* ==============================================================
+          4. FIGMA TRENDING: "LATEST NEWS" (Blog highlights)
+          ============================================================== */}
+      <section style={{ padding: '3rem 1.5rem 5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1.2fr 1fr',
+              gap: '2.5rem',
+              alignItems: 'center'
+            }}
+          >
+            {/* Col 1: Header & Read All Articles Button */}
+            <div>
+              <span
+                style={{
+                  color: 'var(--figma-coral)',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                Trending
+              </span>
+              <h2
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  color: '#18191D',
+                  lineHeight: 1.2,
+                  marginBottom: '1rem'
+                }}
+              >
+                Latest News
+              </h2>
+              <div
+                style={{
+                  width: '45px',
+                  height: '2px',
+                  backgroundColor: 'var(--figma-coral)',
+                  marginBottom: '1.5rem'
+                }}
+              />
+              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                Xonadoningizni yanada shinam va zamonaviy qilish bo‘yicha tajribali usta va dizaynerlarimizdan tavsiyalar.
               </p>
+              <Link to="/blog" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
+                READ ALL ARTICLES &gt;
+              </Link>
+            </div>
+
+            {/* Col 2: Large Vertical Photography Card */}
+            <div
+              style={{
+                height: '460px',
+                borderRadius: '2px',
+                overflow: 'hidden',
+                backgroundImage: `url(${featuredPost.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.08)'
+              }}
+            />
+
+            {/* Col 3: Editorial Article Card */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <h3
+                style={{
+                  fontSize: '1.65rem',
+                  fontWeight: 800,
+                  color: '#18191D',
+                  lineHeight: 1.35,
+                  marginBottom: '1rem'
+                }}
+              >
+                {featuredPost.title}
+              </h3>
+              <p style={{ color: '#6B7280', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                {featuredPost.excerpt}
+              </p>
+
+              {/* Author bar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  S
-                </div>
+                <img
+                  src={featuredPost.avatar}
+                  alt={featuredPost.author}
+                  style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
+                />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Sherzod Aliyev</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Toshkent shahri (Tasdiqlangan xarid)</div>
+                  <strong style={{ display: 'block', fontSize: '0.9rem', color: '#18191D' }}>
+                    {featuredPost.author}
+                  </strong>
+                  <span style={{ fontSize: '0.8rem', color: '#9CA3AF' }}>{featuredPost.date}</span>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
-              <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
-              <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                "Yotoqxona to‘plamini buyurtma qildik. Narx taklifi menedjer tomonidan tezkor berildi, ishlab chiqarish jarayonini ham xabardor qilib turishdi. O‘z vaqtida keldi."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  D
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Dilnoza Karimova</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Samarqand shahri (Tasdiqlangan xarid)</div>
-                </div>
-              </div>
-            </div>
+      {/* ==============================================================
+          5. FIGMA AUTUMN COLLECTION SIGNATURE CAROUSEL
+          ============================================================== */}
+      <FigmaCollectionCarousel title="Autumn Collection" />
 
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-lg)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
-              <div style={{ color: 'var(--wood-amber)', marginBottom: '1rem' }}><Quote size={32} /></div>
-              <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                "Bolalar karavotini tabiiy yog‘ochdan yasatdik. O‘ta baquvvat va bo‘yoqlari mutlaqo xidsiz ekan. Farzandlarim juda xursand!"
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold-gradient)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                  J
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Jamshid Qodirov</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Buxoro viloyati</div>
-                </div>
-              </div>
-            </div>
+      {/* ==============================================================
+          6. QUICK CUSTOM ORDER & CRAFTSMAN LINKAGE
+          ============================================================== */}
+      <section style={{ padding: '3.5rem 1.5rem', backgroundColor: '#FFFFFF', borderTop: '1px solid #F0F0F0' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto', textAlign: 'center' }}>
+          <span
+            style={{
+              color: 'var(--figma-coral)',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
+              display: 'block',
+              marginBottom: '0.5rem'
+            }}
+          >
+            Maxsus Xizmat
+          </span>
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#18191D', marginBottom: '1rem' }}>
+            O‘z O‘lchamingizda Mebel Kerakmi?
+          </h2>
+          <p style={{ color: '#6B7280', maxWidth: '600px', margin: '0 auto 2rem', fontSize: '0.95rem' }}>
+            Urgutning usta duradgorlari sizning xonadoningiz va istagingizga mos maxsus mebellarni yasab beradi.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/custom-order" className="btn-figma-coral" style={{ textDecoration: 'none' }}>
+              MAXSUS BUYURTMA BERISH &gt;
+            </Link>
+            <Link to="/craftsmen" className="btn-figma-dark" style={{ textDecoration: 'none' }}>
+              USTALAR RO‘YXATI &gt;
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Craftsman Request Modal */}
       <CraftsmanRequestModal
-        craftsman={selectedCraftsman}
         isOpen={isRequestModalOpen}
-        onClose={() => {
-          setIsRequestModalOpen(false);
-          setSelectedCraftsman(null);
-        }}
+        onClose={() => setIsRequestModalOpen(false)}
+        craftsman={selectedCraftsman}
       />
     </div>
   );

@@ -1,183 +1,218 @@
 import React, { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
-import { Phone, Mail, MapPin, Send, MessageSquare, Clock, CheckCircle2 } from 'lucide-react';
-
 import { dataService } from '../services/dataService';
+import { Check, Phone, Mail, MapPin } from 'lucide-react';
 
 export const ContactPage = () => {
   const { settings } = useSettings();
   const { addToast } = useNotification();
 
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await dataService.createCustomOrder({
-        customer_name: name,
-        customer_phone: phone,
-        notes: message,
-        category: 'Bog‘lanish / Savol',
-        title: 'Saytdan qoldirilgan murojaat',
-        furniture_type: 'Murojaat va savol',
-        status: 'NEW'
-      });
-    } catch (err) {
-      console.warn('Error saving contact message:', err);
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      addToast('Iltimos, barcha maydonlarni to‘ldiring!', 'warning');
+      return;
     }
-    setSent(true);
-    addToast('Xabaringiz qabul qilindi! Tez orada bog‘lanamiz.', 'success');
+    setLoading(true);
+    try {
+      await dataService.createContactMessage({
+        full_name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || settings.phone || '+998 90 123 45 67',
+        subject: 'Figma Contact Form',
+        message: message.trim()
+      });
+      setSent(true);
+      setName('');
+      setEmail('');
+      setPhone('');
+      setMessage('');
+      addToast('Xabaringiz qabul qilindi! Tez orada mutaxassisimiz javob beradi.', 'success');
+    } catch (err) {
+      console.error('Error saving contact message:', err);
+      addToast('Xatolik yuz berdi. Qaytadan urinib ko‘ring.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ padding: '3.5rem 0 6rem' }}>
-      <div className="container" style={{ maxWidth: '1000px' }}>
+    <div style={{ backgroundColor: '#FFFFFF', minHeight: '80vh', padding: '2rem 1.5rem 6rem' }}>
+      <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <span className="section-tag">Biz Bilan Bog‘lanish</span>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2.5rem)', fontWeight: 800, marginBottom: '0.85rem', wordBreak: 'break-word', lineHeight: 1.25 }}>
-            Bizning Showroom va Aloqa
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.92rem, 2.5vw, 1.05rem)', maxWidth: '600px', margin: '0 auto' }}>
-            Mebellarni o‘z ko‘zingiz bilan ko‘rish, buyurtma berish yoki maslahat olish uchun biz bilan bog‘laning
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2rem' }}>
-          
-          {/* Contact Details */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: 'var(--bg-card)', backdropFilter: 'blur(8px)', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }} className="glass-card">
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-                  <MapPin size={22} />
-                </div>
-                <div>
-                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>Showroom Manzili:</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    {settings.address}
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-                  <Phone size={22} />
-                </div>
-                <div>
-                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>Telefon Raqam:</h4>
-                  <a href={`tel:${settings.phone}`} style={{ color: 'var(--wood-amber)', fontWeight: 700, fontSize: '1.1rem' }}>
-                    {settings.phone}
-                  </a>
-                  <p style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginTop: '0.2rem' }}>Qo‘ng‘iroqlarga 24/7 javob beriladi</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-                  <Mail size={22} />
-                </div>
-                <div>
-                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>Elektron Pochta:</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    {settings.email}
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(194, 109, 46, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wood-amber)', flexShrink: 0 }}>
-                  <Clock size={22} />
-                </div>
-                <div>
-                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>Ish Vaqti:</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    Dushanba - Yakshanba: 08:30 dan 20:00 gacha (Dam olish kunlarisiz)
-                  </p>
-                </div>
-              </div>
+        {/* Figma Split Hero & Contact Form */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1.2fr 1fr',
+            minHeight: '620px',
+            backgroundColor: '#FAFAFA',
+            borderRadius: '2px',
+            overflow: 'hidden',
+            boxShadow: '0 15px 40px rgba(0,0,0,0.04)'
+          }}
+          className="figma-split-hero"
+        >
+          {/* Left: Clean Visual Area (Showroom / Workshop Photo) */}
+          <div
+            style={{
+              backgroundImage:
+                'url(https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              minHeight: '380px',
+              position: 'relative'
+            }}
+          >
+            {/* Subtle Overlay with Showroom Info */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: '2rem',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+                color: '#FFFFFF'
+              }}
+            >
+              <h4 style={{ margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: 700 }}>
+                {settings.site_name || 'Urgut Mebel Markazi'}
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.9 }}>
+                {settings.address || 'Urgut, Dehqonobod ko‘chasi, 12-uy'}
+              </p>
             </div>
           </div>
 
-          {/* Contact Message Form */}
+          {/* Right: Exact Figma Contact Form */}
           <div
             style={{
-              backgroundColor: 'var(--bg-card)',
-              backdropFilter: 'blur(8px)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '2.5rem',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)'
+              padding: '4.5rem 3.5rem',
+              backgroundColor: '#FFFFFF',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}
-            className="glass-card"
           >
+            <span
+              style={{
+                color: 'var(--figma-coral)',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                marginBottom: '0.75rem',
+                display: 'block'
+              }}
+            >
+              Contact Us
+            </span>
+            <h1
+              style={{
+                fontSize: 'clamp(2.4rem, 4vw, 3.2rem)',
+                fontWeight: 800,
+                color: '#18191D',
+                margin: '0 0 1rem',
+                lineHeight: 1.15
+              }}
+            >
+              Let’s talk
+            </h1>
+            <p
+              style={{
+                color: '#6B7280',
+                fontSize: '0.95rem',
+                lineHeight: 1.6,
+                marginBottom: '2.5rem'
+              }}
+            >
+              Our friendly customer service team always responds to enquiries within 24 hours.
+            </p>
+
             {sent ? (
-              <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#ecfdf5', color: 'var(--status-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                  <CheckCircle2 size={36} />
+              <div
+                style={{
+                  backgroundColor: '#FFF3F0',
+                  border: '1px solid #FCD5CE',
+                  padding: '1.75rem',
+                  borderRadius: '2px',
+                  color: 'var(--figma-coral)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  <Check size={22} /> Xabaringiz muvaffaqiyatli yetkazildi!
                 </div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem' }}>Xabaringiz Qabul Qilindi!</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  Mutaxassislarimiz tez orada siz bilan bog‘lanadi.
+                <p style={{ margin: 0, color: '#4B5563', fontSize: '0.9rem' }}>
+                  Mutaxassislarimiz qisqa vaqt ichida siz bilan bog‘lanishadi.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setSent(false)}
+                  className="btn-figma-coral"
+                  style={{ marginTop: '1.25rem', padding: '0.6rem 1.25rem', fontSize: '0.75rem' }}
+                >
+                  Yana xabar yozish
+                </button>
               </div>
             ) : (
-              <>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1.25rem' }}>
-                  Bizga Xabar Qoldiring
-                </h3>
-
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label className="form-label">Ismingiz *</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ismingiz"
-                      className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Telefon Raqamingiz *</label>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+998 90 123 45 67"
-                      className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Xabar Matni *</label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Qiziqtirgan mebelingiz yoki savolingiz..."
-                      className="form-textarea"
-                    />
-                  </div>
-
-                  <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
-                    <Send size={16} />
-                    <span>Xabarni Yuborish</span>
-                  </button>
-                </form>
-              </>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name"
+                    required
+                    className="figma-input"
+                    aria-label="Name"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="hello@abcdef.com"
+                    required
+                    className="figma-input"
+                    style={{ borderColor: 'var(--figma-coral)' }}
+                    aria-label="Email"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    rows={4}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Message..."
+                    required
+                    className="figma-input"
+                    style={{ resize: 'vertical' }}
+                    aria-label="Message"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-figma-dark"
+                  style={{ width: '100%', padding: '1rem', marginTop: '0.5rem' }}
+                >
+                  {loading ? 'Yuborilmoqda...' : 'SIGN UP NOW'}
+                </button>
+              </form>
             )}
           </div>
-
         </div>
+
       </div>
     </div>
   );

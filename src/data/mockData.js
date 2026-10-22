@@ -496,3 +496,211 @@ export const initialComments = [
     replies: []
   }
 ];
+
+export const initialBlogPosts = [
+  {
+    id: "blog-1",
+    title: "Kichik xonadonlarda mebeldan unumli foydalanishning 7 siri",
+    slug: "kichik-xonadonlarda-mebeldan-unumli-foydalanish",
+    excerpt: "Maydoni cheklangan xonalarni vizual jihatdan kengroq, havodorroq va funktsional qilish bo‘yicha interyer mutaxassislari tavsiyalari.",
+    content: `
+Kichik xonalarda qulaylik yaratish – bu murakkab san'at. Ammo to‘g‘ri tanlangan mebel va ranglar orqali hatto kichik maydonni ham shinam maskanga aylantirish mumkin.
+
+### 1. Ko‘p funksiyali (transformatsiya) mebellardan foydalaning
+Yig‘iladigan divan-karavotlar, ichida saqlash qutisi bo‘lgan puflar hamda ochiluvchi kofe stollari keraksiz bo‘shliqni tejaydi.
+
+### 2. Oyoqli mebellarga afzallik bering
+Pol yuzasi ko‘rinib turgan mebellar xonani vizual kengroq ko‘rsatadi. Yupqa yog‘och yoki metall oyoqli kreslo va divanlar yengil muhit hosil qiladi.
+
+### 3. Ochiq va neytral ranglar palitrasi
+Och yog‘och ohanglari, krem, sut ranglari va iliq kulrang xonaga ko‘proq tabiiy yorug‘lik baxsh etadi.
+
+### 4. Vertikal saqlash joylaridan foydalaning
+Shiftdan polgacha bo‘lgan shkaflar nafaqat ko‘p buyumlarni sig‘diradi, balki xona balandligini ham balandroq ko‘rsatadi.
+
+Urgut Mebel ustalari aynan sizning xonangiz o‘lchamlariga moslab istalgan nostandart ixcham mebellarni yasab berishadi.
+    `,
+    cover_image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80",
+    category: "Dizayn",
+    author_name: "Nilufar Rahimova",
+    author_avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+    read_time: "5 daqiqa",
+    is_published: true,
+    created_at: "2026-10-12T10:00:00Z"
+  },
+  {
+    id: "blog-2",
+    title: "Zamonaviy ovqatlanish stoli va stullarini qanday tanlash kerak?",
+    slug: "zamonaviy-ovqatlanish-stoli-va-stullari-tanlash",
+    excerpt: "Tabiiy yog‘och, metall va tosh yuzalarning qulaylik hamda chidamlilik jihatdan solishtirmasi.",
+    content: `
+Ovqatlanish stoli oilaning eng iliq suhbatlari o‘tadigan markaziy mebel hisoblanadi. Uni tanlashda quyidagi omillarni hisobga oling:
+
+### Shakli va o‘lchami
+- To‘rtburchak stol – 6-10 kishilik katta oilalar va uzunchoq xonalar uchun ideal.
+- Dumaloq stol – samimiy muhit yaratadi, o‘tkir burchaklari yo‘qligi sababli yosh bolalar uchun xavfsiz.
+
+### Tabiiy eman yoki yong‘oq
+Tabiiy yog‘och o‘zining takrorlanmas teksturasi va o‘nlab yillar xizmat qilishi bilan ajralib turadi. Urgut ustalari yog‘ochga suv o‘tkazmaydigan ekologik moy va laklar bilan ishlov berishadi.
+    `,
+    cover_image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1200&q=80",
+    category: "Maslahatlar",
+    author_name: "Bobur Usmonov (Bosh Usta)",
+    author_avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+    read_time: "4 daqiqa",
+    is_published: true,
+    created_at: "2026-10-10T14:30:00Z"
+  },
+  {
+    id: "blog-3",
+    title: "Urgut duradgorlik san'ati: Asrlar an'anasi va zamonaviy uslub",
+    slug: "urgut-duradgorlik-sanati-anana-va-uslub",
+    excerpt: "Urgutning mashhur yog‘ochsozlik maktabi qanday qilib zamonaviy Yevropa mebel dizaynlari bilan uyg‘unlashmoqda?",
+    content: `
+Samarqand viloyatining Urgut tumani qadimdan mohir yog‘och o‘ymakorlari va usta duradgorlari bilan mashhur. 
+
+Bugungi kunda Urgut mebel ustalari asriy sirlarni saqlagan holda zamonaviy CNC uskunalari, Turkiya va Germaniya furnituralari hamda Italiya bo‘yoqlaridan foydalanib xalqaro andozalardagi mebellarni ishlab chiqarmoqdalar.
+
+Har bir buyurtma mebel – bu takrorlanmas san'at asari bo‘lib, uyingizga o‘zgacha harorat bag‘ishlaydi.
+    `,
+    cover_image: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=1200&q=80",
+    category: "Hunarmandchilik",
+    author_name: "Azizbek Mansurov",
+    author_avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+    read_time: "6 daqiqa",
+    is_published: true,
+    created_at: "2026-10-06T08:15:00Z"
+  }
+];
+
+export const initialFaqItems = [
+  {
+    id: "faq-1",
+    category: "Umumiy savollar",
+    question: "Urgut Mebel Markazi mahsulotlari qayerda ishlab chiqariladi?",
+    answer: "Barcha mebellarimiz Samarqand viloyati, Urgut tumanidagi maxsus jihozlangan zamonaviy ustaxona va fabrikalarda mahalliy mohir duradgor ustalar tomonidan tayyorlanadi.",
+    display_order: 1,
+    is_active: true
+  },
+  {
+    id: "faq-2",
+    category: "Umumiy savollar",
+    question: "Mebellar tayyorlashda qanday materiallardan foydalaniladi?",
+    answer: "Tabiiy quritilgan eman, yong‘oq va qarag‘ay yog‘ochlari, yuqori sifatli Rossiya va Turkiya MDF, LDSP plitalari, Blum va Hettich furnituralari hamda suv o‘tkazmas velur va eko-charm matolari ishlatiladi.",
+    display_order: 2,
+    is_active: true
+  },
+  {
+    id: "faq-3",
+    category: "Buyurtma va to'lov",
+    question: "Maxsus o'lchamda buyurtma berish qanday amalga oshiriladi?",
+    answer: "Siz 'Maxsus Buyurtma' bo‘limidan o‘zingiz xohlagan o‘lcham, rang va rasmlarni yuklashingiz mumkin. Menejerlarimiz 1 soat ichida bog‘lanib narx taklifi va loyiha eskizini taqdim etadilar. Shuningdek mutaxassisimiz uyingizga borib bepul o‘lchab berishi ham mumkin.",
+    display_order: 3,
+    is_active: true
+  },
+  {
+    id: "faq-4",
+    category: "Buyurtma va to'lov",
+    question: "To'lov usullari qanday? Bo'lib to'lash imkoni bormi?",
+    answer: "To‘lovlarni naqd pul, Click, Payme yoki bank kartasi orqali amalga oshirishingiz mumkin. Shuningdek, qulay muddatli to‘lov (nasiya savdo) shartlari ham mavjud.",
+    display_order: 4,
+    is_active: true
+  },
+  {
+    id: "faq-5",
+    category: "Yetkazib berish",
+    question: "Yetkazib berish va o'rnatish xizmati qancha vaqt oladi?",
+    answer: "Katalogdagi tayyor mahsulotlar 24-48 soat ichida butun O‘zbekiston bo‘ylab yetkaziladi. Maxsus buyurtmalar murakkabligiga qarab 5 kundan 14 kungacha muddatda tayyorlanadi va professional ustalarimiz tomonidan o‘rnatib beriladi.",
+    display_order: 5,
+    is_active: true
+  },
+  {
+    id: "faq-6",
+    category: "Kafolat va qaytarish",
+    question: "Mebellarga qancha muddat kafolat beriladi?",
+    answer: "Har bir mahsulotimizga 3 yildan 5 yilgacha rasmiy sifat kafolati taqdim etiladi. Kafolat davrida nosozlik yuzaga kelsa, bepul ta'mirlab yoki almashtirib beriladi.",
+    display_order: 6,
+    is_active: true
+  }
+];
+
+export const initialCraftsmanRequests = [
+  {
+    id: "req-1",
+    request_number: "UR-REQ-1001",
+    craftsman_id: "usta-1",
+    craftsman_name: "Bobur Usmonov",
+    customer_name: "Akmal Zokirov",
+    customer_phone: "+998 91 234 56 78",
+    customer_telegram: "@akmal_z",
+    furniture_type: "Klassik Mehmonxona Stoli va 8 ta stul",
+    description: "Tabiiy eman yog‘ochidan qo‘lda o‘yilgan naqshli, och yong‘oq rangida sifatli ovqatlanish stoli kerak.",
+    preferred_date: "2026-11-15",
+    estimated_budget: "10 000 000 - 15 000 000 so‘m",
+    status: "NEW",
+    craftsman_notes: "Mijoz bilan bog‘lanib aniq o‘lchamlar kelishilmoqda",
+    created_at: "2026-10-15T11:00:00Z"
+  },
+  {
+    id: "req-2",
+    request_number: "UR-REQ-1002",
+    craftsman_id: "usta-2",
+    craftsman_name: "Rustam Qodirov",
+    customer_name: "Zarina Alimova",
+    customer_phone: "+998 97 765 43 21",
+    customer_telegram: "@zarina_m",
+    furniture_type: "Bolalar ikki qavatli karavoti",
+    description: "Zinapoyasi saqlash javonli, xavfsiz himoya to‘sig‘i bo‘lgan zamonaviy oq rangli karavot.",
+    preferred_date: "2026-11-01",
+    estimated_budget: "7 000 000 so‘m",
+    status: "IN_PROGRESS",
+    craftsman_notes: "Karkas yig‘ish jarayonida",
+    created_at: "2026-10-14T09:30:00Z"
+  }
+];
+
+export const initialContactMessages = [
+  {
+    id: "msg-1",
+    full_name: "Javohir Toshpulatov",
+    phone: "+998 93 111 22 33",
+    email: "javohir@example.com",
+    subject: "Ulgurji narxlar va yetkazish",
+    message: "Toshkent shahridagi yangi ofis binosi uchun 20 ta ishchi stoli va kreslolarga buyurtma bermoqchimiz. Ulgurji chegirmalar mavjudmi?",
+    status: "NEW",
+    reply_notes: null,
+    created_at: "2026-10-17T14:20:00Z"
+  },
+  {
+    id: "msg-2",
+    full_name: "Kamola Saidova",
+    phone: "+998 90 987 65 43",
+    email: "kamola@example.com",
+    subject: "Katalogdagi divan rangi",
+    message: "Royal divanini kulrang emas, to‘q ko‘k (navy blue) matoda buyurtma qilsak bo‘ladimi? Narxi o‘zgaradimi?",
+    status: "REPLIED",
+    reply_notes: "Telefon orqali tushuntirildi, mato namunalari Telegramga tashlandi.",
+    created_at: "2026-10-16T16:45:00Z"
+  }
+];
+
+export const initialNewsletterSubscribers = [
+  {
+    id: "sub-1",
+    email: "anvar.karimov@gmail.com",
+    full_name: "Anvar Karimov",
+    source: "figma_join_us",
+    discount_code: "URGUT10",
+    is_active: true,
+    created_at: "2026-10-15T08:00:00Z"
+  },
+  {
+    id: "sub-2",
+    email: "shaxnoza.dizayn@mail.ru",
+    full_name: "Shaxnoza",
+    source: "figma_join_us",
+    discount_code: "URGUT10",
+    is_active: true,
+    created_at: "2026-10-16T11:20:00Z"
+  }
+];

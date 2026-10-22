@@ -96,10 +96,11 @@ export const CraftsmanDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [worksList, financesList, allCustomOrders, craftProfile] = await Promise.all([
+      const [worksList, financesList, allCustomOrders, directRequests, craftProfile] = await Promise.all([
         dataService.getCraftsmanWorks(craftsmanId),
         dataService.getCraftsmanFinances(craftsmanId),
         dataService.getCustomOrders(),
+        dataService.getCraftsmanRequests(),
         dataService.getCraftsmanById(craftsmanId)
       ]);
       setWorks(worksList || []);
@@ -112,13 +113,25 @@ export const CraftsmanDashboard = () => {
         }));
       }
 
-      const myOrders = (allCustomOrders || []).filter((o) =>
+      const myCustomOrders = (allCustomOrders || []).filter((o) =>
         o.assigned_craftsman === craftsmanId ||
         (o.assigned_craftsman_name && user?.full_name && o.assigned_craftsman_name.toLowerCase().includes(user.full_name.toLowerCase())) ||
         (o.title && user?.full_name && o.title.toLowerCase().includes(user.full_name.toLowerCase())) ||
         role === 'admin'
       );
-      setCraftsmanOrders(myOrders);
+
+      const myDirectRequests = (directRequests || []).filter((r) =>
+        r.craftsman_id === craftsmanId ||
+        (r.craftsman_name && user?.full_name && r.craftsman_name.toLowerCase().includes(user.full_name.toLowerCase())) ||
+        role === 'admin'
+      ).map((r) => ({
+        ...r,
+        order_number: r.request_number,
+        title: `[Shaxsiy Murojaat] ${r.furniture_type || 'Mebel'}`,
+        is_direct_request: true
+      }));
+
+      setCraftsmanOrders([...myDirectRequests, ...myCustomOrders]);
     } finally {
       setLoading(false);
     }
@@ -128,9 +141,11 @@ export const CraftsmanDashboard = () => {
     loadData();
     const handleUpdate = () => loadData();
     window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
+    window.addEventListener('urgut_store_craftsman_requests_updated', handleUpdate);
     const interval = setInterval(loadData, 10000);
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
+      window.removeEventListener('urgut_store_craftsman_requests_updated', handleUpdate);
       clearInterval(interval);
     };
   }, [user]);

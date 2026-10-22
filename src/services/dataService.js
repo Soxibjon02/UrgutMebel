@@ -7,7 +7,12 @@ import {
   initialBanners,
   initialCustomOrders,
   initialOrders,
-  initialComments
+  initialComments,
+  initialBlogPosts,
+  initialFaqItems,
+  initialCraftsmanRequests,
+  initialContactMessages,
+  initialNewsletterSubscribers
 } from '../data/mockData';
 
 // Helper to get from local storage or fallback to initial
@@ -1296,6 +1301,339 @@ export const dataService = {
       netProfit,
       profitMargin
     };
+  },
+
+  // ====================================================================
+  // BLOG POSTS (FIGMA INTERIOR NEWS & DESIGN)
+  // ====================================================================
+  async getBlogPosts() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          setStored('blog_posts', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn("Supabase blog_posts read fallback to storage:", err);
+      }
+    }
+    return getStored('blog_posts', initialBlogPosts);
+  },
+
+  async getBlogPostById(idOrSlug) {
+    const posts = await this.getBlogPosts();
+    return posts.find((p) => p.id === idOrSlug || p.slug === idOrSlug) || null;
+  },
+
+  async saveBlogPost(post) {
+    const all = await this.getBlogPosts();
+    const isNew = !post.id || !all.some((p) => p.id === post.id);
+    const postToSave = {
+      ...post,
+      id: post.id || `blog-${Date.now()}`,
+      slug: post.slug || (post.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      updated_at: new Date().toISOString(),
+      created_at: post.created_at || new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('blog_posts').upsert(postToSave);
+      } catch (err) {
+        console.warn("Supabase blog save error:", err);
+      }
+    }
+
+    const updated = isNew ? [postToSave, ...all] : all.map((p) => (p.id === postToSave.id ? postToSave : p));
+    setStored('blog_posts', updated, true);
+    return postToSave;
+  },
+
+  async deleteBlogPost(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('blog_posts').delete().eq('id', id);
+      } catch (err) {
+        console.warn("Supabase blog delete error:", err);
+      }
+    }
+    const all = await this.getBlogPosts();
+    const updated = all.filter((p) => p.id !== id);
+    setStored('blog_posts', updated, true);
+    return updated;
+  },
+
+  // ====================================================================
+  // FAQ ITEMS (FIGMA FAQ ACCORDIONS)
+  // ====================================================================
+  async getFaqItems() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('faq_items')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (!error && data && data.length > 0) {
+          setStored('faq_items', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn("Supabase faq_items read fallback to storage:", err);
+      }
+    }
+    return getStored('faq_items', initialFaqItems);
+  },
+
+  async saveFaqItem(faq) {
+    const all = await this.getFaqItems();
+    const isNew = !faq.id || !all.some((f) => f.id === faq.id);
+    const itemToSave = {
+      ...faq,
+      id: faq.id || `faq-${Date.now()}`,
+      created_at: faq.created_at || new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('faq_items').upsert(itemToSave);
+      } catch (err) {
+        console.warn("Supabase faq save error:", err);
+      }
+    }
+
+    const updated = isNew ? [...all, itemToSave] : all.map((f) => (f.id === itemToSave.id ? itemToSave : f));
+    setStored('faq_items', updated, true);
+    return itemToSave;
+  },
+
+  async deleteFaqItem(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('faq_items').delete().eq('id', id);
+      } catch (err) {
+        console.warn("Supabase faq delete error:", err);
+      }
+    }
+    const all = await this.getFaqItems();
+    const updated = all.filter((f) => f.id !== id);
+    setStored('faq_items', updated, true);
+    return updated;
+  },
+
+  // ====================================================================
+  // CRAFTSMAN DIRECT REQUESTS (USTAGA TO'G'RIDAN-TO'G'RI BUYURTMA)
+  // ====================================================================
+  async getCraftsmanRequests() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('craftsman_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          setStored('craftsman_requests', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn("Supabase craftsman_requests read fallback to storage:", err);
+      }
+    }
+    return getStored('craftsman_requests', initialCraftsmanRequests);
+  },
+
+  async createCraftsmanRequest(reqData) {
+    const all = await this.getCraftsmanRequests();
+    const newReq = {
+      ...reqData,
+      id: `req-${Date.now()}`,
+      request_number: `UR-REQ-${Math.floor(1000 + Math.random() * 9000)}`,
+      status: reqData.status || 'NEW',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('craftsman_requests').insert(newReq);
+      } catch (err) {
+        console.warn("Supabase craftsman_requests insert error:", err);
+      }
+    }
+
+    const updated = [newReq, ...all];
+    setStored('craftsman_requests', updated, true);
+    return newReq;
+  },
+
+  async updateCraftsmanRequestStatus(requestId, status, notes = '') {
+    const all = await this.getCraftsmanRequests();
+    const target = all.find((r) => r.id === requestId);
+    if (!target) return null;
+
+    const updatedReq = {
+      ...target,
+      status,
+      craftsman_notes: notes || target.craftsman_notes,
+      updated_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('craftsman_requests').update({
+          status,
+          craftsman_notes: updatedReq.craftsman_notes,
+          updated_at: updatedReq.updated_at
+        }).eq('id', requestId);
+      } catch (err) {
+        console.warn("Supabase craftsman_requests update error:", err);
+      }
+    }
+
+    const updated = all.map((r) => (r.id === requestId ? updatedReq : r));
+    setStored('craftsman_requests', updated, true);
+    return updatedReq;
+  },
+
+  // ====================================================================
+  // CONTACT MESSAGES (BOG'LANISH FORMASI)
+  // ====================================================================
+  async getContactMessages() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('contact_messages')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          setStored('contact_messages', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn("Supabase contact_messages read fallback to storage:", err);
+      }
+    }
+    return getStored('contact_messages', initialContactMessages);
+  },
+
+  async createContactMessage(msgData) {
+    const all = await this.getContactMessages();
+    const newMsg = {
+      ...msgData,
+      id: `msg-${Date.now()}`,
+      status: 'NEW',
+      created_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('contact_messages').insert(newMsg);
+      } catch (err) {
+        console.warn("Supabase contact_messages insert error:", err);
+      }
+    }
+
+    const updated = [newMsg, ...all];
+    setStored('contact_messages', updated, true);
+    return newMsg;
+  },
+
+  async updateContactMessageStatus(msgId, status, replyNotes = null) {
+    const all = await this.getContactMessages();
+    const target = all.find((m) => m.id === msgId);
+    if (!target) return null;
+
+    const updatedMsg = {
+      ...target,
+      status,
+      reply_notes: replyNotes !== null ? replyNotes : target.reply_notes
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('contact_messages').update({
+          status,
+          reply_notes: updatedMsg.reply_notes
+        }).eq('id', msgId);
+      } catch (err) {
+        console.warn("Supabase contact_messages update error:", err);
+      }
+    }
+
+    const updated = all.map((m) => (m.id === msgId ? updatedMsg : m));
+    setStored('contact_messages', updated, true);
+    return updatedMsg;
+  },
+
+  async deleteContactMessage(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('contact_messages').delete().eq('id', id);
+      } catch (err) {
+        console.warn("Supabase contact_messages delete error:", err);
+      }
+    }
+    const all = await this.getContactMessages();
+    const updated = all.filter((m) => m.id !== id);
+    setStored('contact_messages', updated, true);
+    return updated;
+  },
+
+  // ====================================================================
+  // NEWSLETTER & JOIN US SUBSCRIBERS (FIGMA JOIN US FORM)
+  // ====================================================================
+  async getNewsletterSubscribers() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('newsletter_subscribers')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          setStored('newsletter_subscribers', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn("Supabase newsletter_subscribers read fallback:", err);
+      }
+    }
+    return getStored('newsletter_subscribers', initialNewsletterSubscribers);
+  },
+
+  async subscribeNewsletter(email, fullName = '', source = 'figma_join_us') {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) throw new Error("Email manzilini kiriting");
+
+    const all = await this.getNewsletterSubscribers();
+    const existing = all.find((s) => s.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      return { success: true, message: "Siz allaqachon a'zo bo‘lgansiz!", discountCode: existing.discount_code || 'URGUT10' };
+    }
+
+    const newSub = {
+      id: `sub-${Date.now()}`,
+      email: cleanEmail,
+      full_name: fullName.trim() || cleanEmail.split('@')[0],
+      source,
+      discount_code: 'URGUT10',
+      is_active: true,
+      created_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('newsletter_subscribers').insert(newSub);
+      } catch (err) {
+        console.warn("Supabase newsletter_subscribers insert error:", err);
+      }
+    }
+
+    const updated = [newSub, ...all];
+    setStored('newsletter_subscribers', updated, true);
+    return { success: true, message: "Tabriklaymiz! Siz muvaffaqiyatli a'zo bo‘ldingiz.", discountCode: 'URGUT10' };
   },
 
   // ==========================================

@@ -34,6 +34,9 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { CraftsmanDashboard } from './pages/CraftsmanDashboard';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
+import { FaqPage } from './pages/FaqPage';
+import { BlogPage } from './pages/BlogPage';
+import { BlogDetailPage } from './pages/BlogDetailPage';
 
 function App() {
   return (
@@ -50,7 +53,7 @@ function App() {
                     
                     <main style={{ flex: 1 }}>
                       <Routes>
-                        {/* Public routes */}
+                        {/* Public routes matching Figma */}
                         <Route path="/" element={<Home />} />
                         <Route path="/furniture" element={<FurnitureCatalog />} />
                         <Route path="/furniture/:id" element={<ProductDetail />} />
@@ -58,6 +61,9 @@ function App() {
                         <Route path="/custom-order" element={<CustomOrderPage />} />
                         <Route path="/craftsmen" element={<CraftsmenDirectory />} />
                         <Route path="/craftsmen/:id" element={<CraftsmanDetail />} />
+                        <Route path="/faq" element={<FaqPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:id" element={<BlogDetailPage />} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/contact" element={<ContactPage />} />
 

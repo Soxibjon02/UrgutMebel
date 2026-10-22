@@ -80,7 +80,19 @@ export const ManagerDashboard = () => {
   const [urlInput, setUrlInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
-  // Custom Orders state
+  // Standard Store Orders state (Do'kon / Savat buyurtmalari)
+  const [standardOrders, setStandardOrders] = useState([]);
+
+  // Craftsman Direct Requests state (Ustaga to'g'ridan-to'g'ri buyurtmalar)
+  const [craftsmanRequests, setCraftsmanRequests] = useState([]);
+
+  // Contact Form Messages state (Bog'lanish xabarlari)
+  const [contactMessages, setContactMessages] = useState([]);
+
+  // Newsletter Subscribers state (Obunachilar)
+  const [newsletterSubs, setNewsletterSubs] = useState([]);
+
+  // Custom Orders state (Maxsus o'lchamli buyurtmalar)
   const [orders, setOrders] = useState([]);
   const [selectedStatusTab, setSelectedStatusTab] = useState('ALL');
   const [activeOrder, setActiveOrder] = useState(null);
@@ -101,16 +113,33 @@ export const ManagerDashboard = () => {
 
   const loadData = async () => {
     try {
-      const [orderList, prodList, catList, craftList] = await Promise.all([
+      const [
+        orderList,
+        prodList,
+        catList,
+        craftList,
+        stdOrders,
+        craftReqs,
+        contactMsgs,
+        subs
+      ] = await Promise.all([
         dataService.getCustomOrders(),
         dataService.getProducts(),
         dataService.getCategories(),
-        dataService.getCraftsmen()
+        dataService.getCraftsmen(),
+        dataService.getStandardOrders(),
+        dataService.getCraftsmanRequests(),
+        dataService.getContactMessages(),
+        dataService.getNewsletterSubscribers()
       ]);
       setOrders(orderList || []);
       setProducts(prodList || []);
       setCategories(catList || []);
       setCraftsmen(craftList || []);
+      setStandardOrders(stdOrders || []);
+      setCraftsmanRequests(craftReqs || []);
+      setContactMessages(contactMsgs || []);
+      setNewsletterSubs(subs || []);
     } finally {
       setLoading(false);
     }
@@ -122,9 +151,17 @@ export const ManagerDashboard = () => {
     const handleProductsUpdate = () => loadData();
     window.addEventListener('urgut_store_custom_orders_updated', handleCustomOrdersUpdate);
     window.addEventListener('urgut_store_products_updated', handleProductsUpdate);
+    window.addEventListener('urgut_store_orders_updated', handleCustomOrdersUpdate);
+    window.addEventListener('urgut_store_craftsman_requests_updated', handleCustomOrdersUpdate);
+    window.addEventListener('urgut_store_contact_messages_updated', handleCustomOrdersUpdate);
+    window.addEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_products_updated', handleProductsUpdate);
+      window.removeEventListener('urgut_store_orders_updated', handleCustomOrdersUpdate);
+      window.removeEventListener('urgut_store_craftsman_requests_updated', handleCustomOrdersUpdate);
+      window.removeEventListener('urgut_store_contact_messages_updated', handleCustomOrdersUpdate);
+      window.removeEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
     };
   }, []);
 
@@ -481,6 +518,51 @@ export const ManagerDashboard = () => {
     loadData();
   };
 
+  // Standard Store Orders Handler
+  const handleUpdateStandardOrderStatus = async (orderId, newStatus) => {
+    try {
+      await dataService.updateStandardOrderStatus(orderId, newStatus);
+      addToast(`Do‘kon buyurtmasi holati: ${newStatus}`, 'success');
+      loadData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  // Craftsman Direct Request Handler
+  const handleUpdateCraftsmanRequestStatus = async (reqId, newStatus) => {
+    try {
+      await dataService.updateCraftsmanRequestStatus(reqId, newStatus);
+      addToast(`Usta buyurtmasi holati: ${newStatus}`, 'success');
+      loadData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  // Contact Message Status Handler
+  const handleUpdateContactMessageStatus = async (msgId, newStatus) => {
+    try {
+      await dataService.updateContactMessageStatus(msgId, newStatus);
+      addToast(`Murojaat holati: ${newStatus}`, 'success');
+      loadData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  const handleDeleteContactMessage = async (msgId) => {
+    if (window.confirm("Ushbu xabarni o‘chirmoqchimisiz?")) {
+      try {
+        await dataService.deleteContactMessage(msgId);
+        addToast("Xabar o‘chirildi", 'info');
+        loadData();
+      } catch (err) {
+        addToast(err.message, 'error');
+      }
+    }
+  };
+
   const statusTabs = [
     { key: 'ALL', label: 'Barchasi' },
     { key: 'NEW', label: 'Yangi (NEW)' },
@@ -499,10 +581,10 @@ export const ManagerDashboard = () => {
         {/* Dashboard Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b45309', fontWeight: 700, fontSize: '0.85rem' }}>
-              <Briefcase size={16} /> MENEDJER PANELI
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700, fontSize: '0.85rem' }}>
+              <Briefcase size={16} /> MENEDJER PANELI (FIGMA USLUBIDA)
             </div>
-            <h1 style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', fontWeight: 800 }}>Mebel va Ishlab Chiqarish Boshqaruvi</h1>
+            <h1 style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', fontWeight: 800 }}>Mebel va Buyurtmalar Boshqaruvi</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
@@ -516,7 +598,7 @@ export const ManagerDashboard = () => {
           </div>
         </div>
 
-        {/* Top Navigation Switch: MEBELLAR vs MAXSUS BUYURTMALAR vs USTALAR */}
+        {/* Top Navigation Switch: SEPARATE TABS & TABLES FOR EACH FORM */}
         <div
           className="no-scrollbar"
           style={{
@@ -528,14 +610,14 @@ export const ManagerDashboard = () => {
             border: '1px solid var(--border-subtle)',
             boxShadow: 'var(--shadow-sm)',
             marginBottom: '2rem',
-            maxWidth: '820px',
             overflowX: 'auto',
             gap: '0.35rem'
           }}
         >
+          {/* 1. Standart Buyurtmalar */}
           <button
             type="button"
-            onClick={() => setActiveMainTab('furniture')}
+            onClick={() => setActiveMainTab('standard_orders')}
             style={{
               flex: '1 0 auto',
               display: 'flex',
@@ -545,40 +627,20 @@ export const ManagerDashboard = () => {
               padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.9rem',
+              fontSize: '0.88rem',
               whiteSpace: 'nowrap',
-              backgroundColor: activeMainTab === 'furniture' ? 'var(--wood-amber)' : 'transparent',
-              color: activeMainTab === 'furniture' ? '#ffffff' : 'var(--text-muted)',
-              transition: 'all 0.2s ease'
+              backgroundColor: activeMainTab === 'standard_orders' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'standard_orders' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
-            <Package size={17} />
-            <span>Mebellar Katalogi ({products.length})</span>
+            <Truck size={16} />
+            <span>Standart Do‘kon ({standardOrders.length})</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveMainTab('discounts')}
-            style={{
-              flex: '1 0 auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.65rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              whiteSpace: 'nowrap',
-              backgroundColor: activeMainTab === 'discounts' ? 'var(--wood-amber)' : 'transparent',
-              color: activeMainTab === 'discounts' ? '#ffffff' : 'var(--text-muted)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Tag size={17} />
-            <span>Chegirmalar ({products.filter(p => Boolean(p.discount_price)).length})</span>
-          </button>
-
+          {/* 2. Maxsus Buyurtmalar */}
           <button
             type="button"
             onClick={() => setActiveMainTab('custom_orders')}
@@ -591,17 +653,150 @@ export const ManagerDashboard = () => {
               padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.9rem',
+              fontSize: '0.88rem',
               whiteSpace: 'nowrap',
-              backgroundColor: activeMainTab === 'custom_orders' ? 'var(--wood-amber)' : 'transparent',
+              backgroundColor: activeMainTab === 'custom_orders' ? 'var(--primary)' : 'transparent',
               color: activeMainTab === 'custom_orders' ? '#ffffff' : 'var(--text-muted)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
-            <Sliders size={17} />
-            <span>Maxsus Buyurtmalar ({orders.length})</span>
+            <Sliders size={16} />
+            <span>Maxsus O‘lchamli ({orders.length})</span>
           </button>
 
+          {/* 3. Ustalarga Buyurtmalar */}
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('craftsman_requests')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'craftsman_requests' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'craftsman_requests' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <Hammer size={16} />
+            <span>Ustalarga Buyurtmalar ({craftsmanRequests.length})</span>
+          </button>
+
+          {/* 4. Murojaatlar */}
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('contact_messages')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'contact_messages' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'contact_messages' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <MessageSquare size={16} />
+            <span>Murojaatlar ({contactMessages.length})</span>
+          </button>
+
+          {/* 5. Obunachilar */}
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('newsletter')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'newsletter' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'newsletter' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <Mail size={16} />
+            <span>Obunachilar ({newsletterSubs.length})</span>
+          </button>
+
+          {/* 6. Mebellar Katalogi */}
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('furniture')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'furniture' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'furniture' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <Package size={16} />
+            <span>Mebellar ({products.length})</span>
+          </button>
+
+          {/* 7. Chegirmalar */}
+          <button
+            type="button"
+            onClick={() => setActiveMainTab('discounts')}
+            style={{
+              flex: '1 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              whiteSpace: 'nowrap',
+              backgroundColor: activeMainTab === 'discounts' ? 'var(--primary)' : 'transparent',
+              color: activeMainTab === 'discounts' ? '#ffffff' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <Tag size={16} />
+            <span>Chegirmalar ({products.filter(p => Boolean(p.discount_price)).length})</span>
+          </button>
+
+          {/* 8. Ustalar */}
           <button
             type="button"
             onClick={() => setActiveMainTab('craftsmen')}
@@ -614,14 +809,16 @@ export const ManagerDashboard = () => {
               padding: '0.65rem 1rem',
               borderRadius: 'var(--radius-md)',
               fontWeight: 700,
-              fontSize: '0.9rem',
+              fontSize: '0.88rem',
               whiteSpace: 'nowrap',
-              backgroundColor: activeMainTab === 'craftsmen' ? 'var(--wood-amber)' : 'transparent',
+              backgroundColor: activeMainTab === 'craftsmen' ? 'var(--primary)' : 'transparent',
               color: activeMainTab === 'craftsmen' ? '#ffffff' : 'var(--text-muted)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
-            <Hammer size={17} />
+            <Hammer size={16} />
             <span>Ustalar ({craftsmen.length})</span>
           </button>
         </div>
@@ -1113,7 +1310,419 @@ export const ManagerDashboard = () => {
           </div>
         )}
 
-      </div>
+        {/* ========================================================= */}
+        {/* TAB: STANDART DO'KON BUYURTMALARI (ORDERS JADVALI)        */}
+        {/* ========================================================= */}
+        {activeMainTab === 'standard_orders' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  Standart Do‘kon Buyurtmalari
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Katalogdan savat orqali xarid qilingan tayyor mebellar ro‘yxati (Jami: {standardOrders.length} ta)
+                </p>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Buyurtma #</th>
+                    <th style={{ padding: '0.85rem' }}>Mijoz</th>
+                    <th style={{ padding: '0.85rem' }}>Manzil</th>
+                    <th style={{ padding: '0.85rem' }}>Mahsulotlar</th>
+                    <th style={{ padding: '0.85rem' }}>Summa</th>
+                    <th style={{ padding: '0.85rem' }}>Holati</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {standardOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📦</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha standart do‘kon buyurtmalari yo‘q</h4>
+                      </td>
+                    </tr>
+                  ) : (
+                    standardOrders.map((ord) => (
+                      <tr key={ord.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
+                          {ord.order_number || ord.id?.slice(0, 8)}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <div style={{ fontWeight: 600 }}>{ord.customer_name}</div>
+                          <a href={`tel:${ord.customer_phone}`} style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textDecoration: 'none' }}>
+                            {ord.customer_phone}
+                          </a>
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-muted)', maxWidth: '200px' }}>
+                          {ord.shipping_address || 'Keltirilmagan'}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          {ord.items && ord.items.length > 0 ? (
+                            ord.items.map((it, idx) => (
+                              <div key={idx} style={{ fontSize: '0.82rem' }}>
+                                • {it.product_name || it.name} ({it.quantity || 1} dona)
+                              </div>
+                            ))
+                          ) : (
+                            <span style={{ color: 'var(--text-light)' }}>Mebel to‘plami</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {Number(ord.total_amount || 0).toLocaleString()} so‘m
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <span
+                            style={{
+                              padding: '0.25rem 0.65rem',
+                              borderRadius: '9999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              backgroundColor:
+                                ord.status === 'DELIVERED' ? '#ecfdf5' :
+                                ord.status === 'PROCESSING' ? '#eff6ff' :
+                                ord.status === 'SHIPPED' ? '#fef3c7' : '#f3f4f6',
+                              color:
+                                ord.status === 'DELIVERED' ? '#059669' :
+                                ord.status === 'PROCESSING' ? '#2563eb' :
+                                ord.status === 'SHIPPED' ? '#d97706' : '#4b5563'
+                            }}
+                          >
+                            {ord.status || 'PENDING'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                          <select
+                            value={ord.status || 'PENDING'}
+                            onChange={(e) => handleUpdateStandardOrderStatus(ord.id, e.target.value)}
+                            style={{
+                              padding: '0.35rem 0.65rem',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-card)',
+                              fontSize: '0.8rem',
+                              backgroundColor: 'var(--bg-card)',
+                              color: 'var(--text-main)',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="PENDING">Kutilmoqda (PENDING)</option>
+                            <option value="PROCESSING">Jarayonda (PROCESSING)</option>
+                            <option value="SHIPPED">Yetkazilmoqda (SHIPPED)</option>
+                            <option value="DELIVERED">Yetkazildi (DELIVERED)</option>
+                            <option value="CANCELLED">Bekor qilindi (CANCELLED)</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB: USTALARGA TO'G'RIDAN-TO'G'RI BUYURTMALAR              */}
+        {/* ========================================================= */}
+        {activeMainTab === 'craftsman_requests' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  Ustalarga To‘g‘ridan-to‘g‘ri Murojaatlar
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Mijozlar tomonidan ma'lum bir ustaga yuborilgan individual loyihalar (Jami: {craftsmanRequests.length} ta)
+                </p>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Murojaat #</th>
+                    <th style={{ padding: '0.85rem' }}>Biriktirilgan Usta</th>
+                    <th style={{ padding: '0.85rem' }}>Mijoz</th>
+                    <th style={{ padding: '0.85rem' }}>Mebel Turi & Tavsif</th>
+                    <th style={{ padding: '0.85rem' }}>Taxminiy Byudjet</th>
+                    <th style={{ padding: '0.85rem' }}>Holati</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {craftsmanRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔨</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha ustalarga to‘g‘ridan-to‘g‘ri murojaatlar yo‘q</h4>
+                      </td>
+                    </tr>
+                  ) : (
+                    craftsmanRequests.map((req) => (
+                      <tr key={req.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
+                          {req.request_number || req.id?.slice(0, 8)}
+                        </td>
+                        <td style={{ padding: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {req.craftsman_name || req.craftsman_id}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <div style={{ fontWeight: 600 }}>{req.customer_name}</div>
+                          <a href={`tel:${req.customer_phone}`} style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textDecoration: 'none' }}>
+                            {req.customer_phone}
+                          </a>
+                        </td>
+                        <td style={{ padding: '0.85rem', maxWidth: '240px' }}>
+                          <div style={{ fontWeight: 600 }}>{req.furniture_type}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {req.description}
+                          </div>
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                          {req.estimated_budget || 'Kelishiladi'}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <span
+                            style={{
+                              padding: '0.25rem 0.65rem',
+                              borderRadius: '9999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              backgroundColor:
+                                req.status === 'COMPLETED' ? '#ecfdf5' :
+                                req.status === 'IN_PROGRESS' ? '#eff6ff' : '#fff7ed',
+                              color:
+                                req.status === 'COMPLETED' ? '#059669' :
+                                req.status === 'IN_PROGRESS' ? '#2563eb' : '#c2410c'
+                            }}
+                          >
+                            {req.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                          <select
+                            value={req.status}
+                            onChange={(e) => handleUpdateCraftsmanRequestStatus(req.id, e.target.value)}
+                            style={{
+                              padding: '0.35rem 0.65rem',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-card)',
+                              fontSize: '0.8rem',
+                              backgroundColor: 'var(--bg-card)',
+                              color: 'var(--text-main)',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="NEW">Yangi (NEW)</option>
+                            <option value="IN_PROGRESS">Jarayonda</option>
+                            <option value="COMPLETED">Tugatildi</option>
+                            <option value="CANCELLED">Bekor qilindi</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB: BOG'LANISH VA MUROJAATLAR (CONTACT FORMI)             */}
+        {/* ========================================================= */}
+        {activeMainTab === 'contact_messages' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  Saytdan Qoldirilgan Murojaatlar
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  "Bog‘lanish" sahifasi orqali yuborilgan savollar va takliflar (Jami: {contactMessages.length} ta)
+                </p>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Yuboruvchi</th>
+                    <th style={{ padding: '0.85rem' }}>Aloqa</th>
+                    <th style={{ padding: '0.85rem' }}>Mavzu</th>
+                    <th style={{ padding: '0.85rem' }}>Xabar Matni</th>
+                    <th style={{ padding: '0.85rem' }}>Sana</th>
+                    <th style={{ padding: '0.85rem' }}>Holati</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contactMessages.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📬</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha yangi xabarlar yo‘q</h4>
+                      </td>
+                    </tr>
+                  ) : (
+                    contactMessages.map((msg) => (
+                      <tr key={msg.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {msg.full_name}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <div><a href={`tel:${msg.phone}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>{msg.phone}</a></div>
+                          {msg.email && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{msg.email}</div>}
+                        </td>
+                        <td style={{ padding: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                          {msg.subject || 'Murojaat'}
+                        </td>
+                        <td style={{ padding: '0.85rem', maxWidth: '300px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                          {msg.message}
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-light)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                          {new Date(msg.created_at).toLocaleDateString('uz-UZ')}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <span
+                            style={{
+                              padding: '0.25rem 0.65rem',
+                              borderRadius: '9999px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              backgroundColor:
+                                msg.status === 'REPLIED' ? '#ecfdf5' :
+                                msg.status === 'READ' ? '#eff6ff' : '#fee2e2',
+                              color:
+                                msg.status === 'REPLIED' ? '#059669' :
+                                msg.status === 'READ' ? '#2563eb' : '#dc2626'
+                            }}
+                          >
+                            {msg.status === 'NEW' ? 'Yangi' : msg.status === 'READ' ? 'O‘qildi' : 'Javob berildi'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateContactMessageStatus(msg.id, msg.status === 'REPLIED' ? 'NEW' : 'REPLIED')}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-card)',
+                                backgroundColor: 'var(--bg-secondary)',
+                                color: 'var(--text-main)',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {msg.status === 'REPLIED' ? 'Yangi qilish' : 'Javob berildi'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteContactMessage(msg.id)}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                backgroundColor: '#fee2e2',
+                                color: '#dc2626',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                              title="O‘chirish"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB: NEWSLETTER / JOIN US OBUNACHILARI                     */}
+        {/* ========================================================= */}
+        {activeMainTab === 'newsletter' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  Mijozlar Klubi va Newsletter Obunachilari
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Figma "Join Us" va Blog orqali a'zo bo‘lgan mijozlar bazasi (Jami: {newsletterSubs.length} ta)
+                </p>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1.25rem' }}>Email Manzili</th>
+                    <th style={{ padding: '0.85rem' }}>Foydalanuvchi</th>
+                    <th style={{ padding: '0.85rem' }}>Manba</th>
+                    <th style={{ padding: '0.85rem' }}>Promo-kod</th>
+                    <th style={{ padding: '0.85rem' }}>A'zo bo‘lgan sana</th>
+                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Holati</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newsletterSubs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💌</div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha obunachilar ro‘yxatga olinmagan</h4>
+                      </td>
+                    </tr>
+                  ) : (
+                    newsletterSubs.map((sub) => (
+                      <tr key={sub.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.85rem 1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
+                          {sub.email}
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                          {sub.full_name || 'Mijoz'}
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                          {sub.source || 'Figma Join Us'}
+                        </td>
+                        <td style={{ padding: '0.85rem' }}>
+                          <span style={{ backgroundColor: 'var(--primary-light)', color: 'var(--primary)', padding: '0.2rem 0.55rem', borderRadius: '6px', fontWeight: 800, fontSize: '0.78rem' }}>
+                            {sub.discount_code || 'URGUT10'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.85rem', color: 'var(--text-light)', fontSize: '0.82rem' }}>
+                          {new Date(sub.created_at).toLocaleDateString('uz-UZ')}
+                        </td>
+                        <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
+                          <span style={{ backgroundColor: '#ecfdf5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                            Faol
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        </div>
 
       {/* ========================================================= */}
       {/* MODAL: MEBEL QO'SHISH / TAHRIRLASH (RASM YUKLASH BILAN)  */}

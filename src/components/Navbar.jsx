@@ -95,7 +95,8 @@ export const Navbar = () => {
     { to: '/categories', label: 'Kategoriyalar' },
     { to: '/custom-order', label: 'Maxsus Buyurtma' },
     { to: '/craftsmen', label: 'Ustalar' },
-    { to: '/about', label: 'Biz haqimizda' },
+    { to: '/blog', label: 'Blog' },
+    { to: '/faq', label: 'FAQ' },
     { to: '/contact', label: 'Bog‘lanish' }
   ];
 

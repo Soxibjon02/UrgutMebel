@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { ProductCard } from '../components/ProductCard';
+import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import {
   Search,
   Filter,
   X,
   SlidersHorizontal,
-  ArrowUpDown,
-  Check,
   RotateCcw
 } from 'lucide-react';
 
@@ -22,12 +21,9 @@ export const FurnitureCatalog = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [maxPrice, setMaxPrice] = useState(30000000);
-  const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [selectedColor, setSelectedColor] = useState('all');
-  const [minRating, setMinRating] = useState(0);
-  const [onlyDiscount, setOnlyDiscount] = useState(searchParams.get('discount') === 'true');
-  const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  const [visibleCount, setVisibleCount] = useState(12);
 
   // Mobile filter sidebar toggle
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -42,7 +38,7 @@ export const FurnitureCatalog = () => {
         setProducts(prodList || []);
         setCategories(catList || []);
       } catch (e) {
-        console.error("Error loading products:", e);
+        console.error('Error loading products:', e);
       } finally {
         setLoading(false);
       }
@@ -50,7 +46,6 @@ export const FurnitureCatalog = () => {
     loadData();
   }, []);
 
-  // Sync url param if changes
   useEffect(() => {
     const cat = searchParams.get('category');
     if (cat) setSelectedCategory(cat);
@@ -58,410 +53,441 @@ export const FurnitureCatalog = () => {
     if (search) setSearchQuery(search);
   }, [searchParams]);
 
-  // Extract unique materials & colors
-  const allMaterials = useMemo(() => {
-    const set = new Set();
-    products.forEach((p) => {
-      if (p.material) {
-        p.material.split(',').forEach((m) => set.add(m.trim()));
-      }
-    });
-    return Array.from(set);
-  }, [products]);
-
-  const allColors = useMemo(() => {
-    const set = new Set();
-    products.forEach((p) => {
-      p.colors?.forEach((c) => set.add(c));
-    });
-    return Array.from(set);
-  }, [products]);
+  // Swatch colors matching Figma
+  const figmaColorSwatches = [
+    { label: 'Qora / Antrasit', color: '#1F2937', val: 'qora' },
+    { label: 'Yalpiz yashil', color: '#A7D7C5', val: 'yashil' },
+    { label: 'Shaftoli', color: '#FBC7A7', val: 'shaftoli' },
+    { label: 'Moviy osmon', color: '#A0C4E2', val: 'ko‘k' },
+    { label: 'Korall qizil', color: '#FA6D58', val: 'qizil' },
+    { label: 'Och sarg‘ish', color: '#F7E7CE', val: 'krem' }
+  ];
 
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
-    return products
-      .filter((p) => {
-        // Only published
-        if (p.is_published === false) return false;
+    let result = [...products];
 
-        // Search
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const matchName = p.name?.toLowerCase().includes(q);
-          const matchDesc = p.description?.toLowerCase().includes(q);
-          const matchMat = p.material?.toLowerCase().includes(q);
-          if (!matchName && !matchDesc && !matchMat) return false;
-        }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.material?.toLowerCase().includes(q)
+      );
+    }
 
-        // Category
-        if (selectedCategory !== 'all') {
-          const cat = categories.find((c) => c.slug === selectedCategory || c.id === selectedCategory);
-          if (cat && p.category_id !== cat.id && !p.tags?.includes(cat.slug)) return false;
-        }
+    if (selectedCategory !== 'all') {
+      result = result.filter((p) => p.category_id === selectedCategory);
+    }
 
-        // Price
-        const effectivePrice = p.discount_price || p.price;
-        if (effectivePrice > maxPrice) return false;
+    if (selectedColor !== 'all') {
+      result = result.filter((p) => p.colors?.some((c) => c.toLowerCase().includes(selectedColor)));
+    }
 
-        // Material
-        if (selectedMaterial !== 'all') {
-          if (!p.material?.toLowerCase().includes(selectedMaterial.toLowerCase())) return false;
-        }
+    result = result.filter((p) => (p.discount_price || p.price) <= maxPrice);
 
-        // Color
-        if (selectedColor !== 'all') {
-          if (!p.colors?.includes(selectedColor)) return false;
-        }
+    switch (sortBy) {
+      case 'price_asc':
+        result.sort((a, b) => (a.discount_price || a.price) - (b.discount_price || b.price));
+        break;
+      case 'price_desc':
+        result.sort((a, b) => (b.discount_price || b.price) - (a.discount_price || a.price));
+        break;
+      case 'name_asc':
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        break;
+    }
 
-        // Rating
-        if (minRating > 0 && (p.rating || 0) < minRating) return false;
+    return result;
+  }, [products, searchQuery, selectedCategory, selectedColor, maxPrice, sortBy]);
 
-        // Discount
-        if (onlyDiscount && !p.discount_price) return false;
-
-        // Stock
-        if (onlyInStock && (p.stock || 0) <= 0) return false;
-
-        return true;
-      })
-      .sort((a, b) => {
-        const priceA = a.discount_price || a.price;
-        const priceB = b.discount_price || b.price;
-
-        switch (sortBy) {
-          case 'lowest_price':
-            return priceA - priceB;
-          case 'highest_price':
-            return priceB - priceA;
-          case 'highest_rated':
-            return (b.rating || 0) - (a.rating || 0);
-          case 'popular':
-            return (b.likes_count || 0) - (a.likes_count || 0);
-          case 'newest':
-          default:
-            return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-        }
-      });
-  }, [
-    products,
-    categories,
-    searchQuery,
-    selectedCategory,
-    maxPrice,
-    selectedMaterial,
-    selectedColor,
-    minRating,
-    onlyDiscount,
-    onlyInStock,
-    sortBy
-  ]);
+  const displayedProducts = filteredProducts.slice(0, visibleCount);
 
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
-    setMaxPrice(30000000);
-    setSelectedMaterial('all');
     setSelectedColor('all');
-    setMinRating(0);
-    setOnlyDiscount(false);
-    setOnlyInStock(false);
+    setMaxPrice(30000000);
     setSortBy('newest');
     setSearchParams({});
   };
 
   return (
-    <div style={{ padding: '2.5rem 0 5rem' }}>
-      <div className="container">
-        
-        {/* Breadcrumb & Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', marginBottom: '0.35rem' }}>
-            Bosh sahifa / Mebellar katalogi
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <h1 style={{ fontSize: '2.2rem', fontWeight: 800 }}>Mebellar Katalogi</h1>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              Topildi: <strong>{filteredProducts.length}</strong> ta mahsulot
-            </span>
-          </div>
-        </div>
-
-        {/* Top Control Bar: Search input, Sort Dropdown & Mobile Filter Button */}
-        <div
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1rem 1.25rem',
-            border: '1px solid var(--border-subtle)',
-            boxShadow: 'var(--shadow-sm)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            marginBottom: '2rem'
-          }}
-          className="glass-card"
-        >
-          {/* Search Input */}
-          <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '400px' }}>
-            <Search
-              size={18}
-              style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }}
-            />
-            <input
-              type="text"
-              placeholder="Mebel nomi, turi yoki materialidan izlang..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="form-input"
-              style={{ paddingLeft: '2.5rem', paddingRight: '2rem' }}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }}
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {/* Sorting select */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ArrowUpDown size={16} color="var(--text-muted)" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="form-select"
-                style={{ width: 'auto', padding: '0.6rem 1rem' }}
-              >
-                <option value="newest">Yangi qo‘shilganlar</option>
-                <option value="popular">Eng ommabop</option>
-                <option value="lowest_price">Eng arzon narx</option>
-                <option value="highest_price">Eng qimmat narx</option>
-                <option value="highest_rated">Yuqori baholangan</option>
-              </select>
-            </div>
-
-            {/* Mobile Filter Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-              className="btn btn-secondary catalog-mobile-filter-btn"
-              style={{ padding: '0.6rem 1rem' }}
-            >
-              <Filter size={16} />
-              <span>Filtrlar</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Catalog Body: Sidebar Filters + Products Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '2rem', alignItems: 'start' }} className="catalog-layout">
-          
-          {/* Filters Sidebar */}
-          <aside
+    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+      
+      {/* ==============================================================
+          1. FIGMA SPLIT HERO BANNER (Sale Off -35% Sofas and Armchairs)
+          ============================================================== */}
+      <section style={{ padding: '2rem 1.5rem 3.5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          <div
             style={{
-              backgroundColor: 'var(--bg-card)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.5rem',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)',
-              backdropFilter: 'blur(8px)'
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr',
+              minHeight: '440px',
+              backgroundColor: '#FAFAF8',
+              borderRadius: '2px',
+              overflow: 'hidden'
             }}
-            className={`catalog-filter-sidebar glass-card ${mobileFilterOpen ? 'mobile-open' : ''}`}
+            className="figma-split-hero"
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1.05rem' }}>
-                <SlidersHorizontal size={18} color="var(--wood-amber)" />
-                <span>Filtrlar</span>
-              </div>
-              <button
-                type="button"
-                onClick={resetFilters}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.78rem', color: 'var(--wood-amber)', fontWeight: 600 }}
-              >
-                <RotateCcw size={13} />
-                <span>Tozalash</span>
-              </button>
-            </div>
-
-            {/* 1. Category Filter */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.6rem' }}>
-                Kategoriyalar
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory('all')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.45rem 0.65rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.85rem',
-                    textAlign: 'left',
-                    background: selectedCategory === 'all' ? 'var(--bg-secondary)' : 'transparent',
-                    fontWeight: selectedCategory === 'all' ? 700 : 500,
-                    color: selectedCategory === 'all' ? 'var(--wood-amber)' : 'var(--text-main)'
-                  }}
-                >
-                  <span>Barcha Mebellar</span>
-                  {selectedCategory === 'all' && <Check size={14} />}
-                </button>
-
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.slug)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.45rem 0.65rem',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: '0.85rem',
-                      textAlign: 'left',
-                      background: selectedCategory === cat.slug ? 'var(--bg-secondary)' : 'transparent',
-                      fontWeight: selectedCategory === cat.slug ? 700 : 500,
-                      color: selectedCategory === cat.slug ? 'var(--wood-amber)' : 'var(--text-main)'
-                    }}
-                  >
-                    <span>{cat.name}</span>
-                    {selectedCategory === cat.slug && <Check size={14} />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Price Range */}
-            <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
-              <label style={{ fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.4rem' }}>
-                Maksimal Narx
-              </label>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--wood-amber)', marginBottom: '0.5rem' }}>
-                {Number(maxPrice).toLocaleString()} so‘m
-              </div>
-              <input
-                type="range"
-                min="1000000"
-                max="30000000"
-                step="500000"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--wood-amber)' }}
+            {/* Left: Soft Pastel Blue with Furniture Image */}
+            <div
+              style={{
+                backgroundColor: 'var(--figma-pastel-blue)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2.5rem',
+                minHeight: '340px'
+              }}
+            >
+              <img
+                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80"
+                alt="Sofas and Armchairs"
+                style={{
+                  maxWidth: '85%',
+                  maxHeight: '320px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 15px 35px rgba(0,0,0,0.12))'
+                }}
               />
             </div>
 
-            {/* 3. Materials Filter */}
-            {allMaterials.length > 0 && (
-              <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.6rem' }}>
-                  Material
-                </label>
-                <select
-                  value={selectedMaterial}
-                  onChange={(e) => setSelectedMaterial(e.target.value)}
-                  className="form-select"
-                >
-                  <option value="all">Barcha materiallar</option>
-                  {allMaterials.map((mat, i) => (
-                    <option key={i} value={mat}>
-                      {mat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* 4. Colors Filter */}
-            {allColors.length > 0 && (
-              <div style={{ marginBottom: '1.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.6rem' }}>
-                  Rang
-                </label>
-                <select
-                  value={selectedColor}
-                  onChange={(e) => setSelectedColor(e.target.value)}
-                  className="form-select"
-                >
-                  <option value="all">Barcha ranglar</option>
-                  {allColors.map((col, i) => (
-                    <option key={i} value={col}>
-                      {col}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* 5. Rating, Discount & Stock Toggles */}
-            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.86rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={onlyDiscount}
-                  onChange={(e) => setOnlyDiscount(e.target.checked)}
-                  style={{ accentColor: 'var(--wood-amber)', width: '17px', height: '17px' }}
-                />
-                <span style={{ fontWeight: 600 }}>Faqat chegirmadagi mahsulotlar</span>
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.86rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={onlyInStock}
-                  onChange={(e) => setOnlyInStock(e.target.checked)}
-                  style={{ accentColor: 'var(--wood-amber)', width: '17px', height: '17px' }}
-                />
-                <span style={{ fontWeight: 600 }}>Faqat omborda mavjudlari</span>
-              </label>
-            </div>
-          </aside>
-
-          {/* Product Grid Area */}
-          <div>
-            {filteredProducts.length === 0 ? (
+            {/* Right: Soft Peach Card with -35% badge */}
+            <div
+              style={{
+                backgroundColor: 'var(--figma-pastel-peach)',
+                padding: '4rem 3.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                position: 'relative'
+              }}
+            >
+              {/* -35% Circular Badge */}
               <div
                 style={{
-                  backgroundColor: 'var(--bg-card)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '4rem 2rem',
-                  textAlign: 'center',
-                  border: '1px solid var(--border-subtle)',
-                  backdropFilter: 'blur(8px)'
+                  position: 'absolute',
+                  top: '2.5rem',
+                  right: '2.5rem',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--figma-coral)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 800,
+                  fontSize: '1.05rem'
                 }}
-                className="glass-card"
               >
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛋️</div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                  Mos keluvchi mebel topilmadi
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
-                  Filtrlarni o‘zgartirib ko‘ring yoki barcha parametrlarni tozalang.
-                </p>
-                <button type="button" onClick={resetFilters} className="btn btn-primary">
-                  <RotateCcw size={16} />
-                  Filtrlarni qayta tiklash
-                </button>
+                -35%
               </div>
-            ) : (
-              <div className="grid-products">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
+
+              <span
+                style={{
+                  color: 'var(--figma-coral)',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  marginBottom: '0.75rem'
+                }}
+              >
+                Sale Off
+              </span>
+              <h1
+                style={{
+                  fontSize: 'clamp(2.2rem, 4vw, 3rem)',
+                  fontWeight: 800,
+                  color: '#18191D',
+                  lineHeight: 1.15,
+                  margin: '0 0 1rem'
+                }}
+              >
+                Sofas and<br />Armchairs
+              </h1>
+              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', marginBottom: '2rem' }}>
+                Eng sara zamonaviy yumshoq mebellar to‘plami. Qulaylik va xonadon go‘zalligi bir joyda.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('all');
+                  window.scrollTo({ top: 600, behavior: 'smooth' });
+                }}
+                className="btn-figma-coral"
+              >
+                CHECK ALL ITEMS &gt;
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ==============================================================
+          2. MAIN CATALOG SECTION WITH SIDEBAR & PRODUCTS
+          ============================================================== */}
+      <section style={{ padding: '1rem 1.5rem 5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          
+          {/* Top Sort & Count Bar */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingBottom: '1.5rem',
+              marginBottom: '2.5rem',
+              borderBottom: '1px solid #ECECEC',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}
+          >
+            <div style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+              Jami <strong>{filteredProducts.length}</strong> ta mebel topildi
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '2px',
+                  fontSize: '0.88rem',
+                  backgroundColor: '#FFFFFF',
+                  color: '#18191D',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="newest">Yangi qo‘shilganlar</option>
+                <option value="price_asc">Narx: Arzondan qimmatga</option>
+                <option value="price_desc">Narx: Qimmatdan arzonga</option>
+                <option value="name_asc">Nomi bo‘yicha (A-Z)</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+                className="btn-figma-dark catalog-mobile-filter-btn"
+                style={{ padding: '0.6rem 1rem', fontSize: '0.78rem' }}
+              >
+                <Filter size={16} /> Filtrlar
+              </button>
+            </div>
+          </div>
+
+          {/* Grid Layout: Sidebar + Products */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '260px 1fr',
+              gap: '3.5rem',
+              alignItems: 'flex-start'
+            }}
+            className="catalog-layout"
+          >
+            {/* Left Filter Sidebar */}
+            <aside className={`catalog-filter-sidebar ${mobileFilterOpen ? 'mobile-open' : ''}`}>
+              {/* Categories */}
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                  Kategoriyalar
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory('all')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      fontWeight: selectedCategory === 'all' ? 700 : 500,
+                      color: selectedCategory === 'all' ? 'var(--figma-coral)' : '#6B7280',
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    Barcha Mebellar
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        textAlign: 'left',
+                        fontSize: '0.9rem',
+                        fontWeight: selectedCategory === cat.id ? 700 : 500,
+                        color: selectedCategory === cat.id ? 'var(--figma-coral)' : '#6B7280',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Swatches */}
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                  Ranglar
+                </h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedColor('all')}
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      border: '1px solid #D1D5DB',
+                      borderRadius: '2px',
+                      backgroundColor: selectedColor === 'all' ? 'var(--figma-coral)' : '#FFFFFF',
+                      color: selectedColor === 'all' ? '#FFFFFF' : '#4B5563',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Barchasi
+                  </button>
+                  {figmaColorSwatches.map((sw, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedColor(sw.val)}
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        backgroundColor: sw.color,
+                        border: selectedColor === sw.val ? '2px solid var(--figma-coral)' : '1px solid #D1D5DB',
+                        outline: selectedColor === sw.val ? '2px solid rgba(250, 109, 88, 0.4)' : 'none',
+                        cursor: 'pointer'
+                      }}
+                      title={sw.label}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Filter Slider */}
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#18191D', marginBottom: '1.25rem' }}>
+                  Narx Bo‘yicha Filtrlash
+                </h4>
+                <input
+                  type="range"
+                  min={100000}
+                  max={30000000}
+                  step={200000}
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--figma-coral)', cursor: 'pointer' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#6B7280', marginTop: '0.5rem' }}>
+                  <span>0 so‘m</span>
+                  <span style={{ fontWeight: 700, color: 'var(--figma-coral)' }}>
+                    {maxPrice.toLocaleString()} so‘m
+                  </span>
+                </div>
+              </div>
+
+              {/* Reset button */}
+              <button
+                type="button"
+                onClick={resetFilters}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.85rem',
+                  color: '#6B7280',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                <RotateCcw size={15} /> Filtrlarni tozalash
+              </button>
+            </aside>
+
+            {/* Right Products Grid */}
+            <main>
+              {loading ? (
+                <div style={{ padding: '5rem 0', textAlign: 'center', color: '#6B7280' }}>
+                  Mebellar yuklanmoqda...
+                </div>
+              ) : displayedProducts.length === 0 ? (
+                <div
+                  style={{
+                    padding: '4rem 2rem',
+                    textAlign: 'center',
+                    backgroundColor: '#F9FAFB',
+                    border: '1px solid #ECECEC'
+                  }}
+                >
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#18191D', marginBottom: '0.5rem' }}>
+                    Mos mebel topilmadi
+                  </h3>
+                  <p style={{ color: '#6B7280', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    Filtrlarni o‘zgartirib ko‘ring yoki tozalang.
+                  </p>
+                  <button type="button" onClick={resetFilters} className="btn-figma-coral">
+                    Filtrlarni Tozalash
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                      gap: '2rem'
+                    }}
+                  >
+                    {displayedProducts.map((prod) => (
+                      <ProductCard key={prod.id} product={prod} />
+                    ))}
+                  </div>
+
+                  {/* Centered Load More button */}
+                  {visibleCount < filteredProducts.length && (
+                    <div style={{ textAlign: 'center', marginTop: '3.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount((prev) => prev + 12)}
+                        className="btn-figma-coral"
+                      >
+                        LOAD MORE PRODUCTS
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </main>
+          </div>
+        </div>
+      </section>
+
+      {/* ==============================================================
+          3. SIGNATURE AUTUMN COLLECTION CAROUSEL
+          ============================================================== */}
+      <FigmaCollectionCarousel title="Autumn Collection" />
 
       {/* Responsive layout styles */}
       <style>{`
@@ -475,6 +501,9 @@ export const FurnitureCatalog = () => {
           .catalog-filter-sidebar.mobile-open {
             display: block !important;
             margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #FAFAFA;
+            border: 1px solid #ECECEC;
           }
           .catalog-mobile-filter-btn {
             display: inline-flex !important;

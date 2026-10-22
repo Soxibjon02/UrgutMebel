@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { ProductCard } from '../components/ProductCard';
+import { FigmaCollectionCarousel } from '../components/FigmaCollectionCarousel';
 import {
   Star,
   Heart,
@@ -17,43 +17,44 @@ import {
   Share2,
   MessageSquare,
   Send,
-  CornerDownRight,
-  ChevronRight
+  ChevronRight,
+  ArrowRight
 } from 'lucide-react';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { toggleLike, isLiked, toggleFavorite, isFavorite } = useWishlist();
+  const { toggleLike, isLiked } = useWishlist();
   const { user, isGuest, openAuthModal } = useAuth();
   const { addToast } = useNotification();
 
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [newRating, setNewRating] = useState(5);
   const [loading, setLoading] = useState(true);
+
+  // Suggestions filter state
+  const [suggestionCategory, setSuggestionCategory] = useState('all');
 
   useEffect(() => {
     const loadProductData = async () => {
       setLoading(true);
       try {
-        const [prodList, commList] = await Promise.all([
+        const [prodList, catList] = await Promise.all([
           dataService.getProducts(),
-          dataService.getComments()
+          dataService.getCategories()
         ]);
         setAllProducts(prodList || []);
+        setCategories(catList || []);
+
         const found = (prodList || []).find((p) => p.id === id || p.slug === id);
         if (found) {
           setProduct(found);
           setSelectedColor(found.colors?.[0] || 'Standart');
-          const relatedComments = (commList || []).filter((c) => c.product_id === found.id);
-          setComments(relatedComments);
         }
       } catch (err) {
         console.error("Error loading product detail:", err);
@@ -67,611 +68,526 @@ export const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="container" style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>Mebel ma'lumotlari yuklanmoqda...</div>
+      <div style={{ padding: '6rem 1.5rem', textAlign: 'center', color: '#6B7280' }}>
+        Mebel ma'lumotlari yuklanmoqda...
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="container" style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
-        <h2>Mahsulot topilmadi</h2>
-        <p style={{ color: 'var(--text-muted)', margin: '1rem 0 2rem' }}>Ushbu mahsulot mavjud emas yoki o‘chirilgan bo‘lishi mumkin.</p>
-        <Link to="/furniture" className="btn btn-primary">Katalogga qaytish</Link>
+      <div style={{ padding: '6rem 1.5rem', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Mahsulot topilmadi</h2>
+        <p style={{ color: '#6B7280', margin: '1rem 0 2rem' }}>
+          Ushbu mahsulot mavjud emas yoki o‘chirilgan bo‘lishi mumkin.
+        </p>
+        <Link to="/furniture" className="btn-figma-coral">
+          Katalogga Qaytish
+        </Link>
       </div>
     );
   }
 
-  const images = product.images?.length > 0 ? product.images : [product.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80'];
-  const discountPercent = product.discount_price && product.price
-    ? Math.round(((product.price - product.discount_price) / product.price) * 100)
-    : null;
+  const images = product.images?.length > 0 ? product.images : [
+    product.image_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80'
+  ];
 
   const effectivePrice = product.discount_price || product.price;
   const liked = isLiked(product.id);
-  const favorited = isFavorite(product.id);
 
-  // Related products from same category or tags
-  const relatedProducts = allProducts
-    .filter((p) => p.id !== product.id && (p.category_id === product.category_id || p.tags?.some((t) => product.tags?.includes(t))))
+  // Suggestions
+  const suggestions = allProducts
+    .filter((p) => p.id !== product.id && (suggestionCategory === 'all' || p.category_id === suggestionCategory))
     .slice(0, 4);
+
+  const figmaColorDots = [
+    { name: 'Ko‘k', color: '#3b82f6' },
+    { name: 'To‘q antrasit', color: '#1f2937' },
+    { name: 'Yalpiz', color: '#2dd4bf' },
+    { name: 'Shaftoli', color: '#fb923c' }
+  ];
 
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedColor);
-  };
-
-  const handleBuyNow = () => {
-    if (isGuest || !user) {
-      openAuthModal('login', 'Xarid qilish faqatgina oddiy mijozlar uchun! Tizimga kiring yoki ro‘yxatdan o‘ting.');
-      return;
-    }
-    if (user.role !== 'customer') {
-      const roleTitle = user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta';
-      addToast(`Buyurtma berish faqatgina oddiy mijozlar uchun ruxsat etilgan! Xodimlar (${roleTitle}) hisobidan buyurtma berish taqiqlangan.`, 'error');
-      return;
-    }
-    addToCart(product, quantity, selectedColor);
-    navigate('/checkout');
-  };
-
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (isGuest) {
-      openAuthModal('login', 'Sharh qoldirish uchun avval tizimga kiring!');
-      return;
-    }
-    if (!newComment.trim()) return;
-
-    const created = await dataService.addComment({
-      product_id: product.id,
-      user_id: user.id,
-      user_name: user.full_name,
-      rating: newRating,
-      content: newComment.trim()
-    });
-
-    setComments([created, ...comments]);
-    setNewComment('');
-    addToast('Fikringiz uchun tashakkur! Sharhingiz e‘lon qilindi.', 'success');
-  };
-
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      addToast('Havola nusxalandi!', 'info');
-    }
+    addToast(`${product.name} savatga qo‘shildi!`, 'success');
   };
 
   return (
-    <div style={{ padding: '1.25rem 0 calc(90px + env(safe-area-inset-bottom, 24px))' }}>
-      <div className="container">
-        
-        {/* Breadcrumb - Clean, single-line horizontal scroll with ellipsis */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            fontSize: '0.82rem',
-            color: 'var(--text-light)',
-            marginBottom: '1.5rem',
-            overflowX: 'auto',
-            whiteSpace: 'nowrap',
-            WebkitOverflowScrolling: 'touch'
-          }}
-          className="no-scrollbar"
-        >
-          <Link to="/" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>Bosh sahifa</Link>
-          <ChevronRight size={14} style={{ flexShrink: 0 }} />
-          <Link to="/furniture" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>Mebellar</Link>
-          <ChevronRight size={14} style={{ flexShrink: 0 }} />
-          <span
-            style={{
-              color: 'var(--text-main)',
-              fontWeight: 600,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '220px',
-              flexShrink: 1
-            }}
-            title={product.name}
-          >
-            {product.name}
-          </span>
-        </div>
-
-        {/* Product Top Grid: Gallery & Info */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', marginBottom: '3.5rem' }}>
+    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', color: '#18191D' }}>
+      
+      {/* ==============================================================
+          1. TOP PRODUCT PRESENTATION SECTION (EXACT FIGMA LAYOUT)
+          ============================================================== */}
+      <section style={{ padding: '3rem 1.5rem 4rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
           
-          {/* Left: Image Gallery */}
-          <div>
-            {/* Primary Large Image */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr',
+              gap: '4rem',
+              alignItems: 'center'
+            }}
+            className="product-top-grid"
+          >
+            {/* Left: Product Images (Main Photo + Right Vertical Thumbnails) */}
             <div
               style={{
-                position: 'relative',
-                borderRadius: 'var(--radius-xl)',
-                overflow: 'hidden',
-                backgroundColor: '#f5f3ee',
-                aspectRatio: '4 / 3',
-                marginBottom: '1rem',
-                boxShadow: 'var(--shadow-md)',
-                border: '1px solid var(--border-subtle)'
+                display: 'grid',
+                gridTemplateColumns: '1fr 120px',
+                gap: '1.5rem',
+                alignItems: 'center'
               }}
+              className="product-images-layout"
             >
-              <img
-                src={images[selectedImage]}
-                alt={product.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              {/* Large Main Photo */}
+              <div
+                style={{
+                  height: '480px',
+                  backgroundColor: '#F8F9FA',
+                  borderRadius: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2.5rem',
+                  position: 'relative'
+                }}
+              >
+                <img
+                  src={images[selectedImage]}
+                  alt={product.name}
+                  style={{
+                    maxWidth: '90%',
+                    maxHeight: '400px',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.09))'
+                  }}
+                />
 
-              {discountPercent && (
-                <span
-                  className="badge badge-discount"
-                  style={{ position: 'absolute', top: '1rem', left: '1rem', fontSize: '0.85rem', padding: '0.35rem 0.75rem' }}
-                >
-                  -{discountPercent}% CHEGIRMA
-                </span>
-              )}
-            </div>
-
-            {/* Thumbnail selector */}
-            {images.length > 1 && (
-              <div style={{ display: 'flex', gap: '0.65rem', overflowX: 'auto', paddingBottom: '0.5rem' }} className="no-scrollbar">
-                {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSelectedImage(idx)}
-                    style={{
-                      width: '70px',
-                      height: '70px',
-                      borderRadius: 'var(--radius-md)',
-                      overflow: 'hidden',
-                      border: selectedImage === idx ? '2.5px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
-                      opacity: selectedImage === idx ? 1 : 0.65,
-                      flexShrink: 0,
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <img src={img} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Right: Product Details & Actions */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', color: '#d97706' }}>
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={18}
-                      fill={i < Math.round(product.rating || 5) ? '#d97706' : 'none'}
-                      color="#d97706"
-                    />
-                  ))}
-                </div>
-                <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{product.rating || 5.0}</span>
-                <span style={{ color: 'var(--text-light)', fontSize: '0.85rem' }}>
-                  ({product.reviews_count || comments.length || 16} ta baho)
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {/* Like Button Floating */}
                 <button
                   type="button"
                   onClick={() => toggleLike(product.id)}
                   style={{
+                    position: 'absolute',
+                    top: '1.25rem',
+                    right: '1.25rem',
                     width: '38px',
                     height: '38px',
                     borderRadius: '50%',
-                    background: liked ? '#fee2e2' : 'var(--bg-secondary)',
-                    color: liked ? '#ef4444' : 'var(--text-main)',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E5E7EB',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '1px solid var(--border-subtle)'
+                    cursor: 'pointer',
+                    color: liked ? '#ef4444' : '#9CA3AF',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
                   }}
-                  title="Layk bosish"
                 >
                   <Heart size={18} fill={liked ? '#ef4444' : 'none'} />
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '50%',
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-main)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid var(--border-subtle)'
-                  }}
-                  title="Ulashish"
-                >
-                  <Share2 size={18} />
-                </button>
-              </div>
-            </div>
-
-            <h1 style={{ fontSize: 'clamp(1.5rem, 4.5vw, 2.2rem)', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.25 }}>
-              {product.name}
-            </h1>
-
-            {/* Price section - Guarantees NO awkward wrapping of "so'm" */}
-            <div
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                padding: '1rem 1.25rem',
-                borderRadius: 'var(--radius-lg)',
-                marginBottom: '1.5rem',
-                display: 'flex',
-                alignItems: 'baseline',
-                flexWrap: 'wrap',
-                gap: '0.5rem 1rem',
-                border: '1px solid var(--border-subtle)'
-              }}
-            >
-              <div style={{ fontSize: 'clamp(1.5rem, 5.5vw, 2rem)', fontWeight: 800, color: 'var(--wood-amber)', whiteSpace: 'nowrap' }}>
-                {Number(effectivePrice).toLocaleString()} so‘m
-              </div>
-              {product.discount_price && (
-                <div style={{ fontSize: 'clamp(0.95rem, 3.5vw, 1.15rem)', color: 'var(--text-light)', textDecoration: 'line-through', whiteSpace: 'nowrap' }}>
-                  {Number(product.price).toLocaleString()} so‘m
-                </div>
-              )}
-            </div>
-
-            {/* Availability */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', fontSize: '0.88rem' }}>
-              <CheckCircle2 size={18} color="var(--status-success)" style={{ flexShrink: 0 }} />
-              <span style={{ fontWeight: 600 }}>
-                Holati: <strong style={{ color: 'var(--status-success)' }}>Omborda tayyor (Yetkazib berish 1-2 kun)</strong>
-              </span>
-            </div>
-
-            {/* Color selection */}
-            {product.colors?.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>
-                  Rangini tanlang: <span style={{ color: 'var(--wood-amber)' }}>{selectedColor}</span>
-                </label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {product.colors.map((color, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setSelectedColor(color)}
-                      style={{
-                        padding: '0.45rem 0.9rem',
-                        borderRadius: 'var(--radius-md)',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        border: selectedColor === color ? '2px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
-                        backgroundColor: selectedColor === color ? '#fff' : 'var(--bg-secondary)',
-                        color: selectedColor === color ? 'var(--wood-amber)' : 'var(--text-main)',
-                        boxShadow: selectedColor === color ? 'var(--shadow-sm)' : 'none'
-                      }}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity & Buy Buttons - Mobile Optimized Stack */}
-            <div
-              className="product-detail-actions"
-              style={{
-                display: 'flex',
-                gap: '0.75rem',
-                marginBottom: '1.5rem',
-                flexWrap: 'wrap'
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  border: '1.5px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-secondary)',
-                  flexShrink: 0
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  style={{ width: '40px', height: '46px', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}
-                  aria-label="Kamaytirish"
-                >
-                  -
-                </button>
-                <span style={{ width: '38px', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  style={{ width: '40px', height: '46px', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}
-                  aria-label="Ko'paytirish"
-                >
-                  +
-                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="btn btn-primary product-btn-add-cart"
-                style={{ flex: '1 1 180px', padding: '0.85rem 1.25rem', fontSize: '0.98rem' }}
-              >
-                <ShoppingBag size={18} />
-                <span>Savatga Qo‘shish</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                className="btn btn-dark product-btn-buy-now"
-                style={{ flex: '1 1 180px', padding: '0.85rem 1.25rem', fontSize: '0.98rem' }}
-              >
-                <Zap size={18} color="var(--gold-accent)" />
-                <span>Hozir Xarid Qilish</span>
-              </button>
-            </div>
-
-            {/* Assurance badges */}
-            <div
-              style={{
-                borderTop: '1px solid var(--border-subtle)',
-                paddingTop: '1.25rem',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '0.75rem',
-                fontSize: '0.82rem',
-                color: 'var(--text-muted)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Truck size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
-                <span>O‘zbekiston bo‘ylab bepul yetkazib o‘rnatish</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ShieldCheck size={18} color="var(--wood-amber)" style={{ flexShrink: 0 }} />
-                <span>3 yillik rasmiy kafolat sertifikati</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Specifications & Description Section */}
-        <div
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: 'var(--radius-xl)',
-            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
-            border: '1px solid var(--border-subtle)',
-            boxShadow: 'var(--shadow-sm)',
-            marginBottom: '3.5rem'
-          }}
-          className="glass-card"
-        >
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.25rem' }}>
-            Tavsif va Xususiyatlar
-          </h2>
-          <p style={{ color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '2rem', fontSize: '0.98rem' }}>
-            {product.description}
-          </p>
-
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>
-            Texnik Ko‘rsatkichlar:
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>Material:</span>
-              <strong style={{ fontSize: '0.95rem' }}>{product.material || "Tabiiy daraxt massivi"}</strong>
-            </div>
-            <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>O‘lchamlari:</span>
-              <strong style={{ fontSize: '0.95rem' }}>{product.dimensions || "Standart format"}</strong>
-            </div>
-
-            {product.specifications &&
-              Object.entries(product.specifications).map(([key, val], idx) => (
-                <div key={idx} style={{ padding: '0.85rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', display: 'block' }}>{key}:</span>
-                  <strong style={{ fontSize: '0.95rem' }}>{val}</strong>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Reviews & Comments Section */}
-        <div
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: 'var(--radius-xl)',
-            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
-            border: '1px solid var(--border-subtle)',
-            boxShadow: 'var(--shadow-sm)',
-            marginBottom: '3.5rem'
-          }}
-          className="glass-card"
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Mijozlar Fikrlari va Sharhlar</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Haqiqiy xaridorlarning baholari</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)' }}>
-              <Star size={20} fill="#d97706" color="#d97706" />
-              <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>{product.rating || 5.0}</span>
-              <span style={{ color: 'var(--text-light)', fontSize: '0.85rem' }}>/ 5.0</span>
-            </div>
-          </div>
-
-          {/* New Comment / Review Form */}
-          <form
-            onSubmit={handleCommentSubmit}
-            style={{
-              backgroundColor: 'var(--bg-secondary)',
-              padding: '1.5rem',
-              borderRadius: 'var(--radius-lg)',
-              marginBottom: '2.5rem'
-            }}
-          >
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-              Ushbu mebel haqida o‘z fikringizni bildiring
-            </h4>
-
-            {/* Rating selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Bahoyingiz:</span>
-              <div style={{ display: 'flex', gap: '0.25rem' }}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setNewRating(star)}
-                    style={{ color: star <= newRating ? '#d97706' : '#d6d3d1' }}
+              {/* Stacked Vertical Thumbnails */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {images.slice(0, 3).map((img, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    style={{
+                      height: '110px',
+                      backgroundColor: '#F8F9FA',
+                      borderRadius: '2px',
+                      border: selectedImage === idx ? '2px solid var(--figma-coral)' : '1px solid #E5E7EB',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0.5rem',
+                      transition: 'all 0.2s ease'
+                    }}
                   >
-                    <Star size={22} fill={star <= newRating ? '#d97706' : 'none'} />
-                  </button>
+                    <img
+                      src={img}
+                      alt="Thumb"
+                      style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
 
-            <textarea
-              required
-              rows={3}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Mebel sifati, yetkazib berilishi va o‘lchamlari haqida yozing..."
-              className="form-textarea"
-              style={{ marginBottom: '1rem' }}
+            {/* Right: Price, Title, Description, Color Dots, Add to Cart */}
+            <div style={{ maxWidth: '440px' }}>
+              <div
+                style={{
+                  fontSize: '1.65rem',
+                  fontWeight: 800,
+                  color: 'var(--figma-coral)',
+                  marginBottom: '0.65rem'
+                }}
+              >
+                {Number(effectivePrice).toLocaleString()} so‘m
+              </div>
+
+              <h1
+                style={{
+                  fontSize: 'clamp(2rem, 3.5vw, 2.75rem)',
+                  fontWeight: 800,
+                  color: '#18191D',
+                  lineHeight: 1.15,
+                  margin: '0 0 1rem'
+                }}
+              >
+                {product.name}
+              </h1>
+
+              <p style={{ color: '#6B7280', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                {product.description || "Urgut duradgorlik an'analari asosida tayyorlangan yuqori sifatli va bejirim mebel to‘plami."}
+              </p>
+
+              {/* Color Swatch Dots */}
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  {figmaColorDots.map((dot, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedColor(dot.name)}
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: dot.color,
+                        border: selectedColor === dot.name ? '2px solid var(--figma-coral)' : '2px solid #FFFFFF',
+                        outline: selectedColor === dot.name ? '2px solid var(--figma-coral)' : '1px solid #D1D5DB',
+                        cursor: 'pointer'
+                      }}
+                      title={dot.name}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Exact Figma Full-Width Coral Button: Add To Cart > */}
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="btn-figma-coral"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '1.15rem'
+                }}
+              >
+                <span>Add To Cart</span>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==============================================================
+          2. MIDDLE 3-COLUMN SECTION (Description | Center Image | Mini Blog Card)
+          ============================================================== */}
+      <section style={{ padding: '3.5rem 1.5rem', borderTop: '1px solid #F0F0F0', borderBottom: '1px solid #F0F0F0' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1.3fr 1fr',
+              gap: '3.5rem',
+              alignItems: 'center'
+            }}
+            className="product-mid-grid"
+          >
+            {/* Left: Description */}
+            <div>
+              <span
+                style={{
+                  color: 'var(--figma-coral)',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                Description
+              </span>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+                {product.name}
+              </h2>
+              <div
+                style={{
+                  width: '36px',
+                  height: '2px',
+                  backgroundColor: 'var(--figma-coral)',
+                  marginBottom: '1.5rem'
+                }}
+              />
+              <p style={{ color: '#6B7280', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                Mebelimiz tabiiy va ekologik toza materiallardan yasalgan bo‘lib, uzoq yillar davomida o‘zining jilosi va mustahkamligini yo‘qotmaydi.
+              </p>
+              <p style={{ color: '#6B7280', fontSize: '0.92rem', lineHeight: 1.7, margin: 0 }}>
+                Har bir detalga alohida mehr bilan ishlov berilgan. Uy va ofis interyerida o‘zgacha qulaylik va estetika baxsh etadi.
+              </p>
+            </div>
+
+            {/* Center: Vertical Lifestyle Image */}
+            <div
+              style={{
+                height: '440px',
+                borderRadius: '2px',
+                backgroundColor: '#E5E7EB',
+                backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             />
 
-            <button type="submit" className="btn btn-primary btn-sm">
-              <Send size={15} />
-              <span>Sharhni E'lon Qilish</span>
-            </button>
-          </form>
-
-          {/* Comments List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {comments.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>
-                Hali sharhlar qoldirilmagan. Birinchi bo‘lib o‘z fikringizni bildiring!
+            {/* Right: Mini Blog Card ("5 ideas for choosing the perfect...") */}
+            <div
+              style={{
+                padding: '2.5rem',
+                border: '1px solid #ECECEC',
+                borderRadius: '2px'
+              }}
+            >
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#18191D', lineHeight: 1.3, margin: '0 0 0.5rem' }}>
+                5 ideas for choosing the perfect furniture
+              </h3>
+              <div
+                style={{
+                  width: '32px',
+                  height: '2px',
+                  backgroundColor: 'var(--figma-coral)',
+                  marginBottom: '1.25rem'
+                }}
+              />
+              <p style={{ color: '#6B7280', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                Xonadon maydoni va mebel proporsiyalari o‘rtasidagi oltin qoidalarni o‘rganing va eng mos tanlovni qiling.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+                  alt="Author"
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                />
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#18191D' }}>
+                  Sherzod Aliyev
+                </span>
               </div>
-            ) : (
-              comments.map((comm) => (
-                <div
-                  key={comm.id}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==============================================================
+          3. OUR SUGGESTIONS: YOU MAY ALSO LIKE (Sidebar + Clean Cards)
+          ============================================================== */}
+      <section style={{ padding: '4rem 1.5rem 5rem' }}>
+        <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+          
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span
+              style={{
+                color: 'var(--figma-coral)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                display: 'block',
+                marginBottom: '0.4rem'
+              }}
+            >
+              Our Suggestions
+            </span>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#18191D', margin: '0 0 0.5rem' }}>
+              You may also like
+            </h2>
+            <div
+              style={{
+                width: '36px',
+                height: '2px',
+                backgroundColor: 'var(--figma-coral)'
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '220px 1fr',
+              gap: '3.5rem',
+              alignItems: 'start'
+            }}
+            className="suggestions-layout"
+          >
+            {/* Left Suggestions Filter Sidebar */}
+            <aside>
+              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#18191D', marginBottom: '1rem' }}>
+                Kategoriyalar
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setSuggestionCategory('all')}
                   style={{
-                    borderBottom: '1px solid var(--border-subtle)',
-                    paddingBottom: '1.5rem'
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    fontSize: '0.88rem',
+                    fontWeight: suggestionCategory === 'all' ? 700 : 500,
+                    color: suggestionCategory === 'all' ? 'var(--figma-coral)' : '#6B7280',
+                    textAlign: 'left',
+                    cursor: 'pointer'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  Barchasi
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSuggestionCategory(c.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      fontSize: '0.88rem',
+                      fontWeight: suggestionCategory === c.id ? 700 : 500,
+                      color: suggestionCategory === c.id ? 'var(--figma-coral)' : '#6B7280',
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            {/* Right Suggestions 2-Column Grid */}
+            <main>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '2rem'
+                }}
+                className="suggestions-products-grid"
+              >
+                {suggestions.map((p, idx) => {
+                  const pastelColors = ['#EEF2F6', '#FCF6ED', '#EAF3ED', '#FDF0E7'];
+                  const bgColor = pastelColors[idx % pastelColors.length];
+                  return (
+                    <div
+                      key={p.id}
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #ECECEC',
+                        borderRadius: '2px',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {/* Pastel Photo Box */}
                       <div
                         style={{
-                          width: '34px',
-                          height: '34px',
-                          borderRadius: '50%',
-                          background: 'var(--gold-gradient)',
-                          color: '#fff',
-                          fontWeight: 700,
+                          backgroundColor: bgColor,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '0.85rem'
+                          padding: '1.5rem',
+                          height: '200px'
                         }}
                       >
-                        {comm.user_name?.charAt(0) || 'M'}
+                        <img
+                          src={p.images?.[0] || p.image_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80'}
+                          alt={p.name}
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '150px',
+                            objectFit: 'contain'
+                          }}
+                        />
                       </div>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>{comm.user_name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--status-success)', fontWeight: 600 }}>
-                          ✓ Tasdiqlangan xaridor
-                        </div>
-                      </div>
-                    </div>
 
-                    <div style={{ display: 'flex', color: '#d97706' }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill={i < (comm.rating || 5) ? '#d97706' : 'none'} color="#d97706" />
-                      ))}
-                    </div>
-                  </div>
-
-                  <p style={{ fontSize: '0.92rem', color: 'var(--text-main)', margin: '0.5rem 0' }}>
-                    {comm.content}
-                  </p>
-
-                  {/* Comment Replies */}
-                  {comm.replies?.length > 0 && (
-                    <div style={{ marginTop: '0.85rem', paddingLeft: '1.5rem', borderLeft: '2px solid var(--wood-light)' }}>
-                      {comm.replies.map((reply) => (
-                        <div key={reply.id} style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--wood-amber)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '0.2rem' }}>
-                            <CornerDownRight size={13} />
-                            <span>{reply.user_name}</span>
+                      {/* Content */}
+                      <div
+                        style={{
+                          padding: '1.5rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--figma-coral)', marginBottom: '0.25rem' }}>
+                            {Number(p.discount_price || p.price).toLocaleString()} so‘m
                           </div>
-                          <p style={{ fontSize: '0.86rem', color: 'var(--text-main)' }}>{reply.content}</p>
+                          <h4 style={{ fontSize: '0.98rem', fontWeight: 700, color: '#18191D', margin: '0 0 0.5rem', lineHeight: 1.3 }}>
+                            {p.name}
+                          </h4>
+                          <p style={{ fontSize: '0.78rem', color: '#6B7280', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {p.material || 'Tabiiy daraxt va sifatli mato'}
+                          </p>
                         </div>
-                      ))}
+
+                        <Link
+                          to={`/furniture/${p.id}`}
+                          style={{
+                            color: 'var(--figma-coral)',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.06em',
+                            textDecoration: 'none',
+                            textTransform: 'uppercase',
+                            marginTop: '1rem'
+                          }}
+                        >
+                          VIEW ITEM &gt;
+                        </Link>
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))
-            )}
+                  );
+                })}
+              </div>
+            </main>
           </div>
         </div>
+      </section>
 
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <div>
-            <div className="section-header">
-              <div>
-                <span className="section-tag">O‘xshash Modellar</span>
-                <h2 className="section-title">Sizga Ham Yoqishi Mumkin</h2>
-              </div>
-              <Link to="/furniture" className="btn btn-secondary btn-sm">
-                Barcha mebellarni ko‘rish <ChevronRight size={16} />
-              </Link>
-            </div>
+      {/* ==============================================================
+          4. SIGNATURE AUTUMN COLLECTION CAROUSEL
+          ============================================================== */}
+      <FigmaCollectionCarousel title="Autumn Collection" />
 
-            <div className="grid-products">
-              {relatedProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
+      {/* Responsive layout styles */}
       <style>{`
-        @media (max-width: 640px) {
-          .product-detail-actions {
-            display: grid !important;
-            grid-template-columns: auto 1fr !important;
-            gap: 0.75rem !important;
+        @media (max-width: 899px) {
+          .product-top-grid {
+            grid-template-columns: 1fr !important;
           }
-          .product-btn-buy-now {
-            grid-column: 1 / -1 !important;
-            width: 100% !important;
+          .product-mid-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .suggestions-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .suggestions-products-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>

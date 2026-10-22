@@ -280,6 +280,28 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
+  const updateProfile = (updatedFields) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...updatedFields };
+    setUser(updatedUser);
+    localStorage.setItem('urgut_mebel_auth_user', JSON.stringify(updatedUser));
+    
+    // Also update registered users list if present
+    try {
+      const allUsers = JSON.parse(localStorage.getItem('urgut_mebel_registered_users') || '[]');
+      const idx = allUsers.findIndex(u => u.id === user.id || u.email === user.email);
+      if (idx !== -1) {
+        allUsers[idx] = { ...allUsers[idx], ...updatedFields };
+        localStorage.setItem('urgut_mebel_registered_users', JSON.stringify(allUsers));
+      }
+    } catch (e) {
+      console.warn('Error updating profile in registered users:', e);
+    }
+
+    addToast('Profil ma‘lumotlari muvaffaqiyatli saqlandi!', 'success');
+    return updatedUser;
+  };
+
   const switchRole = (newRole) => {
     if (newRole === 'guest') {
       setUser(null);
@@ -303,6 +325,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateProfile,
         switchRole,
         authModalState,
         openAuthModal,

@@ -1,60 +1,79 @@
 /* ====================================================================
-   URGUT MEBEL MARKAZI - LUXURY DESIGN SYSTEM & STYLESHEET
-   Harmonious Warm Neutral, Rich Wood, Charcoal & Gold Aesthetics
-   Full Dark Mode Support, Glassmorphism & Modern Micro-Animations
+   URGUT MEBEL MARKAZI - FIGMA FURNITURE DESIGN SYSTEM
+   Modern Terracotta Coral (#E05A47), Rich Dark Charcoal & Clean Neutrals
+   Full Dark Mode Support, Glassmorphism & High-Performance Micro-Animations
    ==================================================================== */
 
 :root {
-  /* Core Color Palette (Light Mode) */
-  --bg-primary: #fcfbf9;
-  --bg-secondary: #f6f3ee;
+  /* Core Figma Color Palette (Light Mode) */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #f3f4f6;
   --bg-card: #ffffff;
-  --bg-dark: #141413;
-  --bg-dark-card: #1c1b18;
+  --bg-dark: #141416;
+  --bg-dark-card: #1c1d21;
 
-  --text-main: #1f1e1d;
-  --text-muted: #6b6863;
-  --text-light: #9c9790;
-  --text-inverse: #fcfbf9;
+  --text-main: #19191b;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --text-inverse: #ffffff;
 
-  /* Brand & Material Accents */
-  --wood-amber: #c26d2e;
-  --wood-dark: #5c381e;
-  --wood-light: #e8c49e;
-  --gold-accent: #d4a359;
-  --gold-gradient: linear-gradient(135deg, #c26d2e 0%, #d4a359 100%);
-  --forest-green: #2a5a44;
+  /* Figma Brand & Accent Colors */
+  --primary: #fa6d58;
+  --primary-hover: #e55944;
+  --primary-light: #fff3f0;
+  --primary-border: #fcd5ce;
+  --primary-glow: rgba(250, 109, 88, 0.28);
 
-  --border-subtle: #eae6df;
-  --border-card: rgba(0, 0, 0, 0.08);
-  --border-focus: #c26d2e;
+  --figma-coral: #fa6d58;
+  --figma-coral-dark: #e55944;
+  --figma-navy: #18202f;
+  --figma-dark: #18191d;
+  --figma-pastel-blue: #eef3f8;
+  --figma-pastel-peach: #faf3ee;
+  --figma-pastel-mint: #e6efea;
+  --figma-pastel-cream: #fff9f5;
+  --figma-pastel-sand: #fbe2cd;
+  --figma-pastel-lavender: #efebf5;
+  --figma-gray-bg: #f4f5f7;
+
+  /* Legacy aliases mapped to Figma coral */
+  --wood-amber: #fa6d58;
+  --wood-dark: #18191d;
+  --wood-light: #fff3f0;
+  --gold-accent: #fa6d58;
+  --gold-gradient: linear-gradient(135deg, #fa6d58 0%, #ff8573 100%);
+  --forest-green: #10b981;
+
+  --border-subtle: #eaeaea;
+  --border-card: #e5e7eb;
+  --border-focus: #fa6d58;
 
   /* Glassmorphism tokens */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
   /* Feedback Colors */
-  --status-success: #15803d;
-  --status-warning: #b45309;
-  --status-danger: #b91c1c;
-  --status-info: #1d4ed8;
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-info: #3b82f6;
 
   /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(28, 27, 24, 0.04);
-  --shadow-md: 0 8px 24px rgba(28, 27, 24, 0.07);
-  --shadow-lg: 0 16px 40px rgba(28, 27, 24, 0.11);
-  --shadow-hover: 0 20px 45px rgba(194, 109, 46, 0.18);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 20px 45px rgba(224, 90, 71, 0.16);
 
   /* Radius */
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
   --radius-full: 9999px;
 
   /* Transitions */
@@ -66,29 +85,40 @@
    DARK MODE OVERRIDES
    ==================================================================== */
 [data-theme="dark"] {
-  --bg-primary: #0c0a09;
-  --bg-secondary: #171412;
-  --bg-card: rgba(26, 23, 20, 0.85);
-  --bg-dark: #080706;
-  --bg-dark-card: #141210;
+  --bg-primary: #0f0f11;
+  --bg-secondary: #17181c;
+  --bg-card: #1c1d22;
+  --bg-dark: #0a0a0c;
+  --bg-dark-card: #141518;
 
-  --text-main: #f5f4f0;
-  --text-muted: #a8a29e;
-  --text-light: #78716c;
-  --text-inverse: #0c0a09;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-light: #6b7280;
+  --text-inverse: #0f0f11;
+
+  --primary: #e05a47;
+  --primary-hover: #ff7b63;
+  --primary-light: rgba(224, 90, 71, 0.15);
+  --primary-border: rgba(224, 90, 71, 0.3);
+  --primary-glow: rgba(224, 90, 71, 0.35);
+
+  --wood-amber: #e05a47;
+  --wood-dark: #ffffff;
+  --wood-light: #2a2220;
+  --gold-accent: #e05a47;
 
   --border-subtle: rgba(255, 255, 255, 0.1);
   --border-card: rgba(255, 255, 255, 0.08);
-  --border-focus: #d4a359;
+  --border-focus: #e05a47;
 
-  --glass-bg: rgba(26, 23, 20, 0.85);
+  --glass-bg: rgba(28, 29, 34, 0.88);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --shadow-hover: 0 22px 50px rgba(212, 163, 89, 0.25);
+  --shadow-hover: 0 22px 50px rgba(224, 90, 71, 0.25);
 }
 
 /* CSS Reset & Defaults */
@@ -322,6 +352,27 @@ img {
   padding: 0.95rem 2rem;
   font-size: 1.05rem;
   border-radius: var(--radius-lg);
+}
+.customer-tab-button {
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.customer-tab-button.active {
+  color: var(--wood-amber);
+  border-bottom-color: var(--wood-amber);
+}
+.customer-tab-button:hover {
+  color: var(--wood-amber);
 }
 
 /* Section Header Utility */
@@ -1233,5 +1284,331 @@ img {
   box-shadow: var(--shadow-hover);
   border-color: var(--wood-amber);
 }
+
+/* ====================================================================
+   FIGMA EXACT DESIGN SYSTEM UTILITIES
+   ==================================================================== */
+.btn-figma-coral {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--figma-coral);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.9rem 1.8rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(250, 109, 88, 0.25);
+}
+.btn-figma-coral:hover {
+  background-color: var(--figma-coral-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(250, 109, 88, 0.35);
+}
+
+.btn-figma-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--figma-navy);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-figma-dark:hover {
+  background-color: #0f1622;
+  transform: translateY(-2px);
+}
+
+.figma-split-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 420px;
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 4rem;
+}
+@media (max-width: 900px) {
+  .figma-split-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+}
+
+.figma-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: transparent;
+  border: 1px solid #e2e4e8;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  border-radius: 2px;
+}
+.figma-input:focus {
+  border-color: var(--figma-coral);
+  box-shadow: 0 0 0 2px rgba(250, 109, 88, 0.15);
+}
+.figma-input-underline {
+  width: 100%;
+  padding: 0.75rem 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.figma-input-underline:focus {
+  border-bottom-color: var(--figma-coral);
+}
+
+/* ==========================================================================
+   CUSTOMER ACCOUNT FIGMA-GRADE STYLES
+   ========================================================================== */
+.account-hero-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+.account-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--figma-coral) 0%, #ff8e75 50%, #f59e0b 100%);
+}
+
+.account-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--figma-coral) 0%, #ff8e75 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.85rem;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(250, 109, 88, 0.35);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+}
+
+.account-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 992px) {
+  .account-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 576px) {
+  .account-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-stat-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+.account-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(250, 109, 88, 0.35);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+.account-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Order Stepper / Timeline */
+.order-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 1.75rem 0 1.25rem;
+  padding: 0 0.5rem;
+}
+.order-stepper::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background-color: var(--border-subtle);
+  z-index: 1;
+}
+.order-step-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+.order-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.order-step-node.completed .order-step-circle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+.order-step-node.active .order-step-circle {
+  background: var(--figma-coral);
+  border-color: var(--figma-coral);
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(250, 109, 88, 0.25);
+  animation: pulseNode 2s infinite;
+}
+@keyframes pulseNode {
+  0% { box-shadow: 0 0 0 0 rgba(250, 109, 88, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(250, 109, 88, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 109, 88, 0); }
+}
+.order-step-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  max-width: 100px;
+  line-height: 1.25;
+}
+.order-step-node.active .order-step-label {
+  color: var(--figma-coral);
+  font-weight: 700;
+}
+.order-step-node.completed .order-step-label {
+  color: var(--text-main);
+}
+
+@media (max-width: 640px) {
+  .order-stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding-left: 1.5rem;
+  }
+  .order-stepper::before {
+    top: 10px;
+    bottom: 10px;
+    left: 32px;
+    right: auto;
+    width: 3px;
+    height: auto;
+  }
+  .order-step-node {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+  }
+  .order-step-label {
+    margin-top: 0;
+    max-width: none;
+  }
+}
+
+/* Price Offer Banner */
+.price-offer-box {
+  background: linear-gradient(135deg, rgba(250, 109, 88, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border: 1.5px solid rgba(250, 109, 88, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.75rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.price-offer-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--figma-coral);
+}
+
+.spec-chip {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+.spec-chip-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}
+.spec-chip-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+
 
 

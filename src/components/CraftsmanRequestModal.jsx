@@ -32,18 +32,15 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
     }
 
     try {
-      await dataService.createCustomOrder({
+      await dataService.createCraftsmanRequest({
+        craftsman_id: craftsman.id,
+        craftsman_name: craftsman.name,
         customer_name: fullName,
         customer_phone: phone,
-        user_id: user.id,
-        user_role: user.role,
-        title: `[${serviceType}] ${craftsman.name}ga shaxsiy murojaat`,
-        category: serviceType,
+        customer_telegram: user?.telegram || null,
         furniture_type: serviceType,
-        notes: `Xizmat: ${serviceType}\nIzoh: ${message}`,
-        urgency: preferredDate,
-        assigned_craftsman: craftsman.id,
-        assigned_craftsman_name: craftsman.name,
+        description: message,
+        preferred_date: preferredDate || null,
         status: 'NEW'
       });
     } catch (err) {
