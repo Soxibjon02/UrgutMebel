@@ -23,6 +23,7 @@ export const Home = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [selectedCraftsman, setSelectedCraftsman] = useState(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
@@ -35,14 +36,16 @@ export const Home = () => {
   useEffect(() => {
     const loadHomeData = async () => {
       try {
-        const [prodList, catList, blogList] = await Promise.all([
+        const [prodList, catList, blogList, banList] = await Promise.all([
           dataService.getProducts(),
           dataService.getCategories(),
-          dataService.getBlogPosts()
+          dataService.getBlogPosts(),
+          dataService.getBanners()
         ]);
         setProducts(prodList || []);
         setCategories(catList || []);
         setBlogPosts(blogList || []);
+        setBanners(banList || []);
       } catch (err) {
         console.error('Error loading home data:', err);
       }
@@ -549,6 +552,103 @@ export const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* ==============================================================
+          2.5. FIGMA ANNOUNCEMENTS & PROMOTIONAL BANNERS
+          ============================================================== */}
+      {banners.filter(b => b.is_active !== false).length > 0 && (
+        <section style={{ padding: '0 1.5rem 4rem' }}>
+          <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <span style={{ color: 'var(--figma-coral)', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '0.35rem' }}>
+                  Aksiyalar &amp; E‘lonlar
+                </span>
+                <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                  Maxsus Takliflar
+                </h2>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+              {banners.filter(b => b.is_active !== false).map((banner) => (
+                <div
+                  key={banner.id}
+                  onClick={() => navigate(banner.link || '/furniture')}
+                  style={{
+                    position: 'relative',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    minHeight: '260px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    padding: '2rem',
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-card)',
+                    border: '1px solid var(--border-subtle)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-card)';
+                  }}
+                >
+                  {/* Background Image with Gradient Overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundImage: `url(${banner.image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80'})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      zIndex: 1
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 100%)',
+                      zIndex: 2
+                    }}
+                  />
+
+                  {/* Content */}
+                  <div style={{ position: 'relative', zIndex: 3, color: '#FFFFFF' }}>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                      {banner.title}
+                    </h3>
+                    {banner.subtitle && (
+                      <p style={{ fontSize: '0.88rem', opacity: 0.92, marginBottom: '1.25rem', lineHeight: 1.4, maxWidth: '420px', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                        {banner.subtitle}
+                      </p>
+                    )}
+                    <span
+                      className="btn-figma-coral"
+                      style={{
+                        padding: '0.5rem 1.25rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}
+                    >
+                      {banner.button_text || 'BATAFSIL'} &gt;
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ==============================================================
           3. FIGMA SPECIAL OFFER: "JOIN US" & LIFESTYLE PHOTO

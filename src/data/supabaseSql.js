@@ -225,6 +225,55 @@ CREATE TABLE IF NOT EXISTS public.craftsman_finances (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 14. BLOG & INTERIOR YANGILIKLARI (BLOG POSTS)
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  excerpt TEXT,
+  content TEXT,
+  image TEXT,
+  author TEXT DEFAULT 'Urgut Mebel Markazi',
+  author_avatar TEXT,
+  date TEXT,
+  read_time TEXT DEFAULT '4 daqiqa',
+  category TEXT DEFAULT 'Interyer',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 15. FAQ (KO'P SO'RALADIGAN SAVOLLAR)
+CREATE TABLE IF NOT EXISTS public.faq_items (
+  id TEXT PRIMARY KEY,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category TEXT DEFAULT 'Umumiy',
+  display_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 16. BOG'LANISH VA MUROJAATLAR (CONTACT MESSAGES)
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'NEW',
+  reply_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 17. YANGILIKLAR OBUNACHILARI (NEWSLETTER SUBSCRIBERS)
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT,
+  source TEXT DEFAULT 'home_join_us',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ====================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES - PERMISSIVE FOR APPLICATION
 -- ====================================================================
@@ -240,6 +289,10 @@ ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.craftsman_works ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.craftsman_finances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.faq_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 
 -- Drop old policies if they exist
 DO $$ BEGIN
@@ -255,6 +308,10 @@ DO $$ BEGIN
   DROP POLICY IF EXISTS "Public users access" ON public.users;
   DROP POLICY IF EXISTS "Public craftsman_works access" ON public.craftsman_works;
   DROP POLICY IF EXISTS "Public craftsman_finances access" ON public.craftsman_finances;
+  DROP POLICY IF EXISTS "Public blog_posts access" ON public.blog_posts;
+  DROP POLICY IF EXISTS "Public faq_items access" ON public.faq_items;
+  DROP POLICY IF EXISTS "Public contact_messages access" ON public.contact_messages;
+  DROP POLICY IF EXISTS "Public newsletter_subscribers access" ON public.newsletter_subscribers;
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- Create open application policies
@@ -270,6 +327,10 @@ CREATE POLICY "Public banners access" ON public.banners FOR ALL USING (true) WIT
 CREATE POLICY "Public users access" ON public.users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public craftsman_works access" ON public.craftsman_works FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public craftsman_finances access" ON public.craftsman_finances FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public blog_posts access" ON public.blog_posts FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public faq_items access" ON public.faq_items FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public contact_messages access" ON public.contact_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public newsletter_subscribers access" ON public.newsletter_subscribers FOR ALL USING (true) WITH CHECK (true);
 
 -- Grant privileges to anon and authenticated roles
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;

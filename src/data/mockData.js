@@ -340,7 +340,38 @@ export const initialCraftsmen = [
   }
 ];
 
-export const initialBanners = [];
+export const initialBanners = [
+  {
+    id: "ban-1",
+    title: "Yangi Mavsum: Barcha Mebellarga 20% gacha Chegirma!",
+    subtitle: "Uyingiz va ofisingiz uchun Urgut ustalari yasagan eng sara to‘plamlar",
+    link: "/furniture",
+    image_url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80",
+    button_text: "Katalogni Ko‘rish",
+    is_active: true,
+    display_order: 1
+  },
+  {
+    id: "ban-2",
+    title: "Maxsus Buyurtma Asosida Mebel Yasatish",
+    subtitle: "O‘z o‘lchamingiz va xohlagan dizayningizni yuboring, bepul loyihalashtirib beramiz",
+    link: "/custom-order",
+    image_url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80",
+    button_text: "Buyurtma Berish",
+    is_active: true,
+    display_order: 2
+  },
+  {
+    id: "ban-3",
+    title: "Urgut Ustalari bilan To‘g‘ridan-To‘g‘ri Hamkorlik",
+    subtitle: "Oradagi vositachilarsiz, arzon va kafolatlangan duradgorlik xizmatlari",
+    link: "/craftsmen",
+    image_url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80",
+    button_text: "Ustalar Ro‘yxati",
+    is_active: true,
+    display_order: 3
+  }
+];
 
 export const initialCustomOrders = [
   {

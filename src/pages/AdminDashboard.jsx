@@ -71,11 +71,14 @@ export const AdminDashboard = () => {
   const [editingCraftsman, setEditingCraftsman] = useState(null);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [editingManager, setEditingManager] = useState(null);
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
+  const [editingBanner, setEditingBanner] = useState(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [editingDiscountProduct, setEditingDiscountProduct] = useState(null);
   const [discountVal, setDiscountVal] = useState('');
   const [discountType, setDiscountType] = useState('price'); // 'price' | 'percent'
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Settings Form (Web Loyiha Nomi, Header & Footer o'zgartirish)
   const [settingsForm, setSettingsForm] = useState({
@@ -520,7 +523,37 @@ export const AdminDashboard = () => {
     loadAllData();
   };
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Banners & Announcements CRUD
+  const handleSaveBanner = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const bannerData = {
+      ...(editingBanner || {}),
+      title: form.title.value.trim(),
+      subtitle: form.subtitle?.value?.trim() || '',
+      link: form.link?.value?.trim() || '/furniture',
+      image_url: form.image_url?.value?.trim() || editingBanner?.image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+      button_text: form.button_text?.value?.trim() || 'Batafsil',
+      is_active: form.is_active ? form.is_active.checked : true,
+      display_order: Number(form.display_order?.value) || 0
+    };
+
+    setBannerModalOpen(false);
+    setEditingBanner(null);
+    addToast('E‘lon saqlanmoqda...', 'info');
+    const updated = await dataService.saveBanner(bannerData);
+    setBanners(updated);
+    addToast('E‘lon / Banner saqlandi va Supabase-ga yuborildi!', 'success');
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (window.confirm("Rostdan ham ushbu e‘lonni o‘chirmoqchimisiz?")) {
+      addToast('E‘lon o‘chirilmoqda...', 'info');
+      const updated = await dataService.deleteBanner(id);
+      setBanners(updated);
+      addToast('E‘lon o‘chirildi', 'success');
+    }
+  };
 
   // Total revenue calc
   const totalRevenue = standardOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
@@ -530,6 +563,7 @@ export const AdminDashboard = () => {
     { id: 'products', label: `Mahsulotlar (${products.length})`, shortLabel: `Mebellar (${products.length})`, icon: Package },
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
+    { id: 'banners', label: `E'lonlar & Bannerlar (${banners.length})`, shortLabel: `E'lonlar (${banners.length})`, icon: ImageIcon },
     { id: 'custom_orders', label: `Maxsus Buyurtmalar (${customOrders.length})`, shortLabel: `Maxsus (${customOrders.length})`, icon: Sliders },
     { id: 'orders', label: `Do‘kon Buyurtmalari (${standardOrders.length})`, shortLabel: `Do‘kon (${standardOrders.length})`, icon: ShoppingBag },
     { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
@@ -2125,6 +2159,109 @@ export const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* TAB: BANNERS & ANNOUNCEMENTS (ELONLAR VA REKLAMA BANNERLARI) */}
+        {activeTab === 'banners' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>E‘lonlar va Reklama Bannerlari Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  Bosh sahifadagi aksiyalar, chegirmalar va e‘lonlar bannerlarini qo‘shing, tahrirlang yoki o‘chiring (Supabase <code>public.banners</code> jadvalida to‘g‘ridan-to‘g‘ri saqlanadi).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingBanner(null);
+                  setBannerModalOpen(true);
+                }}
+                className="btn btn-primary"
+                style={{ gap: '0.4rem' }}
+              >
+                <Plus size={16} /> Yangi E‘lon Qo‘shish
+              </button>
+            </div>
+
+            {banners.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📢</div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha e‘lonlar mavjud emas</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Yuqoridagi "Yangi E‘lon Qo‘shish" tugmasi orqali yangi e‘lon yoki reklama banneri yarating</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+                {banners.map((ban) => (
+                  <div key={ban.id} className="glass-card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ height: '160px', position: 'relative', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
+                      {ban.image_url ? (
+                        <img src={ban.image_url} alt={ban.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                          Rasm yuklanmagan
+                        </div>
+                      )}
+                      <span style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        backgroundColor: ban.is_active !== false ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)',
+                        color: '#fff'
+                      }}>
+                        {ban.is_active !== false ? 'Faol' : 'Faol emas'}
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                          <h4 style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)', margin: 0 }}>{ban.title}</h4>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', backgroundColor: 'var(--bg-secondary)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                            Tartib: #{ban.display_order ?? 0}
+                          </span>
+                        </div>
+                        {ban.subtitle && (
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                            {ban.subtitle}
+                          </p>
+                        )}
+                        <div style={{ fontSize: '0.78rem', color: 'var(--wood-amber)', marginBottom: '1rem', wordBreak: 'break-all' }}>
+                          🔗 Havola: <strong>{ban.link || '/furniture'}</strong> ({ban.button_text || 'Batafsil'})
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.75rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBanner(ban);
+                            setBannerModalOpen(true);
+                          }}
+                          className="btn btn-secondary btn-sm"
+                          style={{ gap: '0.35rem' }}
+                        >
+                          <Edit2 size={13} /> Tahrirlash
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBanner(ban.id)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: '#ef4444', gap: '0.35rem' }}
+                        >
+                          <Trash2 size={13} /> O‘chirish
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* PRODUCT CREATE/EDIT MODAL */}
@@ -2503,6 +2640,113 @@ export const AdminDashboard = () => {
                   style={{ flex: 1 }}
                 >
                   Chegirmani Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* BANNER CREATE/EDIT MODAL */}
+      {bannerModalOpen && (
+        <div className="modal-overlay" onClick={() => setBannerModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '580px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
+              {editingBanner ? 'E‘lonni Tahrirlash' : 'Yangi E‘lon Qo‘shish'}
+            </h3>
+            <form onSubmit={handleSaveBanner}>
+              <div className="form-group">
+                <label className="form-label">E‘lon Sarlavhasi *</label>
+                <input
+                  type="text"
+                  required
+                  name="title"
+                  defaultValue={editingBanner?.title || ''}
+                  placeholder="Masalan: Bahorgi Yangi To‘plam Aksiyasi"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Qisqa Tavsif / Tagline</label>
+                <textarea
+                  rows={2}
+                  name="subtitle"
+                  defaultValue={editingBanner?.subtitle || ''}
+                  placeholder="Barcha mebellarga 20% gacha chegirma..."
+                  className="form-textarea"
+                />
+              </div>
+
+              <ImageUploadField
+                label="Banner Rasmi (URL yoki Supabase Storage)"
+                name="image_url"
+                value={editingBanner?.image_url || ''}
+                folder="banners"
+                placeholder="https://... yoki faylni tanlab yuklang"
+                helperText="Banner rasm havolasini kiriting yoki fayl tanlang (Supabase Storage ga yuklanadi)."
+              />
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">O‘tish Havolasi (Link)</label>
+                  <input
+                    type="text"
+                    name="link"
+                    defaultValue={editingBanner?.link || '/furniture'}
+                    placeholder="/furniture yoki /discounts"
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Tugma Matni</label>
+                  <input
+                    type="text"
+                    name="button_text"
+                    defaultValue={editingBanner?.button_text || 'Batafsil'}
+                    placeholder="Batafsil, Xarid qilish..."
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Tartib Raqami</label>
+                  <input
+                    type="number"
+                    name="display_order"
+                    defaultValue={editingBanner?.display_order ?? 0}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center', marginTop: '1.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      defaultChecked={editingBanner ? editingBanner.is_active !== false : true}
+                    />
+                    <span>E‘lon saytda faol ko‘rinsin</span>
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setBannerModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  Saqlash
                 </button>
               </div>
             </form>

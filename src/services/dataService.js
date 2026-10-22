@@ -932,28 +932,73 @@ export const dataService = {
   },
 
   // Banners
+  // Banners & Elonlar (Aksiyalar va E'lonlar)
   async getBanners() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('banners')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          setStored('banners', data, false);
+          return data;
+        }
+      } catch (e) {
+        console.warn('Supabase getBanners error:', e);
+      }
+    }
     return getStored('banners', initialBanners);
   },
 
   async saveBanner(banner) {
     const banners = getStored('banners', initialBanners);
-    let updated;
-    if (banner.id) {
-      updated = banners.map((b) => (b.id === banner.id ? { ...b, ...banner } : b));
-    } else {
-      const newBan = {
-        ...banner,
-        id: `ban-${Date.now()}`,
-        created_at: new Date().toISOString()
-      };
-      updated = [...banners, newBan];
+    const newBan = {
+      ...banner,
+      id: banner.id || `ban-${Date.now()}`,
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      link: banner.link || '/furniture',
+      image_url: banner.image_url || '',
+      button_text: banner.button_text || 'Batafsil',
+      is_active: banner.is_active !== false,
+      display_order: Number(banner.display_order) || 0
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('banners').upsert({
+          id: newBan.id,
+          title: newBan.title,
+          subtitle: newBan.subtitle,
+          link: newBan.link,
+          image_url: newBan.image_url,
+          button_text: newBan.button_text,
+          is_active: newBan.is_active,
+          display_order: newBan.display_order
+        });
+        if (error) console.error('Supabase saveBanner error:', error);
+      } catch (e) {
+        console.warn('Supabase saveBanner exception:', e);
+      }
     }
+
+    const updated = banner.id
+      ? banners.map((b) => (b.id === banner.id ? { ...b, ...newBan } : b))
+      : [newBan, ...banners];
     setStored('banners', updated, true);
     return updated;
   },
 
   async deleteBanner(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('banners').delete().eq('id', id);
+        if (error) console.error('Supabase deleteBanner error:', error);
+      } catch (e) {
+        console.warn('Supabase deleteBanner exception:', e);
+      }
+    }
     const banners = getStored('banners', initialBanners).filter((b) => b.id !== id);
     setStored('banners', banners, true);
     return banners;
@@ -1665,7 +1710,8 @@ export const dataService = {
     try {
       // 1. Settings sync
       const settings = await this.getSettings();
-      await supabase.from('settings').upsert({ id: '1', ...settings });
+      const settingsPayload = sanitizeSettingsPayload(settings);
+      await supabase.from('settings').upsert(settingsPayload);
 
       // 2. Categories sync
       const categories = await this.getCategories();
@@ -1720,6 +1766,66 @@ export const dataService = {
       if (users && users.length) {
         for (const u of users) {
           await supabase.from('users').upsert(u);
+        }
+      }
+
+      // 7. Banners sync (E'lonlar va Bannerlar)
+      const banners = await this.getBanners();
+      if (banners && banners.length) {
+        for (const ban of banners) {
+          await supabase.from('banners').upsert({
+            id: ban.id,
+            title: ban.title,
+            subtitle: ban.subtitle || '',
+            link: ban.link || '',
+            image_url: ban.image_url || '',
+            button_text: ban.button_text || 'Batafsil',
+            is_active: ban.is_active !== false,
+            display_order: Number(ban.display_order) || 0
+          });
+        }
+      }
+
+      // 8. Custom Orders sync
+      const customOrders = await this.getCustomOrders();
+      if (customOrders && customOrders.length) {
+        for (const co of customOrders) {
+          await supabase.from('custom_orders').upsert({
+            id: co.id,
+            order_number: co.order_number,
+            user_id: co.user_id || null,
+            customer_name: co.full_name || co.customer_name || 'Mijoz',
+            customer_phone: co.phone || co.customer_phone || '',
+            customer_email: co.email || co.customer_email || '',
+            category: co.furniture_type || co.category || '',
+            title: co.furniture_type || co.title || '',
+            room_type: co.room_type || '',
+            dimensions: `${co.length || ''}x${co.width || ''}x${co.height || ''}`.replace(/^x|x$/g, '') || co.dimensions || '',
+            wood_type: co.material || co.wood_type || '',
+            status: co.status || 'NEW',
+            price_offer: co.price_offer ? Number(co.price_offer) : null,
+            offer_notes: co.offer_notes || '',
+            files: co.files || [],
+            history: co.history || []
+          });
+        }
+      }
+
+      // 9. Standard Orders sync
+      const standardOrders = await this.getStandardOrders();
+      if (standardOrders && standardOrders.length) {
+        for (const so of standardOrders) {
+          await supabase.from('orders').upsert({
+            id: so.id,
+            order_number: so.order_number,
+            customer_name: so.customer_name || 'Xaridor',
+            customer_phone: so.customer_phone || '',
+            shipping_address: so.shipping_address || '',
+            payment_method: so.payment_method || 'cash_on_delivery',
+            total_amount: Number(so.total_amount) || 0,
+            status: so.status || 'PENDING',
+            items: so.items || []
+          });
         }
       }
 
