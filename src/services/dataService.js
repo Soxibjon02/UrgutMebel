@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { realtimeService } from './realtimeService';
 import {
   initialSettings,
   initialCategories,
@@ -34,6 +35,15 @@ const setStored = (key, value, broadcast = false) => {
     // ONLY broadcast custom event on explicit mutations, NEVER on read/get caching!
     if (broadcast) {
       window.dispatchEvent(new CustomEvent(`urgut_store_${key}_updated`, { detail: value }));
+      try {
+        realtimeService.broadcast({
+          type: 'STORAGE_MUTATED',
+          key,
+          count: Array.isArray(value) ? value.length : undefined
+        });
+      } catch (err) {
+        // Silently continue
+      }
     }
   } catch (e) {
     console.error(`Error saving ${key} to storage:`, e);
@@ -713,6 +723,18 @@ export const dataService = {
         console.warn('Supabase createCustomOrder error:', e);
       }
     }
+
+    try {
+      realtimeService.broadcast({
+        type: 'CUSTOM_ORDER_CREATED',
+        orderId: newOrder.id,
+        orderNumber: newOrder.order_number,
+        customerName: newOrder.customer_name,
+        title: newOrder.title,
+        status: 'NEW'
+      });
+    } catch (e) {}
+
     return newOrder;
   },
 
@@ -753,6 +775,21 @@ export const dataService = {
         console.warn('Supabase updateCustomOrderStatus error:', e);
       }
     }
+
+    try {
+      if (target) {
+        realtimeService.broadcast({
+          type: 'CUSTOM_ORDER_STATUS_CHANGED',
+          orderId: target.id,
+          orderNumber: target.order_number,
+          newStatus,
+          changedBy,
+          customerName: target.customer_name,
+          customerEmail: target.customer_email
+        });
+      }
+    } catch (e) {}
+
     return target || updated.find((o) => o.id === orderId);
   },
 
@@ -1011,6 +1048,18 @@ export const dataService = {
         console.warn('Supabase createStandardOrder error:', e);
       }
     }
+
+    try {
+      realtimeService.broadcast({
+        type: 'ORDER_CREATED',
+        orderId: newOrder.id,
+        orderNumber: newOrder.order_number,
+        customerName: newOrder.customer_name,
+        totalAmount: newOrder.total_amount,
+        status: newOrder.status || 'PENDING'
+      });
+    } catch (e) {}
+
     return newOrder;
   },
 
@@ -1034,6 +1083,18 @@ export const dataService = {
         console.warn('Supabase updateStandardOrderStatus error:', e);
       }
     }
+
+    try {
+      if (target) {
+        realtimeService.broadcast({
+          type: 'ORDER_STATUS_CHANGED',
+          orderId: target.id,
+          orderNumber: target.order_number || target.id,
+          newStatus: status
+        });
+      }
+    } catch (e) {}
+
     return target || updated.find((o) => o.id === orderId);
   },
 

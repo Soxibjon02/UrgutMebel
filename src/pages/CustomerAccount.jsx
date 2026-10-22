@@ -5,6 +5,8 @@ import { useWishlist } from '../context/WishlistContext';
 import { useNotification } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
 import { dataService } from '../services/dataService';
+import { realtimeService } from '../services/realtimeService';
+import { StatusBadge } from '../components/StatusBadge';
 import { ProductCard } from '../components/ProductCard';
 import { AppInstallCard } from '../components/AppInstallCard';
 import {
@@ -111,9 +113,17 @@ export const CustomerAccount = () => {
     const handleUpdate = () => loadAccountData();
     window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
     window.addEventListener('urgut_store_standard_orders_updated', handleUpdate);
+    window.addEventListener('urgut_realtime_event', handleUpdate);
+
+    const unsubscribeRealtime = realtimeService.subscribe(() => {
+      loadAccountData();
+    });
+
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
       window.removeEventListener('urgut_store_standard_orders_updated', handleUpdate);
+      window.removeEventListener('urgut_realtime_event', handleUpdate);
+      unsubscribeRealtime();
     };
   }, []);
 
@@ -160,32 +170,9 @@ export const CustomerAccount = () => {
     }
   };
 
-  // Status mapping and badge helper
+  // Status mapping and badge helper (Bilingual: O'zbekcha va Inglizcha)
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'NEW':
-        return <span className="badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}>Yangi (Qabul qilindi)</span>;
-      case 'REVIEWING':
-        return <span className="badge" style={{ backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>Ko‘rib chiqilmoqda</span>;
-      case 'CALCULATING':
-        return <span className="badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }}>Narx hisoblanmoqda</span>;
-      case 'PRICE_SENT':
-        return <span className="badge" style={{ backgroundColor: 'rgba(250, 109, 88, 0.2)', color: 'var(--figma-coral)', border: '1px solid rgba(250, 109, 88, 0.4)', fontWeight: 800 }}>⚠️ Narx Taklifi Tayyor</span>;
-      case 'CUSTOMER_APPROVED':
-        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Tasdiqlangan</span>;
-      case 'IN_PRODUCTION':
-        return <span className="badge" style={{ backgroundColor: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)' }}>Ishlab chiqarishda</span>;
-      case 'READY':
-        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Tayyor bo‘ldi</span>;
-      case 'DELIVERING':
-        return <span className="badge" style={{ backgroundColor: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>Yetkazilmoqda</span>;
-      case 'COMPLETED':
-        return <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Topshirildi (Bajarildi)</span>;
-      case 'CANCELLED':
-        return <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}>Bekor qilindi</span>;
-      default:
-        return <span className="badge badge-wood">{status}</span>;
-    }
+    return <StatusBadge status={status} format="bilingual" size="md" />;
   };
 
   // 6-Step Visual Timeline Calculator

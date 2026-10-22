@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { uploadImageToSupabase } from '../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { StatusBadge } from '../components/StatusBadge';
 
 export const CustomOrderPage = () => {
   const { user, isGuest, openAuthModal } = useAuth();
@@ -220,8 +221,9 @@ export const CustomOrderPage = () => {
               <strong style={{ fontSize: '1.5rem', color: 'var(--wood-amber)', letterSpacing: '0.05em' }}>
                 {completedOrder.order_number}
               </strong>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-                {t('account.order_status', 'Holati')}: <span className="badge badge-wood" style={{ marginLeft: '0.35rem' }}>{t('account.status_new', 'Yangi')} (NEW)</span>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <span>{t('account.order_status', 'Holati')}:</span>
+                <StatusBadge status="NEW" format="bilingual" size="md" />
               </div>
             </div>
 

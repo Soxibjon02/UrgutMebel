@@ -4,6 +4,9 @@ import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
 import { uploadProductImage, isSupabaseConfigured } from '../lib/supabase';
 import { ImageUploadField } from '../components/ImageUploadField';
+import { StatusBadge } from '../components/StatusBadge';
+import { realtimeService } from '../services/realtimeService';
+import { CUSTOM_ORDER_STATUS_OPTIONS, STANDARD_ORDER_STATUS_OPTIONS } from '../utils/statusHelper';
 import {
   Briefcase,
   Sliders,
@@ -180,6 +183,12 @@ export const ManagerDashboard = () => {
     window.addEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
     window.addEventListener('urgut_store_discount_requests_updated', handleProductsUpdate);
     window.addEventListener('urgut_store_stores_updated', handleProductsUpdate);
+    window.addEventListener('urgut_realtime_event', handleCustomOrdersUpdate);
+
+    const unsubRealtime = realtimeService.subscribe(() => {
+      loadData();
+    });
+
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_products_updated', handleProductsUpdate);
@@ -189,6 +198,8 @@ export const ManagerDashboard = () => {
       window.removeEventListener('urgut_store_newsletter_subscribers_updated', handleCustomOrdersUpdate);
       window.removeEventListener('urgut_store_discount_requests_updated', handleProductsUpdate);
       window.removeEventListener('urgut_store_stores_updated', handleProductsUpdate);
+      window.removeEventListener('urgut_realtime_event', handleCustomOrdersUpdate);
+      unsubRealtime();
     };
   }, []);
 
@@ -665,14 +676,14 @@ export const ManagerDashboard = () => {
   };
 
   const statusTabs = [
-    { key: 'ALL', label: 'Barchasi' },
-    { key: 'NEW', label: 'Yangi (NEW)' },
-    { key: 'REVIEWING', label: 'Ko‘rib chiqilmoqda' },
-    { key: 'PRICE_SENT', label: 'Narx yuborilgan' },
-    { key: 'CUSTOMER_APPROVED', label: 'Mijoz tasdiqlagan' },
-    { key: 'IN_PRODUCTION', label: 'Ishlab chiqarishda' },
-    { key: 'READY', label: 'Tayyor' },
-    { key: 'COMPLETED', label: 'Tugatilgan' }
+    { key: 'ALL', label: 'Barchasi • All' },
+    { key: 'NEW', label: 'Yangi • New' },
+    { key: 'REVIEWING', label: 'Ko‘rib chiqilmoqda • Reviewing' },
+    { key: 'PRICE_SENT', label: 'Narx yuborilgan • Price Sent' },
+    { key: 'CUSTOMER_APPROVED', label: 'Mijoz tasdiqlagan • Approved' },
+    { key: 'IN_PRODUCTION', label: 'Ishlab chiqarishda • In Production' },
+    { key: 'READY', label: 'Tayyor • Ready' },
+    { key: 'COMPLETED', label: 'Tugatilgan • Completed' }
   ];
 
   return (
@@ -1158,9 +1169,7 @@ export const ManagerDashboard = () => {
                         <strong style={{ fontSize: '1.15rem', color: 'var(--wood-amber)' }}>
                           {order.order_number}
                         </strong>
-                        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 700, backgroundColor: 'rgba(212, 163, 89, 0.15)', color: 'var(--gold-accent)', border: '1px solid rgba(212, 163, 89, 0.3)' }}>
-                          {order.status}
-                        </span>
+                        <StatusBadge status={order.status} format="bilingual" size="md" />
                       </div>
                       <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>
                         {order.title || order.category || 'Maxsus Mebel Buyurtmasi'}
@@ -1609,24 +1618,7 @@ export const ManagerDashboard = () => {
                           {Number(ord.total_amount || 0).toLocaleString()} so‘m
                         </td>
                         <td style={{ padding: '0.85rem' }}>
-                          <span
-                            style={{
-                              padding: '0.25rem 0.65rem',
-                              borderRadius: '9999px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              backgroundColor:
-                                ord.status === 'DELIVERED' ? '#ecfdf5' :
-                                ord.status === 'PROCESSING' ? '#eff6ff' :
-                                ord.status === 'SHIPPED' ? '#fef3c7' : '#f3f4f6',
-                              color:
-                                ord.status === 'DELIVERED' ? '#059669' :
-                                ord.status === 'PROCESSING' ? '#2563eb' :
-                                ord.status === 'SHIPPED' ? '#d97706' : '#4b5563'
-                            }}
-                          >
-                            {ord.status || 'PENDING'}
-                          </span>
+                          <StatusBadge status={ord.status || 'PENDING'} format="bilingual" size="sm" />
                         </td>
                         <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>
                           <select
@@ -1642,11 +1634,11 @@ export const ManagerDashboard = () => {
                               cursor: 'pointer'
                             }}
                           >
-                            <option value="PENDING">Kutilmoqda (PENDING)</option>
-                            <option value="PROCESSING">Jarayonda (PROCESSING)</option>
-                            <option value="SHIPPED">Yetkazilmoqda (SHIPPED)</option>
-                            <option value="DELIVERED">Yetkazildi (DELIVERED)</option>
-                            <option value="CANCELLED">Bekor qilindi (CANCELLED)</option>
+                            {STANDARD_ORDER_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt.code} value={opt.code}>
+                                {opt.bilingual}
+                              </option>
+                            ))}
                           </select>
                         </td>
                       </tr>
@@ -2435,12 +2427,15 @@ export const ManagerDashboard = () => {
                   onClick={() => handleStatusChange(t.key)}
                   className="btn btn-secondary"
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     fontWeight: activeOrder.status === t.key ? 700 : 500,
-                    borderColor: activeOrder.status === t.key ? 'var(--wood-amber)' : 'var(--border-subtle)'
+                    borderColor: activeOrder.status === t.key ? 'var(--wood-amber)' : 'var(--border-subtle)',
+                    padding: '0.65rem 1rem'
                   }}
                 >
-                  <span>{t.label}</span>
+                  <StatusBadge status={t.key} format="bilingual" />
                   {activeOrder.status === t.key && <Check size={16} color="var(--wood-amber)" />}
                 </button>
               ))}

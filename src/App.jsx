@@ -19,6 +19,7 @@ import { AuthModal } from './components/AuthModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { InstallPromptModal } from './components/InstallPromptModal';
 import { ScrollToTop } from './components/ScrollToTop';
+import { RealtimeListener } from './components/RealtimeListener';
 
 // Pages
 import { Home } from './pages/Home';
@@ -98,6 +99,7 @@ function App() {
                     
                     {/* Floating Elements, Bottom Nav & Overlays */}
                     <MobileBottomNav />
+                    <RealtimeListener />
                     <Toast />
                     <AuthModal />
                     <InstallPromptModal />

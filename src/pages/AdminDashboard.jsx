@@ -51,10 +51,13 @@ import {
   CheckCircle2,
   Clock,
   Phone,
-  MapPin,
-  Send
+  Send,
+  Wifi
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
+import { StatusBadge } from '../components/StatusBadge';
+import { realtimeService } from '../services/realtimeService';
+import { CUSTOM_ORDER_STATUS_OPTIONS, STANDARD_ORDER_STATUS_OPTIONS } from '../utils/statusHelper';
 import { SUPABASE_SQL_SCRIPT } from '../data/supabaseSql';
 
 export const AdminDashboard = () => {
@@ -241,6 +244,33 @@ export const AdminDashboard = () => {
     }
   };
 
+  const [wsStatus, setWsStatus] = useState(realtimeService.connectionStatus || 'active');
+
+  const handleAdminUpdateCustomOrderStatus = async (orderId, newStatus) => {
+    try {
+      await dataService.updateCustomOrderStatus(
+        orderId,
+        newStatus,
+        `Super Admin (${user?.full_name || 'Admin'}) tomonidan yangilandi`,
+        user?.full_name || 'Super Admin'
+      );
+      addToast(`Maxsus buyurtma holati yangilandi: ${newStatus}`, 'success');
+      loadAllData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  const handleAdminUpdateStandardOrderStatus = async (orderId, newStatus) => {
+    try {
+      await dataService.updateStandardOrderStatus(orderId, newStatus);
+      addToast(`Do‘kon buyurtmasi holati yangilandi: ${newStatus}`, 'success');
+      loadAllData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
   useEffect(() => {
     loadAllData();
     const handleUpdate = () => loadAllData();
@@ -252,6 +282,17 @@ export const AdminDashboard = () => {
     window.addEventListener('urgut_store_stores_updated', handleUpdate);
     window.addEventListener('urgut_store_discount_requests_updated', handleUpdate);
     window.addEventListener('urgut_store_products_updated', handleUpdate);
+    window.addEventListener('urgut_realtime_event', handleUpdate);
+
+    const unsubRealtime = realtimeService.subscribe(() => {
+      loadAllData();
+    });
+
+    const handleWsStatus = (e) => {
+      setWsStatus(e.detail || 'active');
+    };
+    window.addEventListener('urgut_ws_status_change', handleWsStatus);
+
     const interval = setInterval(loadAllData, 10000);
     return () => {
       window.removeEventListener('urgut_store_orders_updated', handleUpdate);
@@ -262,6 +303,9 @@ export const AdminDashboard = () => {
       window.removeEventListener('urgut_store_stores_updated', handleUpdate);
       window.removeEventListener('urgut_store_discount_requests_updated', handleUpdate);
       window.removeEventListener('urgut_store_products_updated', handleUpdate);
+      window.removeEventListener('urgut_realtime_event', handleUpdate);
+      window.removeEventListener('urgut_ws_status_change', handleWsStatus);
+      unsubRealtime();
       clearInterval(interval);
     };
   }, []);
@@ -2179,7 +2223,7 @@ export const AdminDashboard = () => {
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
                           <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{o.order_number}</strong>
-                          <span className="badge badge-wood">{o.status || 'NEW'}</span>
+                          <StatusBadge status={o.status || 'NEW'} format="bilingual" size="md" />
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(o.created_at).toLocaleString('uz-UZ')}</span>
                         </div>
                         <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{o.title || o.furniture_type || o.category || 'Mebel Buyurtmasi'}</h4>
@@ -2221,7 +2265,31 @@ export const AdminDashboard = () => {
                       <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                         {o.assigned_craftsman ? `Biriktirilgan usta: ${o.assigned_craftsman_name || o.assigned_craftsman}` : 'Hali ustaga biriktirilmagan'}
                       </span>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Holat / Status:</span>
+                          <select
+                            value={o.status || 'NEW'}
+                            onChange={(e) => handleAdminUpdateCustomOrderStatus(o.id, e.target.value)}
+                            style={{
+                              padding: '0.32rem 0.6rem',
+                              borderRadius: '6px',
+                              backgroundColor: 'var(--bg-secondary)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-main)',
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              outline: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {CUSTOM_ORDER_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <a href={`tel:${o.customer_phone || o.phone}`} className="btn btn-secondary btn-sm">
                           Mijozga Qo‘ng‘iroq
                         </a>
@@ -2261,7 +2329,7 @@ export const AdminDashboard = () => {
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
                           <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{ord.order_number}</strong>
-                          <span className="badge badge-wood">{ord.status || 'PENDING'}</span>
+                          <StatusBadge status={ord.status || 'PENDING'} format="bilingual" size="md" />
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{ord.created_at ? new Date(ord.created_at).toLocaleString('uz-UZ') : ''}</span>
                         </div>
                         <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -2302,9 +2370,35 @@ export const AdminDashboard = () => {
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         To‘lov usuli: <strong>{ord.payment_method === 'cash_on_delivery' ? 'Naqd (yetkazganda)' : ord.payment_method}</strong>
                       </span>
-                      <a href={`tel:${ord.customer_phone || ord.phone}`} className="btn btn-secondary btn-sm">
-                        📞 Mijozga Bog‘lanish
-                      </a>
+                      <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Holat / Status:</span>
+                          <select
+                            value={ord.status || 'PENDING'}
+                            onChange={(e) => handleAdminUpdateStandardOrderStatus(ord.id, e.target.value)}
+                            style={{
+                              padding: '0.32rem 0.6rem',
+                              borderRadius: '6px',
+                              backgroundColor: 'var(--bg-secondary)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-main)',
+                              fontSize: '0.82rem',
+                              fontWeight: 600,
+                              outline: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {STANDARD_ORDER_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <a href={`tel:${ord.customer_phone || ord.phone}`} className="btn btn-secondary btn-sm">
+                          📞 Mijozga Bog‘lanish
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}

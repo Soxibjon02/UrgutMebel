@@ -4,6 +4,9 @@ import { useNotification } from '../context/NotificationContext';
 import { dataService } from '../services/dataService';
 import { uploadProductImage, isSupabaseConfigured } from '../lib/supabase';
 import ImageUploadField from '../components/ImageUploadField';
+import { StatusBadge } from '../components/StatusBadge';
+import { realtimeService } from '../services/realtimeService';
+import { CUSTOM_ORDER_STATUS_OPTIONS } from '../utils/statusHelper';
 import {
   Hammer,
   DollarSign,
@@ -137,15 +140,38 @@ export const CraftsmanDashboard = () => {
     }
   };
 
+  const handleCraftsmanUpdateStatus = async (orderId, newStatus) => {
+    try {
+      await dataService.updateCustomOrderStatus(
+        orderId,
+        newStatus,
+        `Usta (${user?.full_name || 'Usta'}) tomonidan yangilandi`,
+        user?.full_name || 'Usta'
+      );
+      addToast(`Buyurtma holati yangilandi: ${newStatus}`, 'success');
+      loadData();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
   useEffect(() => {
     loadData();
     const handleUpdate = () => loadData();
     window.addEventListener('urgut_store_custom_orders_updated', handleUpdate);
     window.addEventListener('urgut_store_craftsman_requests_updated', handleUpdate);
+    window.addEventListener('urgut_realtime_event', handleUpdate);
+
+    const unsubRealtime = realtimeService.subscribe(() => {
+      loadData();
+    });
+
     const interval = setInterval(loadData, 10000);
     return () => {
       window.removeEventListener('urgut_store_custom_orders_updated', handleUpdate);
       window.removeEventListener('urgut_store_craftsman_requests_updated', handleUpdate);
+      window.removeEventListener('urgut_realtime_event', handleUpdate);
+      unsubRealtime();
       clearInterval(interval);
     };
   }, [user]);
@@ -1086,7 +1112,7 @@ export const CraftsmanDashboard = () => {
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
                           <strong style={{ color: 'var(--wood-amber)', fontSize: '1.15rem' }}>{ord.order_number}</strong>
-                          <span className="badge badge-wood">{ord.status || 'NEW'}</span>
+                          <StatusBadge status={ord.status || 'NEW'} format="bilingual" size="md" />
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(ord.created_at).toLocaleString('uz-UZ')}</span>
                         </div>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{ord.title || ord.category || 'Shaxsiy mebel buyurtmasi'}</h4>
@@ -1114,9 +1140,30 @@ export const CraftsmanDashboard = () => {
                     )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-subtle)' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Status: <strong style={{ color: 'var(--wood-amber)' }}>{ord.status === 'NEW' ? 'Yangi murojaat' : ord.status}</strong>
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Holat / Status:</span>
+                        <select
+                          value={ord.status || 'NEW'}
+                          onChange={(e) => handleCraftsmanUpdateStatus(ord.id, e.target.value)}
+                          style={{
+                            padding: '0.32rem 0.6rem',
+                            borderRadius: '6px',
+                            backgroundColor: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--text-main)',
+                            fontSize: '0.82rem',
+                            fontWeight: 600,
+                            outline: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {CUSTOM_ORDER_STATUS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <a href={`tel:${ord.customer_phone || ord.phone}`} className="btn btn-primary btn-sm">
                         📞 Mijozga Qo‘ng‘iroq Qilish
                       </a>
