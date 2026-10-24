@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
@@ -49,6 +49,25 @@ export const UrbanHeaderMegaMenu = () => {
   const [activeMegamenu, setActiveMegamenu] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSectionsOpen, setMobileSectionsOpen] = useState(false);
+
+  // Close menus on page route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMobileSectionsOpen(false);
+    setActiveMegamenu(null);
+  }, [location.pathname]);
+
+  // Sync mobile-nav-open class to document.body so Navbar stays visible on scroll
+  useEffect(() => {
+    if (mobileMenuOpen || mobileSectionsOpen) {
+      document.body.classList.add('mobile-nav-open');
+    } else {
+      document.body.classList.remove('mobile-nav-open');
+    }
+    return () => {
+      document.body.classList.remove('mobile-nav-open');
+    };
+  }, [mobileMenuOpen, mobileSectionsOpen]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -843,13 +862,19 @@ export const UrbanHeaderMegaMenu = () => {
       {/* Regular Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div
+          className="urban-mobile-drawer"
           style={{
             backgroundColor: 'var(--bg-card)',
             borderTop: '1px solid var(--border-subtle)',
-            padding: '1.25rem',
+            borderBottom: '1.5px solid var(--border-subtle)',
+            padding: '1.25rem 1.25rem 3.5rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.85rem'
+            gap: '0.85rem',
+            maxHeight: 'calc(100vh - 120px)',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.16)'
           }}
         >
           {navCategories.map((cat) => {

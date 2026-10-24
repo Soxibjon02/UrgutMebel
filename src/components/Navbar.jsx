@@ -11,6 +11,12 @@ export const Navbar = () => {
     let ticking = false;
 
     const handleScroll = () => {
+      // If mobile menu or drawer is open, NEVER hide navbar!
+      if (document.body.classList.contains('mobile-nav-open')) {
+        setIsVisible(true);
+        return;
+      }
+
       const currentScrollY = window.scrollY;
 
       // Ignore negative rubber-band scrolls (e.g. on macOS / iOS)
@@ -18,6 +24,12 @@ export const Navbar = () => {
 
       if (!ticking) {
         window.requestAnimationFrame(() => {
+          if (document.body.classList.contains('mobile-nav-open')) {
+            setIsVisible(true);
+            ticking = false;
+            return;
+          }
+
           const prevScrollY = lastScrollYRef.current;
           const delta = currentScrollY - prevScrollY;
 
