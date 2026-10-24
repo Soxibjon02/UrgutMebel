@@ -24,7 +24,13 @@ export const PwaProvider = ({ children }) => {
 
     // 2. Check if already installed
     const checkIsInstalled = () => {
+      const urlParamInstalled = new URLSearchParams(window.location.search).get('installed') === 'true';
+      if (urlParamInstalled) {
+        localStorage.setItem('urgut_app_installed', 'true');
+      }
+
       const isStandalone =
+        urlParamInstalled ||
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true ||
         document.referrer.includes('android-app://') ||
@@ -34,6 +40,10 @@ export const PwaProvider = ({ children }) => {
     };
 
     checkIsInstalled();
+
+    const handleStorageChange = () => checkIsInstalled();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('urgut_app_installed_changed', handleStorageChange);
 
     // Listen for display mode change
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
@@ -83,6 +93,8 @@ export const PwaProvider = ({ children }) => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('urgut_app_installed_changed', handleStorageChange);
       try {
         mediaQuery.removeEventListener('change', handleModeChange);
       } catch {}

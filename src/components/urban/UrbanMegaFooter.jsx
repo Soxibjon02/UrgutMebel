@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Smartphone, Download, MapPin, Phone, Mail, ShieldCheck } from 'lucide-react';
+import { ChevronDown, ChevronUp, Smartphone, Download, MapPin, Phone, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { usePwa } from '../../context/PwaContext';
 
 export const UrbanMegaFooter = () => {
+  const { isInstalled, installApp } = usePwa();
   const [openAccordions, setOpenAccordions] = useState({
     company: false,
     moreInfo: false,
@@ -15,6 +17,39 @@ export const UrbanMegaFooter = () => {
 
   const smoothScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Detect friendly device name for display
+  const getDeviceName = () => {
+    if (typeof window === 'undefined') return 'Qurilma';
+    const ua = window.navigator.userAgent || '';
+    if (/iphone/i.test(ua)) return 'iPhone';
+    if (/ipad/i.test(ua)) return 'iPad';
+    if (/android/i.test(ua)) {
+      const match = ua.match(/Android\s+[\d\.]+;\s+([^;)]+)/i);
+      if (match && match[1]) {
+        const rawModel = match[1].trim();
+        const cleanModel = rawModel.split('Build')[0].trim();
+        return cleanModel || 'Android';
+      }
+      return 'Android';
+    }
+    if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+    if (/windows/i.test(ua)) return 'Windows PC';
+    if (/linux/i.test(ua)) return 'Linux PC';
+    return 'Qurilma';
+  };
+
+  const deviceName = getDeviceName();
+
+  const handleDownloadApp = async () => {
+    try {
+      const res = await installApp();
+      if (res?.success) return;
+      window.dispatchEvent(new CustomEvent('open-urgut-install-modal'));
+    } catch {
+      window.dispatchEvent(new CustomEvent('open-urgut-install-modal'));
+    }
   };
 
   return (
@@ -33,7 +68,7 @@ export const UrbanMegaFooter = () => {
         <div
           style={{
             backgroundColor: '#ffffff',
-            borderRadius: '12px',
+            borderRadius: '16px',
             border: '1px solid #e5e7eb',
             padding: '1.5rem 2rem',
             marginBottom: '3rem',
@@ -46,65 +81,73 @@ export const UrbanMegaFooter = () => {
           }}
           className="urban-app-download-bar"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0, flex: 1 }}>
             <div
               style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(250, 109, 88, 0.12)',
+                width: '50px',
+                height: '50px',
+                borderRadius: '14px',
+                backgroundColor: isInstalled ? 'rgba(16, 185, 129, 0.12)' : 'rgba(250, 109, 88, 0.12)',
+                color: isInstalled ? '#10b981' : 'var(--figma-coral, #FA6D58)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexShrink: 0
               }}
             >
-              <Smartphone size={26} color="var(--figma-coral, #FA6D58)" />
+              {isInstalled ? <CheckCircle2 size={26} /> : <Smartphone size={26} />}
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#111827' }}>
+              <h3 style={{ fontSize: '1.12rem', fontWeight: 800, margin: 0, color: '#111827' }}>
                 Download Our App
               </h3>
-              <p style={{ margin: '0.2rem 0 0', fontSize: '0.84rem', color: '#6b7280' }}>
-                Xaridlarni mobil ilovamizda tezkor va qulay bajaring
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: isInstalled ? '#059669' : '#6b7280', fontWeight: isInstalled ? 600 : 400 }}>
+                {isInstalled
+                  ? `Sizning ${deviceName} qurilmangizga allaqachon o‘rnatilgan`
+                  : 'Xaridlarni mobil ilovamizda tezkor va qulay bajaring'}
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-urgut-install-modal'))}
-              className="btn btn-secondary"
-              style={{
-                borderRadius: '8px',
-                padding: '0.55rem 1.15rem',
-                fontSize: '0.84rem',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem'
-              }}
-            >
-              <Download size={15} />
-              <span>Google Play</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent('open-urgut-install-modal'))}
-              className="btn btn-primary"
-              style={{
-                borderRadius: '8px',
-                padding: '0.55rem 1.15rem',
-                fontSize: '0.84rem',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem'
-              }}
-            >
-              <Download size={15} />
-              <span>App Store</span>
-            </button>
+          <div className="urban-app-action">
+            {isInstalled ? (
+              <div
+                style={{
+                  borderRadius: '10px',
+                  padding: '0.65rem 1.35rem',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                  color: '#059669',
+                  border: '1.5px solid rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <CheckCircle2 size={17} />
+                <span>{deviceName} — Allaqachon o‘rnatilgan</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDownloadApp}
+                className="btn btn-figma-primary"
+                style={{
+                  borderRadius: '10px',
+                  padding: '0.7rem 1.5rem',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 4px 14px rgba(250, 109, 88, 0.28)'
+                }}
+              >
+                <Download size={17} />
+                <span>Download APP</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -280,6 +323,20 @@ export const UrbanMegaFooter = () => {
 
       <style>{`
         @media (max-width: 768px) {
+          .urban-app-download-bar {
+            padding: 1.25rem 1rem !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 1rem !important;
+          }
+          .urban-app-action {
+            width: 100% !important;
+          }
+          .urban-app-action button,
+          .urban-app-action div {
+            width: 100% !important;
+            justify-content: center !important;
+          }
           .urban-footer-columns-grid {
             grid-template-columns: 1fr !important;
             gap: 0 !important;
