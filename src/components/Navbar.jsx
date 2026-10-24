@@ -23,6 +23,7 @@ export const Navbar = () => {
 
     const measureHeight = () => {
       if (el) {
+        if (document.body.classList.contains('mobile-nav-open')) return;
         setNavbarHeight(el.offsetHeight);
       }
     };

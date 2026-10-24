@@ -58,16 +58,20 @@ export const UrbanHeaderMegaMenu = () => {
     setActiveMegamenu(null);
   }, [location.pathname]);
 
-  // Sync mobile-nav-open class to document.body so Navbar stays visible on scroll
+  // Sync mobile-nav-open class and lock body scroll so mobile drawer scrolls smoothly
   useEffect(() => {
     if (mobileMenuOpen || mobileSectionsOpen) {
       document.body.classList.add('mobile-nav-open');
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.classList.remove('mobile-nav-open');
+        document.body.style.overflow = prevOverflow || '';
+      };
     } else {
       document.body.classList.remove('mobile-nav-open');
+      document.body.style.overflow = '';
     }
-    return () => {
-      document.body.classList.remove('mobile-nav-open');
-    };
   }, [mobileMenuOpen, mobileSectionsOpen]);
 
   const handleSearch = (e) => {
@@ -873,13 +877,15 @@ export const UrbanHeaderMegaMenu = () => {
             backgroundColor: 'var(--bg-card)',
             borderTop: '1px solid var(--border-subtle)',
             borderBottom: '1.5px solid var(--border-subtle)',
-            padding: '1.25rem 1.25rem 3.5rem',
+            padding: '1.25rem 1.25rem 6.5rem',
             display: 'flex',
             flexDirection: 'column',
             gap: '0.85rem',
-            maxHeight: 'calc(100vh - 120px)',
+            maxHeight: 'calc(100dvh - 225px)',
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y',
             boxShadow: '0 16px 36px rgba(0, 0, 0, 0.16)'
           }}
         >
@@ -1057,6 +1063,18 @@ export const UrbanHeaderMegaMenu = () => {
           .urban-megamenu-nav-row {
             display: block !important;
             padding: 0.15rem 0;
+          }
+          .urban-mobile-drawer {
+            max-height: calc(100dvh - 225px) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
+          }
+          @supports not (height: 100dvh) {
+            .urban-mobile-drawer {
+              max-height: calc(100vh - 225px) !important;
+            }
           }
         }
       `}</style>
