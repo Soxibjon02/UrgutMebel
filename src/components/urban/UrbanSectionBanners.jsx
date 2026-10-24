@@ -334,6 +334,9 @@ export const UrbanExploreStoresBanner = () => (
         .urban-stores-grid {
           grid-template-columns: 1fr !important;
         }
+        .urban-stores-grid > div:first-child {
+          padding: 1.5rem 1.25rem !important;
+        }
       }
     `}</style>
   </section>

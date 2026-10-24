@@ -175,36 +175,11 @@ export const StoreDetailPage = () => {
       </div>
 
       {/* Store Profile Card (Overlapping Banner) */}
-      <div className="container" style={{ maxWidth: '1240px', margin: '-70px auto 3rem', position: 'relative', zIndex: 5, padding: '0 1.5rem' }}>
-        <div
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid var(--border-subtle)',
-            padding: '2rem',
-            boxShadow: 'var(--shadow-lg)',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '2rem',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-          className="glass-card"
-        >
+      <div className="container store-detail-card-container">
+        <div className="store-detail-profile-card glass-card">
           {/* Logo & Info */}
-          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flex: '1 1 500px' }}>
-            <div
-              style={{
-                width: '90px',
-                height: '90px',
-                borderRadius: 'var(--radius-lg)',
-                border: '3px solid var(--bg-card)',
-                overflow: 'hidden',
-                backgroundColor: 'var(--bg-secondary)',
-                boxShadow: 'var(--shadow-md)',
-                flexShrink: 0
-              }}
-            >
+          <div className="store-detail-logo-info">
+            <div className="store-detail-avatar">
               <img
                 src={store.logo}
                 alt={store.name}
@@ -212,9 +187,9 @@ export const StoreDetailPage = () => {
               />
             </div>
 
-            <div>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
-                <h1 style={{ fontSize: 'clamp(1.4rem, 3.5vw, 2rem)', fontWeight: 800, margin: 0 }}>
+                <h1 style={{ fontSize: 'clamp(1.25rem, 3.5vw, 2rem)', fontWeight: 800, margin: 0 }}>
                   {store.name}
                 </h1>
                 {store.verified && (
@@ -237,7 +212,7 @@ export const StoreDetailPage = () => {
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#f59e0b', fontWeight: 700 }}>
                   <Star size={15} fill="#f59e0b" color="#f59e0b" />
                   <span>{store.rating}</span>
@@ -246,12 +221,12 @@ export const StoreDetailPage = () => {
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Package size={14} style={{ color: 'var(--primary)' }} />
+                  <Package size={14} style={{ color: 'var(--figma-coral, #FA6D58)' }} />
                   <span><strong>{storeProducts.length}</strong> {t('stores.items_count', 'ta mebel')}</span>
                 </div>
                 {store.established_year && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Calendar size={14} style={{ color: 'var(--primary)' }} />
+                    <Calendar size={14} style={{ color: 'var(--figma-coral, #FA6D58)' }} />
                     <span>{store.established_year}-yildan beri</span>
                   </div>
                 )}
@@ -260,13 +235,13 @@ export const StoreDetailPage = () => {
           </div>
 
           {/* Action Contact Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="store-detail-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
             <a
               href={`tel:${store.phone}`}
-              className="btn btn-primary"
-              style={{ padding: '0.7rem 1.25rem', fontSize: '0.88rem', fontWeight: 700 }}
+              className="btn btn-figma-primary"
+              style={{ padding: '0.65rem 1.15rem', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
             >
-              <Phone size={16} /> {store.phone}
+              <Phone size={15} /> <span>{store.phone}</span>
             </a>
 
             {store.telegram && (
@@ -275,9 +250,9 @@ export const StoreDetailPage = () => {
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-secondary"
-                style={{ padding: '0.7rem 1.1rem', fontSize: '0.88rem' }}
+                style={{ padding: '0.65rem 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
               >
-                <Send size={15} /> Telegram
+                <Send size={15} /> <span>Telegram</span>
               </a>
             )}
 
@@ -286,7 +261,7 @@ export const StoreDetailPage = () => {
               onClick={handleShare}
               className="btn btn-secondary"
               aria-label="Ulashish"
-              style={{ width: '42px', height: '42px', padding: 0 }}
+              style={{ width: '40px', height: '40px', padding: 0 }}
             >
               <Share2 size={16} />
             </button>
@@ -456,6 +431,75 @@ export const StoreDetailPage = () => {
           setQuickBuyProduct(null);
         }}
       />
+
+      <style>{`
+        .store-detail-card-container {
+          max-width: 1240px;
+          margin: -70px auto 3rem;
+          position: relative;
+          z-index: 5;
+          padding: 0 1.5rem;
+        }
+        .store-detail-profile-card {
+          background-color: var(--bg-card);
+          border-radius: var(--radius-xl, 20px);
+          border: 1px solid var(--border-subtle);
+          padding: 2rem;
+          box-shadow: var(--shadow-lg);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1.75rem;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .store-detail-logo-info {
+          display: flex;
+          gap: 1.5rem;
+          align-items: center;
+          flex: 1 1 450px;
+          min-width: 0;
+        }
+        .store-detail-avatar {
+          width: 86px;
+          height: 86px;
+          border-radius: var(--radius-lg, 16px);
+          border: 3px solid var(--bg-card);
+          overflow: hidden;
+          background-color: var(--bg-secondary);
+          box-shadow: var(--shadow-md);
+          flex-shrink: 0;
+        }
+        @media (max-width: 640px) {
+          .store-detail-card-container {
+            margin: -45px auto 1.75rem !important;
+            padding: 0 1rem !important;
+          }
+          .store-detail-profile-card {
+            padding: 1.25rem 1rem !important;
+            gap: 1.25rem !important;
+          }
+          .store-detail-logo-info {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.85rem !important;
+            flex: 1 1 100% !important;
+          }
+          .store-detail-avatar {
+            width: 64px !important;
+            height: 64px !important;
+            border-radius: 12px !important;
+          }
+          .store-detail-actions {
+            width: 100% !important;
+            justify-content: stretch !important;
+          }
+          .store-detail-actions > a {
+            flex: 1 !important;
+            text-align: center !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
