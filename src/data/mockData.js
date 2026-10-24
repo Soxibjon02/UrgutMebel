@@ -256,6 +256,7 @@ export const initialProducts = [
     store_id: "store-1",
     store_name: "Urgut Shahar Mebel Markazi",
     store_phone: "+998 90 456 78 90",
+    craftsman_id: "craft-soxib",
     name: "Royal Urgut Mehmonxona Divani",
     slug: "royal-urgut-mehmonxona-divani",
     price: 14500000,
@@ -293,6 +294,7 @@ export const initialProducts = [
     store_id: "store-4",
     store_name: "Modern Loft & Kitchen Urgut",
     store_phone: "+998 97 789 01 23",
+    craftsman_id: "craft-akmal",
     name: "Modern Oshxona Garnituri 'Granit Elegance'",
     slug: "modern-oshxona-garnituri-granit-elegance",
     price: 18000000,
@@ -538,6 +540,7 @@ export const initialProducts = [
     store_id: "store-3",
     store_name: "O‘ymakor Usta Duradgorlik Markazi",
     store_phone: "+998 93 333 44 55",
+    craftsman_id: "craft-jamshid",
     name: "Elegance O‘ymakorlik Ovqatlanish To‘plami (Stol + 8 ta Stul)",
     slug: "elegance-oymakorlik-ovqatlanish-toplami",
     price: 13500000,
@@ -573,6 +576,7 @@ export const initialProducts = [
     store_id: "store-4",
     store_name: "Modern Loft & Kitchen Urgut",
     store_phone: "+998 97 789 01 23",
+    craftsman_id: "craft-dilshod",
     name: "Minimalist Modulli TV Podstavka & Devor Javoni",
     slug: "minimalist-modulli-tv-podstavka",
     price: 4500000,
@@ -608,21 +612,157 @@ export const initialCraftsmen = [
     id: "craft-soxib",
     name: "Soxib Gaybullayev",
     photo_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
-    experience_years: 2,
-    location: "Urgut tumani",
-    specializations: ["Oshxona mebellari", "Ofis mebellari", "Yotoqxona to‘plamlari"],
+    experience_years: 12,
+    location: "Urgut tumani, Hunarmandlar shaharchasi",
+    store_id: "store-1",
+    store_name: "Urgut Shahar Mebel Markazi",
+    specializations: ["Oshxona mebellari", "Ofis mebellari", "Yotoqxona to‘plamlari", "Premium Akril"],
     rating: 5.0,
-    reviews_count: 1,
+    reviews_count: 48,
     phone: "+998 90 456 78 90",
     telegram: "@urgutmebel_uz",
-    bio: "Professional mebel ustasi ! Ko‘plab korxona va ofislar mebellarini yasab topshirgan maser!",
+    bio: "Professional mebel ustasi va duradgor! 12 yillik tajribaga ega, Germaniya va Italiya texnologiyalarida mebel yasash bo‘yicha mutaxassis. Xonadon va ofislar uchun yuzlab muvaffaqiyatli loyihalarni topshirgan.",
+    schedule: {
+      status: "available", // 'available' (green) | 'busy' (red) | 'tentative' (orange)
+      working_hours: "08:30 - 18:30",
+      days: "Dushanba - Shanba",
+      busy_notes: "Bugun yangi buyurtmalar uchun bo‘sh vaqt mavjud. Bevosita qo‘ng‘iroq qilishingiz mumkin.",
+      dates: {
+        "2026-10-24": "available",
+        "2026-10-25": "available",
+        "2026-10-26": "busy",
+        "2026-10-27": "busy",
+        "2026-10-28": "available",
+        "2026-10-29": "tentative",
+        "2026-10-30": "available"
+      }
+    },
     services: [
-      { name: "Oshxona va xonadon mebellari", price: "Kelishuv asosida", desc: "Sifatli va zamonaviy materiallar" },
-      { name: "Ofis va korxona mebellari", price: "Kelishuv asosida", desc: "Buyurtmaga asosan sifatli yig‘ish" }
+      { name: "Oshxona va xonadon mebellari", price: "O‘lchamga qarab", desc: "Sifatli va zamonaviy fasad materiallaridan" },
+      { name: "Ofis va korxona mebellari", price: "Kelishuv asosida", desc: "Buyurtmaga asosan sifatli yig‘ish va o‘rnatish" },
+      { name: "Mebel montaji va sozlash", price: "150,000 so‘mdan", desc: "Professional darajadagi Blum mexanizmlari bilan ta'mirlash" }
     ],
     portfolio: [
-      { title: "Mebel loyihasi 1", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80" },
-      { title: "Mebel loyihasi 2", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80" }
+      { title: "Royal Mehmonxona Divani", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80" },
+      { title: "Zamonaviy Akril Oshxona Garnituri", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80" },
+      { title: "Executive Rahbar Ish Stoli", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80" }
+    ],
+    is_active: true
+  },
+  {
+    id: "craft-jamshid",
+    name: "Usta Jamshid O‘ymakor",
+    photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80",
+    experience_years: 18,
+    location: "Urgut tumani, Mergancha mahallasi",
+    store_id: null, // Free / Mustaqil usta
+    store_name: null,
+    specializations: ["Qo‘lda o‘ymakorlik", "Eman va Yong‘oq massiv", "Klassik karavotlar", "Xonadon eshiklari"],
+    rating: 4.95,
+    reviews_count: 64,
+    phone: "+998 93 333 44 55",
+    telegram: "@jamshid_oymakor",
+    bio: "Urgutning sulolaviy duradgori. Qo‘lda naqsh solingan hashamatli milliy va klassik mebellar ustasi. Har bir buyum san'at asari darajasida tayyorlanadi.",
+    schedule: {
+      status: "busy", // red
+      working_hours: "09:00 - 18:00",
+      days: "Seshanba - Yakshanba",
+      busy_notes: "Ayni paytda katta yotoqxona to‘plami ustida ish ketmoqda. Keyingi haftadan yangi buyurtmalar olinadi.",
+      dates: {
+        "2026-10-24": "busy",
+        "2026-10-25": "busy",
+        "2026-10-26": "busy",
+        "2026-10-27": "tentative",
+        "2026-10-28": "available",
+        "2026-10-29": "available",
+        "2026-10-30": "available"
+      }
+    },
+    services: [
+      { name: "Yog‘och o‘ymakorligi va naqshlar", price: "Loyiha bo‘yicha", desc: "Eman va yong‘oqdan qo‘lda nafis o‘yma bezaklar" },
+      { name: "Klassik ovqatlanish stollari va stullar", price: "Kelishuv asosida", desc: "Mustahkam va ko‘p yillik kafolatli" }
+    ],
+    portfolio: [
+      { title: "Elegance O‘ymakorlik Ovqatlanish To‘plami", image: "https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=800&q=80" },
+      { title: "Qadimiy Uslubdagi Yog‘och Javon", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80" }
+    ],
+    is_active: true
+  },
+  {
+    id: "craft-akmal",
+    name: "Akmal Duradgor (Modern Loft)",
+    photo_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80",
+    experience_years: 8,
+    location: "Urgut tumani, Yangi bozor majmuasi",
+    store_id: "store-4",
+    store_name: "Modern Loft & Kitchen Urgut",
+    specializations: ["Modern oshxonalar", "Kvarts tosh stol usti", "Loft metall mebellar", "Kupeli shkaflar"],
+    rating: 4.88,
+    reviews_count: 36,
+    phone: "+998 97 789 01 23",
+    telegram: "@akmal_loft_urgut",
+    bio: "Minimalizm va zamonaviy loft uslubida ijod qiluvchi muhandis-usta. Avstriya Blum furnituralari va namlikka chidamli fasadlar bo‘yicha mutaxassis.",
+    schedule: {
+      status: "tentative", // orange
+      working_hours: "09:00 - 19:30",
+      days: "Dushanba - Shanba",
+      busy_notes: "Kunning birinchi yarmida mijoz xonadonida o‘lchov olishda. Ikkinchi yarmida aloqaga chiqish mumkin.",
+      dates: {
+        "2026-10-24": "tentative",
+        "2026-10-25": "available",
+        "2026-10-26": "available",
+        "2026-10-27": "busy",
+        "2026-10-28": "busy",
+        "2026-10-29": "available",
+        "2026-10-30": "available"
+      }
+    },
+    services: [
+      { name: "3D Dizayn va O‘lchov olish", price: "Bepul (Buyurtma bilan)", desc: "Xonadoningizga mos aniq loyiha va 3D rendering" },
+      { name: "Loft oshxona va javonlar", price: "Kvadrat metrga qarab", desc: "Metall karkas va tabiiy daraxt uyg‘unligi" }
+    ],
+    portfolio: [
+      { title: "Granit Elegance Oshxona Garnituri", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80" },
+      { title: "Loft Ovqatlanish Stoli va 6 Stul", image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=800&q=80" }
+    ],
+    is_active: true
+  },
+  {
+    id: "craft-dilshod",
+    name: "Dilshod Usta (Restavratsiya & Montaj)",
+    photo_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80",
+    experience_years: 15,
+    location: "Urgut tumani, Pochvon qishlog‘i",
+    store_id: null, // Free / Mustaqil usta
+    store_name: null,
+    specializations: ["Mebel ta'mirlash", "Qayta qoplash (Peretyajka)", "Xavfsiz ko‘chirish va yig‘ish", "Mexanizmlar almashtirish"],
+    rating: 4.92,
+    reviews_count: 53,
+    phone: "+998 99 876 54 32",
+    telegram: "@dilshod_mebel_servis",
+    bio: "Uy va ofis mebellarini tezkor ta'mirlash, qayta mato tortish va restavratsiya qilish bo‘yicha oliy toifali usta. Samarqand va Urgut bo‘ylab chaqiruvga boriladi.",
+    schedule: {
+      status: "available", // green
+      working_hours: "08:00 - 20:00",
+      days: "Har kuni",
+      busy_notes: "Bo‘shman! Tezkor ta'mirlash va yig‘ish xizmatlari uchun bevosita qo‘ng‘iroq qiling.",
+      dates: {
+        "2026-10-24": "available",
+        "2026-10-25": "available",
+        "2026-10-26": "available",
+        "2026-10-27": "tentative",
+        "2026-10-28": "available",
+        "2026-10-29": "busy",
+        "2026-10-30": "available"
+      }
+    },
+    services: [
+      { name: "Uyga borib mebel ta'mirlash", price: "80,000 so‘mdan", desc: "Eshik ilmoqlari, tortma yo‘naltirgichlari va stullarni mustahkamlash" },
+      { name: "Divan va stullarga yangi mato qoplash", price: "Kelishuv asosida", desc: "Turkiya va Italiya matolari bilan yangidek holatga keltirish" }
+    ],
+    portfolio: [
+      { title: "Mehmonxona Kreslosi Qayta Qoplash", image: "https://images.unsplash.com/photo-1580481077195-c328ad45be48?auto=format&fit=crop&w=800&q=80" },
+      { title: "Modulli TV Podstavka Montaji", image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80" }
     ],
     is_active: true
   }

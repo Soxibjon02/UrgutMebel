@@ -148,6 +148,58 @@ const sanitizeSettingsPayload = (settingsObj = {}) => {
   return payload;
 };
 
+// Default Home Sections Configuration (Super Admin manages layout, order, titles, badges & active states)
+export const DEFAULT_HOME_SECTIONS = [
+  { id: 'category_pills', name: 'Kategoriyalar Tezkor Tugmalari', category: 'navigation', order: 1, is_active: true, title: 'Shop by Categories', subtitle: 'Barcha asosiy toifalar bo‘yicha tezkor o‘tish' },
+  { id: 'hero_slider', name: 'Asosiy Katta Slayder (Hero Fiesta)', category: 'banner', order: 2, is_active: true, title: 'FullHouse Fiesta 2026', subtitle: 'Eng sara mebellar to‘plami va qulay narxlar', badge: 'UP TO 50% OFF' },
+  { id: 'bank_offers', name: 'To‘lov va Bank Aksiyalari Qatori', category: 'offers', order: 3, is_active: true, title: 'Payment & Bank Offers', subtitle: 'Uzum, Anor, Payme va Humo kartalari orqali muddatli to‘lov' },
+  { id: 'atmos_hero', name: 'ATMOS 4-in-1 Vitrina Kolleksiyasi', category: 'showcase', order: 4, is_active: true, title: 'The New ATMOS Collection', subtitle: '4 xil zamonaviy uslubdagi premium interyer to‘plamlari', badge: 'NEW ATMOS' },
+  { id: 'shoe_racks', name: 'Poyafzal Javonlari Mahsulotlar Qatori', category: 'products', order: 5, is_active: true, title: 'Explore Shoe Racks', subtitle: 'Kompakt va keng sig‘imli poyafzal shkaflari', link: '/furniture?category=cat-wardrobe' },
+  { id: 'new_arrivals', name: 'Yangi Kelganlar (3 ta Plitka)', category: 'tiles', order: 6, is_active: true, title: 'New Arrivals 2026', subtitle: 'Beds, Sofas & Dining Sets yangi mavsum modellari', badge: 'NEW' },
+  { id: 'deal_zone', name: 'Qaynoq Chegirmalar Zonasi (Deal Zone)', category: 'deals', order: 7, is_active: true, title: 'Deal Zone', subtitle: '1M dan past mahsulotlar, Ombordan sotuv va Dekorlar', badge: 'DEALS' },
+  { id: 'top_categories', name: 'Top Toifalar va Gidravlik Karavot Vitrinasi', category: 'curated', order: 8, is_active: true, title: 'Top Categories Curated', subtitle: 'Gidravlik karavotlar va mashhur toifalar' },
+  { id: 'video_reels', name: 'Watch & Shop Video Lavhalar (Reels)', category: 'media', order: 9, is_active: true, title: 'Watch & Shop', subtitle: 'Mebellarning real video ko‘rinishi va qulayliklari', badge: 'REELS' },
+  { id: 'celebrations_banner', name: 'Bayramona Chegirmalar Katta Afishasi', category: 'banner', order: 10, is_active: true, title: 'Celebrations Made Special by Savings', subtitle: 'Uyingizga fayz va qulaylik olib kiruvchi bayramona chegirmalar', badge: 'FESTIVE SALE' },
+  { id: 'lounge_chairs', name: 'Lounge Kreslolar Qatori', category: 'products', order: 11, is_active: true, title: 'Explore Lounge Chairs', subtitle: 'Qulay hordiq chiqarish uchun shohona kreslolar', link: '/furniture?category=cat-living' },
+  { id: 'bedroom_banner', name: 'To‘liq Yotoqxona Mebellari Banneri', category: 'banner', order: 12, is_active: true, title: 'Full Bedroom Range', subtitle: 'Orfopedik matrasli karavot, komod va shkaflar to‘plami', badge: 'BEDROOM' },
+  { id: 'hydraulic_beds', name: 'Gidravlik Karavotlar Qatori', category: 'products', order: 13, is_active: true, title: 'Explore Hydraulic Beds', subtitle: 'Katta quti va oson ko‘tariluvchi mexanizmga ega karavotlar', link: '/furniture?category=cat-bedroom' },
+  { id: 'partner_brands_banner', name: 'Hamkor Brendlar 60% gacha Chegirma Banneri', category: 'banner', order: 14, is_active: true, title: 'Enjoy Up To 60% Off on Partner Brands', subtitle: 'Eng yetakchi mebel fabrikalari to‘g‘ridan-to‘g‘ri Urgutda', badge: 'UP TO 60% OFF' },
+  { id: 'partner_brands_products', name: 'Hamkor Brendlar Saralangan Mahsulotlar', category: 'products', order: 15, is_active: true, title: 'Top Picks From Partner Brands', subtitle: 'Xalqaro va mahalliy hamkorlarimizning sara mahsulotlari' },
+  { id: 'solid_wood_products', name: 'Tabiiy Qattiq Yog‘och Mebellari Qatori', category: 'products', order: 16, is_active: true, title: "Premium Solid Wood From Partner's Brand", subtitle: '100% tabiiy eman, yong‘oq va qarag‘ay daraxti' },
+  { id: 'shop_the_look', name: 'Shop The Look (Interaktiv Interyer Ilhomi)', category: 'inspiration', order: 17, is_active: true, title: 'Shop The Look', subtitle: 'Tayyor xona dizaynlari va rasmdagi mebellarni 1 bosishda sotib olish', badge: 'INTERIOR INSPIRATION' },
+  { id: 'coffee_tables', name: 'Kofe Stollari Mahsulotlar Qatori', category: 'products', order: 18, is_active: true, title: 'Explore Coffee Tables', subtitle: 'Mehmonxona markaziy stollari va nafis jurnallar', link: '/furniture?category=cat-living' },
+  { id: 'tv_units', name: 'TV Podstavkalar va Devor Javonlari Qatori', category: 'products', order: 19, is_active: true, title: 'Explore TV Units', subtitle: 'Zamonaviy televizor tagliklari va modulli tokchalar', link: '/furniture?category=cat-living' },
+  { id: 'study_tables_feature', name: 'Yozuv va Ish Stollari Blok-Banneri', category: 'feature', order: 20, is_active: true, title: 'Study Tables from 299,000 so‘m', subtitle: 'Bolalar va talabalar uchun qulay ergonomik ish stollari' },
+  { id: 'c_tables', name: 'Ichimlik & C-stollari Mahsulotlar Qatori', category: 'products', order: 21, is_active: true, title: 'Explore Drink & C Tables', subtitle: 'Divan yoniga qo‘yiluvchi mobil va ixcham stollar', link: '/furniture?category=cat-living' },
+  { id: 'gift_card', name: 'Urgut Mebel Sovg‘a Sertifikati (Gift Card)', category: 'promo', order: 22, is_active: true, title: 'Urgut Mebel Gift Card', subtitle: 'Yaqinlaringizga yangi uy to‘yi uchun eng munosib sovg‘a', badge: 'GIFT CARD' },
+  { id: 'toledo_collection', name: 'The Toledo Look Eksklyuziv Kolleksiyasi', category: 'showcase', order: 23, is_active: true, title: 'The Toledo Look', subtitle: 'Klassik va zamonaviy uslub uyg‘unlashgan hashamat', badge: 'EDITORIAL' },
+  { id: 'explore_stores', name: 'Barcha Mebel Do‘konlari Ommaviy Banneri', category: 'stores', order: 24, is_active: true, title: 'Explore All Stores', subtitle: 'O‘zbekiston bo‘ylab 60+ rasmiy do‘konlar va ko‘rgazma zallari' },
+  { id: 'non_storage_beds', name: 'Klassik Karavotlar 699,000 so‘mdan Banneri', category: 'banner', order: 25, is_active: true, title: 'Non-Storage Beds from 699,000 so‘m', subtitle: 'Soddaligi va baquvvatligi bilan ajralib turuvchi to‘shaklar' },
+  { id: 'wardrobes', name: 'Kiyim Shkaflari Mahsulotlar Qatori', category: 'products', order: 26, is_active: true, title: 'Explore Wardrobes', subtitle: 'Kupeli va ochiladigan eshikli sig‘imli shkaflar', link: '/furniture?category=cat-wardrobe' },
+  { id: 'chest_of_drawers', name: 'Komodlar va Tortmali Javonlar Qatori', category: 'products', order: 27, is_active: true, title: 'Explore Chest Of Drawers', subtitle: 'Kiyimlar va mayda buyumlar uchun qulay tortmalar', link: '/furniture?category=cat-bedroom' },
+  { id: 'modular_kitchen', name: 'Modulli Oshxona Mebellari Banneri', category: 'banner', order: 28, is_active: true, title: 'Modular Kitchens, Wardrobes & More', subtitle: 'Har qanday o‘lchamdagi xonadonga maxsus loyihalashtirish', badge: 'KITCHEN' },
+  { id: 'shoe_racks_banner', name: 'Poyafzal Mebellari 299,000 so‘mdan Banneri', category: 'banner', order: 29, is_active: true, title: 'Shoe Racks from 299,000 so‘m', subtitle: 'Dahliz tartibi uchun eng zo‘r yechim' },
+  { id: 'bookshelves', name: 'Kitob Javonlari Mahsulotlar Qatori', category: 'products', order: 30, is_active: true, title: 'Explore Bookshelves', subtitle: 'Ofis va xonadon kutubxonasi uchun zamonaviy javonlar', link: '/furniture?category=cat-office' },
+  { id: 'sideboards', name: 'Oshxona Servantlari va Bufetlar Qatori', category: 'products', order: 31, is_active: true, title: 'Explore Sideboards', subtitle: 'Idish-tovoqlar va taqinchoqlar uchun oynavand vitrinalar', link: '/furniture?category=cat-dining' },
+  { id: 'mattresses', name: 'Orfopedik Matraslar Banneri', category: 'banner', order: 32, is_active: true, title: 'Mattresses Starting from 299,000 so‘m', subtitle: 'Sog‘lom uyqu va umurtqa pog‘onasi uchun qulay matraslar' },
+  { id: 'sofa_beds', name: 'Transformatsiya Divanlar 1,599,000 so‘mdan Banneri', category: 'banner', order: 33, is_active: true, title: 'Sofa Beds from 1,599,000 so‘m', subtitle: 'Kunduzi qulay divan, kechasi keng ikki kishilik karavot' },
+  { id: 'recliners', name: 'Reklayner va Massaj Kreslolari Qatori', category: 'products', order: 34, is_active: true, title: 'Explore Recliners', subtitle: 'Tugmani bosish bilan yotadigan premium dam olish kreslolari', link: '/furniture?category=cat-living' },
+  { id: 'study_tables', name: 'Yozuv Stollari Mahsulotlar Qatori', category: 'products', order: 35, is_active: true, title: 'Explore Study Tables', subtitle: 'Zamonaviy noutbuk va dars stollari', link: '/furniture?category=cat-office' },
+  { id: 'decor_corner', name: 'Xonadon Dekori va Aksessuarlari Gridi', category: 'decor', order: 36, is_active: true, title: 'Decor for Every Corner', subtitle: '10 xil toifada uy shinamligi uchun dekorativ bezaklar' },
+  { id: 'trust_badges', name: 'Kafolat va Ishonch Nishonlari', category: 'trust', order: 37, is_active: true, title: 'Nega Aynan Urgut Mebel?', subtitle: '5 Yillik Kafolat, Bepul Yetkazish va O‘rnatish, Asriy Duradgorlik' }
+];
+
+export const sortWithDiscountsFirst = (productsList) => {
+  if (!Array.isArray(productsList)) return [];
+  return [...productsList].sort((a, b) => {
+    const aHasDiscount = Boolean(a.discount_price && Number(a.discount_price) > 0 && Number(a.discount_price) < Number(a.price));
+    const bHasDiscount = Boolean(b.discount_price && Number(b.discount_price) > 0 && Number(b.discount_price) < Number(b.price));
+    if (aHasDiscount && !bHasDiscount) return -1;
+    if (!aHasDiscount && bHasDiscount) return 1;
+    return 0;
+  });
+};
+
 export const dataService = {
   // Settings
   async getSettings() {
@@ -202,6 +254,29 @@ export const dataService = {
       }
     }
     return updated;
+  },
+
+  // Homepage Sections & Layout Management (Super Admin controls layout, ordering, texts, badges)
+  async getHomeSections() {
+    const stored = getStored('home_sections', null);
+    if (stored && Array.isArray(stored) && stored.length > 0) {
+      // Merge with default sections to ensure new sections are never lost
+      const storedIds = new Set(stored.map(s => s.id));
+      const missingDefaults = DEFAULT_HOME_SECTIONS.filter(d => !storedIds.has(d.id));
+      const merged = [...stored, ...missingDefaults].sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999));
+      return merged;
+    }
+    return DEFAULT_HOME_SECTIONS;
+  },
+
+  async saveHomeSections(sections) {
+    setStored('home_sections', sections, true);
+    return sections;
+  },
+
+  async resetHomeSections() {
+    setStored('home_sections', DEFAULT_HOME_SECTIONS, true);
+    return DEFAULT_HOME_SECTIONS;
   },
 
   // Categories
@@ -305,6 +380,10 @@ export const dataService = {
     const newProd = product.id ? {
       ...product,
       slug,
+      store_id: product.store_id || null,
+      store_name: product.store_name || null,
+      store_phone: product.store_phone || null,
+      craftsman_id: product.craftsman_id || null,
       images: finalImages.length > 0 ? finalImages : [primaryImg],
       image_url: primaryImg,
       updated_at: new Date().toISOString()
@@ -312,6 +391,10 @@ export const dataService = {
       ...product,
       id: `prod-${Date.now()}`,
       slug,
+      store_id: product.store_id || null,
+      store_name: product.store_name || null,
+      store_phone: product.store_phone || null,
+      craftsman_id: product.craftsman_id || null,
       rating: 5.0,
       reviews_count: 0,
       likes_count: 0,
@@ -662,6 +745,26 @@ export const dataService = {
     const craftsmen = current.filter((c) => c.id !== id);
     setStored('craftsmen', craftsmen, true);
     return craftsmen;
+  },
+
+  async updateCraftsmanSchedule(craftsmanId, scheduleData) {
+    const craftsmen = await this.getCraftsmen();
+    const target = craftsmen.find((c) => c.id === craftsmanId);
+    if (!target) return null;
+    const updatedCraft = {
+      ...target,
+      schedule: {
+        ...(target.schedule || {}),
+        ...scheduleData
+      }
+    };
+    await this.saveCraftsman(updatedCraft);
+    return updatedCraft;
+  },
+
+  async getProductsByCraftsman(craftsmanId) {
+    const products = await this.getProducts();
+    return products.filter((p) => p.craftsman_id === craftsmanId);
   },
 
   // Custom Orders & Workflow

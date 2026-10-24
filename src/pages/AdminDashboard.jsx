@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
-import { dataService, getStored } from '../services/dataService';
+import { dataService, getStored, DEFAULT_HOME_SECTIONS, sortWithDiscountsFirst } from '../services/dataService';
 import {
   initialProducts,
   initialCategories,
@@ -52,7 +52,14 @@ import {
   Clock,
   Phone,
   Send,
-  Wifi
+  Wifi,
+  SlidersHorizontal,
+  MoveUp,
+  MoveDown,
+  ToggleLeft,
+  ToggleRight,
+  RotateCcw,
+  Filter
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { StatusBadge } from '../components/StatusBadge';
@@ -79,6 +86,17 @@ export const AdminDashboard = () => {
   const [discountRequests, setDiscountRequests] = useState(() => getStored('discount_requests', initialDiscountRequests));
   const [managers, setManagers] = useState(() => getStored('managers', []));
   const [usersList, setUsersList] = useState(() => getStored('urgut_mebel_registered_users', []));
+
+  // Dynamic Homepage Sections Configuration (Super Admin full control)
+  const [homeSections, setHomeSections] = useState(() => getStored('home_sections', DEFAULT_HOME_SECTIONS));
+  const [editingSection, setEditingSection] = useState(null);
+  const [sectionModalOpen, setSectionModalOpen] = useState(false);
+  const [sectionCategoryFilter, setSectionCategoryFilter] = useState('ALL');
+
+  // Product Filtering by Category & Search (Super Admin & Store Manager)
+  const [productCategoryFilter, setProductCategoryFilter] = useState('ALL');
+  const [productSearch, setProductSearch] = useState('');
+  const [productStoreFilter, setProductStoreFilter] = useState('ALL');
 
   // Modals & Forms
   const [storeModalOpen, setStoreModalOpen] = useState(false);
@@ -215,7 +233,7 @@ export const AdminDashboard = () => {
   const loadAllData = async () => {
     try {
       checkHealth();
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs, secList] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
@@ -226,7 +244,8 @@ export const AdminDashboard = () => {
         dataService.getManagers(),
         dataService.getUsers(),
         dataService.getStores(),
-        dataService.getDiscountRequests()
+        dataService.getDiscountRequests(),
+        dataService.getHomeSections()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -239,6 +258,7 @@ export const AdminDashboard = () => {
       setUsersList(usrs || []);
       setStores(strs || []);
       setDiscountRequests(dReqs || []);
+      if (secList && secList.length > 0) setHomeSections(secList);
     } catch (e) {
       console.error(e);
     }
@@ -431,8 +451,10 @@ export const AdminDashboard = () => {
     const form = e.target;
     const name = form.name.value.trim();
     const imgUrl = form.image_url?.value || editingProduct?.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
-    const selectedStoreId = form.store_id?.value || editingProduct?.store_id || (stores[0]?.id || 'store-1');
+    const selectedStoreId = user?.store_id || form.store_id?.value || editingProduct?.store_id || (stores[0]?.id || 'store-1');
     const matchedStore = stores.find(s => s.id === selectedStoreId);
+    const rawCraftsmanVal = form.craftsman_id?.value;
+    const selectedCraftsmanId = rawCraftsmanVal && rawCraftsmanVal !== 'NONE' ? rawCraftsmanVal : (editingProduct?.craftsman_id || null);
 
     const prodData = {
       ...(editingProduct || {}),
@@ -444,6 +466,7 @@ export const AdminDashboard = () => {
       store_id: selectedStoreId,
       store_name: matchedStore?.name || editingProduct?.store_name || "Urgut Shahar Mebel Markazi",
       store_phone: matchedStore?.phone || editingProduct?.store_phone || "+998 90 123 45 67",
+      craftsman_id: selectedCraftsmanId,
       material: form.material.value,
       dimensions: form.dimensions.value,
       stock: Number(form.stock.value) || 0,
@@ -461,6 +484,65 @@ export const AdminDashboard = () => {
     const updated = await dataService.saveProduct(prodData);
     setProducts(updated);
     addToast('Mahsulot muvaffaqiyatli saqlandi!', 'success');
+  };
+
+  // ==========================================
+  // HOMEPAGE SECTIONS & LAYOUT MANAGEMENT
+  // ==========================================
+  const handleMoveSection = async (index, direction) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= homeSections.length) return;
+    const reordered = [...homeSections];
+    const [moved] = reordered.splice(index, 1);
+    reordered.splice(targetIndex, 0, moved);
+    const updated = reordered.map((sec, idx) => ({ ...sec, order: idx + 1 }));
+    setHomeSections(updated);
+    await dataService.saveHomeSections(updated);
+    addToast(`"${moved.name}" bo‘limi tartibi #${targetIndex + 1}-o‘ringa o‘tkazildi!`, 'info');
+  };
+
+  const handleToggleSectionActive = async (section) => {
+    const nextState = section.is_active === false;
+    const updated = homeSections.map((s) =>
+      s.id === section.id ? { ...s, is_active: nextState } : s
+    );
+    setHomeSections(updated);
+    await dataService.saveHomeSections(updated);
+    addToast(`"${section.name}" ${nextState ? 'faollashtirildi' : 'o‘chirildi'}`, nextState ? 'success' : 'info');
+  };
+
+  const handleOpenEditSection = (section) => {
+    setEditingSection({ ...section });
+    setSectionModalOpen(true);
+  };
+
+  const handleSaveSectionForm = async (e) => {
+    e.preventDefault();
+    if (!editingSection) return;
+    const form = e.target;
+    const updatedSec = {
+      ...editingSection,
+      title: form.title.value.trim(),
+      subtitle: form.subtitle?.value?.trim() || '',
+      badge: form.badge?.value?.trim() || '',
+      banner_image: form.banner_image?.value?.trim() || editingSection.banner_image || '',
+      link: form.link?.value?.trim() || editingSection.link || '',
+      is_active: form.is_active.checked
+    };
+    const updatedList = homeSections.map((s) => s.id === updatedSec.id ? updatedSec : s);
+    setHomeSections(updatedList);
+    await dataService.saveHomeSections(updatedList);
+    setSectionModalOpen(false);
+    setEditingSection(null);
+    addToast(`"${updatedSec.name}" bo‘limi muvaffaqiyatli saqlandi!`, 'success');
+  };
+
+  const handleResetSections = async () => {
+    if (window.confirm("Barcha bo‘limlar tartibi va sozlamalarini dastlabki holatga qaytarishni xohlaysizmi?")) {
+      const def = await dataService.resetHomeSections();
+      setHomeSections(def);
+      addToast("Barcha bo‘limlar dastlabki holatga qaytarildi", 'info');
+    }
   };
 
   const handleDeleteProduct = async (id) => {
@@ -906,17 +988,18 @@ export const AdminDashboard = () => {
 
   const adminTabs = [
     { id: 'overview', label: 'Umumiy Statistika', shortLabel: 'Statistika', icon: LayoutDashboard },
-    { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
-    { id: 'trending', label: `Top 10 Trend (${products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
-    { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
-    { id: 'products', label: `Mahsulotlar (${products.length})`, shortLabel: `Mebellar (${products.length})`, icon: Package },
+    { id: 'home_sections', label: `Bo‘limlar Boshqaruvi (${homeSections.length})`, shortLabel: `Bo‘limlar (${homeSections.length})`, icon: SlidersHorizontal },
+    { id: 'products', label: `Mebellar & E‘lonlar (${products.length})`, shortLabel: `E‘lonlar (${products.length})`, icon: Package },
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
+    { id: 'trending', label: `Top 10 Trend (${products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
+    { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
+    { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
     { id: 'banners', label: `E'lonlar & Bannerlar (${banners.length})`, shortLabel: `E'lonlar (${banners.length})`, icon: ImageIcon },
     { id: 'slides', label: 'Header Slayd Shou Boshqaruvi', shortLabel: 'Slaydlar', icon: ImageIcon },
+    { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
     { id: 'custom_orders', label: `Maxsus Buyurtmalar (${customOrders.length})`, shortLabel: `Maxsus (${customOrders.length})`, icon: Sliders },
     { id: 'orders', label: `Do‘kon Buyurtmalari (${standardOrders.length})`, shortLabel: `Do‘kon (${standardOrders.length})`, icon: ShoppingBag },
-    { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
     { id: 'comments', label: `Sharhlar (${comments.length})`, shortLabel: `Sharhlar (${comments.length})`, icon: MessageSquare },
     { id: 'managers', label: `Menedjerlar (${managers.length})`, shortLabel: `Menedjerlar (${managers.length})`, icon: Users },
     { id: 'users', label: `Foydalanuvchilar (${usersList.length})`, shortLabel: `Foydalanuvchilar (${usersList.length})`, icon: Users },
@@ -1476,6 +1559,250 @@ export const AdminDashboard = () => {
           </div>
         )}
 
+        {/* TAB: HOMEPAGE SECTIONS & LAYOUT MANAGEMENT (SUPER ADMIN TO'LIQ BOSHQARUVI) */}
+        {activeTab === 'home_sections' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(0, 113, 227, 0.1)', color: '#0071e3', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  <SlidersHorizontal size={13} /> SUPER ADMIN • DINAMIK BO‘LIMLAR & TARTIB
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                  Asosiy Sahifa Bo‘limlari & Tartibi
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '780px', lineHeight: 1.5 }}>
+                  Bosh sahifadagi barcha 37 ta bo‘limni to‘liq nazorat qiling: istalgan bo‘limni <strong>Yuqoriga/Pastga surish</strong> orqali tartiblang, <strong>Yoqish/O‘chirish</strong> orqali boshqaring yoki sarlavha, afisha va havolalarini tahrirlang. O‘zgarishlar darhol saytda aks etadi.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleResetSections}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
+                  title="Dastlabki tartibni tiklash"
+                >
+                  <RotateCcw size={14} /> Dastlabki Tartib
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await dataService.saveHomeSections(homeSections);
+                    addToast("Barcha bo‘limlar sozlamalari saqlandi va saytda jonli yangilandi!", 'success');
+                  }}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, backgroundColor: '#0071e3', borderColor: '#0071e3' }}
+                >
+                  <CheckCircle2 size={15} /> Saqlash & Yangilash
+                </button>
+              </div>
+            </div>
+
+            {/* Apple-style Filter Segment Controls */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', overflowX: 'auto', paddingBottom: '0.4rem', scrollbarWidth: 'none' }}>
+              {[
+                { id: 'ALL', label: `Barcha Bo‘limlar (${homeSections.length})` },
+                { id: 'banner', label: 'Afisha & Katta Bannerlar' },
+                { id: 'products', label: 'Mahsulot Qatorlari' },
+                { id: 'showcase', label: 'Vitrinalar & Kolleksiyalar' },
+                { id: 'deals', label: 'Chegirmalar & Aksiyalar' },
+                { id: 'navigation', label: 'Navigatsiya & Vidjetlar' }
+              ].map((f) => {
+                const isSelected = sectionCategoryFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setSectionCategoryFilter(f.id)}
+                    style={{
+                      padding: '0.45rem 0.9rem',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.8rem',
+                      fontWeight: isSelected ? 700 : 500,
+                      backgroundColor: isSelected ? '#0071e3' : 'var(--bg-secondary)',
+                      color: isSelected ? '#ffffff' : 'var(--text-main)',
+                      border: isSelected ? '1px solid #0071e3' : '1px solid var(--border-subtle)',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.18s ease'
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sections Reordering & Editing Table */}
+            <div className="table-responsive glass-card" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <tr>
+                    <th style={{ padding: '0.85rem 1rem', width: '90px' }}>Tartib</th>
+                    <th style={{ padding: '0.85rem' }}>Bo‘lim Nomi va ID</th>
+                    <th style={{ padding: '0.85rem' }}>Saytdagi Sarlavha & Izoh</th>
+                    <th style={{ padding: '0.85rem', width: '120px' }}>Holati</th>
+                    <th style={{ padding: '0.85rem 1rem', textAlign: 'right', width: '140px' }}>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {homeSections
+                    .filter((sec) => sectionCategoryFilter === 'ALL' || sec.category === sectionCategoryFilter)
+                    .map((sec, idx) => {
+                      const originalIndex = homeSections.findIndex((s) => s.id === sec.id);
+                      const isFirst = originalIndex === 0;
+                      const isLast = originalIndex === homeSections.length - 1;
+                      const isActive = sec.is_active !== false;
+
+                      return (
+                        <tr
+                          key={sec.id}
+                          style={{
+                            borderBottom: '1px solid var(--border-subtle)',
+                            backgroundColor: isActive ? 'transparent' : 'rgba(239, 68, 68, 0.03)',
+                            opacity: isActive ? 1 : 0.72,
+                            transition: 'background-color 0.15s ease'
+                          }}
+                        >
+                          {/* Order & Move buttons */}
+                          <td style={{ padding: '0.75rem 1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '6px',
+                                  backgroundColor: 'var(--bg-secondary)',
+                                  fontWeight: 800,
+                                  fontSize: '0.78rem',
+                                  color: 'var(--text-main)',
+                                  border: '1px solid var(--border-subtle)'
+                                }}
+                              >
+                                #{sec.order || originalIndex + 1}
+                              </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveSection(originalIndex, -1)}
+                                  disabled={isFirst}
+                                  style={{
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: isFirst ? 'not-allowed' : 'pointer',
+                                    opacity: isFirst ? 0.3 : 1,
+                                    padding: '1px',
+                                    color: 'var(--text-main)'
+                                  }}
+                                  title="Yuqoriga surish"
+                                >
+                                  <ArrowUp size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveSection(originalIndex, 1)}
+                                  disabled={isLast}
+                                  style={{
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: isLast ? 'not-allowed' : 'pointer',
+                                    opacity: isLast ? 0.3 : 1,
+                                    padding: '1px',
+                                    color: 'var(--text-main)'
+                                  }}
+                                  title="Pastga surish"
+                                >
+                                  <ArrowDown size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Section identity */}
+                          <td style={{ padding: '0.75rem 0.85rem' }}>
+                            <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                              {sec.name}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                              <code style={{ fontSize: '0.72rem', color: 'var(--text-light)', background: 'var(--bg-secondary)', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                                {sec.id}
+                              </code>
+                              {sec.category && (
+                                <span style={{ fontSize: '0.7rem', color: '#0071e3', fontWeight: 600 }}>
+                                  • {sec.category}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Titles preview */}
+                          <td style={{ padding: '0.75rem 0.85rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              <span style={{ fontWeight: 650, color: 'var(--text-main)' }}>
+                                {sec.title || "—"}
+                              </span>
+                              {sec.badge && (
+                                <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: 'rgba(0, 113, 227, 0.1)', color: '#0071e3' }}>
+                                  {sec.badge}
+                                </span>
+                              )}
+                            </div>
+                            {sec.subtitle && (
+                              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.15rem', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {sec.subtitle}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Active / Inactive switch */}
+                          <td style={{ padding: '0.75rem 0.85rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSectionActive(sec)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: '0.25rem 0.65rem',
+                                borderRadius: 'var(--radius-full)',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                backgroundColor: isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                                color: isActive ? '#10b981' : '#ef4444'
+                              }}
+                            >
+                              {isActive ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
+                              <span>{isActive ? 'Faol' : 'O‘chirilgan'}</span>
+                            </button>
+                          </td>
+
+                          {/* Actions */}
+                          <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditSection(sec)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', padding: '0.35rem 0.7rem' }}
+                            >
+                              <Edit2 size={13} /> Tahrirlash
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* TAB: STORES MANAGEMENT (MEBEL DO'KONLARI) */}
         {activeTab === 'stores' && (
           <div>
@@ -1970,82 +2297,285 @@ export const AdminDashboard = () => {
           </div>
         )}
 
-        {/* TAB 2: PRODUCTS CRUD */}
-        {activeTab === 'products' && (
-          <div>
-            <div className="dashboard-action-toolbar">
-              <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Mahsulotlar Boshqaruvi</h2>
-              <button
-                type="button"
-                onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
-                className="btn btn-primary"
-              >
-                <Plus size={16} /> Yangi Mebel Qo‘shish
-              </button>
-            </div>
+        {/* TAB 2: PRODUCTS & ADS CRUD (SUPER ADMIN & STORE MANAGERS) */}
+        {activeTab === 'products' && (() => {
+          const filteredList = products.filter((p) => {
+            if (productCategoryFilter !== 'ALL' && p.category_id !== productCategoryFilter) return false;
+            if (productStoreFilter !== 'ALL' && p.store_id !== productStoreFilter) return false;
+            if (productSearch.trim()) {
+              const q = productSearch.toLowerCase();
+              const matchName = p.name?.toLowerCase().includes(q);
+              const matchStore = p.store_name?.toLowerCase().includes(q);
+              const matchMat = p.material?.toLowerCase().includes(q);
+              if (!matchName && !matchStore && !matchMat) return false;
+            }
+            return true;
+          });
 
-            <div className="table-responsive glass-card">
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <tr>
-                    <th style={{ padding: '0.85rem 1.25rem' }}>Mebel nomi</th>
-                    <th style={{ padding: '0.85rem' }}>Narxi</th>
-                    <th style={{ padding: '0.85rem' }}>Chegirma</th>
-                    <th style={{ padding: '0.85rem' }}>Qoldiq</th>
-                    <th style={{ padding: '0.85rem' }}>Holati</th>
-                    <th style={{ padding: '0.85rem 1.25rem', textAlign: 'right' }}>Amallar</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((p) => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                      <td style={{ padding: '1rem 1.25rem', fontWeight: 600 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <img
-                            src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
-                            alt=""
-                            style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
-                          />
-                          <span>{p.name}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '1rem 0.85rem' }}>{Number(p.price).toLocaleString()} so‘m</td>
-                      <td style={{ padding: '1rem 0.85rem', color: '#ef4444' }}>
-                        {p.discount_price ? `${Number(p.discount_price).toLocaleString()} so‘m` : 'Yo‘q'}
-                      </td>
-                      <td style={{ padding: '1rem 0.85rem' }}>{p.stock ?? 10} dona</td>
-                      <td style={{ padding: '1rem 0.85rem' }}>
-                        <span className={`badge ${p.is_published ? 'badge-stock' : 'badge-discount'}`}>
-                          {p.is_published ? 'E‘lon qilingan' : 'Yashirilgan'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
-                          <button
-                            type="button"
-                            onClick={() => { setEditingProduct(p); setProductModalOpen(true); }}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '0.4rem' }}
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProduct(p.id)}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '0.4rem', color: '#ef4444' }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
+          // Discounted products are automatically placed at the top in their category as requested
+          const displayedProducts = sortWithDiscountsFirst(filteredList);
+
+          return (
+            <div>
+              <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(0, 113, 227, 0.1)', color: '#0071e3', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                    <Package size={13} /> {isAdmin ? 'SUPER ADMIN' : 'DO‘KON MENEDJERI'} • E‘LONLAR VA MEBELLAR
+                  </div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>
+                    Mebellar va E‘lonlar Boshqaruvi
+                  </h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '780px' }}>
+                    Barcha e‘lonlarni kategoriya bo‘yicha saralang yoki birgalikda ko‘ring. Chegirmali mebellar o‘z kategoriyasida avtomatik ravishda eng yuqoriga chiqariladi. Yangi e‘lon kiritganda do‘kon va usta biriktirilishi mumkin.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setEditingProduct(null); setProductModalOpen(true); }}
+                  className="btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.65rem 1.25rem', backgroundColor: '#0071e3', borderColor: '#0071e3' }}
+                >
+                  <Plus size={16} /> Yangi Mebel E‘loni Qo‘shish
+                </button>
+              </div>
+
+              {/* Category Filter Pills (Apple Segmented Style) */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.4rem', scrollbarWidth: 'none' }}>
+                <button
+                  type="button"
+                  onClick={() => setProductCategoryFilter('ALL')}
+                  style={{
+                    padding: '0.4rem 0.85rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.8rem',
+                    fontWeight: productCategoryFilter === 'ALL' ? 700 : 500,
+                    backgroundColor: productCategoryFilter === 'ALL' ? '#0071e3' : 'var(--bg-secondary)',
+                    color: productCategoryFilter === 'ALL' ? '#ffffff' : 'var(--text-main)',
+                    border: productCategoryFilter === 'ALL' ? '1px solid #0071e3' : '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.18s ease'
+                  }}
+                >
+                  Barchasi ({products.length})
+                </button>
+                {categories.map((c) => {
+                  const count = products.filter((p) => p.category_id === c.id || p.category_id === c.slug).length;
+                  const isSelected = productCategoryFilter === c.id || productCategoryFilter === c.slug;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setProductCategoryFilter(c.id)}
+                      style={{
+                        padding: '0.4rem 0.85rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.8rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        backgroundColor: isSelected ? '#0071e3' : 'var(--bg-secondary)',
+                        color: isSelected ? '#ffffff' : 'var(--text-main)',
+                        border: isSelected ? '1px solid #0071e3' : '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.18s ease'
+                      }}
+                    >
+                      {c.name} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Search & Store Filter Bar */}
+              <div style={{ display: 'flex', gap: '0.85rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: '1 1 260px' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input
+                    type="text"
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Mebel nomi, do‘kon yoki material bo‘yicha qidirish..."
+                    className="form-input"
+                    style={{ paddingLeft: '2.4rem', fontSize: '0.84rem' }}
+                  />
+                </div>
+
+                <div style={{ flex: '0 1 240px' }}>
+                  <select
+                    value={productStoreFilter}
+                    onChange={(e) => setProductStoreFilter(e.target.value)}
+                    className="form-select"
+                    style={{ fontSize: '0.84rem' }}
+                  >
+                    <option value="ALL">🏪 Barcha Mebel Do‘konlari</option>
+                    {stores.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Products Table */}
+              <div className="table-responsive glass-card" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+                  <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <tr>
+                      <th style={{ padding: '0.85rem 1rem' }}>Mebel nomi & Kategoriya</th>
+                      <th style={{ padding: '0.85rem' }}>Do‘kon</th>
+                      <th style={{ padding: '0.85rem' }}>Usta (Portfolio)</th>
+                      <th style={{ padding: '0.85rem' }}>Narxi</th>
+                      <th style={{ padding: '0.85rem' }}>Omborda</th>
+                      <th style={{ padding: '0.85rem' }}>Holati</th>
+                      <th style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>Amallar</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {displayedProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                          <Package size={36} style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
+                          <div style={{ fontWeight: 700, fontSize: '1rem' }}>Ushbu mezon bo‘yicha mebellar topilmadi</div>
+                          <div style={{ fontSize: '0.82rem', marginTop: '0.2rem' }}>Filtrni tozalang yoki yangi mebel e‘lonini qo‘shing</div>
+                        </td>
+                      </tr>
+                    ) : (
+                      displayedProducts.map((p) => {
+                        const hasDiscount = Boolean(p.discount_price && Number(p.discount_price) > 0 && Number(p.discount_price) < Number(p.price));
+                        const matchedStore = stores.find((s) => s.id === p.store_id);
+                        const matchedCraftsman = craftsmen.find((c) => c.id === p.craftsman_id);
+                        const matchedCategory = categories.find((c) => c.id === p.category_id || c.slug === p.category_id);
+
+                        return (
+                          <tr
+                            key={p.id}
+                            style={{
+                              borderBottom: '1px solid var(--border-subtle)',
+                              backgroundColor: hasDiscount ? 'rgba(239, 68, 68, 0.02)' : 'transparent'
+                            }}
+                          >
+                            {/* Product Info */}
+                            <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <img
+                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                                  alt=""
+                                  style={{ width: '44px', height: '44px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border-subtle)' }}
+                                />
+                                <div>
+                                  <div style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                    <span>{p.name}</span>
+                                    {hasDiscount && (
+                                      <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#dc2626' }}>
+                                        CHEGIRMA
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize: '0.74rem', color: 'var(--text-light)' }}>
+                                    {matchedCategory?.name || p.category_id || 'Mebel'}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Store Name */}
+                            <td style={{ padding: '0.75rem 0.85rem', fontSize: '0.82rem' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                                <Store size={13} color="#0071e3" />
+                                {p.store_name || matchedStore?.name || "Urgut Shahar Mebel Markazi"}
+                              </span>
+                            </td>
+
+                            {/* Craftsman (Portfolio link) */}
+                            <td style={{ padding: '0.75rem 0.85rem', fontSize: '0.82rem' }}>
+                              {matchedCraftsman ? (
+                                <a
+                                  href={`/craftsmen/${matchedCraftsman.id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.3rem',
+                                    color: 'var(--wood-amber)',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                    padding: '0.2rem 0.55rem',
+                                    borderRadius: '6px'
+                                  }}
+                                  title="Ustaning portfoliosiga o‘tish"
+                                >
+                                  <Award size={12} /> {matchedCraftsman.name}
+                                </a>
+                              ) : (
+                                <span style={{ color: 'var(--text-light)', fontSize: '0.78rem' }}>— Biriktirilmagan</span>
+                              )}
+                            </td>
+
+                            {/* Price & Discount */}
+                            <td style={{ padding: '0.75rem 0.85rem' }}>
+                              {hasDiscount ? (
+                                <div>
+                                  <div style={{ fontWeight: 800, color: '#dc2626' }}>
+                                    {Number(p.discount_price).toLocaleString()} so‘m
+                                  </div>
+                                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                    {Number(p.price).toLocaleString()} so‘m
+                                  </div>
+                                </div>
+                              ) : (
+                                <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                                  {Number(p.price).toLocaleString()} so‘m
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Stock */}
+                            <td style={{ padding: '0.75rem 0.85rem', fontSize: '0.82rem' }}>
+                              {p.stock ?? 10} dona
+                            </td>
+
+                            {/* Status */}
+                            <td style={{ padding: '0.75rem 0.85rem' }}>
+                              <span className={`badge ${p.is_published !== false ? 'badge-stock' : 'badge-discount'}`}>
+                                {p.is_published !== false ? 'Faol' : 'Yashirilgan'}
+                              </span>
+                            </td>
+
+                            {/* Actions */}
+                            <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                              <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => { setEditingProduct(p); setProductModalOpen(true); }}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ padding: '0.35rem 0.55rem' }}
+                                  title="Tahrirlash"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProduct(p.id)}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ padding: '0.35rem 0.55rem', color: '#ef4444' }}
+                                  title="O‘chirish"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB: DISCOUNTS & SPECIAL OFFERS */}
         {activeTab === 'discounts' && (
@@ -3485,12 +4015,45 @@ export const AdminDashboard = () => {
                 <input type="text" required name="name" defaultValue={editingProduct?.name || ''} className="form-input" />
               </div>
               <div className="form-group">
-                <label className="form-label">Tegishli Mebel Do‘koni *</label>
-                <select name="store_id" defaultValue={editingProduct?.store_id || stores[0]?.id} className="form-select">
-                  {stores.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name} ({s.address})</option>
+                <label className="form-label">
+                  Tegishli Mebel Do‘koni * {user?.store_id && <span style={{ color: 'var(--wood-amber)' }}>(Do‘koningiz avtomatik biriktirilgan)</span>}
+                </label>
+                {user?.store_id ? (
+                  <div>
+                    <input
+                      type="text"
+                      disabled
+                      value={stores.find((s) => s.id === user.store_id)?.name || "Do‘koningiz"}
+                      className="form-input"
+                      style={{ opacity: 0.85, backgroundColor: 'var(--bg-secondary)' }}
+                    />
+                    <input type="hidden" name="store_id" value={user.store_id} />
+                  </div>
+                ) : (
+                  <select name="store_id" defaultValue={editingProduct?.store_id || stores[0]?.id} className="form-select">
+                    {stores.map((s) => (
+                      <option key={s.id} value={s.id}>🏪 {s.name} ({s.address})</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Yasagan Usta (Ustaning shaxsiy portfoliosi uchun)</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Ixtiyoriy</span>
+                </label>
+                <select name="craftsman_id" defaultValue={editingProduct?.craftsman_id || 'NONE'} className="form-select">
+                  <option value="NONE">— Biriktirilmagan (Umumiy do‘kon mahsuloti)</option>
+                  {craftsmen.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      🔨 {c.name} {c.store_name ? `(${c.store_name})` : '(Mustaqil / Free)'}
+                    </option>
                   ))}
                 </select>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                  Usta tanlansa, ushbu mebel e‘loni ustaning shaxsiy profilida va portfolio sahifasida avtomatik ko‘rinadi.
+                </div>
               </div>
               <div className="dashboard-form-row">
                 <div className="form-group">
@@ -4300,6 +4863,126 @@ export const AdminDashboard = () => {
                   style={{ flex: 1.2, fontWeight: 750 }}
                 >
                   Tasdiqlash & Joylash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* HOMEPAGE SECTION EDIT MODAL (SUPER ADMIN FULL CONTROL) */}
+      {sectionModalOpen && editingSection && (
+        <div className="modal-overlay" onClick={() => setSectionModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '580px', padding: '2rem', borderRadius: '22px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+              <div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  SUPER ADMIN • BO‘LIMNI TAHRIRLASH
+                </span>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0 0', color: 'var(--text-main)' }}>
+                  {editingSection.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSectionModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSectionForm}>
+              <div className="form-group">
+                <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
+                <input
+                  type="text"
+                  required
+                  name="title"
+                  defaultValue={editingSection.title || ''}
+                  placeholder="Masalan: Explore Shoe Racks yoki Bayramona Chegirmalar"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
+                <textarea
+                  rows={2}
+                  name="subtitle"
+                  defaultValue={editingSection.subtitle || ''}
+                  placeholder="Bo‘lim haqidagi qo‘shimcha yozuv yoki reklama shiori..."
+                  className="form-textarea"
+                />
+              </div>
+
+              <div className="dashboard-form-row">
+                <div className="form-group">
+                  <label className="form-label">Aksiya Nishoni (Badge)</label>
+                  <input
+                    type="text"
+                    name="badge"
+                    defaultValue={editingSection.badge || ''}
+                    placeholder="Masalan: NEW, -50%, SALE, EDITORIAL"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Tugma / Bo‘lim Havolasi (Link)</label>
+                  <input
+                    type="text"
+                    name="link"
+                    defaultValue={editingSection.link || ''}
+                    placeholder="/furniture?category=cat-living"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <ImageUploadField
+                label="Afisha yoki Banner Rasmi (Ixtiyoriy)"
+                name="banner_image"
+                value={editingSection.banner_image || ''}
+                folder="banners"
+                placeholder="https://... yoki faylni tanlab yuklang"
+                helperText="Banner yoki vitrina bo‘limlari uchun rasm havolasi (Supabase-ga yuklanadi)."
+              />
+
+              <div style={{ padding: '0.85rem 1rem', borderRadius: '12px', backgroundColor: 'var(--bg-secondary)', marginBottom: '1.25rem', border: '1px solid var(--border-subtle)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    defaultChecked={editingSection.is_active !== false}
+                    style={{ width: '18px', height: '18px', accentColor: '#0071e3' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                      Ushbu bo‘lim bosh sahifada ko‘rinsin (Faol holat)
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Belgini olib tashlasangiz, bo‘lim sayt bosh sahifasidan vaqtincha yashiriladi.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setSectionModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.7rem 1.25rem' }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ padding: '0.7rem 1.5rem', backgroundColor: '#0071e3', borderColor: '#0071e3', fontWeight: 700 }}
+                >
+                  Saqlash va Saytda Yangilash
                 </button>
               </div>
             </form>

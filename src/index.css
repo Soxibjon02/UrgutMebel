@@ -1921,3 +1921,168 @@ select:-webkit-autofill:focus {
   background-color: var(--bg-card) !important;
   border-color: var(--border-subtle) !important;
 }
+
+/* ==========================================================================
+   APPLE CUPERTINO DESIGN SYSTEM (Cards, Pills, Frosted Glass, Typography)
+   ========================================================================== */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  letter-spacing: -0.012em;
+}
+
+h1, h2, h3, h4, .apple-heading {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+/* Apple Frosted Glass Card */
+.apple-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .apple-card {
+  background: rgba(28, 28, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .apple-card:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+
+/* Apple Pill Buttons */
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 980px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-btn:active {
+  transform: scale(0.97);
+}
+
+.apple-btn-primary {
+  background-color: #0071e3;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.28);
+}
+
+.apple-btn-primary:hover {
+  background-color: #0077ed;
+  box-shadow: 0 6px 20px rgba(0, 113, 227, 0.38);
+}
+
+.apple-btn-secondary {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-main) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.apple-btn-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .apple-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff !important;
+}
+
+/* Apple Segmented Controls */
+.apple-segment-control {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background-color: rgba(118, 118, 128, 0.12);
+  border-radius: 980px;
+  gap: 2px;
+}
+
+.apple-segment-item {
+  padding: 0.45rem 1rem;
+  border-radius: 980px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.apple-segment-item.active {
+  background-color: #ffffff;
+  color: #1d1d1f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .apple-segment-control {
+  background-color: rgba(118, 118, 128, 0.24);
+}
+
+[data-theme="dark"] .apple-segment-item.active {
+  background-color: #636366;
+  color: #ffffff;
+}
+
+/* Apple Badges */
+.apple-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 980px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.apple-badge-green {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.apple-badge-red {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.apple-badge-orange {
+  background-color: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+
+.apple-badge-blue {
+  background-color: rgba(0, 113, 227, 0.1);
+  color: #0071e3;
+  border: 1px solid rgba(0, 113, 227, 0.2);
+}
+

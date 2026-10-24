@@ -675,6 +675,119 @@ export const CraftsmanDashboard = () => {
                 </div>
               </div>
 
+              {/* Interactive Calendar Date Status Manager (Apple Cupertino Style) */}
+              <div className="form-group" style={{ marginBottom: '1.75rem', backgroundColor: 'var(--bg-secondary)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, margin: 0, fontSize: '0.95rem' }}>
+                      📅 14 Kunlik Bandlik Kalendari (Sana ustiga bosib holatini o‘zgartiring):
+                    </label>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                      Har bir kun ustiga bosganingizda: 🟢 Bo‘sh ➔ 🔴 Band ➔ 🟠 Noaniq tartibida aylanadi
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newDates = {};
+                        for (let i = 0; i < 14; i++) {
+                          const d = new Date();
+                          d.setDate(d.getDate() + i);
+                          newDates[d.toISOString().split('T')[0]] = 'available';
+                        }
+                        setScheduleForm((prev) => ({ ...prev, dates: newDates }));
+                      }}
+                      style={{ fontSize: '0.72rem', padding: '0.25rem 0.55rem', borderRadius: '8px', border: '1px solid #16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                      Barchasi Bo‘sh 🟢
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        setScheduleForm((prev) => ({
+                          ...prev,
+                          dates: { ...(prev.dates || {}), [todayStr]: 'busy' }
+                        }));
+                      }}
+                      style={{ fontSize: '0.72rem', padding: '0.25rem 0.55rem', borderRadius: '8px', border: '1px solid #dc2626', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                      Bugun Band 🔴
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(64px, 1fr))', gap: '0.5rem' }}>
+                  {(() => {
+                    const days = [];
+                    const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Juma', 'Shan'];
+                    const today = new Date();
+                    for (let i = 0; i < 14; i++) {
+                      const d = new Date();
+                      d.setDate(today.getDate() + i);
+                      const dateStr = d.toISOString().split('T')[0];
+                      const dayName = dayNames[d.getDay()];
+                      const dayNum = d.getDate();
+                      const status = scheduleForm.dates?.[dateStr] || (i === 0 ? scheduleForm.status : 'available');
+                      days.push({ dateStr, dayName, dayNum, status, isToday: i === 0 });
+                    }
+                    return days.map((d) => {
+                      const isAvail = d.status === 'available';
+                      const isBusy = d.status === 'busy';
+                      const color = isAvail ? '#34c759' : isBusy ? '#ff3b30' : '#ff9500';
+                      const bgColor = isAvail ? 'rgba(52, 199, 89, 0.14)' : isBusy ? 'rgba(255, 59, 48, 0.14)' : 'rgba(255, 149, 0, 0.14)';
+                      const statusName = isAvail ? 'Bo‘sh' : isBusy ? 'Band' : 'Noaniq';
+
+                      return (
+                        <button
+                          key={d.dateStr}
+                          type="button"
+                          onClick={() => {
+                            let nextStatus = 'busy';
+                            if (d.status === 'available') nextStatus = 'busy';
+                            else if (d.status === 'busy') nextStatus = 'tentative';
+                            else nextStatus = 'available';
+
+                            setScheduleForm((prev) => ({
+                              ...prev,
+                              dates: {
+                                ...(prev.dates || {}),
+                                [d.dateStr]: nextStatus
+                              }
+                            }));
+                          }}
+                          style={{
+                            backgroundColor: bgColor,
+                            border: d.isToday ? `2px solid ${color}` : `1px solid ${color}44`,
+                            borderRadius: '12px',
+                            padding: '0.65rem 0.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            userSelect: 'none'
+                          }}
+                        >
+                          {d.isToday && (
+                            <span style={{ fontSize: '0.55rem', fontWeight: 800, color: color, textTransform: 'uppercase' }}>
+                              Bugun
+                            </span>
+                          )}
+                          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>{d.dayName}</span>
+                          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: '1px 0' }}>{d.dayNum}</span>
+                          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: color }}>
+                            {statusName}
+                          </span>
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
               {/* Working Hours & Days */}
               <div className="dashboard-form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                 <div className="form-group">
