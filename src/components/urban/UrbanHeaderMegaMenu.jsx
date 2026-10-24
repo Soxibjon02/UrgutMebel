@@ -169,7 +169,7 @@ export const UrbanHeaderMegaMenu = () => {
     >
       {/* Upper Main Bar: Logo, Search, Action Icons */}
       <div
-        className="container"
+        className="container urban-header-main-container"
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
@@ -186,12 +186,13 @@ export const UrbanHeaderMegaMenu = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.65rem',
+            gap: '0.55rem',
             textDecoration: 'none',
             flexShrink: 0
           }}
         >
           <div
+            className="urban-header-logo-icon"
             style={{
               width: '36px',
               height: '36px',
@@ -210,6 +211,7 @@ export const UrbanHeaderMegaMenu = () => {
           </div>
           <div>
             <div
+              className="urban-header-logo-title"
               style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: '1.25rem',
@@ -222,6 +224,7 @@ export const UrbanHeaderMegaMenu = () => {
               Urgut Mebel
             </div>
             <div
+              className="urban-header-logo-sub"
               style={{
                 fontSize: '0.62rem',
                 color: 'var(--figma-coral, #FA6D58)',
@@ -235,7 +238,7 @@ export const UrbanHeaderMegaMenu = () => {
           </div>
         </Link>
 
-        {/* Large Urban Search Bar */}
+        {/* Large Urban Search Bar (Desktop only) */}
         <form
           onSubmit={handleSearch}
           className="urban-desktop-search"
@@ -288,8 +291,8 @@ export const UrbanHeaderMegaMenu = () => {
         </form>
 
         {/* Action Icons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
-          {/* Language Switcher */}
+        <div className="urban-action-icons" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
+          {/* Language Switcher (Desktop) */}
           <div className="urban-desktop-only">
             <LanguageSwitcher />
           </div>
@@ -298,6 +301,7 @@ export const UrbanHeaderMegaMenu = () => {
           <button
             type="button"
             onClick={toggleTheme}
+            className="urban-theme-btn"
             style={{
               width: '36px',
               height: '36px',
@@ -315,24 +319,14 @@ export const UrbanHeaderMegaMenu = () => {
             {isDark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
-          {/* Track order */}
+          {/* Track order (Desktop only) */}
           <Link
             to="/account?tab=orders"
-            className="urban-header-icon-link"
+            className="urban-header-icon-link urban-desktop-only"
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'var(--text-main)' }}
           >
             <Truck size={19} />
-            <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Buyurtma</span>
-          </Link>
-
-          {/* Mobile Store Locator Icon */}
-          <Link
-            to="/stores"
-            className="urban-mobile-store-icon"
-            style={{ display: 'none', color: 'var(--text-main)', textDecoration: 'none' }}
-            aria-label="Do'konlar"
-          >
-            <MapPin size={21} />
+            <span className="urban-icon-label" style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Buyurtma</span>
           </Link>
 
           {/* Wishlist */}
@@ -403,6 +397,7 @@ export const UrbanHeaderMegaMenu = () => {
               <button
                 type="button"
                 onClick={() => openAuthModal('login')}
+                className="urban-header-icon-link"
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -419,6 +414,7 @@ export const UrbanHeaderMegaMenu = () => {
             ) : (
               <Link
                 to={profilePath}
+                className="urban-header-icon-link"
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'var(--text-main)' }}
               >
                 <User size={20} color="var(--figma-coral, #FA6D58)" />
@@ -439,7 +435,8 @@ export const UrbanHeaderMegaMenu = () => {
               background: 'none',
               border: 'none',
               color: 'var(--text-main)',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              padding: '4px'
             }}
             aria-label="Menyu"
           >
@@ -876,6 +873,49 @@ export const UrbanHeaderMegaMenu = () => {
               </Link>
             );
           })}
+
+          {/* Additional mobile utility links */}
+          <div style={{ marginTop: '0.75rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <Link
+              to="/account?tab=orders"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                color: 'var(--text-main)',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                padding: '0.35rem 0.5rem'
+              }}
+            >
+              <Truck size={18} color="var(--figma-coral, #FA6D58)" />
+              <span>Buyurtmani kuzatish</span>
+            </Link>
+
+            <Link
+              to="/stores"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.65rem',
+                color: 'var(--text-main)',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                padding: '0.35rem 0.5rem'
+              }}
+            >
+              <MapPin size={18} color="var(--figma-coral, #FA6D58)" />
+              <span>Showroomlar xaritasi</span>
+            </Link>
+
+            <div style={{ padding: '0.5rem 0.5rem 0' }}>
+              <LanguageSwitcher />
+            </div>
+          </div>
         </div>
       )}
 
@@ -898,11 +938,43 @@ export const UrbanHeaderMegaMenu = () => {
           transform: translateX(4px);
         }
         @media (max-width: 992px) {
-          .urban-desktop-search, .urban-desktop-only, .urban-icon-label {
+          .urban-header-main-container {
+            padding: 0.55rem 0.75rem !important;
+            gap: 0.4rem !important;
+          }
+          .urban-action-icons {
+            gap: 0.45rem !important;
+          }
+          .urban-desktop-search,
+          .urban-desktop-only,
+          .urban-icon-label,
+          .urban-mobile-store-icon {
             display: none !important;
           }
-          .urban-mobile-search-row, .urban-mobile-store-icon, .urban-mobile-menu-btn {
+          .urban-theme-btn {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .urban-header-logo-icon {
+            width: 30px !important;
+            height: 30px !important;
+            font-size: 1rem !important;
+          }
+          .urban-header-logo-title {
+            font-size: 1.05rem !important;
+          }
+          .urban-header-logo-sub {
+            font-size: 0.52rem !important;
+          }
+          .urban-mobile-search-row {
             display: block !important;
+            padding: 0 0.75rem 0.65rem !important;
+          }
+          .urban-mobile-menu-btn {
+            display: flex !important;
+            align-items: center;
+            justifyContent: center;
+            padding: 4px !important;
           }
           .urban-megamenu-nav-row {
             display: block !important;
