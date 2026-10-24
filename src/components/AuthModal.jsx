@@ -55,22 +55,6 @@ export const AuthModal = () => {
     setLoading(false);
   };
 
-  const setDemoCredentials = (type) => {
-    if (type === 'admin') {
-      setEmail('soxibgaybullayev439@gmail.com');
-      setPassword('s0x1bj0n$02$');
-    } else if (type === 'manager') {
-      setEmail('manager@urgutmebel.uz');
-      setPassword('manager12345');
-    } else if (type === 'craftsman') {
-      setEmail('usta@urgutmebel.uz');
-      setPassword('usta12345');
-    } else {
-      setEmail('sherzod@gmail.com');
-      setPassword('customer123');
-    }
-  };
-
   return (
     <div className="modal-overlay" onClick={closeAuthModal}>
       <div
@@ -289,48 +273,6 @@ export const AuthModal = () => {
             <ArrowRight size={18} />
           </button>
         </form>
-
-        {isLoginMode && (
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)' }}>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-light)', marginBottom: '0.6rem', textAlign: 'center' }}>
-              {t('auth.fast_demo_login', 'Sinov uchun tezkor kirish:')}
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('customer')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
-              >
-                {t('auth.demo_customer', 'Mijoz')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('craftsman')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
-              >
-                {t('auth.demo_craftsman', 'Usta')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('manager')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
-              >
-                {t('auth.demo_manager', 'Menedjer')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('admin')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.72rem', padding: '0.45rem 0.2rem' }}
-              >
-                {t('auth.demo_admin', 'Admin')}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

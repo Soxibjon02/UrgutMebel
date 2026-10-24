@@ -303,34 +303,17 @@ export const UrbanMegaFooter = () => {
           </div>
         </div>
 
-        {/* Copyright & Direct Admin Links */}
+        {/* Copyright */}
         <div
           style={{
             paddingTop: '1.25rem',
             borderTop: '1px solid #e7ded5',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
+            textAlign: 'center',
             fontSize: '0.78rem',
             color: '#9ca3af'
           }}
         >
-          <div>&copy; 2012-2026 URGUT MEBEL MARKAZI. Barcha huquqlar himoyalangan.</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link to="/admin" style={{ color: '#6b7280', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-              🔒 Super Admin
-            </Link>
-            <span style={{ color: '#d1d5db' }}>•</span>
-            <Link to="/manager" style={{ color: '#6b7280', textDecoration: 'none', fontWeight: 600 }}>
-              👔 Do‘kon Menedjeri
-            </Link>
-            <span style={{ color: '#d1d5db' }}>•</span>
-            <Link to="/craftsman-dashboard" style={{ color: '#6b7280', textDecoration: 'none', fontWeight: 600 }}>
-              🔨 Usta Kabineti
-            </Link>
-          </div>
+          &copy; 2012-2026 URGUT MEBEL MARKAZI. Barcha huquqlar himoyalangan.
         </div>
       </div>
 

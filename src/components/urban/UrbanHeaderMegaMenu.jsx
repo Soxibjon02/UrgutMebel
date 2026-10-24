@@ -27,7 +27,8 @@ export const UrbanHeaderMegaMenu = () => {
   const navigate = useNavigate();
   const { totalItemsCount } = useCart();
   const { favoritesCount } = useWishlist();
-  const { user, isGuest, openAuthModal } = useAuth();
+  const { user, isGuest, isAdmin, isManager, isCraftsman, openAuthModal } = useAuth();
+  const profilePath = isAdmin ? '/admin' : isManager ? '/manager' : isCraftsman ? '/craftsman-dashboard' : '/account';
   const { t } = useLanguage();
   const { isDark, toggleTheme } = useSettings();
 
@@ -318,7 +319,7 @@ export const UrbanHeaderMegaMenu = () => {
               </button>
             ) : (
               <Link
-                to="/account"
+                to={profilePath}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'var(--text-main)' }}
               >
                 <User size={20} color="var(--figma-coral, #FA6D58)" />

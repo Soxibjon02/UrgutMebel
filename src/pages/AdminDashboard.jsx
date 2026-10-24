@@ -1261,6 +1261,33 @@ export const AdminDashboard = () => {
     );
   };
 
+  // Security Auth Guard: only Super Admin can view the dashboard
+  if (!user || !isAdmin) {
+    return (
+      <div style={{ padding: '6rem 1rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)' }}>
+        <div className="apple-card" style={{ maxWidth: '460px', width: '100%', padding: '2.5rem 2rem', textAlign: 'center' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(250, 109, 88, 0.12)', color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <Shield size={32} />
+          </div>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+            Super Admin Ruxsati Talab Qilinadi
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '1.75rem' }}>
+            Ushbu boshqaruv paneli faqat tizim ma’muri uchun mo‘ljallangan. O‘z elektron pochta va parolingiz orqali tizimga kiring.
+          </p>
+          <button
+            type="button"
+            onClick={() => openAuthModal('login', 'Admin panelga kirish uchun Super Admin hisobingizga kiring')}
+            className="apple-btn apple-btn-primary"
+            style={{ width: '100%', padding: '0.85rem' }}
+          >
+            Tizimga Kirish
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-layout">
 
