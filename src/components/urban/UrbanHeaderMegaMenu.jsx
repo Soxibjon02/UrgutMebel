@@ -587,15 +587,17 @@ export const UrbanHeaderMegaMenu = () => {
                     }}
                     className="urban-megamenu-item"
                   >
-                    <span>{cat.label}</span>
+                    <span className="urban-nav-label">{cat.label}</span>
                     <span
+                      className="urban-nav-badge"
                       style={{
                         fontSize: '0.65rem',
                         fontWeight: 800,
                         backgroundColor: '#0071e3',
                         color: '#ffffff',
                         padding: '0.1rem 0.45rem',
-                        borderRadius: '980px'
+                        borderRadius: '980px',
+                        lineHeight: 1
                       }}
                     >
                       {cat.badge}
@@ -628,9 +630,10 @@ export const UrbanHeaderMegaMenu = () => {
                         style={{ marginTop: '-1px' }}
                       />
                     )}
-                    <span>{cat.label}</span>
+                    <span className="urban-nav-label">{cat.label}</span>
                     {cat.badge && (
                       <span
+                        className="urban-nav-badge"
                         style={{
                           fontSize: '0.62rem',
                           fontWeight: 800,
@@ -911,6 +914,7 @@ export const UrbanHeaderMegaMenu = () => {
                 </div>
                 {cat.badge && (
                   <span
+                    className="urban-nav-badge"
                     style={{
                       fontSize: '0.68rem',
                       fontWeight: 800,
@@ -992,6 +996,20 @@ export const UrbanHeaderMegaMenu = () => {
           color: var(--figma-coral, #FA6D58) !important;
           background-color: rgba(250, 109, 88, 0.08) !important;
           transform: translateY(-1px);
+        }
+        .urban-megamenu-item:hover .urban-nav-label,
+        .urban-megamenu-item:hover > span:not(.urban-nav-badge) {
+          color: var(--figma-coral, #FA6D58) !important;
+        }
+        .urban-nav-badge,
+        .urban-nav-badge span,
+        .urban-megamenu-item .urban-nav-badge,
+        .urban-megamenu-item:hover .urban-nav-badge,
+        .urban-megamenu-item .urban-nav-badge span,
+        .urban-megamenu-item:hover .urban-nav-badge span,
+        .urban-megamenu-item .urban-nav-badge svg,
+        .urban-megamenu-item:hover .urban-nav-badge svg {
+          color: #ffffff !important;
         }
         .urban-section-jump-btn:hover {
           color: var(--figma-coral, #FA6D58) !important;

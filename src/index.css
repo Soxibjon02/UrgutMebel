@@ -2279,8 +2279,19 @@ h1, h2, h3, h4, .apple-heading {
   background-color: rgba(250, 109, 88, 0.08) !important;
   border-radius: 8px;
 }
-.urban-megamenu-item:hover span {
+.urban-megamenu-item:hover .urban-nav-label,
+.urban-megamenu-item:hover > span:not(.urban-nav-badge) {
   color: var(--figma-coral, #FA6D58) !important;
+}
+.urban-nav-badge,
+.urban-nav-badge span,
+.urban-megamenu-item .urban-nav-badge,
+.urban-megamenu-item:hover .urban-nav-badge,
+.urban-megamenu-item .urban-nav-badge span,
+.urban-megamenu-item:hover .urban-nav-badge span,
+.urban-megamenu-item .urban-nav-badge svg,
+.urban-megamenu-item:hover .urban-nav-badge svg {
+  color: #ffffff !important;
 }
 
 /* Footer Links & Buttons Hover Effects */
