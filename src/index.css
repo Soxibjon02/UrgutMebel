@@ -2314,4 +2314,60 @@ h1, h2, h3, h4, .apple-heading {
   display: block !important;
 }
 
+/* Universal Modal Backdrop & Apple-Card Modal */
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 17, 23, 0.72) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  overflow-y: auto !important;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content.apple-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45) !important;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes modalScaleIn {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.custom-modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+}
+.custom-modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-modal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 999px;
+}
+.custom-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+
 

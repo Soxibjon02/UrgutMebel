@@ -99,6 +99,9 @@ export const AdminDashboard = () => {
   const [collections, setCollections] = useState(() => getStored('collections', initialCollections));
   const [collectionModalOpen, setCollectionModalOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState(null);
+  const [collectionDisplayType, setCollectionDisplayType] = useState('grid');
+  const [collectionSlideImages, setCollectionSlideImages] = useState([]);
+  const [newSlideInput, setNewSlideInput] = useState('');
   const [assignProductsModalOpen, setAssignProductsModalOpen] = useState(false);
   const [selectedColForProducts, setSelectedColForProducts] = useState(null);
   const [colProductSearch, setColProductSearch] = useState('');
@@ -782,11 +785,21 @@ export const AdminDashboard = () => {
   // ==========================================
   const handleOpenAddCollection = () => {
     setEditingCollection(null);
+    setCollectionDisplayType('grid');
+    setCollectionSlideImages([]);
+    setNewSlideInput('');
     setCollectionModalOpen(true);
   };
 
   const handleOpenEditCollection = (col) => {
     setEditingCollection({ ...col });
+    setCollectionDisplayType(col.display_type || (col.is_slider || col.has_slideshow ? 'slider' : 'grid'));
+    setCollectionSlideImages(
+      Array.isArray(col.slide_images) && col.slide_images.length > 0
+        ? [...col.slide_images]
+        : (col.cover_image ? [col.cover_image] : [])
+    );
+    setNewSlideInput('');
     setCollectionModalOpen(true);
   };
 
@@ -798,16 +811,28 @@ export const AdminDashboard = () => {
       addToast("Kolleksiya nomini kiriting!", 'warning');
       return;
     }
+    const cover_image = form.cover_image?.value?.trim() || editingCollection?.cover_image || (collectionSlideImages[0] || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80');
+
+    // Ensure slide_images has at least cover image if in slider mode
+    let finalSlides = [...collectionSlideImages];
+    if (collectionDisplayType === 'slider' && finalSlides.length === 0 && cover_image) {
+      finalSlides.push(cover_image);
+    }
+
     const colData = {
       ...(editingCollection || {}),
       title,
       slug: form.slug.value.trim() || editingCollection?.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       subtitle: form.subtitle?.value?.trim() || '',
       badge: form.badge?.value?.trim() || '',
-      cover_image: form.cover_image?.value?.trim() || editingCollection?.cover_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+      cover_image,
       description: form.description?.value?.trim() || '',
       display_order: Number(form.display_order?.value) || 0,
       is_active: form.is_active ? form.is_active.checked : true,
+      display_type: collectionDisplayType,
+      is_slider: collectionDisplayType === 'slider',
+      has_slideshow: collectionDisplayType === 'slider',
+      slide_images: finalSlides,
       product_ids: Array.isArray(editingCollection?.product_ids) ? editingCollection.product_ids : []
     };
 
@@ -2914,6 +2939,15 @@ export const AdminDashboard = () => {
                         {col.badge && (
                           <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'var(--gold-gradient)', color: '#fff', fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.65rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                             {col.badge}
+                          </div>
+                        )}
+                        {col.is_slider || col.display_type === 'slider' || col.has_slideshow ? (
+                          <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '0.22rem 0.6rem', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.25rem', boxShadow: '0 2px 6px rgba(99,102,241,0.4)' }}>
+                            🎠 Slayder
+                          </div>
+                        ) : (
+                          <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.22rem 0.55rem', borderRadius: '4px' }}>
+                            📦 Katalog
                           </div>
                         )}
                         <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -5244,152 +5278,420 @@ export const AdminDashboard = () => {
 
       {/* MODAL: CREATE / EDIT COLLECTION */}
       {collectionModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content apple-card" style={{ maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Sparkles size={20} style={{ color: 'var(--wood-amber)' }} />
-                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>
+        <div className="modal-backdrop" onClick={() => setCollectionModalOpen(false)}>
+          <div
+            className="modal-content apple-card custom-modal-scroll"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '740px',
+              width: '95%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: '24px',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
+              boxShadow: '0 25px 70px rgba(0, 0, 0, 0.45)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Modal Sticky Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1.25rem 1.75rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                backgroundColor: 'var(--bg-card)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--wood-amber)', fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>
+                  <Sparkles size={13} /> SUPER ADMIN • MEBEL KOLLEKSIYALARI
+                </div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
                   {editingCollection ? 'Kolleksiyani Tahrirlash' : 'Yangi Kolleksiya Yaratish'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setCollectionModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                title="Yopish"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveCollection}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                <div>
-                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    Kolleksiya Nomi <span style={{ color: '#ef4444' }}>*</span>
+            {/* Modal Scrollable Body */}
+            <form onSubmit={handleSaveCollection} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div
+                className="custom-modal-scroll"
+                style={{
+                  padding: '1.5rem 1.75rem',
+                  overflowY: 'auto',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem'
+                }}
+              >
+                {/* 1. Format Switcher: Grid vs Slide */}
+                <div style={{ padding: '1rem', borderRadius: '16px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-main)' }}>
+                    <Layers size={16} style={{ color: 'var(--figma-coral, #FA6D58)' }} />
+                    Kolleksiya Formati va Ko‘rinish Turi <span style={{ color: '#ef4444' }}>*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="title"
-                    required
-                    defaultValue={editingCollection?.title || ''}
-                    placeholder="Masalan: Atmos Kolleksiyasi"
-                    className="form-input"
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    Slug (URL identifikatori)
-                  </label>
-                  <input
-                    type="text"
-                    name="slug"
-                    defaultValue={editingCollection?.slug || ''}
-                    placeholder="Masalan: atmos-collection"
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                <div>
-                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    Kichik Sarlavha (Subtitle)
-                  </label>
-                  <input
-                    type="text"
-                    name="subtitle"
-                    defaultValue={editingCollection?.subtitle || ''}
-                    placeholder="Masalan: Shinam va zamonaviy interyer to‘plami"
-                    className="form-input"
-                  />
-                </div>
-
-                <div>
-                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    Yorliq (Badge)
-                  </label>
-                  <input
-                    type="text"
-                    name="badge"
-                    defaultValue={editingCollection?.badge || ''}
-                    placeholder="Masalan: THE NEW ATMOS, 2026 TREND"
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '1rem' }}>
-                <ImageUploadField
-                  label="Kolleksiya Asosiy Muqova Rasmi (Cover Image)"
-                  name="cover_image"
-                  defaultValue={editingCollection?.cover_image || ''}
-                  folder="collections"
-                  placeholder="https://... yoki kompyuterdan fayl tanlang"
-                  helperText="Kolleksiyalar sahifasida va bosh sahifa kartalarida aks etadigan yuqori sifatli banner rasmi."
-                />
-              </div>
-
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                  Kolleksiya Tavsifi
-                </label>
-                <textarea
-                  name="description"
-                  rows={3}
-                  defaultValue={editingCollection?.description || ''}
-                  placeholder="Ushbu to‘plam haqida mijozlar uchun jozibador qisqacha ma’lumot..."
-                  className="form-input"
-                  style={{ resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-                <div>
-                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    Tartib Raqami (Display Order)
-                  </label>
-                  <input
-                    type="number"
-                    name="display_order"
-                    defaultValue={editingCollection?.display_order || 0}
-                    className="form-input"
-                  />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
-                    <input
-                      type="checkbox"
-                      name="is_active"
-                      defaultChecked={editingCollection?.is_active !== false}
-                      style={{ width: '18px', height: '18px', accentColor: 'var(--wood-amber)' }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                        Kolleksiya saytda ko‘rinsin (Faol)
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                    {/* Option: Grid */}
+                    <div
+                      onClick={() => setCollectionDisplayType('grid')}
+                      style={{
+                        padding: '0.9rem 1rem',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        border: collectionDisplayType === 'grid' ? '2px solid var(--figma-coral, #FA6D58)' : '1px solid var(--border-subtle)',
+                        backgroundColor: collectionDisplayType === 'grid' ? 'rgba(250, 109, 88, 0.08)' : 'var(--bg-card)',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '8px',
+                          backgroundColor: collectionDisplayType === 'grid' ? 'var(--figma-coral, #FA6D58)' : 'rgba(0,0,0,0.06)',
+                          color: collectionDisplayType === 'grid' ? '#fff' : 'var(--text-muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                      >
+                        <Package size={17} />
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Belgini olsangiz, foydalanuvchilardan yashiriladi
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                          📦 Standart Katalog (Grid)
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                          Mebellar qatorli kartalar ko‘rinishida ketma-ket chiqadi
+                        </div>
                       </div>
                     </div>
+
+                    {/* Option: Slide */}
+                    <div
+                      onClick={() => setCollectionDisplayType('slider')}
+                      style={{
+                        padding: '0.9rem 1rem',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        border: collectionDisplayType === 'slider' ? '2px solid #8b5cf6' : '1px solid var(--border-subtle)',
+                        backgroundColor: collectionDisplayType === 'slider' ? 'rgba(139, 92, 246, 0.08)' : 'var(--bg-card)',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '8px',
+                          backgroundColor: collectionDisplayType === 'slider' ? '#8b5cf6' : 'rgba(0,0,0,0.06)',
+                          color: collectionDisplayType === 'slider' ? '#fff' : 'var(--text-muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                      >
+                        <Sparkles size={17} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                          🎠 Slayd / Karusel Formati
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                          Interaktiv avtomatik aylanuvchi fotoslayder bo‘lib aks etadi
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Slide Images Manager (Visible only when slider is selected) */}
+                {collectionDisplayType === 'slider' && (
+                  <div style={{ padding: '1.15rem', borderRadius: '16px', background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.25)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#8b5cf6', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <ImageIcon size={16} /> Kolleksiya Slayd Rasmlari ({collectionSlideImages.length})
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Kamida 1 ta rasm tavsiya etiladi
+                      </span>
+                    </div>
+
+                    {/* Thumbnails grid */}
+                    {collectionSlideImages.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(115px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                        {collectionSlideImages.map((imgUrl, sIdx) => (
+                          <div
+                            key={sIdx}
+                            style={{
+                              position: 'relative',
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              height: '75px',
+                              border: '1px solid var(--border-subtle)',
+                              boxShadow: 'var(--shadow-sm)'
+                            }}
+                          >
+                            <img src={imgUrl} alt={`slide-${sIdx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <span style={{ position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '0.68rem', fontWeight: 800, padding: '1px 5px', borderRadius: '4px' }}>
+                              #{sIdx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setCollectionSlideImages(collectionSlideImages.filter((_, i) => i !== sIdx))}
+                              style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '50%',
+                                backgroundColor: 'rgba(239, 68, 68, 0.9)',
+                                color: '#fff',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 0
+                              }}
+                              title="O‘chirish"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add slide image input */}
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: '220px' }}>
+                        <ImageUploadField
+                          label="Yangi Slayd Rasmi Tanlash / Yuklash"
+                          value={newSlideInput}
+                          onChange={(val) => setNewSlideInput(val)}
+                          folder="collection_slides"
+                          placeholder="Rasm URL havolasi yoki kompyuterdan fayl..."
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        disabled={!newSlideInput.trim()}
+                        onClick={() => {
+                          if (newSlideInput.trim()) {
+                            setCollectionSlideImages([...collectionSlideImages, newSlideInput.trim()]);
+                            setNewSlideInput('');
+                          }
+                        }}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: '0.65rem 1.1rem',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          gap: '0.35rem',
+                          height: '42px',
+                          marginBottom: '0.1rem',
+                          backgroundColor: newSlideInput.trim() ? '#8b5cf6' : 'var(--bg-secondary)',
+                          color: newSlideInput.trim() ? '#fff' : 'var(--text-muted)',
+                          borderColor: newSlideInput.trim() ? '#8b5cf6' : 'var(--border-subtle)',
+                          cursor: newSlideInput.trim() ? 'pointer' : 'not-allowed'
+                        }}
+                      >
+                        <Plus size={15} /> Slayd Qo‘shish
+                      </button>
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.55rem' }}>
+                      💡 <em>Eslatma: Agar qo‘shimcha slayd qo‘shilmasa, ushbu to‘plamga biriktirilgan mebellarning rasmlari avtomatik slayd qilib olinadi.</em>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Core Information Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Kolleksiya Nomi <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      required
+                      defaultValue={editingCollection?.title || ''}
+                      placeholder="Masalan: Autumn Exclusive Collection"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Slug (URL identifikatori)
+                    </label>
+                    <input
+                      type="text"
+                      name="slug"
+                      defaultValue={editingCollection?.slug || ''}
+                      placeholder="Masalan: autumn-collection"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Kichik Sarlavha (Subtitle)
+                    </label>
+                    <input
+                      type="text"
+                      name="subtitle"
+                      defaultValue={editingCollection?.subtitle || ''}
+                      placeholder="Masalan: Kuzgi issiqlik, sokinlik va shinamlik"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Yorliq (Badge)
+                    </label>
+                    <input
+                      type="text"
+                      name="badge"
+                      defaultValue={editingCollection?.badge || ''}
+                      placeholder="Masalan: SEASONAL, NEW 2026, LUXURY"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Cover Image */}
+                <div>
+                  <ImageUploadField
+                    label="Kolleksiya Asosiy Muqova Rasmi (Cover Image)"
+                    name="cover_image"
+                    defaultValue={editingCollection?.cover_image || ''}
+                    folder="collections"
+                    placeholder="https://... yoki kompyuterdan fayl tanlang"
+                    helperText="Kolleksiyalar sahifasida, kartalarda va afishalarda asosiy qilib ko‘rsatiladigan banner rasmi."
+                  />
+                </div>
+
+                {/* 5. Description */}
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Kolleksiya Tavsifi
                   </label>
+                  <textarea
+                    name="description"
+                    rows={3}
+                    defaultValue={editingCollection?.description || ''}
+                    placeholder="Ushbu mebel to‘plami haqida mijozlar uchun jozibador qisqacha ma’lumot..."
+                    className="form-input"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                {/* 6. Display Order & Is Active */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Tartib Raqami (Display Order)
+                    </label>
+                    <input
+                      type="number"
+                      name="display_order"
+                      defaultValue={editingCollection?.display_order || 0}
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', padding: '0.85rem 1rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', margin: 0, width: '100%' }}>
+                      <input
+                        type="checkbox"
+                        name="is_active"
+                        defaultChecked={editingCollection?.is_active !== false}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--figma-coral, #FA6D58)' }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main)' }}>
+                          Kolleksiya saytda ko‘rinsin (Faol)
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          Belgini olsangiz, tashrif buyuruvchilardan yashiriladi
+                        </div>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem' }}>
+              {/* Modal Sticky Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  padding: '1.1rem 1.75rem',
+                  borderTop: '1px solid var(--border-subtle)',
+                  backgroundColor: 'var(--bg-card)'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setCollectionModalOpen(false)}
                   className="btn btn-secondary"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '10px' }}
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ fontWeight: 700 }}
+                  style={{
+                    padding: '0.65rem 1.5rem',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    boxShadow: '0 4px 14px rgba(250, 109, 88, 0.35)'
+                  }}
                 >
                   <Check size={16} /> Saqlash va Saytda Yangilash
                 </button>
@@ -5401,8 +5703,12 @@ export const AdminDashboard = () => {
 
       {/* MODAL: ASSIGN PRODUCTS TO COLLECTION */}
       {assignProductsModalOpen && selectedColForProducts && (
-        <div className="modal-backdrop">
-          <div className="modal-content apple-card" style={{ maxWidth: '820px', width: '95%', maxHeight: '88vh', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
+        <div className="modal-backdrop" onClick={() => setAssignProductsModalOpen(false)}>
+          <div
+            className="modal-content apple-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '820px', width: '95%', maxHeight: '88vh', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}
+          >
             {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
               <div>

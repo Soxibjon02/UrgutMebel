@@ -191,10 +191,33 @@ export const CollectionsPage = () => {
                     </Link>
                   </div>
 
-                  {/* Autumn Collection special interactive slideshow */}
-                  {col.id === 'col-autumn' && (
+                  {/* Interactive Slideshow / Carousel if collection is configured as slider */}
+                  {(col.is_slider || col.display_type === 'slider' || col.has_slideshow || col.id === 'col-autumn') && (
                     <div style={{ marginBottom: '2.5rem' }}>
-                      <FigmaCollectionCarousel title="Autumn Collection Maxsus Slayder" />
+                      <FigmaCollectionCarousel
+                        title={`${col.title} Slayderi`}
+                        slides={
+                          Array.isArray(col.slide_images) && col.slide_images.length > 0
+                            ? col.slide_images.map((img, sIdx) => ({
+                                id: sIdx + 1,
+                                title: `${col.title} #${sIdx + 1}`,
+                                subtitle: col.subtitle || col.description || 'Eksklyuziv mebel to‘plami',
+                                badge: col.badge || String(sIdx + 1).padStart(2, '0'),
+                                image: typeof img === 'string' ? img : (img.image || img.image_url),
+                                category: col.badge || 'Kolleksiya'
+                              }))
+                            : colProducts.length > 0
+                              ? colProducts.map((p, pIdx) => ({
+                                  id: p.id,
+                                  title: p.name,
+                                  subtitle: p.category_name || col.title,
+                                  badge: p.badge || (p.discount ? `${p.discount}% CHEGIRMA` : String(pIdx + 1).padStart(2, '0')),
+                                  image: p.images?.[0] || p.image || col.cover_image,
+                                  category: p.room_type || 'Mebel'
+                                }))
+                              : null
+                        }
+                      />
                     </div>
                   )}
 
