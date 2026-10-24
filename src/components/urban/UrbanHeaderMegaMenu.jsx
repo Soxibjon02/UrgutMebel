@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
   Heart,
@@ -19,7 +19,8 @@ import {
   Flame,
   Grid,
   Compass,
-  ArrowUpRight
+  ArrowUpRight,
+  Home
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -30,6 +31,7 @@ import { LanguageSwitcher } from '../LanguageSwitcher';
 
 export const UrbanHeaderMegaMenu = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { totalItemsCount } = useCart();
   const { favoritesCount } = useWishlist();
   const { user, isGuest, isAdmin, isManager, isCraftsman, openAuthModal } = useAuth();
@@ -49,8 +51,9 @@ export const UrbanHeaderMegaMenu = () => {
     }
   };
 
-  // Nav categories in top bar
+  // Nav categories in top bar (Asosiy is first)
   const navCategories = [
+    { id: 'home', label: 'Asosiy', icon: Home, link: '/' },
     { id: 'custom-order', label: 'Maxsus Buyurtma', badge: '✨ Buyurtma', link: '/custom-order' },
     { id: 'craftsmen', label: 'Ustalar', badge: '🔨 Ustalar', link: '/craftsmen' },
     { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', link: '/furniture?filter=discount' },
@@ -515,6 +518,7 @@ export const UrbanHeaderMegaMenu = () => {
         >
           {navCategories.map((cat) => {
             const isSections = cat.id === 'sections';
+            const isHomeActive = cat.id === 'home' && location.pathname === '/';
 
             return (
               <div
@@ -571,16 +575,25 @@ export const UrbanHeaderMegaMenu = () => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.35rem',
-                      padding: '0.75rem 0.5rem',
+                      padding: '0.75rem 0.55rem',
                       fontSize: '0.84rem',
-                      fontWeight: 600,
-                      color: 'var(--text-main)',
+                      fontWeight: isHomeActive ? 750 : 600,
+                      color: isHomeActive ? 'var(--figma-coral, #FA6D58)' : 'var(--text-main)',
+                      backgroundColor: isHomeActive ? 'rgba(250, 109, 88, 0.08)' : 'transparent',
+                      borderRadius: '8px',
                       textDecoration: 'none',
                       transition: 'all 0.2s ease',
                       position: 'relative'
                     }}
                     className="urban-megamenu-item"
                   >
+                    {cat.icon && (
+                      <cat.icon
+                        size={15}
+                        color={isHomeActive ? 'var(--figma-coral, #FA6D58)' : 'currentColor'}
+                        style={{ marginTop: '-1px' }}
+                      />
+                    )}
                     <span>{cat.label}</span>
                     {cat.badge && (
                       <span
@@ -817,39 +830,52 @@ export const UrbanHeaderMegaMenu = () => {
             gap: '0.85rem'
           }}
         >
-          {navCategories.map((cat) => (
-            <Link
-              key={cat.id}
-              to={cat.link || `/furniture?category=${cat.id}`}
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                color: 'var(--text-main)',
-                textDecoration: 'none',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                padding: '0.4rem 0'
-              }}
-            >
-              <span>{cat.label}</span>
-              {cat.badge && (
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    backgroundColor: 'var(--figma-coral, #FA6D58)',
-                    color: '#ffffff',
-                    padding: '0.15rem 0.5rem',
-                    borderRadius: '4px'
-                  }}
-                >
-                  {cat.badge}
-                </span>
-              )}
-            </Link>
-          ))}
+          {navCategories.map((cat) => {
+            const isHomeActive = cat.id === 'home' && location.pathname === '/';
+            return (
+              <Link
+                key={cat.id}
+                to={cat.link || `/furniture?category=${cat.id}`}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  color: isHomeActive ? 'var(--figma-coral, #FA6D58)' : 'var(--text-main)',
+                  textDecoration: 'none',
+                  fontSize: '0.95rem',
+                  fontWeight: isHomeActive ? 750 : 600,
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: '8px',
+                  backgroundColor: isHomeActive ? 'rgba(250, 109, 88, 0.08)' : 'transparent'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {cat.icon && (
+                    <cat.icon
+                      size={17}
+                      color={isHomeActive ? 'var(--figma-coral, #FA6D58)' : 'currentColor'}
+                    />
+                  )}
+                  <span>{cat.label}</span>
+                </div>
+                {cat.badge && (
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      backgroundColor: 'var(--figma-coral, #FA6D58)',
+                      color: '#ffffff',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    {cat.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </div>
       )}
 
