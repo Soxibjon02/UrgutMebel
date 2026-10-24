@@ -683,19 +683,15 @@ export const FurnitureCatalog = () => {
       {/* ==============================================================
           1. DYNAMIC CATEGORY HERO BANNER (Adapted to the active section)
           ============================================================== */}
-      <section style={{ padding: '2rem 1.25rem 2.5rem' }}>
+      <section className="catalog-hero-section">
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
           <div className="figma-split-hero" style={{ borderRadius: '16px', overflow: 'hidden' }}>
             
             {/* Left: Slideshow with tailored background */}
             <div
+              className="catalog-hero-slideshow-col"
               style={{
                 backgroundColor: bannerConfig.leftBg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2.5rem',
-                minHeight: '340px',
                 position: 'relative',
                 overflow: 'hidden'
               }}
@@ -710,76 +706,36 @@ export const FurnitureCatalog = () => {
 
             {/* Right: Info Card with Dynamic Badge & Title */}
             <div
+              className="catalog-hero-info-col"
               style={{
                 backgroundColor: bannerConfig.rightBg,
-                padding: '3.5rem 3rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
                 position: 'relative'
               }}
             >
-              {/* Dynamic Badge */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '2rem',
-                  right: '2rem',
-                  minWidth: '60px',
-                  height: '60px',
-                  padding: '0 10px',
-                  borderRadius: '30px',
-                  backgroundColor: bannerConfig.badgeBg,
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
-                }}
-              >
-                {bannerConfig.badgeText}
+              {/* Dynamic Meta Header Row: Tag on left, Badge on right (never overlaps!) */}
+              <div className="catalog-hero-meta-row">
+                <span
+                  className="catalog-hero-tag"
+                  style={{ color: bannerConfig.tagColor }}
+                >
+                  {bannerConfig.tagText}
+                </span>
+
+                {bannerConfig.badgeText && (
+                  <span
+                    className="catalog-hero-badge"
+                    style={{ backgroundColor: bannerConfig.badgeBg }}
+                  >
+                    {bannerConfig.badgeText}
+                  </span>
+                )}
               </div>
 
-              <span
-                style={{
-                  color: bannerConfig.tagColor,
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.12em',
-                  marginBottom: '0.75rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem'
-                }}
-              >
-                {bannerConfig.tagText}
-              </span>
-
-              <h1
-                style={{
-                  fontSize: 'clamp(2rem, 3.6vw, 2.8rem)',
-                  fontWeight: 800,
-                  color: 'var(--text-main)',
-                  lineHeight: 1.2,
-                  margin: '0 0 1rem'
-                }}
-              >
+              <h1 className="catalog-hero-title">
                 {bannerConfig.title}
               </h1>
 
-              <p
-                style={{
-                  color: 'var(--text-muted)',
-                  fontSize: '0.95rem',
-                  lineHeight: 1.6,
-                  maxWidth: '440px',
-                  marginBottom: '1.75rem'
-                }}
-              >
+              <p className="catalog-hero-desc">
                 {bannerConfig.desc}
               </p>
 
@@ -793,15 +749,7 @@ export const FurnitureCatalog = () => {
                     window.scrollTo({ top: 550, behavior: 'smooth' });
                   }
                 }}
-                className="btn-figma-coral"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.8rem 1.6rem',
-                  borderRadius: '980px',
-                  fontWeight: 700
-                }}
+                className="btn-figma-coral catalog-hero-btn"
               >
                 <span>{bannerConfig.btnText}</span>
                 <span>&gt;</span>

@@ -124,6 +124,7 @@ export const HeaderAfishaSlideshow = ({
   // Image mode (masalan, Chairs & Stools, Sofas & Armchairs, Help Center)
   return (
     <div
+      className="header-afisha-slideshow"
       style={{
         position: 'relative',
         width: '100%',
