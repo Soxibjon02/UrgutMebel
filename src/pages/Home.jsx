@@ -9,6 +9,7 @@ import { UrbanShopTheLook } from '../components/UrbanShopTheLook';
 import { UrbanCategoryQuickPills } from '../components/urban/UrbanCategoryQuickPills';
 import { UrbanBankOffersBar } from '../components/urban/UrbanBankOffersBar';
 import { UrbanAtmosHero } from '../components/urban/UrbanAtmosHero';
+import { UrbanTop10Trending } from '../components/urban/UrbanTop10Trending';
 import { UrbanProductRow } from '../components/urban/UrbanProductRow';
 import { UrbanNewArrivalsTiles } from '../components/urban/UrbanNewArrivalsTiles';
 import { UrbanDealZone } from '../components/urban/UrbanDealZone';
@@ -55,7 +56,15 @@ export const Home = () => {
   const [searchParams] = useSearchParams();
   const [quickBuyProduct, setQuickBuyProduct] = useState(null);
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
-  const [sections, setSections] = useState(() => getStored('home_sections', DEFAULT_HOME_SECTIONS));
+  const [sections, setSections] = useState(() => {
+    const stored = getStored('home_sections', null);
+    if (stored && Array.isArray(stored) && stored.length > 0) {
+      const storedIds = new Set(stored.map(s => s.id));
+      const missingDefaults = DEFAULT_HOME_SECTIONS.filter(d => !storedIds.has(d.id));
+      return [...stored, ...missingDefaults].sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999));
+    }
+    return DEFAULT_HOME_SECTIONS;
+  });
 
   // Auto-scroll to section if URL has ?section=id or #id
   useEffect(() => {
@@ -123,6 +132,17 @@ export const Home = () => {
         return <UrbanBankOffersBar key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
       case 'atmos_hero':
         return <UrbanAtmosHero key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+      case 'top_10_trending':
+      case 'trending':
+        return (
+          <UrbanTop10Trending
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            onQuickBuy={handleOpenQuickBuy}
+          />
+        );
       case 'shoe_racks':
         return (
           <UrbanProductRow

@@ -155,7 +155,8 @@ export const DEFAULT_HOME_SECTIONS = [
   { id: 'hero_slider', name: 'Asosiy Katta Slayder (Hero Fiesta)', category: 'banner', order: 2, is_active: true, title: 'FullHouse Fiesta 2026', subtitle: 'Eng sara mebellar to‘plami va qulay narxlar', badge: 'UP TO 50% OFF' },
   { id: 'bank_offers', name: 'To‘lov va Bank Aksiyalari Qatori', category: 'offers', order: 3, is_active: true, title: 'Payment & Bank Offers', subtitle: 'Uzum, Anor, Payme va Humo kartalari orqali muddatli to‘lov' },
   { id: 'atmos_hero', name: 'ATMOS 4-in-1 Vitrina Kolleksiyasi', category: 'showcase', order: 4, is_active: true, title: 'The New ATMOS Collection', subtitle: '4 xil zamonaviy uslubdagi premium interyer to‘plamlari', badge: 'NEW ATMOS' },
-  { id: 'shoe_racks', name: 'Poyafzal Javonlari Mahsulotlar Qatori', category: 'products', order: 5, is_active: true, title: 'Explore Shoe Racks', subtitle: 'Kompakt va keng sig‘imli poyafzal shkaflari', link: '/furniture?category=cat-wardrobe' },
+  { id: 'top_10_trending', name: 'Top 10 Trend Mebellari Reytingi', category: 'trending', order: 5, is_active: true, title: 'Top 10 Trend Mebellari', subtitle: 'Eng xaridorgir va yuqori baholangan sara mebellar reytingi', badge: 'TOP 10 TREND' },
+  { id: 'shoe_racks', name: 'Poyafzal Javonlari Mahsulotlar Qatori', category: 'products', order: 6, is_active: true, title: 'Explore Shoe Racks', subtitle: 'Kompakt va keng sig‘imli poyafzal shkaflari', link: '/furniture?category=cat-wardrobe' },
   { id: 'new_arrivals', name: 'Yangi Kelganlar (3 ta Plitka)', category: 'tiles', order: 6, is_active: true, title: 'New Arrivals 2026', subtitle: 'Beds, Sofas & Dining Sets yangi mavsum modellari', badge: 'NEW' },
   { id: 'deal_zone', name: 'Qaynoq Chegirmalar Zonasi (Deal Zone)', category: 'deals', order: 7, is_active: true, title: 'Deal Zone', subtitle: '1M dan past mahsulotlar, Ombordan sotuv va Dekorlar', badge: 'DEALS' },
   { id: 'top_categories', name: 'Top Toifalar va Gidravlik Karavot Vitrinasi', category: 'curated', order: 8, is_active: true, title: 'Top Categories Curated', subtitle: 'Gidravlik karavotlar va mashhur toifalar' },
@@ -471,28 +472,48 @@ export const dataService = {
 
   // Products
   async getProducts() {
+    let prods = [];
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('products').select('*');
-        if (!error && Array.isArray(data)) {
-          setStored('products', data, false);
-          return data;
+        if (!error && Array.isArray(data) && data.length > 0) {
+          prods = data;
         }
       } catch (e) {
         console.warn('Supabase getProducts error:', e);
       }
     }
-    const stored = getStored('products', initialProducts);
-    if (Array.isArray(stored) && stored.length > 0) {
-      const storedIds = new Set(stored.map((p) => p.id));
-      const missing = initialProducts.filter((p) => !storedIds.has(p.id));
-      if (missing.length > 0) {
-        const merged = [...stored, ...missing];
-        setStored('products', merged, false);
-        return merged;
+    if (prods.length === 0) {
+      const stored = getStored('products', initialProducts);
+      if (Array.isArray(stored) && stored.length > 0) {
+        const storedIds = new Set(stored.map((p) => p.id));
+        const missing = initialProducts.filter((p) => !storedIds.has(p.id));
+        prods = missing.length > 0 ? [...stored, ...missing] : stored;
+      } else {
+        prods = initialProducts;
       }
     }
-    return stored;
+
+    // Preserve and enrich with trending rank from trending_ids
+    const trendingIds = this.getTrendingProductIds();
+    const enriched = prods.map((p) => {
+      const rankIdx = trendingIds.indexOf(p.id);
+      if (rankIdx !== -1) {
+        return {
+          ...p,
+          is_trending: true,
+          trending_rank: rankIdx + 1
+        };
+      }
+      return {
+        ...p,
+        is_trending: false,
+        trending_rank: null
+      };
+    });
+
+    setStored('products', enriched, false);
+    return enriched;
   },
 
   async getProductById(id) {
@@ -725,30 +746,30 @@ export const dataService = {
     return updated;
   },
 
-  // Top 10 Trending Products
-  async getTrendingTop10() {
-    const products = await this.getProducts();
-    // Prioritize products marked is_trending sorted by trending_rank or rating
-    const trending = products
-      .filter((p) => p.is_trending || p.trending_rank)
-      .sort((a, b) => (Number(a.trending_rank) || 99) - (Number(b.trending_rank) || 99));
-
-    if (trending.length >= 10) {
-      return trending.slice(0, 10);
+  // Top 10 Trending Products Persistence & Ordering
+  getTrendingProductIds() {
+    let ids = getStored('trending_ids', null);
+    if (!Array.isArray(ids) || ids.length === 0) {
+      const all = getStored('products', initialProducts);
+      const defaults = all.filter(p => p.is_trending).map(p => p.id);
+      if (defaults.length >= 5) {
+        ids = defaults.slice(0, 10);
+      } else {
+        ids = all.slice(0, 10).map(p => p.id);
+      }
+      setStored('trending_ids', ids, false);
     }
-
-    // If less than 10 marked, fill with highest rated products
-    const otherProducts = products
-      .filter((p) => !trending.some((t) => t.id === p.id))
-      .sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
-
-    return [...trending, ...otherProducts].slice(0, 10);
+    return ids;
   },
 
-  async updateTrendingRanking(orderedProductIds) {
+  async setTrendingProductIds(orderedIds) {
+    const validIds = Array.isArray(orderedIds) ? orderedIds.slice(0, 10) : [];
+    setStored('trending_ids', validIds, true);
+
+    // Sync is_trending and trending_rank in products store
     const products = getStored('products', initialProducts);
     const updated = products.map((p) => {
-      const rankIdx = orderedProductIds.indexOf(p.id);
+      const rankIdx = validIds.indexOf(p.id);
       if (rankIdx !== -1) {
         return {
           ...p,
@@ -758,11 +779,54 @@ export const dataService = {
       }
       return {
         ...p,
+        is_trending: false,
         trending_rank: null
       };
     });
     setStored('products', updated, true);
+    window.dispatchEvent(new CustomEvent('urgut_store_trending_updated', { detail: validIds }));
     return updated;
+  },
+
+  async getTrendingTop10() {
+    const products = await this.getProducts();
+    const trendingIds = this.getTrendingProductIds();
+    
+    // Map in exact ordered sequence
+    const matched = [];
+    for (const id of trendingIds) {
+      const found = products.find(p => p.id === id);
+      if (found) {
+        matched.push({
+          ...found,
+          is_trending: true,
+          trending_rank: matched.length + 1
+        });
+      }
+    }
+
+    // If less than 10, fill up to 10 from available products
+    if (matched.length < 10) {
+      const remaining = products.filter(p => !matched.some(m => m.id === p.id));
+      for (const p of remaining) {
+        if (matched.length >= 10) break;
+        matched.push({
+          ...p,
+          is_trending: true,
+          trending_rank: matched.length + 1
+        });
+      }
+    }
+
+    return matched.slice(0, 10);
+  },
+
+  async updateTrendingRanking(input) {
+    let ids = [];
+    if (Array.isArray(input)) {
+      ids = input.map(item => (typeof item === 'string' ? item : item?.id)).filter(Boolean);
+    }
+    return this.setTrendingProductIds(ids);
   },
 
   // Craftsmen

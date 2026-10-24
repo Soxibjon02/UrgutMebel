@@ -112,6 +112,8 @@ export const AdminDashboard = () => {
   const [productCategoryFilter, setProductCategoryFilter] = useState('ALL');
   const [productSearch, setProductSearch] = useState('');
   const [productStoreFilter, setProductStoreFilter] = useState('ALL');
+  const [trendingSearch, setTrendingSearch] = useState('');
+  const [trendingCategoryFilter, setTrendingCategoryFilter] = useState('ALL');
 
   // Modals & Forms
   const [storeModalOpen, setStoreModalOpen] = useState(false);
@@ -715,40 +717,48 @@ export const AdminDashboard = () => {
   // TOP 10 TRENDING MANAGEMENT HANDLERS
   // ==========================================
   const handleMoveTrending = async (index, direction) => {
-    const trendingProducts = [...products]
-      .filter(p => p.is_trending)
-      .sort((a, b) => (Number(a.trending_rank) || 999) - (Number(b.trending_rank) || 999));
-
+    const trendingIds = [...dataService.getTrendingProductIds()];
     const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= trendingProducts.length) return;
+    if (targetIndex < 0 || targetIndex >= trendingIds.length) return;
 
-    // Swap ranks
-    const tempRank = trendingProducts[index].trending_rank;
-    trendingProducts[index].trending_rank = trendingProducts[targetIndex].trending_rank;
-    trendingProducts[targetIndex].trending_rank = tempRank;
-
-    const rankUpdates = trendingProducts.map((p, idx) => ({
-      id: p.id,
-      trending_rank: idx + 1
-    }));
+    // Swap elements in trendingIds array
+    const [moved] = trendingIds.splice(index, 1);
+    trendingIds.splice(targetIndex, 0, moved);
 
     addToast("Top 10 tartibi yangilanmoqda...", 'info');
-    const updated = await dataService.updateTrendingRanking(rankUpdates);
+    const updated = await dataService.setTrendingProductIds(trendingIds);
     setProducts(updated);
     addToast("Top 10 reyting tartibi muvaffaqiyatli saqlandi!", 'success');
   };
 
   const handleToggleTrending = async (product) => {
-    const isNowTrending = !product.is_trending;
-    const currentTrendingCount = products.filter(p => p.is_trending).length;
-    const updatedProd = {
-      ...product,
-      is_trending: isNowTrending,
-      trending_rank: isNowTrending ? currentTrendingCount + 1 : null
-    };
-    addToast(isNowTrending ? "Mebel Top 10 Trendga qo'shildi!" : "Mebel Top 10 Trenddan chiqarildi", 'info');
-    const updated = await dataService.saveProduct(updatedProd);
+    let trendingIds = [...dataService.getTrendingProductIds()];
+    const exists = trendingIds.includes(product.id);
+    if (exists) {
+      trendingIds = trendingIds.filter(id => id !== product.id);
+      addToast(`"${product.name}" Top 10 Trenddan chiqarildi`, 'info');
+    } else {
+      if (trendingIds.length >= 10) {
+        addToast("Top 10 ro‘yxati to‘lgan (maksimal 10 ta). Avval birortasini chiqaring.", 'warning');
+        return;
+      }
+      trendingIds.push(product.id);
+      addToast(`"${product.name}" Top 10 Trendga qo‘shildi!`, 'success');
+    }
+    const updated = await dataService.setTrendingProductIds(trendingIds);
     setProducts(updated);
+  };
+
+  const handleAutoFillTrending = async () => {
+    // Select top 10 best rated / highest products
+    const top10Ids = [...products]
+      .sort((a, b) => (Number(b.rating) || 5) - (Number(a.rating) || 5))
+      .slice(0, 10)
+      .map(p => p.id);
+    addToast("10 ta sara mebel Top 10 Trendga biriktirilmoqda...", 'info');
+    const updated = await dataService.setTrendingProductIds(top10Ids);
+    setProducts(updated);
+    addToast("10 ta eng sara mebellar Top 10 Trendga muvaffaqiyatli kiritildi!", 'success');
   };
 
   // Categories CRUD
@@ -1103,7 +1113,7 @@ export const AdminDashboard = () => {
     { id: 'home_sections', label: `Bo‘limlar Boshqaruvi (${homeSections.length})`, shortLabel: `Bo‘limlar (${homeSections.length})`, icon: SlidersHorizontal },
     { id: 'products', label: `Mebellar & E‘lonlar (${products.length})`, shortLabel: `E‘lonlar (${products.length})`, icon: Package },
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
-    { id: 'trending', label: `Top 10 Trend (${products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
+    { id: 'trending', label: `Top 10 Trend (${dataService.getTrendingProductIds().length || products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
     { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
     { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
@@ -2101,209 +2111,307 @@ export const AdminDashboard = () => {
         )}
 
         {/* TAB: TOP 10 TREND MEBELLAR BOSHQARUVI */}
-        {activeTab === 'trending' && (
-          <div>
-            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.4rem' }}>
-                  <Trophy size={14} /> SUPER ADMIN • TRENDING REYT沢NG
+        {activeTab === 'trending' && (() => {
+          const trendingIds = dataService.getTrendingProductIds();
+          const trendingList = trendingIds
+            .map((id) => products.find((p) => p.id === id))
+            .filter(Boolean);
+
+          const nonTrendingProducts = products
+            .filter((p) => !trendingIds.includes(p.id))
+            .filter((p) => {
+              const matchesCat = trendingCategoryFilter === 'ALL' || p.category === trendingCategoryFilter;
+              const matchesSearch = !trendingSearch.trim() ||
+                p.name?.toLowerCase().includes(trendingSearch.toLowerCase()) ||
+                (p.store_name && p.store_name.toLowerCase().includes(trendingSearch.toLowerCase()));
+              return matchesCat && matchesSearch;
+            });
+
+          return (
+            <div>
+              <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                    <Trophy size={14} /> SUPER ADMIN • TRENDING REYTING
+                  </div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Top 10 Trend Mebellari Boshqaruvi</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '750px' }}>
+                    Bosh sahifadagi eng ko‘p ko‘riladigan Top 10 Trend mebellar reytingini boshqaring. O‘rinlarni Yuqoriga/Pastga surish orqali tartiblang yoki yangi mebellarni trendga qo‘shing.
+                  </p>
                 </div>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Top 10 Trend Mebellari Boshqaruvi</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '750px' }}>
-                  Bosh sahifadagi eng ko‘p ko‘riladigan Top 10 Trend mebellar reytingini boshqaring. O‘rinlarni Yuqoriga/Pastga surish orqali tartiblang yoki yangi mebellarni trendga qo‘shing.
-                </p>
+
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleAutoFillTrending}
+                    className="btn btn-secondary btn-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                    title="Eng yuqori reytingli 10 ta mebelni avtomatik tanlash"
+                  >
+                    <Sparkles size={14} color="#f59e0b" /> Avto-To‘ldirish (Top 10)
+                  </button>
+                  <a
+                    href="/#top-10-trending"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontWeight: 700 }}
+                  >
+                    <ExternalLink size={14} /> Bosh Sahifada Ko‘rish
+                  </a>
+                </div>
               </div>
-            </div>
 
-            {/* Active Top 10 Ranking List */}
-            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)', marginBottom: '2.5rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Trophy size={18} color="#f59e0b" />
-                <span>Hozirgi Top 10 Trend Ro‘yxati (Bosh Sahifada Chiqadi)</span>
-              </h3>
+              {/* Active Top 10 Ranking List */}
+              <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Trophy size={18} color="#f59e0b" />
+                    <span>Hozirgi Top 10 Trend Ro‘yxati ({trendingList.length}/10)</span>
+                  </h3>
+                  <span style={{ fontSize: '0.82rem', padding: '0.2rem 0.65rem', borderRadius: '12px', background: trendingList.length === 10 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: trendingList.length === 10 ? '#16a34a' : '#d97706', fontWeight: 700 }}>
+                    {trendingList.length === 10 ? '✓ Top 10 To‘liq shakllangan' : `${trendingList.length} ta mebel kiritilgan (Maks: 10)`}
+                  </span>
+                </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {products
-                  .filter((p) => p.is_trending)
-                  .sort((a, b) => (Number(a.trending_rank) || 999) - (Number(b.trending_rank) || 999))
-                  .slice(0, 10)
-                  .map((p, idx) => {
-                    const rank = idx + 1;
-                    const isGold = rank === 1;
-                    const isSilver = rank === 2;
-                    const isBronze = rank === 3;
-                    const effectivePrice = p.discount_price || p.price;
+                {trendingList.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--border-subtle)' }}>
+                    <Trophy size={48} color="#f59e0b" style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
+                    <h4 style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.5rem' }}>Top 10 Trend Ro‘yxati Hozircha Bo‘sh</h4>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '520px', margin: '0 auto 1.5rem' }}>
+                      Bosh sahifada Top 10 reytingini ko‘rsatish uchun pastdagi katalogdan mebellarni "+ Trendga Qo‘shish" orqali tanlang yoki tizimdagi eng sara 10 ta mebelni bir marta bosish orqali kiritish uchun quyidagi tugmani bosing.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleAutoFillTrending}
+                      className="btn btn-primary"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+                    >
+                      <Sparkles size={16} /> 10 ta Eng Sara Mebellarni Avtomatik Kiritish
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {trendingList.map((p, idx) => {
+                      const rank = idx + 1;
+                      const isGold = rank === 1;
+                      const isSilver = rank === 2;
+                      const isBronze = rank === 3;
+                      const effectivePrice = p.discount_price || p.price;
 
-                    return (
-                      <div
-                        key={p.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '1rem',
-                          padding: '0.85rem 1.25rem',
-                          borderRadius: '10px',
-                          backgroundColor: 'var(--bg-card)',
-                          border: isGold ? '2px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-subtle)',
-                          boxShadow: isGold ? '0 4px 15px rgba(245, 158, 11, 0.1)' : 'none',
-                          flexWrap: 'wrap'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '240px' }}>
-                          {/* Rank Medal */}
-                          <div
-                            style={{
-                              width: '38px',
-                              height: '38px',
-                              borderRadius: '8px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 900,
-                              fontSize: '1rem',
-                              flexShrink: 0,
-                              background: isGold
-                                ? 'linear-gradient(135deg, #F59E0B, #D97706)'
-                                : isSilver
-                                ? 'linear-gradient(135deg, #94A3B8, #64748B)'
-                                : isBronze
-                                ? 'linear-gradient(135deg, #B45309, #78350F)'
-                                : 'var(--bg-secondary)',
-                              color: isGold || isSilver || isBronze ? '#ffffff' : 'var(--text-main)',
-                              boxShadow: isGold ? '0 4px 10px rgba(245, 158, 11, 0.35)' : 'none'
-                            }}
-                          >
-                            #{rank}
-                          </div>
-
-                          <img
-                            src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=150&q=80'}
-                            alt={p.name}
-                            style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }}
-                          />
-
-                          <div>
-                            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{p.name}</div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                              Do‘kon: <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{p.store_name || "Urgut Mebel Markazi"}</span>
+                      return (
+                        <div
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '1rem',
+                            padding: '0.85rem 1.25rem',
+                            borderRadius: '10px',
+                            backgroundColor: 'var(--bg-card)',
+                            border: isGold ? '2px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-subtle)',
+                            boxShadow: isGold ? '0 4px 15px rgba(245, 158, 11, 0.1)' : 'none',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '240px' }}>
+                            {/* Rank Medal */}
+                            <div
+                              style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifySelf: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                flexShrink: 0,
+                                background: isGold
+                                  ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+                                  : isSilver
+                                  ? 'linear-gradient(135deg, #94A3B8, #64748B)'
+                                  : isBronze
+                                  ? 'linear-gradient(135deg, #B45309, #78350F)'
+                                  : 'var(--bg-secondary)',
+                                color: isGold || isSilver || isBronze ? '#ffffff' : 'var(--text-main)',
+                                boxShadow: isGold ? '0 4px 10px rgba(245, 158, 11, 0.35)' : 'none'
+                              }}
+                            >
+                              #{rank}
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Rating & Price */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem' }}>
-                            <Star size={14} fill="#fbbf24" color="#fbbf24" />
-                            <span style={{ fontWeight: 800 }}>{Number(p.rating || 5.0).toFixed(1)}</span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({p.reviews_count || 12})</span>
-                          </div>
+                            <img
+                              src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=150&q=80'}
+                              alt={p.name}
+                              style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }}
+                            />
 
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 800, color: 'var(--figma-coral)', fontSize: '0.95rem' }}>
-                              {Number(effectivePrice).toLocaleString()} so‘m
-                            </div>
-                            {p.discount_price && (
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                                {Number(p.price).toLocaleString()} so‘m
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{p.name}</div>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                Do‘kon: <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{p.store_name || "Urgut Mebel Markazi"}</span>
                               </div>
-                            )}
+                            </div>
+                          </div>
+
+                          {/* Rating & Price */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem' }}>
+                              <Star size={14} fill="#fbbf24" color="#fbbf24" />
+                              <span style={{ fontWeight: 800 }}>{Number(p.rating || 5.0).toFixed(1)}</span>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({p.reviews_count || 12})</span>
+                            </div>
+
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: 800, color: 'var(--figma-coral)', fontSize: '0.95rem' }}>
+                                {Number(effectivePrice).toLocaleString()} so‘m
+                              </div>
+                              {p.discount_price && (
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                  {Number(p.price).toLocaleString()} so‘m
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Order & Remove Controls */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => handleMoveTrending(idx, -1)}
+                              className="btn btn-secondary btn-sm"
+                              title="Yuqoriga surish (o'rinni ko'tarish)"
+                              style={{ opacity: idx === 0 ? 0.35 : 1 }}
+                            >
+                              <ArrowUp size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === trendingList.length - 1}
+                              onClick={() => handleMoveTrending(idx, 1)}
+                              className="btn btn-secondary btn-sm"
+                              title="Pastga surish (o'rinni tushirish)"
+                              style={{ opacity: idx === trendingList.length - 1 ? 0.35 : 1 }}
+                            >
+                              <ArrowDown size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleTrending(p)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ color: '#ef4444' }}
+                              title="Top 10 Trenddan chiqarish"
+                            >
+                              <X size={14} /> Chiqarish
+                            </button>
                           </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-                        {/* Order & Remove Controls */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              {/* Other Products to Add to Trending */}
+              <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+                    Katalogdagi Boshqa Mebellarni Trendga Qo‘shish
+                  </h3>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    Topilgan: <strong>{nonTrendingProducts.length}</strong> ta mebel
+                  </span>
+                </div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                  Reytingi yuqori bo‘lgan mebellarni "+ Qo‘shish" tugmasini bosib yuqoridagi Top 10 ro‘yxatiga kiritishingiz mumkin.
+                </p>
+
+                {/* Filter and Search Bar */}
+                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: '1', minWidth: '220px' }}>
+                    <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                      type="text"
+                      placeholder="Mebel nomi yoki do'kon bo'yicha qidirish..."
+                      value={trendingSearch}
+                      onChange={(e) => setTrendingSearch(e.target.value)}
+                      className="form-control"
+                      style={{ paddingLeft: '36px', fontSize: '0.88rem' }}
+                    />
+                  </div>
+                  <select
+                    value={trendingCategoryFilter}
+                    onChange={(e) => setTrendingCategoryFilter(e.target.value)}
+                    className="form-control"
+                    style={{ maxWidth: '220px', fontSize: '0.88rem' }}
+                  >
+                    <option value="ALL">Barcha Kategoriyalar</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.slug || c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {nonTrendingProducts.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    Qidiruvga mos mebel topilmadi.
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                    {nonTrendingProducts.map((p) => {
+                      const isFull = trendingList.length >= 10;
+                      return (
+                        <div
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.75rem 1rem',
+                            backgroundColor: 'var(--bg-card)',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-subtle)',
+                            gap: '0.75rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                            <img
+                              src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
+                              alt=""
+                              style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'cover' }}
+                            />
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {p.name}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                ⭐ {Number(p.rating || 5.0).toFixed(1)} • {Number(p.discount_price || p.price).toLocaleString()} so‘m
+                              </div>
+                            </div>
+                          </div>
                           <button
                             type="button"
-                            disabled={idx === 0}
-                            onClick={() => handleMoveTrending(idx, -1)}
-                            className="btn btn-secondary btn-sm"
-                            title="Yuqoriga surish"
-                            style={{ opacity: idx === 0 ? 0.35 : 1 }}
-                          >
-                            <ArrowUp size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={idx === products.filter((p) => p.is_trending).length - 1}
-                            onClick={() => handleMoveTrending(idx, 1)}
-                            className="btn btn-secondary btn-sm"
-                            title="Pastga surish"
-                            style={{ opacity: idx === products.filter((p) => p.is_trending).length - 1 ? 0.35 : 1 }}
-                          >
-                            <ArrowDown size={14} />
-                          </button>
-                          <button
-                            type="button"
+                            disabled={isFull}
                             onClick={() => handleToggleTrending(p)}
                             className="btn btn-secondary btn-sm"
-                            style={{ color: '#ef4444' }}
-                            title="Trenddan chiqarish"
+                            style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', whiteSpace: 'nowrap', opacity: isFull ? 0.5 : 1 }}
+                            title={isFull ? "Top 10 ro'yxati to'lgan (10 ta)" : "Trendga qo'shish"}
                           >
-                            <X size={14} /> Chiqarish
+                            <Plus size={13} /> Qo‘shish
                           </button>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Other Products to Add to Trending */}
-            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '0.75rem' }}>
-                Katalogdagi Boshqa Mebellarni Trendga Qo‘shish
-              </h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                Reytingi yuqori bo‘lgan mebellarni "+ Trendga Qo‘shish" tugmasini bosib yuqoridagi Top 10 ro‘yxatiga kiritishingiz mumkin.
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                {products
-                  .filter((p) => !p.is_trending)
-                  .map((p) => (
-                    <div
-                      key={p.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.75rem 1rem',
-                        backgroundColor: 'var(--bg-card)',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-subtle)',
-                        gap: '0.75rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                        <img
-                          src={p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=100&q=80'}
-                          alt=""
-                          style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
-                        />
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {p.name}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            ⭐ {Number(p.rating || 4.5).toFixed(1)} • {Number(p.discount_price || p.price).toLocaleString()} so‘m
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleTrending(p)}
-                        className="btn btn-secondary btn-sm"
-                        style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', whiteSpace: 'nowrap' }}
-                      >
-                        <Plus size={13} /> Qo‘shish
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB: DISCOUNT & PLACEMENT REQUESTS (MENEDJERLAR SO'ROVLARI) */}
         {activeTab === 'discount_requests' && (
