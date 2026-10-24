@@ -43,6 +43,7 @@ import { BlogDetailPage } from './pages/BlogDetailPage';
 import { StoresPage } from './pages/StoresPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import { CollectionsPage } from './pages/CollectionsPage';
+import { WatchPage } from './pages/WatchPage';
 
 function App() {
   return (
@@ -66,6 +67,8 @@ function App() {
                         <Route path="/furniture/:id" element={<ProductDetail />} />
                         <Route path="/product/:id" element={<ProductDetail />} />
                         <Route path="/collections" element={<CollectionsPage />} />
+                        <Route path="/watch" element={<WatchPage />} />
+                        <Route path="/watch/:id" element={<WatchPage />} />
                         <Route path="/categories" element={<CategoriesPage />} />
                         <Route path="/custom-order" element={<CustomOrderPage />} />
                         <Route path="/craftsmen" element={<CraftsmenDirectory />} />

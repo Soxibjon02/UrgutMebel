@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
-import { dataService, getStored, DEFAULT_HOME_SECTIONS, sortWithDiscountsFirst } from '../services/dataService';
+import {
+  dataService,
+  getStored,
+  DEFAULT_HOME_SECTIONS,
+  sortWithDiscountsFirst,
+  INITIAL_VIDEO_REELS,
+  extractYouTubeId,
+  getYouTubeThumbnail
+} from '../services/dataService';
 import {
   initialProducts,
   initialCategories,
@@ -62,7 +70,10 @@ import {
   ToggleLeft,
   ToggleRight,
   RotateCcw,
-  Filter
+  Filter,
+  Film,
+  Play,
+  Video
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { StatusBadge } from '../components/StatusBadge';
@@ -139,6 +150,13 @@ export const AdminDashboard = () => {
   const [discountType, setDiscountType] = useState('price'); // 'price' | 'percent'
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Watch & Shop Video Reels State (YouTube Integratsiyasi)
+  const [videoReels, setVideoReels] = useState(() => getStored('video_reels', INITIAL_VIDEO_REELS));
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState(null);
+  const [videoInputUrl, setVideoInputUrl] = useState('');
+  const [videoDetectedYtId, setVideoDetectedYtId] = useState('');
 
   // Settings Form (Web Loyiha Nomi, Header & Footer o'zgartirish)
   const [settingsForm, setSettingsForm] = useState({
@@ -250,7 +268,7 @@ export const AdminDashboard = () => {
   const loadAllData = async () => {
     try {
       checkHealth();
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs, secList, colList] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs, secList, colList, vList] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
@@ -263,7 +281,8 @@ export const AdminDashboard = () => {
         dataService.getStores(),
         dataService.getDiscountRequests(),
         dataService.getHomeSections(),
-        dataService.getCollections()
+        dataService.getCollections(),
+        dataService.getVideoReels()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -278,6 +297,7 @@ export const AdminDashboard = () => {
       setDiscountRequests(dReqs || []);
       if (secList && secList.length > 0) setHomeSections(secList);
       if (colList && colList.length > 0) setCollections(colList);
+      if (vList && vList.length > 0) setVideoReels(vList);
     } catch (e) {
       console.error(e);
     }
@@ -761,6 +781,91 @@ export const AdminDashboard = () => {
     addToast("10 ta eng sara mebellar Top 10 Trendga muvaffaqiyatli kiritildi!", 'success');
   };
 
+  // ==========================================
+  // WATCH & SHOP VIDEO REELS HANDLERS (YouTube)
+  // ==========================================
+  const handleOpenVideoModal = (video = null) => {
+    setEditingVideo(video);
+    const existingUrl = video?.youtube_url || (video?.youtube_id ? `https://www.youtube.com/watch?v=${video.youtube_id}` : '');
+    setVideoInputUrl(existingUrl);
+    setVideoDetectedYtId(video?.youtube_id || extractYouTubeId(existingUrl));
+    setVideoModalOpen(true);
+  };
+
+  const handleVideoUrlChange = (val) => {
+    setVideoInputUrl(val);
+    const parsedId = extractYouTubeId(val);
+    setVideoDetectedYtId(parsedId);
+  };
+
+  const handleSaveVideoReel = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const title = form.title.value.trim();
+    const ytUrl = videoInputUrl.trim();
+    const ytId = videoDetectedYtId || extractYouTubeId(ytUrl);
+
+    if (!title) {
+      addToast('Iltimos, video sarlavhasini kiriting', 'warning');
+      return;
+    }
+    if (!ytId) {
+      addToast('Iltimos, haqiqiy YouTubedan video linkini yoki ID sini kiriting (masalan: https://www.youtube.com/watch?v=...)', 'error');
+      return;
+    }
+
+    const payload = {
+      ...(editingVideo || {}),
+      title,
+      youtube_url: ytUrl,
+      youtube_id: ytId,
+      product_id: form.product_id.value || null,
+      views: form.views.value.trim() || '15k',
+      desc: form.desc.value.trim(),
+      videoThumb: form.videoThumb?.value?.trim() || getYouTubeThumbnail(ytId, 'hqdefault'),
+      is_active: form.is_active.checked,
+      order: Number(form.order.value) || (videoReels.length + 1)
+    };
+
+    addToast('Video saqlanmoqda...', 'info');
+    const updated = await dataService.saveVideoReel(payload);
+    setVideoReels(updated);
+    setVideoModalOpen(false);
+    setEditingVideo(null);
+    addToast('Video muvaffaqiyatli saqlandi va saytga joylandi!', 'success');
+  };
+
+  const handleDeleteVideoReel = async (id) => {
+    if (!window.confirm("Haqiqatan ham ushbu videoni o‘chirmoqchimisiz?")) return;
+    const updated = await dataService.deleteVideoReel(id);
+    setVideoReels(updated);
+    addToast('Video ro‘yxatdan o‘chirildi', 'info');
+  };
+
+  const handleResetVideoReels = async () => {
+    if (!window.confirm("Barcha videolarni standart namunaviy videolarga qaytarmoqchimisiz?")) return;
+    const updated = await dataService.resetVideoReels();
+    setVideoReels(updated);
+    addToast('Videolar standart holatga qaytarildi', 'success');
+  };
+
+  const handleMoveVideoReel = async (index, direction) => {
+    const list = [...videoReels];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= list.length) return;
+
+    const [moved] = list.splice(index, 1);
+    list.splice(targetIndex, 0, moved);
+
+    const reordered = list.map((item, idx) => ({ ...item, order: idx + 1 }));
+    setVideoReels(reordered);
+
+    for (const item of reordered) {
+      await dataService.saveVideoReel(item);
+    }
+    addToast('Video tartibi muvaffaqiyatli yangilandi!', 'success');
+  };
+
   // Categories CRUD
   const handleSaveCategory = async (e) => {
     e.preventDefault();
@@ -1114,6 +1219,7 @@ export const AdminDashboard = () => {
     { id: 'products', label: `Mebellar & E‘lonlar (${products.length})`, shortLabel: `E‘lonlar (${products.length})`, icon: Package },
     { id: 'discounts', label: `Chegirmalar & Aksiyalar (${products.filter(p => Boolean(p.discount_price)).length})`, shortLabel: `Chegirmalar (${products.filter(p => Boolean(p.discount_price)).length})`, icon: DollarSign },
     { id: 'trending', label: `Top 10 Trend (${dataService.getTrendingProductIds().length || products.filter(p => p.is_trending).length})`, shortLabel: 'Top 10 Trend', icon: Trophy },
+    { id: 'video_reels', label: `Watch & Shop Videolari (${videoReels.length})`, shortLabel: `Videolar (${videoReels.length})`, icon: Film },
     { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
     { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
@@ -2412,6 +2518,244 @@ export const AdminDashboard = () => {
             </div>
           );
         })()}
+
+        {/* TAB: WATCH & SHOP VIDEO REELS BOSHQARUVI (YouTube) */}
+        {activeTab === 'video_reels' && (
+          <div>
+            <div className="dashboard-action-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', fontSize: '0.8rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  <Film size={14} /> SUPER ADMIN • WATCH & SHOP VIDEOLAR
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Watch & Shop Video Lavhalar (YouTube)</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.35rem', maxWidth: '750px' }}>
+                  Asosiy sahifadagi "Watch & Shop" bo‘limi va yangi Video Player sahifasidagi videolarni boshqaring. YouTubedan mebel videosi havolasini ulab, uni katalogdagi mebel bilan bog‘lang.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenVideoModal()}
+                  className="btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+                >
+                  <Plus size={16} /> Yangi Video Qo‘shish
+                </button>
+                <a
+                  href="/watch"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontWeight: 700 }}
+                  title="Saytda video player sahifasini ochish"
+                >
+                  <Play size={14} color="#ef4444" /> Player Sahifasini Ko‘rish
+                </a>
+                <a
+                  href="/#video_reels"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontWeight: 700 }}
+                >
+                  <ExternalLink size={14} /> Asosiy Sahifada Ko‘rish
+                </a>
+                <button
+                  type="button"
+                  onClick={handleResetVideoReels}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: 'var(--text-muted)' }}
+                  title="Standart mebel videolariga qaytarish"
+                >
+                  <RotateCcw size={14} /> Qaytarish
+                </button>
+              </div>
+            </div>
+
+            {/* Videos List Card */}
+            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Film size={18} color="#ef4444" />
+                  <span>Jami Videolar ({videoReels.length} ta)</span>
+                </h3>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Tartibni o‘zgartirish uchun Yuqoriga/Pastga tugmalaridan foydalaning
+                </span>
+              </div>
+
+              {videoReels.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--border-subtle)' }}>
+                  <Film size={48} color="var(--text-muted)" style={{ margin: '0 auto 1rem', opacity: 0.6 }} />
+                  <h4 style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.5rem' }}>Hozircha videolar mavjud emas</h4>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+                    YouTubedan mebelingizning sifatli video lavhalari linkini qo‘shing yoki namunaviy videolarni tiklang.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                    <button type="button" onClick={() => handleOpenVideoModal()} className="btn btn-primary">
+                      <Plus size={16} /> Birinchi Videoni Qo‘shish
+                    </button>
+                    <button type="button" onClick={handleResetVideoReels} className="btn btn-secondary">
+                      <RotateCcw size={16} /> Namunaviy Videolarni Qaytarish
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {videoReels.map((video, idx) => {
+                    const linkedProduct = products.find((p) => p.id === video.product_id);
+                    return (
+                      <div
+                        key={video.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '1.25rem',
+                          padding: '1rem 1.25rem',
+                          backgroundColor: 'var(--bg-card)',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-subtle)',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        {/* Left: Thumbnail & Info */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '280px', flex: 1 }}>
+                          {/* Order number */}
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'var(--bg-secondary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 800,
+                              fontSize: '0.85rem',
+                              flexShrink: 0
+                            }}
+                          >
+                            #{idx + 1}
+                          </div>
+
+                          {/* Thumbnail with play badge */}
+                          <div style={{ position: 'relative', width: '90px', height: '60px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: '#000000' }}>
+                            <img
+                              src={video.videoThumb || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=200&q=80'}
+                              alt={video.title}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Play size={16} fill="#ffffff" color="#ffffff" />
+                            </div>
+                          </div>
+
+                          {/* Title & YouTube Details */}
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 800, fontSize: '0.98rem', color: 'var(--text-main)', marginBottom: '0.2rem' }}>
+                              {video.title}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
+                                YT ID: {video.youtube_id}
+                              </span>
+                              <span>•</span>
+                              <span>👁️ {video.views || '12k'} ko‘rish</span>
+                              <span>•</span>
+                              <span style={{ color: video.is_active !== false ? '#16a34a' : '#ef4444', fontWeight: 700 }}>
+                                {video.is_active !== false ? '● Faol' : '○ Nofaol'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Middle: Connected Product */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: '220px', maxWidth: '280px', padding: '0.5rem 0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                          {linkedProduct ? (
+                            <>
+                              <img
+                                src={linkedProduct.images?.[0] || linkedProduct.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=80&q=80'}
+                                alt=""
+                                style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover' }}
+                              />
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--figma-coral)', fontWeight: 800, textTransform: 'uppercase' }}>
+                                  Biriktirilgan Mebel
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {linkedProduct.name}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                  {(linkedProduct.discount_price || linkedProduct.price)?.toLocaleString()} so‘m
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                              ⚠️ Mebel biriktirilmagan
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right: Controls & Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveVideoReel(idx, -1)}
+                            className="btn btn-secondary btn-sm"
+                            title="Yuqoriga surish"
+                            style={{ opacity: idx === 0 ? 0.35 : 1 }}
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === videoReels.length - 1}
+                            onClick={() => handleMoveVideoReel(idx, 1)}
+                            className="btn btn-secondary btn-sm"
+                            title="Pastga surish"
+                            style={{ opacity: idx === videoReels.length - 1 ? 0.35 : 1 }}
+                          >
+                            <ArrowDown size={14} />
+                          </button>
+                          <a
+                            href={`/watch/${video.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary btn-sm"
+                            title="Playerda ko‘rish"
+                          >
+                            <Play size={14} />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenVideoModal(video)}
+                            className="btn btn-secondary btn-sm"
+                            title="Tahrirlash"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteVideoReel(video.id)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ color: '#ef4444' }}
+                            title="O‘chirish"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* TAB: DISCOUNT & PLACEMENT REQUESTS (MENEDJERLAR SO'ROVLARI) */}
         {activeTab === 'discount_requests' && (
@@ -6076,6 +6420,236 @@ export const AdminDashboard = () => {
         </div>
       )}
 
+      {/* MODAL: ADD / EDIT WATCH & SHOP VIDEO (YouTube) */}
+      {videoModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            zIndex: 1000
+          }}
+          onClick={() => setVideoModalOpen(false)}
+        >
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '650px',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                  <Film size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                    {editingVideo ? 'Videoni Tahrirlash' : 'Yangi YouTube Video Qo‘shish'}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Watch & Shop bo‘limi va maxsus Video Player sahifasiga video biriktirish
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(false)}
+                className="btn btn-secondary btn-sm"
+                style={{ borderRadius: '50%', width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveVideoReel}>
+              {/* Video Title */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                  Video Sarlavhasi <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  defaultValue={editingVideo?.title || ''}
+                  placeholder="Masalan: Larsson Zamonaviy Yozuv Stoli Taqdimoti"
+                  required
+                  className="form-control"
+                  style={{ width: '100%', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              {/* YouTube URL input with live detection preview */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                  YouTube Video Havolasi (URL) yoki ID <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  value={videoInputUrl}
+                  onChange={(e) => handleVideoUrlChange(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=... yoki https://youtu.be/... yoki Shorts havolasi"
+                  required
+                  className="form-control"
+                  style={{ width: '100%', fontSize: '0.9rem' }}
+                />
+                
+                {/* Live parsed YouTube ID & Thumbnail preview */}
+                <div style={{ marginTop: '0.6rem', padding: '0.75rem', borderRadius: '8px', background: videoDetectedYtId ? 'rgba(34, 197, 94, 0.08)' : 'rgba(239, 68, 68, 0.06)', border: `1px solid ${videoDetectedYtId ? 'rgba(34, 197, 94, 0.25)' : 'rgba(239, 68, 68, 0.2)'}`, display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  {videoDetectedYtId ? (
+                    <>
+                      <img
+                        src={getYouTubeThumbnail(videoDetectedYtId, 'hqdefault')}
+                        alt="Preview"
+                        style={{ width: '64px', height: '40px', borderRadius: '6px', objectFit: 'cover' }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0, fontSize: '0.82rem' }}>
+                        <div style={{ color: '#16a34a', fontWeight: 800 }}>✓ YouTube Video Muvaffaqiyatli Aniqlondi!</div>
+                        <div style={{ color: 'var(--text-muted)' }}>Video ID: <code style={{ color: 'var(--text-main)', fontWeight: 700 }}>{videoDetectedYtId}</code></div>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      ℹ️ YouTubedagi oddiy video, Shorts yoki mobil ilovadagi "Ulashish" linkini kiritsangiz, tizim avtomatik taniydi.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Connected Product (Mahsulot bilan bog'lash) */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                  Bog‘langan Mebel (Foydalanuvchi videodan to‘g‘ridan-to‘g‘ri xarid qilishi uchun)
+                </label>
+                <select
+                  name="product_id"
+                  defaultValue={editingVideo?.product_id || ''}
+                  className="form-control"
+                  style={{ width: '100%', fontSize: '0.9rem' }}
+                >
+                  <option value="">-- Mebel tanlanmadi (Umumiy video) --</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — {(p.discount_price || p.price)?.toLocaleString()} so‘m ({p.store_name || 'Urgut Mebel'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Views and Order Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                    Ko‘rishlar soni (Matn)
+                  </label>
+                  <input
+                    type="text"
+                    name="views"
+                    defaultValue={editingVideo?.views || '24.5k'}
+                    placeholder="Masalan: 35.8k"
+                    className="form-control"
+                    style={{ width: '100%', fontSize: '0.9rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                    Tartib raqami
+                  </label>
+                  <input
+                    type="number"
+                    name="order"
+                    defaultValue={editingVideo?.order || (videoReels.length + 1)}
+                    min="1"
+                    className="form-control"
+                    style={{ width: '100%', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                  Video Tavsifi va Qisqa Izoh
+                </label>
+                <textarea
+                  name="desc"
+                  defaultValue={editingVideo?.desc || ''}
+                  placeholder="Mebel haqida xaridorlarga qiziqarli qisqa ma'lumot..."
+                  rows="3"
+                  className="form-control"
+                  style={{ width: '100%', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              {/* Custom Thumbnail URL (Optional) */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.4rem' }}>
+                  Maxsus Muqova Rasmi (Ixtiyoriy)
+                </label>
+                <input
+                  type="text"
+                  name="videoThumb"
+                  defaultValue={editingVideo?.videoThumb || ''}
+                  placeholder="Bo‘sh qoldirilsa YouTube muqovasi avtomatik olinadi"
+                  className="form-control"
+                  style={{ width: '100%', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              {/* Is Active Checkbox */}
+              <div style={{ padding: '0.75rem 1rem', borderRadius: '10px', backgroundColor: 'var(--bg-secondary)', marginBottom: '1.5rem', border: '1px solid var(--border-subtle)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    defaultChecked={editingVideo ? editingVideo.is_active !== false : true}
+                    style={{ width: '18px', height: '18px', accentColor: '#ef4444' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                      Video saytda faol ko‘rinsin
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Belgini olib qo‘ysangiz, video bosh sahifadan yashiriladi.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              {/* Submit Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setVideoModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.65rem 1.25rem' }}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ padding: '0.65rem 1.5rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Check size={16} /> Saqlash va Saytga Joylash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

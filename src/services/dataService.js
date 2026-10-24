@@ -51,6 +51,86 @@ const setStored = (key, value, broadcast = false) => {
   }
 };
 
+// YouTube Link Parser & Helper
+export const extractYouTubeId = (url) => {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = trimmed.match(regExp);
+  return match && match[1] ? match[1] : '';
+};
+
+export const getYouTubeThumbnail = (videoId, quality = 'hqdefault') => {
+  if (!videoId) return 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80';
+  return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
+};
+
+export const INITIAL_VIDEO_REELS = [
+  {
+    id: 'reel-1',
+    title: 'Larsson Zamonaviy Yozuv Stoli',
+    youtube_url: 'https://www.youtube.com/watch?v=0e3GPea1Tyg',
+    youtube_id: '0e3GPea1Tyg',
+    views: '16.4k',
+    videoThumb: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=600&q=80',
+    desc: 'Yuqori sifatli eman yog‘ochidan ishlangan ixcham va funksional yozuv stoli. O‘qish va ish uchun juda qulay.',
+    product_id: 'prod-4',
+    is_active: true,
+    order: 1
+  },
+  {
+    id: 'reel-2',
+    title: 'Hanza Cane Gidravlik Saqlagichli Karavot',
+    youtube_url: 'https://www.youtube.com/watch?v=kXYiU_JCYtU',
+    youtube_id: 'kXYiU_JCYtU',
+    views: '74.2k',
+    videoThumb: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80',
+    desc: 'Qamish to‘rli boshliq va oson ochiladigan gidravlik saqlagichli hashamatli karavot namoyishi.',
+    product_id: 'prod-2',
+    is_active: true,
+    order: 2
+  },
+  {
+    id: 'reel-3',
+    title: 'Berrio Ko‘p Sig‘imli Poyabzal Javoni',
+    youtube_url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+    youtube_id: 'kJQP7kiw5Fk',
+    views: '39.8k',
+    videoThumb: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=600&q=80',
+    desc: 'Dahliz uchun keng sig‘imli va chang o‘tkazmaydigan zamonaviy poyabzal javoni montaji va qulayliklari.',
+    product_id: 'prod-3',
+    is_active: true,
+    order: 3
+  },
+  {
+    id: 'reel-4',
+    title: 'Rowntree Velvet Queen Hashamatli Karavot',
+    youtube_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    youtube_id: 'LXb3EKWsInQ',
+    views: '52.1k',
+    videoThumb: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80',
+    desc: 'Yumshoq velvet matoli, mustahkam metall karkas va ortopedik asosga ega premium karavot.',
+    product_id: 'prod-1',
+    is_active: true,
+    order: 4
+  },
+  {
+    id: 'reel-5',
+    title: 'Nina Led Oynali Elegant Pardoz Stoli',
+    youtube_url: 'https://www.youtube.com/watch?v=fJ9rUzIMcZQ',
+    youtube_id: 'fJ9rUzIMcZQ',
+    views: '28.5k',
+    videoThumb: 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=600&q=80',
+    desc: 'Aylana sensorli yorug‘likli oyna va zargarlik buyumlari uchun bo‘lmali zamonaviy tualet stoli.',
+    product_id: 'prod-5',
+    is_active: true,
+    order: 5
+  }
+];
+
 // Check if an order (standard or custom) belongs to the given user
 export const isOrderOwnedByUser = (order, userObj) => {
   if (!order || !userObj) return false;
@@ -827,6 +907,69 @@ export const dataService = {
       ids = input.map(item => (typeof item === 'string' ? item : item?.id)).filter(Boolean);
     }
     return this.setTrendingProductIds(ids);
+  },
+
+  // Watch & Shop Video Reels (YouTube integration & Super Admin management)
+  async getVideoReels() {
+    const stored = getStored('video_reels', null);
+    if (Array.isArray(stored) && stored.length > 0) {
+      return stored.sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999));
+    }
+    setStored('video_reels', INITIAL_VIDEO_REELS, false);
+    return INITIAL_VIDEO_REELS;
+  },
+
+  async getVideoReelById(id) {
+    const list = await this.getVideoReels();
+    return list.find((v) => v.id === id || v.youtube_id === id) || null;
+  },
+
+  async saveVideoReel(reel) {
+    const list = await this.getVideoReels();
+    const ytId = extractYouTubeId(reel.youtube_url || reel.youtube_id);
+    const thumb = reel.videoThumb || (ytId ? getYouTubeThumbnail(ytId) : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80');
+
+    const newReel = reel.id
+      ? {
+          ...reel,
+          youtube_id: ytId,
+          videoThumb: thumb,
+          updated_at: new Date().toISOString()
+        }
+      : {
+          ...reel,
+          id: `reel-${Date.now()}`,
+          youtube_id: ytId,
+          videoThumb: thumb,
+          views: reel.views || '1.2k',
+          is_active: reel.is_active !== false,
+          order: Number(reel.order) || (list.length + 1),
+          created_at: new Date().toISOString()
+        };
+
+    const exists = list.some((v) => v.id === newReel.id);
+    const updated = exists
+      ? list.map((v) => (v.id === newReel.id ? newReel : v))
+      : [...list, newReel];
+
+    const sorted = updated.sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999));
+    setStored('video_reels', sorted, true);
+    window.dispatchEvent(new CustomEvent('urgut_store_videos_updated', { detail: sorted }));
+    return sorted;
+  },
+
+  async deleteVideoReel(id) {
+    const list = await this.getVideoReels();
+    const updated = list.filter((v) => v.id !== id);
+    setStored('video_reels', updated, true);
+    window.dispatchEvent(new CustomEvent('urgut_store_videos_updated', { detail: updated }));
+    return updated;
+  },
+
+  async resetVideoReels() {
+    setStored('video_reels', INITIAL_VIDEO_REELS, true);
+    window.dispatchEvent(new CustomEvent('urgut_store_videos_updated', { detail: INITIAL_VIDEO_REELS }));
+    return INITIAL_VIDEO_REELS;
   },
 
   // Craftsmen
