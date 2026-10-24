@@ -28,6 +28,7 @@ import {
   Phone,
   Mail,
   ShieldCheck,
+  ShieldAlert,
   LogOut,
   ChevronRight,
   Eye,
@@ -44,14 +45,16 @@ import {
 export const CustomerAccount = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isGuest, openAuthModal, logout, updateProfile } = useAuth();
+  const isStaff = Boolean(user && (user.role === 'admin' || user.role === 'manager' || user.role === 'craftsman'));
   const { favorites } = useWishlist();
   const { addToast } = useNotification();
   const { t, getLocalized, language } = useLanguage();
 
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(
-    tabParam === 'orders' || tabParam === 'custom' ? 'orders' : tabParam === 'wishlist' ? 'wishlist' : 'profile'
-  );
+  const [activeTab, setActiveTab] = useState(() => {
+    if (isStaff) return tabParam === 'wishlist' ? 'wishlist' : 'profile';
+    return tabParam === 'orders' || tabParam === 'custom' ? 'orders' : tabParam === 'wishlist' ? 'wishlist' : 'profile';
+  });
   const [orderSubTab, setOrderSubTab] = useState(tabParam === 'orders' ? 'standard' : 'custom');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [customOrders, setCustomOrders] = useState([]);
@@ -82,6 +85,11 @@ export const CustomerAccount = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
+    if (isStaff) {
+      if (tab === 'wishlist') setActiveTab('wishlist');
+      else setActiveTab('profile');
+      return;
+    }
     if (tab === 'orders' || tab === 'custom') {
       setActiveTab('orders');
       if (tab === 'orders') setOrderSubTab('standard');
@@ -91,7 +99,7 @@ export const CustomerAccount = () => {
     } else if (tab === 'profile') {
       setActiveTab('profile');
     }
-  }, [searchParams]);
+  }, [searchParams, isStaff]);
 
   useEffect(() => {
     const loadAccountData = async () => {
@@ -134,6 +142,9 @@ export const CustomerAccount = () => {
   }, [user]);
 
   const handleTabChange = (newTab) => {
+    if (isStaff && (newTab === 'orders' || newTab === 'custom')) {
+      return;
+    }
     setActiveTab(newTab);
     setSearchParams({ tab: newTab });
   };
@@ -312,26 +323,28 @@ export const CustomerAccount = () => {
             <span>{t('account.title', 'Mening Hisobim')}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange('orders')}
-            className={`customer-tab-button ${activeTab === 'orders' || activeTab === 'custom' ? 'active' : ''}`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
-          >
-            <ShoppingBag size={18} />
-            <span>{t('nav.my_orders', 'Buyurtmalarim')}</span>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.15rem 0.5rem',
-                borderRadius: '999px',
-                backgroundColor: (activeTab === 'orders' || activeTab === 'custom') ? 'var(--figma-coral)' : 'var(--bg-secondary)',
-                color: (activeTab === 'orders' || activeTab === 'custom') ? '#fff' : 'var(--text-muted)'
-              }}
+          {!isStaff && (
+            <button
+              type="button"
+              onClick={() => handleTabChange('orders')}
+              className={`customer-tab-button ${activeTab === 'orders' || activeTab === 'custom' ? 'active' : ''}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}
             >
-              {customOrders.length + standardOrders.length}
-            </span>
-          </button>
+              <ShoppingBag size={18} />
+              <span>{t('nav.my_orders', 'Buyurtmalarim')}</span>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '999px',
+                  backgroundColor: (activeTab === 'orders' || activeTab === 'custom') ? 'var(--figma-coral)' : 'var(--bg-secondary)',
+                  color: (activeTab === 'orders' || activeTab === 'custom') ? '#fff' : 'var(--text-muted)'
+                }}
+              >
+                {customOrders.length + standardOrders.length}
+              </span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -409,15 +422,26 @@ export const CustomerAccount = () => {
 
                 {/* Quick Action Buttons */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('orders')}
-                    className="btn btn-figma-primary"
-                    style={{ padding: '0.75rem 1.4rem' }}
-                  >
-                    <ShoppingBag size={16} />
-                    <span>{t('nav.my_orders', 'Buyurtmalarimga O‘tish')}</span>
-                  </button>
+                  {isStaff ? (
+                    <Link
+                      to={user.role === 'admin' ? '/admin' : user.role === 'manager' ? '/manager' : '/craftsman-dashboard'}
+                      className="btn btn-figma-primary"
+                      style={{ padding: '0.75rem 1.4rem' }}
+                    >
+                      <ShieldCheck size={16} />
+                      <span>Boshqaruv Paneli</span>
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange('orders')}
+                      className="btn btn-figma-primary"
+                      style={{ padding: '0.75rem 1.4rem' }}
+                    >
+                      <ShoppingBag size={16} />
+                      <span>{t('nav.my_orders', 'Buyurtmalarim')}</span>
+                    </button>
+                  )}
 
                   <button
                     type="button"
@@ -565,10 +589,61 @@ export const CustomerAccount = () => {
         )}
 
         {/* =========================================================================
-            TAB: ORDERS (BUYURTMALARIM - FAQAT BUYURTMALAR)
+            TAB: ORDERS (BUYURTMALARIM - FAQAT ODDIY USERLAR UCHUN)
             ========================================================================= */}
         {(activeTab === 'orders' || activeTab === 'custom') && (
-          <div>
+          isStaff ? (
+            <div
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                borderRadius: 'var(--radius-xl)',
+                padding: '3.5rem 2rem',
+                textAlign: 'center',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-sm)',
+                marginBottom: '3rem'
+              }}
+            >
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: '#fee2e2',
+                  color: '#dc2626',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.25rem'
+                }}
+              >
+                <ShieldAlert size={34} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                Buyurtmalarim bo‘limi faqat oddiy mijozlar uchun!
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto 1.75rem', lineHeight: 1.6 }}>
+                Siz hozirda <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz ({user.full_name || user.email}).
+                Buyurtmalarni boshqarish, ko‘rib chiqish va holatini yangilash xodimlar boshqaruv panelida amalga oshiriladi.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link
+                  to={user.role === 'admin' ? '/admin' : user.role === 'manager' ? '/manager' : '/craftsman-dashboard'}
+                  className="btn btn-primary"
+                >
+                  Boshqaruv paneliga o‘tish
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('profile')}
+                  className="btn btn-secondary"
+                >
+                  Mening Profilim
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
             {/* Orders Stats Row */}
             <div className="account-stat-grid" style={{ marginBottom: '2rem' }}>
               <div className="account-stat-card">
@@ -1095,7 +1170,8 @@ export const CustomerAccount = () => {
           </div>
         )}
       </div>
-    )}
+    )
+  )}
 
     {/* =========================================================================
         TAB 3: WISHLIST (SEVIMLI MEBELLAR)

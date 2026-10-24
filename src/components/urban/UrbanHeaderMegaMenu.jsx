@@ -41,6 +41,7 @@ export const UrbanHeaderMegaMenu = () => {
   const { totalItemsCount } = useCart();
   const { favoritesCount } = useWishlist();
   const { user, isGuest, isAdmin, isManager, isCraftsman, openAuthModal } = useAuth();
+  const isStaff = isAdmin || isManager || isCraftsman;
   const profilePath = isAdmin ? '/admin' : isManager ? '/manager' : isCraftsman ? '/craftsman-dashboard' : '/account';
   const { t } = useLanguage();
   const { isDark, toggleTheme } = useSettings();
@@ -353,15 +354,17 @@ export const UrbanHeaderMegaMenu = () => {
             {isDark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
-          {/* Track order (Desktop only) */}
-          <Link
-            to="/account?tab=orders"
-            className="urban-header-icon-link urban-desktop-only"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'var(--text-main)' }}
-          >
-            <Truck size={19} />
-            <span className="urban-icon-label" style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Buyurtma</span>
-          </Link>
+          {/* Track order (Desktop only) - Faqat oddiy foydalanuvchilar uchun */}
+          {!isStaff && (
+            <Link
+              to="/account?tab=orders"
+              className="urban-header-icon-link urban-desktop-only"
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'var(--text-main)' }}
+            >
+              <Truck size={19} />
+              <span className="urban-icon-label" style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Buyurtma</span>
+            </Link>
+          )}
 
           {/* Wishlist */}
           <Link
@@ -931,23 +934,25 @@ export const UrbanHeaderMegaMenu = () => {
 
           {/* Additional mobile utility links */}
           <div style={{ marginTop: '0.75rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            <Link
-              to="/account?tab=orders"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                color: 'var(--text-main)',
-                textDecoration: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                padding: '0.35rem 0.5rem'
-              }}
-            >
-              <Truck size={18} color="var(--figma-coral, #FA6D58)" />
-              <span>Buyurtmani kuzatish</span>
-            </Link>
+            {!isStaff && (
+              <Link
+                to="/account?tab=orders"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  color: 'var(--text-main)',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  padding: '0.35rem 0.5rem'
+                }}
+              >
+                <Truck size={18} color="var(--figma-coral, #FA6D58)" />
+                <span>Buyurtmani kuzatish</span>
+              </Link>
+            )}
 
             <Link
               to="/stores"

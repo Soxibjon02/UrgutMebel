@@ -29,7 +29,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge } from '../components/StatusBadge';
 
 export const CustomOrderPage = () => {
-  const { user, isGuest, openAuthModal } = useAuth();
+  const { user, isGuest, openAuthModal, logout } = useAuth();
+  const isStaff = Boolean(user && (user.role === 'admin' || user.role === 'manager' || user.role === 'craftsman'));
   const { addToast } = useNotification();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
@@ -273,25 +274,27 @@ export const CustomOrderPage = () => {
           </p>
         </div>
 
-        {/* Warning banner for staff or guests */}
-        {user && user.role !== 'customer' && (
+        {/* Anti-fraud / Staff Guard Warning */}
+        {isStaff ? (
           <div
             style={{
               backgroundColor: '#fef2f2',
               border: '1.5px solid #f87171',
               borderRadius: 'var(--radius-xl)',
-              padding: '1.25rem 1.75rem',
-              marginBottom: '2rem',
+              padding: '2.5rem 2rem',
+              marginBottom: '3rem',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
+              textAlign: 'center',
               gap: '1.25rem',
-              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.08)'
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.08)'
             }}
           >
             <div
               style={{
-                width: '46px',
-                height: '46px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
                 backgroundColor: '#fee2e2',
                 color: '#dc2626',
@@ -301,54 +304,75 @@ export const CustomOrderPage = () => {
                 flexShrink: 0
               }}
             >
-              <ShieldAlert size={26} />
+              <ShieldAlert size={36} />
             </div>
-            <div style={{ flex: 1 }}>
-              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.25rem' }}>
+            <div style={{ maxWidth: '620px' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.65rem' }}>
                 Xodimlar hisobidan buyurtma berish taqiqlangan!
-              </h4>
-              <p style={{ fontSize: '0.88rem', color: '#b91c1c', margin: 0, lineHeight: 1.5 }}>
+              </h3>
+              <p style={{ fontSize: '0.95rem', color: '#b91c1c', margin: '0 0 1.5rem', lineHeight: 1.6 }}>
                 Siz hozirda <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz ({user.full_name || user.email}).
                 Tizimda chalkashliklar kelib chiqmasligi uchun <strong>faqatgina oddiy mijoz (user)</strong> buyurtma bera oladi.
                 Iltimos, buyurtma yuborish uchun mijoz hisobiga kiring!
               </p>
+              
+              <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link
+                  to={user.role === 'admin' ? '/admin' : user.role === 'manager' ? '/manager' : '/craftsman-dashboard'}
+                  className="btn btn-primary"
+                  style={{ padding: '0.75rem 1.4rem' }}
+                >
+                  Boshqaruv paneliga o‘tish
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    openAuthModal('login', 'Buyurtma yuborish uchun mijoz hisobingizga kiring');
+                  }}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.75rem 1.4rem' }}
+                >
+                  Mijoz hisobiga kirish (Chiqish)
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        ) : (
+          <>
+            {isGuest && (
+              <div
+                style={{
+                  backgroundColor: 'rgba(194, 109, 46, 0.08)',
+                  border: '1px solid rgba(194, 109, 46, 0.25)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1rem 1.5rem',
+                  marginBottom: '2rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <User size={20} color="var(--wood-amber)" />
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                    Maxsus buyurtma yuborish faqat ro‘yxatdan o‘tgan <strong>oddiy mijozlar</strong> uchun ochiq.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('login', 'Buyurtma yuborish uchun mijoz hisobingizga kiring')}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Mijoz hisobiga kirish
+                </button>
+              </div>
+            )}
 
-        {isGuest && (
-          <div
-            style={{
-              backgroundColor: 'rgba(194, 109, 46, 0.08)',
-              border: '1px solid rgba(194, 109, 46, 0.25)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1rem 1.5rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <User size={20} color="var(--wood-amber)" />
-              <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
-                Maxsus buyurtma yuborish faqat ro‘yxatdan o‘tgan <strong>oddiy mijozlar</strong> uchun ochiq.
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => openAuthModal('login', 'Buyurtma yuborish uchun mijoz hisobingizga kiring')}
-              className="btn btn-secondary btn-sm"
-            >
-              Mijoz hisobiga kirish
-            </button>
-          </div>
-        )}
-
-        {/* Custom Order Form */}
-        <form onSubmit={handleSubmit}>
+            {/* Custom Order Form (faqat oddiy user bo'lsa chiqadi) */}
+            <form onSubmit={handleSubmit}>
           
           {/* SECTION 1: CUSTOMER INFORMATION */}
           <div
@@ -859,7 +883,9 @@ export const CustomOrderPage = () => {
             </div>
           </div>
         </form>
-      </div>
-    </div>
+      </>
+    )}
+  </div>
+</div>
   );
 };

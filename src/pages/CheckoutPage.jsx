@@ -9,7 +9,8 @@ import { CheckCircle2, ShieldCheck, Truck, CreditCard, Banknote, ArrowRight, Shi
 
 export const CheckoutPage = () => {
   const { cartItems, totalAmount, clearCart } = useCart();
-  const { user, isGuest, openAuthModal } = useAuth();
+  const { user, isGuest, openAuthModal, logout } = useAuth();
+  const isStaff = Boolean(user && (user.role === 'admin' || user.role === 'manager' || user.role === 'craftsman'));
   const { addToast } = useNotification();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
@@ -164,25 +165,27 @@ export const CheckoutPage = () => {
           {t('checkout.title', 'Buyurtmani Rasmiylashtirish')}
         </h1>
 
-        {/* Warning banner for staff or guests */}
-        {user && user.role !== 'customer' && (
+        {/* Anti-fraud / Staff Guard Warning */}
+        {isStaff ? (
           <div
             style={{
               backgroundColor: '#fef2f2',
               border: '1.5px solid #f87171',
               borderRadius: 'var(--radius-xl)',
-              padding: '1.25rem 1.75rem',
-              marginBottom: '2rem',
+              padding: '2.5rem 2rem',
+              marginBottom: '3rem',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
+              textAlign: 'center',
               gap: '1.25rem',
-              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.08)'
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.08)'
             }}
           >
             <div
               style={{
-                width: '46px',
-                height: '46px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
                 backgroundColor: '#fee2e2',
                 color: '#dc2626',
@@ -192,55 +195,73 @@ export const CheckoutPage = () => {
                 flexShrink: 0
               }}
             >
-              <ShieldAlert size={26} />
+              <ShieldAlert size={36} />
             </div>
-            <div style={{ flex: 1 }}>
-              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.25rem' }}>
+            <div style={{ maxWidth: '620px' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#991b1b', marginBottom: '0.65rem' }}>
                 {language === 'ru' ? 'Сотрудникам запрещено оформлять заказ!' : language === 'en' ? 'Employee checkout is prohibited!' : 'Xodimlar hisobidan buyurtma berish taqiqlangan!'}
-              </h4>
-              <p style={{ fontSize: '0.88rem', color: '#b91c1c', margin: 0, lineHeight: 1.5 }}>
-                {language === 'ru'
-                  ? `Вы вошли как ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Менеджер' : 'Мастер'}. Пожалуйста, войдите как обычный клиент.`
-                  : language === 'en'
-                  ? `You are logged in as ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Manager' : 'Craftsman'}. Please sign in as a regular customer.`
-                  : `Siz hozirda ${user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'} hisobidasiz (${user.full_name || user.email}). Chalkashliklarning oldini olish uchun faqatgina oddiy mijoz buyurtma berishi mumkin.`}
+              </h3>
+              <p style={{ fontSize: '0.95rem', color: '#b91c1c', margin: '0 0 1.5rem', lineHeight: 1.6 }}>
+                Siz hozirda <strong>{user.role === 'admin' ? 'Super Admin' : user.role === 'manager' ? 'Menedjer' : 'Usta'}</strong> hisobidasiz ({user.full_name || user.email}).
+                Chalkashliklarning oldini olish uchun <strong>faqatgina oddiy mijoz (user)</strong> buyurtma bera oladi.
               </p>
+              
+              <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link
+                  to={user.role === 'admin' ? '/admin' : user.role === 'manager' ? '/manager' : '/craftsman-dashboard'}
+                  className="btn btn-primary"
+                  style={{ padding: '0.75rem 1.4rem' }}
+                >
+                  Boshqaruv paneliga o‘tish
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    openAuthModal('login', 'Buyurtma berish uchun mijoz hisobingizga kiring');
+                  }}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.75rem 1.4rem' }}
+                >
+                  Mijoz sifatida kirish (Chiqish)
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        ) : (
+          <>
+            {isGuest && (
+              <div
+                style={{
+                  backgroundColor: 'rgba(194, 109, 46, 0.08)',
+                  border: '1px solid rgba(194, 109, 46, 0.25)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1rem 1.5rem',
+                  marginBottom: '2rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <User size={20} color="var(--wood-amber)" />
+                  <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                    {language === 'ru' ? 'Для оформления заказа войдите как клиент.' : language === 'en' ? 'Please log in as a customer to checkout.' : 'Buyurtmani rasmiylashtirish uchun oddiy mijoz sifatida tizimga kiring.'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('login', language === 'ru' ? 'Войдите в аккаунт клиента' : language === 'en' ? 'Sign in to customer account' : 'Buyurtma berish uchun mijoz hisobingizga kiring')}
+                  className="btn btn-secondary btn-sm"
+                >
+                  {language === 'ru' ? 'Войти' : language === 'en' ? 'Sign In' : 'Mijoz hisobiga kirish'}
+                </button>
+              </div>
+            )}
 
-        {isGuest && (
-          <div
-            style={{
-              backgroundColor: 'rgba(194, 109, 46, 0.08)',
-              border: '1px solid rgba(194, 109, 46, 0.25)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1rem 1.5rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <User size={20} color="var(--wood-amber)" />
-              <span style={{ fontSize: '0.92rem', color: 'var(--text-main)' }}>
-                {language === 'ru' ? 'Для оформления заказа войдите как клиент.' : language === 'en' ? 'Please log in as a customer to checkout.' : 'Buyurtmani rasmiylashtirish uchun oddiy mijoz sifatida tizimga kiring.'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => openAuthModal('login', language === 'ru' ? 'Войдите в аккаунт клиента' : language === 'en' ? 'Sign in to customer account' : 'Buyurtma berish uchun mijoz hisobingizga kiring')}
-              className="btn btn-secondary btn-sm"
-            >
-              {language === 'ru' ? 'Войти' : language === 'en' ? 'Sign In' : 'Mijoz hisobiga kirish'}
-            </button>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }} className="checkout-layout">
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2.5rem', alignItems: 'start' }} className="checkout-layout">
           
           {/* Form Fields */}
           <div
@@ -394,7 +415,9 @@ export const CheckoutPage = () => {
             </button>
           </div>
         </form>
-      </div>
+      </>
+    )}
+  </div>
 
       <style>{`
         @media (max-width: 899px) {
