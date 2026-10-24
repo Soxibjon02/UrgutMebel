@@ -37,7 +37,9 @@ import {
   Hammer,
   Tag,
   Percent,
-  Store
+  Store,
+  Shield,
+  Inbox
 } from 'lucide-react';
 
 export const ManagerDashboard = () => {
@@ -207,7 +209,7 @@ export const ManagerDashboard = () => {
     return (
       <div style={{ padding: '6rem 0', textAlign: 'center' }}>
         <div className="container" style={{ maxWidth: '520px' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🛡️</div>
+          <Shield size={54} style={{ color: 'var(--primary)', margin: '0 auto 1rem', display: 'block' }} />
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.75rem' }}>
             Menedjer Ruxsati Talab Qilinadi
           </h2>
@@ -1362,7 +1364,7 @@ export const ManagerDashboard = () => {
                     {discountRequests.length === 0 ? (
                       <tr>
                         <td colSpan={7} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                          <div style={{ fontSize: '2rem', marginBottom: '0.35rem' }}>📝</div>
+                          <FileText size={36} style={{ color: 'var(--text-muted)', margin: '0 auto 0.35rem', display: 'block' }} />
                           <div style={{ fontWeight: 700 }}>Hozircha hech qanday so‘rov yuborilmagan</div>
                           <div style={{ fontSize: '0.8rem' }}>Yuqoridagi tugma orqali mahsulotingizni chegirma yoki trendga chiqarishni so‘rang</div>
                         </td>
@@ -1480,7 +1482,7 @@ export const ManagerDashboard = () => {
                   {products.filter((p) => Boolean(p.discount_price)).length === 0 ? (
                     <tr>
                       <td colSpan={5} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏷️</div>
+                        <Tag size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.35rem' }}>Hozirda chegirmadagi mebellar yo‘q</h4>
                         <p style={{ fontSize: '0.85rem' }}>Super Adminga so‘rov yuborish orqali aksiyalarni faollashtiring</p>
                       </td>
@@ -1584,7 +1586,7 @@ export const ManagerDashboard = () => {
                   {standardOrders.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📦</div>
+                        <Package size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha standart do‘kon buyurtmalari yo‘q</h4>
                       </td>
                     </tr>
@@ -1683,7 +1685,7 @@ export const ManagerDashboard = () => {
                   {craftsmanRequests.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔨</div>
+                        <Hammer size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha ustalarga to‘g‘ridan-to‘g‘ri murojaatlar yo‘q</h4>
                       </td>
                     </tr>
@@ -1791,7 +1793,7 @@ export const ManagerDashboard = () => {
                   {contactMessages.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📬</div>
+                        <Inbox size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha yangi xabarlar yo‘q</h4>
                       </td>
                     </tr>
@@ -1908,7 +1910,7 @@ export const ManagerDashboard = () => {
                   {newsletterSubs.length === 0 ? (
                     <tr>
                       <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💌</div>
+                        <Mail size={40} style={{ color: 'var(--text-muted)', margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha obunachilar ro‘yxatga olinmagan</h4>
                       </td>
                     </tr>

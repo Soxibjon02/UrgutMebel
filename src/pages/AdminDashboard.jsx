@@ -411,7 +411,7 @@ export const AdminDashboard = () => {
     return (
       <div style={{ padding: '6rem 0', textAlign: 'center' }}>
         <div className="container" style={{ maxWidth: '520px' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🛡️</div>
+          <Shield size={54} style={{ color: 'var(--wood-amber)', margin: '0 auto 1rem', display: 'block' }} />
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.75rem' }}>
             Maxfiy Admin Paneli
           </h2>
@@ -2308,7 +2308,7 @@ export const AdminDashboard = () => {
                   {discountRequests.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📬</div>
+                        <Send size={42} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Hozircha hech qanday chegirma so‘rovi yo‘q</h4>
                         <p style={{ fontSize: '0.85rem' }}>Do‘kon menejerlari so‘rov yuborganda bu yerda ko‘rinadi.</p>
                       </td>
@@ -2744,7 +2744,7 @@ export const AdminDashboard = () => {
                   {products.filter((p) => Boolean(p.discount_price)).length === 0 ? (
                     <tr>
                       <td colSpan={5} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏷️</div>
+                        <DollarSign size={42} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 0.5rem', display: 'block' }} />
                         <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.3rem' }}>Hozircha chegirmadagi mebellar yo‘q</h4>
                         <p style={{ fontSize: '0.85rem' }}>Yuqoridagi "+ Mebelga Chegirma Qo‘shish" tugmasini bosib istalgan mebelga aksiya belgilang.</p>
                       </td>
@@ -2993,7 +2993,7 @@ export const AdminDashboard = () => {
 
             {customOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📭</div>
+                <Sliders size={42} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 0.75rem', display: 'block' }} />
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha maxsus buyurtmalar yo‘q</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mijozlar buyurtma berganda bu yerda darhol aks etadi</p>
               </div>
@@ -3099,7 +3099,7 @@ export const AdminDashboard = () => {
 
             {standardOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🛍️</div>
+                <ShoppingBag size={42} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 0.75rem', display: 'block' }} />
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha do‘kon xaridlari yo‘q</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Mijoz savatdan xarid qilganda bu yerda darhol aks etadi</p>
               </div>
@@ -4156,7 +4156,7 @@ export const AdminDashboard = () => {
 
             {banners.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📢</div>
+                <ImageIcon size={42} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 0.75rem', display: 'block' }} />
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Hozircha e‘lonlar mavjud emas</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Yuqoridagi "Yangi E‘lon Qo‘shish" tugmasi orqali yangi e‘lon yoki reklama banneri yarating</p>
               </div>
@@ -4299,7 +4299,7 @@ export const AdminDashboard = () => {
                   <option value="NONE">— Biriktirilmagan (Umumiy do‘kon mahsuloti)</option>
                   {craftsmen.map((c) => (
                     <option key={c.id} value={c.id}>
-                      🔨 {c.name} {c.store_name ? `(${c.store_name})` : '(Mustaqil / Free)'}
+                      {c.name} {c.store_name ? `(${c.store_name})` : '(Mustaqil / Free)'}
                     </option>
                   ))}
                 </select>

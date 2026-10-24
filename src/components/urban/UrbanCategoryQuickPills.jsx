@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dataService, getStored } from '../../services/dataService';
 import { initialCategories } from '../../data/mockData';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, LayoutGrid, Flame } from 'lucide-react';
 
 export const UrbanCategoryQuickPills = ({ title }) => {
   const [categories, setCategories] = useState(() => getStored('categories', initialCategories));
@@ -102,18 +102,17 @@ export const UrbanCategoryQuickPills = ({ title }) => {
               style={{
                 width: '72px',
                 height: '72px',
-                borderRadius: '18px',
+                borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: 'rgba(250, 109, 88, 0.1)',
-                border: '1.5px solid rgba(250, 109, 88, 0.25)',
+                background: 'linear-gradient(135deg, rgba(250, 109, 88, 0.16) 0%, rgba(250, 109, 88, 0.06) 100%)',
+                border: '1.5px solid rgba(250, 109, 88, 0.28)',
                 color: 'var(--figma-coral, #FA6D58)',
-                fontSize: '1.6rem',
-                boxShadow: '0 4px 12px rgba(250, 109, 88, 0.12)'
+                boxShadow: '0 4px 14px rgba(250, 109, 88, 0.12)'
               }}
             >
-              🪵
+              <LayoutGrid size={28} strokeWidth={2.2} />
             </div>
             <span
               style={{
@@ -146,19 +145,18 @@ export const UrbanCategoryQuickPills = ({ title }) => {
               style={{
                 width: '72px',
                 height: '72px',
-                borderRadius: '18px',
+                borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                border: '1.5px solid rgba(239, 68, 68, 0.25)',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(239, 68, 68, 0.06) 100%)',
+                border: '1.5px solid rgba(239, 68, 68, 0.3)',
                 color: '#ef4444',
-                fontSize: '1.6rem',
-                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)',
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.15)',
                 position: 'relative'
               }}
             >
-              🔥
+              <Flame size={28} strokeWidth={2.2} />
               <span
                 style={{
                   position: 'absolute',
@@ -168,8 +166,10 @@ export const UrbanCategoryQuickPills = ({ title }) => {
                   color: '#ffffff',
                   fontSize: '0.58rem',
                   fontWeight: 900,
-                  padding: '1px 5px',
-                  borderRadius: '980px'
+                  padding: '2px 6px',
+                  borderRadius: '980px',
+                  letterSpacing: '0.02em',
+                  boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)'
                 }}
               >
                 AKSIYA

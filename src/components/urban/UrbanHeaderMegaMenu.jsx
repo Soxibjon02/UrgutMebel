@@ -20,7 +20,13 @@ import {
   Grid,
   Compass,
   ArrowUpRight,
-  Home
+  Home,
+  Hammer,
+  Sofa,
+  Bed,
+  Utensils,
+  Store,
+  Package
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -54,10 +60,10 @@ export const UrbanHeaderMegaMenu = () => {
   // Nav categories in top bar (Asosiy is first)
   const navCategories = [
     { id: 'home', label: 'Asosiy', icon: Home, link: '/' },
-    { id: 'collections', label: 'Kolleksiyalar', badge: 'Yangi', link: '/collections' },
-    { id: 'custom-order', label: 'Maxsus Buyurtma', badge: '✨ Buyurtma', link: '/custom-order' },
-    { id: 'craftsmen', label: 'Ustalar', badge: '🔨 Ustalar', link: '/craftsmen' },
-    { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', link: '/furniture?filter=discount' },
+    { id: 'collections', label: 'Kolleksiyalar', badge: 'Yangi', badgeIcon: Sparkles, link: '/collections' },
+    { id: 'custom-order', label: 'Maxsus Buyurtma', badge: 'Buyurtma', badgeIcon: Sparkles, link: '/custom-order' },
+    { id: 'craftsmen', label: 'Ustalar', badge: 'Ustalar', badgeIcon: Hammer, link: '/craftsmen' },
+    { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', badgeIcon: Flame, link: '/furniture?filter=discount' },
     { id: 'sections', label: 'Bo‘limlar', badge: 'Barchasi', hasMegamenu: true },
     { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-sofas' },
     { id: 'living', label: 'Mehmonxona', link: '/furniture?category=cat-1' },
@@ -69,7 +75,8 @@ export const UrbanHeaderMegaMenu = () => {
   // All 37 Homepage Sections Logically Categorized for Instant Smooth Jumps
   const homepageSectionGroups = [
     {
-      group: '👟 Dahliz & Poyabzal',
+      group: 'Dahliz & Poyabzal',
+      icon: Package,
       items: [
         { id: 'shoe_racks', label: 'Poyabzal Javonlari (Shoe Racks)', badge: 'Trend' },
         { id: 'wardrobes', label: 'Kiyim Shkaflari (Wardrobes)', badge: 'Keng' },
@@ -78,7 +85,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '🔥 Aksiya & Chegirmalar',
+      group: 'Aksiya & Chegirmalar',
+      icon: Flame,
       items: [
         { id: 'deal_zone', label: 'Aksiya Maydoni (Deal Zone)', badge: 'Aksiya' },
         { id: 'new_arrivals', label: 'Yangi Kelganlar (New Arrivals)', badge: 'Yangi' },
@@ -88,7 +96,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '✨ Toifalar & Ilhom',
+      group: 'Toifalar & Ilhom',
+      icon: Sparkles,
       items: [
         { id: 'atmos_hero', label: 'Atmos Yangi Kolleksiyasi', badge: 'Kolleksiya' },
         { id: 'category_pills', label: 'Tezkor Mebel Toifalari' },
@@ -99,7 +108,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '🛋️ Yumshoq Mebellar',
+      group: 'Yumshoq Mebellar',
+      icon: Sofa,
       items: [
         { id: 'lounge_chairs', label: 'Dam Olish Kreslolari (Lounge Chairs)' },
         { id: 'sofa_beds', label: 'Transformatsiya Divanlar (Sofa Beds)' },
@@ -110,7 +120,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '🛏️ Yotoqxona (Bedroom)',
+      group: 'Yotoqxona (Bedroom)',
+      icon: Bed,
       items: [
         { id: 'bedroom_banner', label: 'To‘liq Yotoqxona To‘plami' },
         { id: 'hydraulic_beds', label: 'Gidravlik Karavotlar (Storage)', badge: 'Top' },
@@ -120,7 +131,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '🍽️ Oshxona & Ofis',
+      group: 'Oshxona & Ofis',
+      icon: Utensils,
       items: [
         { id: 'modular_kitchen', label: 'Modulli Oshxona Garniturlari', badge: 'Loyiha' },
         { id: 'sideboards', label: 'Idish Javonlari & Bufetlar' },
@@ -130,7 +142,8 @@ export const UrbanHeaderMegaMenu = () => {
       ]
     },
     {
-      group: '🏪 Do‘konlar & Kafolat',
+      group: 'Do‘konlar & Kafolat',
+      icon: Store,
       items: [
         { id: 'explore_stores', label: 'Urgut Mebel Showroomlari' },
         { id: 'nearest_store', label: 'Eng Yaqin Do‘konni Topish' },
@@ -597,15 +610,20 @@ export const UrbanHeaderMegaMenu = () => {
                     {cat.badge && (
                       <span
                         style={{
-                          fontSize: '0.65rem',
+                          fontSize: '0.62rem',
                           fontWeight: 800,
                           backgroundColor: cat.id === 'deal-zone' ? '#ef4444' : cat.id === 'craftsmen' ? '#0071e3' : 'var(--figma-coral, #FA6D58)',
                           color: '#ffffff',
-                          padding: '0.1rem 0.45rem',
-                          borderRadius: '980px'
+                          padding: '0.12rem 0.45rem',
+                          borderRadius: '980px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                          lineHeight: 1
                         }}
                       >
-                        {cat.badge}
+                        {cat.badgeIcon && <cat.badgeIcon size={9} strokeWidth={2.8} />}
+                        <span>{cat.badge}</span>
                       </span>
                     )}
                   </Link>
@@ -656,10 +674,14 @@ export const UrbanHeaderMegaMenu = () => {
                     color: 'var(--text-main)',
                     marginBottom: '0.85rem',
                     paddingBottom: '0.35rem',
-                    borderBottom: '1.5px solid var(--border-subtle)'
+                    borderBottom: '1.5px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.45rem'
                   }}
                 >
-                  {group.group}
+                  {group.icon && <group.icon size={15} style={{ color: 'var(--figma-coral, #FA6D58)' }} />}
+                  <span>{group.group}</span>
                 </div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                   {group.items.map((item) => (
@@ -785,8 +807,9 @@ export const UrbanHeaderMegaMenu = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {homepageSectionGroups.map((group, idx) => (
                 <div key={idx}>
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--figma-coral, #FA6D58)', marginBottom: '0.5rem' }}>
-                    {group.group}
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--figma-coral, #FA6D58)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    {group.icon && <group.icon size={15} />}
+                    <span>{group.group}</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.45rem' }}>
                     {group.items.map((item) => (
@@ -861,15 +884,20 @@ export const UrbanHeaderMegaMenu = () => {
                 {cat.badge && (
                   <span
                     style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      backgroundColor: 'var(--figma-coral, #FA6D58)',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      backgroundColor: cat.id === 'deal-zone' ? '#ef4444' : cat.id === 'craftsmen' ? '#0071e3' : 'var(--figma-coral, #FA6D58)',
                       color: '#ffffff',
-                      padding: '0.15rem 0.5rem',
-                      borderRadius: '4px'
+                      padding: '0.12rem 0.5rem',
+                      borderRadius: '980px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      lineHeight: 1
                     }}
                   >
-                    {cat.badge}
+                    {cat.badgeIcon && <cat.badgeIcon size={9} strokeWidth={2.8} />}
+                    <span>{cat.badge}</span>
                   </span>
                 )}
               </Link>

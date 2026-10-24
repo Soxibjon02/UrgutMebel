@@ -1,21 +1,31 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Flame, Sparkles, MapPin } from 'lucide-react';
+import {
+  Sofa,
+  Bed,
+  Utensils,
+  DoorOpen,
+  Briefcase,
+  Baby,
+  Sparkles,
+  MapPin,
+  Flame
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export const UrbanSecondaryNav = () => {
   const { t } = useLanguage();
 
   const links = [
-    { to: '/furniture?category=cat-living', label: t('nav.living', 'Yashash Xonasi'), icon: '🛋️' },
-    { to: '/furniture?category=cat-bedroom', label: t('nav.bedroom', 'Yotoqxona'), icon: '🛏️' },
-    { to: '/furniture?category=cat-dining', label: t('nav.dining', 'Oshxona & Ovqatlanish'), icon: '🍽️' },
-    { to: '/furniture?category=cat-wardrobe', label: t('nav.wardrobes', 'Shkaflar & Garderob'), icon: '🚪' },
-    { to: '/furniture?category=cat-office', label: t('nav.office', 'Ishxona & Ofis'), icon: '💼' },
-    { to: '/furniture?category=cat-kids', label: t('nav.kids', 'Bolalar Xonasi'), icon: '👶' },
-    { to: '/custom-order', label: t('nav.custom_order', 'Maxsus Buyurtma'), icon: '✨', highlight: true },
-    { to: '/stores', label: t('nav.stores', 'Showroomlar'), icon: '📍' },
-    { to: '/furniture?filter=discount', label: t('nav.deals', 'Aksiyalar'), icon: '🔥', badge: 'Chegirma' }
+    { to: '/furniture?category=cat-living', label: t('nav.living', 'Yashash Xonasi'), icon: Sofa },
+    { to: '/furniture?category=cat-bedroom', label: t('nav.bedroom', 'Yotoqxona'), icon: Bed },
+    { to: '/furniture?category=cat-dining', label: t('nav.dining', 'Oshxona & Ovqatlanish'), icon: Utensils },
+    { to: '/furniture?category=cat-wardrobe', label: t('nav.wardrobes', 'Shkaflar & Garderob'), icon: DoorOpen },
+    { to: '/furniture?category=cat-office', label: t('nav.office', 'Ishxona & Ofis'), icon: Briefcase },
+    { to: '/furniture?category=cat-kids', label: t('nav.kids', 'Bolalar Xonasi'), icon: Baby },
+    { to: '/custom-order', label: t('nav.custom_order', 'Maxsus Buyurtma'), icon: Sparkles, highlight: true },
+    { to: '/stores', label: t('nav.stores', 'Showroomlar'), icon: MapPin },
+    { to: '/furniture?filter=discount', label: t('nav.deals', 'Aksiyalar'), icon: Flame, badge: 'Chegirma' }
   ];
 
   return (
@@ -41,29 +51,33 @@ export const UrbanSecondaryNav = () => {
           padding: '0.65rem 1.25rem'
         }}
       >
-        {links.map((item, idx) => (
-          <NavLink
-            key={idx}
-            to={item.to}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              fontSize: '0.86rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-              color: isActive || item.highlight
-                ? 'var(--figma-coral, #FA6D58)'
-                : 'var(--text-main)',
-              padding: '0.35rem 0',
-              position: 'relative',
-              transition: 'color 0.2s ease',
-              flexShrink: 0
-            })}
-            className="urban-sec-link"
-          >
-            <span>{item.icon}</span>
-            <span>{item.label}</span>
+        {links.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={idx}
+              to={item.to}
+              style={({ isActive }) => ({
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+                color: isActive || item.highlight
+                  ? 'var(--figma-coral, #FA6D58)'
+                  : 'var(--text-main)',
+                padding: '0.35rem 0',
+                position: 'relative',
+                transition: 'color 0.2s ease',
+                flexShrink: 0
+              })}
+              className="urban-sec-link"
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <Icon size={16} strokeWidth={2.2} />
+              </span>
+              <span>{item.label}</span>
 
             {item.badge && (
               <span

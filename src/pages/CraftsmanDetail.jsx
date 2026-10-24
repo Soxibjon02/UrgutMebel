@@ -19,7 +19,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   Clock,
-  Sparkles
+  Sparkles,
+  Hammer,
+  Wrench,
+  Layers
 } from 'lucide-react';
 
 export const CraftsmanDetail = () => {
@@ -531,8 +534,9 @@ export const CraftsmanDetail = () => {
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Ustaning Shaxsiy Portfoliosi
               </span>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0.2rem 0 0', letterSpacing: '-0.01em' }}>
-                🔨 {craftsman.name} Yasagan Mebellar & E‘lonlar ({craftsmanProducts.length})
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0.2rem 0 0', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Hammer size={22} style={{ color: '#0071e3' }} />
+                <span>{craftsman.name} Yasagan Mebellar & E‘lonlar ({craftsmanProducts.length})</span>
               </h2>
             </div>
             <Link
@@ -642,7 +646,7 @@ export const CraftsmanDetail = () => {
                 border: '1px dashed rgba(0, 0, 0, 0.1)'
               }}
             >
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🪵</div>
+              <Layers size={36} style={{ color: '#0071e3', opacity: 0.6, margin: '0 auto 0.5rem', display: 'block' }} />
               <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.35rem' }}>
                 Hozircha do‘konga biriktirilgan mahsulot e’lonlari yuklanmagan
               </h4>
@@ -704,7 +708,8 @@ export const CraftsmanDetail = () => {
           }}
         >
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>🛠️</span> Taklif Qilinadigan Duradgorlik Xizmatlari
+            <Wrench size={22} style={{ color: '#0071e3' }} />
+            <span>Taklif Qilinadigan Duradgorlik Xizmatlari</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
             {(craftsman.services?.length > 0 ? craftsman.services : [

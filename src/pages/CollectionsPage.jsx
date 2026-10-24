@@ -413,7 +413,7 @@ export const CollectionsPage = () => {
                   border: '1px solid var(--border-subtle)'
                 }}
               >
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✨</div>
+                <Sparkles size={44} style={{ color: 'var(--wood-amber)', opacity: 0.7, margin: '0 auto 0.75rem', display: 'block' }} />
                 <h4 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.45rem' }}>
                   Hozircha ushbu kolleksiyaga mebellar biriktirilmagan
                 </h4>

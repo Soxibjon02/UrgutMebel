@@ -187,7 +187,10 @@ export const StoresPage = () => {
                   transition: 'all 0.2s ease'
                 }}
               >
-                🛡️ {t('stores.filter_verified', 'Tasdiqlangan')}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <ShieldCheck size={14} />
+                  <span>{t('stores.filter_verified', 'Tasdiqlangan')}</span>
+                </span>
               </button>
             </div>
           </div>

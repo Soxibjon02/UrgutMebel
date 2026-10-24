@@ -508,7 +508,7 @@ export const FurnitureCatalog = () => {
       return {
         badgeText: '-50% GACHA',
         badgeBg: '#ef4444',
-        tagText: '🔥 KATTA MAVSUMIY AKSIYA',
+        tagText: 'KATTA MAVSUMIY AKSIYA',
         tagColor: '#ef4444',
         title: 'Aksiya va Chegirmalar',
         desc: 'Urgut Mebel Markazidagi barcha chegirmali mahsulotlar to‘plami! Eng sara sifatli mebellarni maxsus arzon narxlarda xarid qiling.',
@@ -526,7 +526,7 @@ export const FurnitureCatalog = () => {
     // 2. Matraslar (sub=matras)
     if (selectedSub === 'matras') {
       return {
-        badgeText: '💤 ORTOPEDIK',
+        badgeText: 'ORTOPEDIK',
         badgeBg: '#0ea5e9',
         tagText: 'SOG‘LOM VA OROMBAXSH UYQU',
         tagColor: '#0ea5e9',
@@ -567,7 +567,7 @@ export const FurnitureCatalog = () => {
     if (selectedCategory === 'cat-1' || selectedCategory === 'mehmonxona' || selectedCategory === 'cat-living') {
       const catObj = categories.find((c) => c.id === 'cat-1');
       return {
-        badgeText: '👑 SHINAM',
+        badgeText: 'SHINAM',
         badgeBg: '#f59e0b',
         tagText: 'MEHMONXONA TO‘PLAMI',
         tagColor: '#f59e0b',
@@ -588,7 +588,7 @@ export const FurnitureCatalog = () => {
     if (selectedCategory === 'cat-2' || selectedCategory === 'yotoqxona' || selectedCategory === 'cat-bedroom') {
       const catObj = categories.find((c) => c.id === 'cat-2');
       return {
-        badgeText: '✨ LUXURY',
+        badgeText: 'LUXURY',
         badgeBg: '#8b5cf6',
         tagText: 'YOTOQXONA MEBELLARI',
         tagColor: '#8b5cf6',
@@ -609,7 +609,7 @@ export const FurnitureCatalog = () => {
     if (selectedCategory === 'cat-3' || selectedCategory === 'oshxona' || selectedCategory === 'cat-dining') {
       const catObj = categories.find((c) => c.id === 'cat-3');
       return {
-        badgeText: '🍽️ BARDOSH',
+        badgeText: 'BARDOSH',
         badgeBg: '#10b981',
         tagText: 'OSHXONA & OVQATLANISH',
         tagColor: '#10b981',
@@ -649,7 +649,7 @@ export const FurnitureCatalog = () => {
 
     // 8. Default: Barcha Mebellar Katalogi
     return {
-      badgeText: '✨ BARCHASI',
+      badgeText: 'BARCHASI',
       badgeBg: 'var(--figma-coral, #FA6D58)',
       tagText: 'URGUT MEBEL MARKAZI',
       tagColor: 'var(--figma-coral, #FA6D58)',
@@ -1036,7 +1036,7 @@ export const FurnitureCatalog = () => {
                 }}
               >
                 {selectedFilter === 'discount' && (
-                  <option value="discount_desc">🔥 Eng katta chegirma foizi bo‘yicha</option>
+                  <option value="discount_desc">Eng katta chegirma foizi bo‘yicha</option>
                 )}
                 <option value="rating_desc">⭐ {t('catalog.sort_rating', 'Yulduzlar bo‘yicha (Reyting: Yuqoridan pastga)')}</option>
                 <option value="price_asc">{t('catalog.sort_price_asc', 'Narx: Arzondan qimmatga')}</option>

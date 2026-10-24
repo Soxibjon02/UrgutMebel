@@ -32,7 +32,8 @@ import {
   Briefcase,
   Package,
   Wrench,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 export const CraftsmanDashboard = () => {
@@ -181,7 +182,7 @@ export const CraftsmanDashboard = () => {
     return (
       <div style={{ padding: '6rem 0', textAlign: 'center' }}>
         <div className="container" style={{ maxWidth: '520px' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🔨</div>
+          <Hammer size={54} style={{ color: '#0071e3', margin: '0 auto 1rem', display: 'block' }} />
           <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.75rem' }}>
             Usta Ruxsati Talab Qilinadi
           </h2>
@@ -842,7 +843,7 @@ export const CraftsmanDashboard = () => {
                       checked={scheduleForm.service_repair}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, service_repair: e.target.checked })}
                     />
-                    <span>🛠️ Uy mebellari va jihozlarini ta‘mirlash</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Wrench size={15} /> Uy mebellari va jihozlarini ta‘mirlash</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
                     <input
@@ -850,7 +851,7 @@ export const CraftsmanDashboard = () => {
                       checked={scheduleForm.service_moving}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, service_moving: e.target.checked })}
                     />
-                    <span>🚚 Mebel ko‘chirish, demontaj va montaj</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Package size={15} /> Mebel ko‘chirish, demontaj va montaj</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
                     <input
@@ -858,7 +859,7 @@ export const CraftsmanDashboard = () => {
                       checked={scheduleForm.service_custom}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, service_custom: e.target.checked })}
                     />
-                    <span>🪚 Buyurtma asosida yangi mebel yasash</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Hammer size={15} /> Buyurtma asosida yangi mebel yasash</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', background: 'var(--bg-secondary)', padding: '0.6rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
                     <input
@@ -866,7 +867,7 @@ export const CraftsmanDashboard = () => {
                       checked={scheduleForm.service_restoration}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, service_restoration: e.target.checked })}
                     />
-                    <span>✨ Mebel restavratsiyasi va loklash</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Sparkles size={15} /> Mebel restavratsiyasi va loklash</span>
                   </label>
                 </div>
               </div>
@@ -1213,7 +1214,7 @@ export const CraftsmanDashboard = () => {
 
             {craftsmanOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }} className="glass-card">
-                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📭</div>
+                <div style={{ margin: '0 auto 0.75rem', display: 'flex', justifyContent: 'center', color: 'var(--text-muted)' }}><FileText size={44} /></div>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.35rem' }}>Hozircha yangi shaxsiy buyurtmalar yo‘q</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Mijoz sizning profilingizdan murojaat qilganda bu yerda darhol aks etadi</p>
               </div>

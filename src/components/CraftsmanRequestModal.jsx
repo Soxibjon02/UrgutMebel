@@ -181,11 +181,11 @@ export const CraftsmanRequestModal = ({ craftsman, isOpen, onClose }) => {
                   onChange={(e) => setServiceType(e.target.value)}
                   style={{ width: '100%', padding: '0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}
                 >
-                  <option value="Uy mebellari va jihozlarini ta'mirlash">🛠️ {t('craftsmen.service_repair', 'Uy mebellari va jihozlarini ta\'mirlash')}</option>
-                  <option value="Mebellarni ko'chirish, demontaj va montaj (yig'ish)">🚚 {t('craftsmen.service_assembly', 'Mebellarni ko\'chirish, demontaj va montaj')}</option>
-                  <option value="Yangi mebel yasash (shaxsiy buyurtma)">🪚 {t('craftsmen.service_custom', 'Yangi mebel yasash (shaxsiy buyurtma)')}</option>
-                  <option value="Mebel restavratsiyasi va yangilash">✨ {t('craftsmen.service_restore', 'Mebel restavratsiyasi va yangilash')}</option>
-                  <option value="Boshqa duradgorlik xizmati">📦 {t('common.other', 'Boshqa duradgorlik xizmati')}</option>
+                  <option value="Uy mebellari va jihozlarini ta'mirlash">{t('craftsmen.service_repair', 'Uy mebellari va jihozlarini ta\'mirlash')}</option>
+                  <option value="Mebellarni ko'chirish, demontaj va montaj (yig'ish)">{t('craftsmen.service_assembly', 'Mebellarni ko\'chirish, demontaj va montaj')}</option>
+                  <option value="Yangi mebel yasash (shaxsiy buyurtma)">{t('craftsmen.service_custom', 'Yangi mebel yasash (shaxsiy buyurtma)')}</option>
+                  <option value="Mebel restavratsiyasi va yangilash">{t('craftsmen.service_restore', 'Mebel restavratsiyasi va yangilash')}</option>
+                  <option value="Boshqa duradgorlik xizmati">{t('common.other', 'Boshqa duradgorlik xizmati')}</option>
                 </select>
               </div>
 
