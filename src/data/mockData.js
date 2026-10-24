@@ -604,6 +604,111 @@ export const initialProducts = [
     rating: 4.65,
     reviews_count: 14,
     likes_count: 39
+  },
+  {
+    id: "prod-11",
+    category_id: "cat-2",
+    store_id: "store-2",
+    store_name: "Zarafshon Lux Mebel Uyi",
+    store_phone: "+998 91 555 12 34",
+    name: "Ergonomik Ortopedik Matras 'Sleep Master 7-Zone'",
+    slug: "ergonomik-ortopedik-matras-sleep-master",
+    price: 3600000,
+    discount_price: 2990000,
+    stock: 14,
+    material: "Mustaqil prujinalar bloki (Pocket Spring), tabiiy kokos koyrasi, antibakterial trikotaj",
+    dimensions: "200 x 180 x 24 sm",
+    colors: ["Oq nafis naqshli"],
+    description: "Umurtqa pog'onasi uchun 7-zonaviy ortopedik tayanch tizimiga ega shifobaxsh matras. Tana vaznini teng taqsimlab, sog'lom uyqu beradi.",
+    specifications: {
+      "Prujina tizimi": "Mustaqil Pocket Spring (512 dona/m²)",
+      "Qatlamlar": "Latekslangan kokos koyrasi + Ortopedik ko'pik",
+      "G‘ilof": "Yechiladigan antibakterial Silver-care trikotaj",
+      "Kafolat": "5 yil rasmiy kafolat"
+    },
+    images: [
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?auto=format&fit=crop&w=1000&q=80"
+    ],
+    is_published: true,
+    is_featured: true,
+    is_new: true,
+    is_popular: true,
+    is_trending: true,
+    trending_rank: 11,
+    tags: ["matras", "ortopedik", "yotoqxona", "chegirma"],
+    rating: 4.95,
+    reviews_count: 42,
+    likes_count: 89
+  },
+  {
+    id: "prod-12",
+    category_id: "cat-2",
+    store_id: "store-2",
+    store_name: "Zarafshon Lux Mebel Uyi",
+    store_phone: "+998 91 555 12 34",
+    name: "Premium Anatomik Memory Foam Matras 'Cloud Lux'",
+    slug: "premium-anatomik-memory-foam-matras-cloud-lux",
+    price: 4900000,
+    discount_price: 4100000,
+    stock: 8,
+    material: "Tana haroratiga moslashuvchi xotirali Memory Foam, tabiiy lateks",
+    dimensions: "200 x 160 x 26 sm",
+    colors: ["Oq / Kulrang kant"],
+    description: "Tana shaklini eslab qoluvchi innovatsion Memory Foam texnologiyasi. Charchoqni yengish va chuqur orom olish uchun ideal.",
+    specifications: {
+      "Asos": "Zichligi yuqori ortopedik ko'pik + 4 sm Memory Foam",
+      "Qattiqlik": "O'rta yumshoq (H2/H3 universal)",
+      "Maksimal yuk": "140 kg gacha har bir o'ringa",
+      "Kafolat": "7 yil"
+    },
+    images: [
+      "https://images.unsplash.com/photo-1582582621959-48d27397dc69?auto=format&fit=crop&w=1000&q=80"
+    ],
+    is_published: true,
+    is_featured: false,
+    is_new: true,
+    is_popular: true,
+    is_trending: false,
+    trending_rank: 12,
+    tags: ["matras", "memory foam", "anatomik", "yotoqxona"],
+    rating: 4.9,
+    reviews_count: 29,
+    likes_count: 64
+  },
+  {
+    id: "prod-13",
+    category_id: "cat-6",
+    store_id: "store-1",
+    store_name: "Urgut Shahar Mebel Markazi",
+    store_phone: "+998 90 456 78 90",
+    name: "Burchakli Qulay Divan 'Istanbul Modern'",
+    slug: "burchakli-qulay-divan-istanbul-modern",
+    price: 11500000,
+    discount_price: 9900000,
+    stock: 6,
+    material: "Qayin karkas, suv o'tkazmaydigan nano-velur",
+    dimensions: "300 x 190 x 85 sm",
+    colors: ["To'q kulrang", "Sariq xantal", "Bej"],
+    description: "Katta oila va mehmonlar uchun keng, ochiluvchi va sig'imli choyshab qutisi bilan jihozlangan burchakli divan.",
+    specifications: {
+      "Mexanizm": "Delfin ochilish tizimi",
+      "Karkas": "Quritilgan qayin yog'ochi",
+      "Kafolat": "3 yil"
+    },
+    images: [
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80"
+    ],
+    is_published: true,
+    is_featured: true,
+    is_new: false,
+    is_popular: true,
+    is_trending: true,
+    trending_rank: 13,
+    tags: ["divan", "yumshoq-mebellar", "burchak divan", "mehmonxona"],
+    rating: 4.88,
+    reviews_count: 35,
+    likes_count: 82
   }
 ];
 

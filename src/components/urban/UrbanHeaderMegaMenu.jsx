@@ -14,7 +14,12 @@ import {
   ArrowRight,
   Sun,
   Moon,
-  MapPin
+  MapPin,
+  Layers,
+  Flame,
+  Grid,
+  Compass,
+  ArrowUpRight
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -35,6 +40,7 @@ export const UrbanHeaderMegaMenu = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMegamenu, setActiveMegamenu] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSectionsOpen, setMobileSectionsOpen] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -43,20 +49,110 @@ export const UrbanHeaderMegaMenu = () => {
     }
   };
 
+  // Nav categories in top bar
   const navCategories = [
     { id: 'custom-order', label: 'Maxsus Buyurtma', badge: '✨ Buyurtma', link: '/custom-order' },
     { id: 'craftsmen', label: 'Ustalar', badge: '🔨 Ustalar', link: '/craftsmen' },
     { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', link: '/furniture?filter=discount' },
-    { id: 'new-arrivals', label: 'Yangi Kelganlar', badge: 'Yangi', hasMegamenu: true },
-    { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-living' },
-    { id: 'living', label: 'Mehmonxona', link: '/furniture?category=cat-living' },
-    { id: 'bedroom', label: 'Yotoqxona', link: '/furniture?category=cat-bedroom' },
-    { id: 'dining', label: 'Oshxona & Stol', link: '/furniture?category=cat-dining' },
-    { id: 'mattresses', label: 'Matraslar', link: '/furniture?category=cat-bedroom' },
-    { id: 'study', label: 'Ish & Ofis', link: '/furniture?category=cat-office' },
-    { id: 'storage', label: 'Shkaflar', link: '/furniture?category=cat-wardrobe' },
-    { id: 'stores', label: 'Showroomlar', link: '/stores' }
+    { id: 'sections', label: 'Bo‘limlar', badge: 'Barchasi', hasMegamenu: true },
+    { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-6' },
+    { id: 'living', label: 'Mehmonxona', link: '/furniture?category=cat-1' },
+    { id: 'bedroom', label: 'Yotoqxona', link: '/furniture?category=cat-2' },
+    { id: 'dining', label: 'Oshxona & Stol', link: '/furniture?category=cat-3' },
+    { id: 'mattresses', label: 'Matras', link: '/furniture?category=cat-2&sub=matras' }
   ];
+
+  // All 37 Homepage Sections Logically Categorized for Instant Smooth Jumps
+  const homepageSectionGroups = [
+    {
+      group: '👟 Dahliz & Poyabzal',
+      items: [
+        { id: 'shoe_racks', label: 'Poyabzal Javonlari (Shoe Racks)', badge: 'Trend' },
+        { id: 'wardrobes', label: 'Kiyim Shkaflari (Wardrobes)', badge: 'Keng' },
+        { id: 'chest_of_drawers', label: 'Komodlar (Chest of Drawers)' },
+        { id: 'shoe_racks_banner', label: 'Dahliz Mebellari Banneri' }
+      ]
+    },
+    {
+      group: '🔥 Aksiya & Chegirmalar',
+      items: [
+        { id: 'deal_zone', label: 'Aksiya Maydoni (Deal Zone)', badge: 'Aksiya' },
+        { id: 'new_arrivals', label: 'Yangi Kelganlar (New Arrivals)', badge: 'Yangi' },
+        { id: 'celebrations_banner', label: 'Bayram Chegirmalari (-40%)' },
+        { id: 'bank_offers', label: 'Bank Takliflari & Keshbek' },
+        { id: 'gift_card', label: 'Sovg‘a Sertifikatlari' }
+      ]
+    },
+    {
+      group: '✨ Toifalar & Ilhom',
+      items: [
+        { id: 'category_pills', label: 'Tezkor Mebel Toifalari' },
+        { id: 'top_categories', label: 'Asosiy Top Kategoriyalar', badge: 'Sara' },
+        { id: 'video_reels', label: 'Video Lavhalar (Watch & Shop)' },
+        { id: 'shop_the_look', label: 'Xonalar Bo‘yicha Ilhom' },
+        { id: 'decor_corner', label: 'Dekor va Chiroqlar Burchagi' }
+      ]
+    },
+    {
+      group: '🛋️ Yumshoq Mebellar',
+      items: [
+        { id: 'lounge_chairs', label: 'Dam Olish Kreslolari (Lounge Chairs)' },
+        { id: 'sofa_beds', label: 'Transformatsiya Divanlar (Sofa Beds)' },
+        { id: 'recliners', label: 'Qulay Recliner Kreslolar' },
+        { id: 'coffee_tables', label: 'Kofe Stollari (Coffee Tables)' },
+        { id: 'tv_units', label: 'TV Jihozlari & Podstavkalar' },
+        { id: 'c_tables', label: 'C-Shaklli Qulay Stollar' }
+      ]
+    },
+    {
+      group: '🛏️ Yotoqxona (Bedroom)',
+      items: [
+        { id: 'bedroom_banner', label: 'To‘liq Yotoqxona To‘plami' },
+        { id: 'hydraulic_beds', label: 'Gidravlik Karavotlar (Storage)', badge: 'Top' },
+        { id: 'non_storage_beds', label: 'Ixcham Karavotlar (Non-Storage)' },
+        { id: 'mattresses', label: 'Ortopedik Matraslar' },
+        { id: 'toledo_collection', label: 'Toledo Premium Kolleksiyasi' }
+      ]
+    },
+    {
+      group: '🍽️ Oshxona & Ofis',
+      items: [
+        { id: 'modular_kitchen', label: 'Modulli Oshxona Garniturlari', badge: 'Loyiha' },
+        { id: 'sideboards', label: 'Idish Javonlari & Bufetlar' },
+        { id: 'study_tables', label: 'Yozuv & Kompyuter Stollari' },
+        { id: 'study_tables_feature', label: 'Ofis Stollari To‘plami' },
+        { id: 'bookshelves', label: 'Kitob Javonlari (Bookshelves)' }
+      ]
+    },
+    {
+      group: '🏪 Do‘konlar & Kafolat',
+      items: [
+        { id: 'explore_stores', label: 'Urgut Mebel Showroomlari' },
+        { id: 'nearest_store', label: 'Eng Yaqin Do‘konni Topish' },
+        { id: 'trust_badges', label: 'Sifat va Rasmiy Kafolat' },
+        { id: 'partner_brands_banner', label: 'Hamkor Ishlab Chiqaruvchilar' },
+        { id: 'solid_wood_products', label: 'Tabiiy Massiv Yog‘och Mebellar' }
+      ]
+    }
+  ];
+
+  // Smooth jump to homepage section with visual highlight pulse
+  const handleJumpToSection = (sectionId) => {
+    setActiveMegamenu(null);
+    setMobileMenuOpen(false);
+    setMobileSectionsOpen(false);
+
+    if (window.location.pathname === '/') {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('section-highlight-pulse');
+        setTimeout(() => el.classList.remove('section-highlight-pulse'), 2500);
+      }
+    } else {
+      navigate(`/?section=${sectionId}`);
+    }
+  };
 
   return (
     <div
@@ -264,7 +360,7 @@ export const UrbanHeaderMegaMenu = () => {
                 {favoritesCount}
               </span>
             )}
-            <span className="urban-icon-label" style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Saralangan</span>
+            <span className="urban-icon-label" style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Tanlangan</span>
           </Link>
 
           {/* Cart */}
@@ -299,7 +395,7 @@ export const UrbanHeaderMegaMenu = () => {
           </Link>
 
           {/* User profile */}
-          <div style={{ position: 'relative' }} className="urban-desktop-only">
+          <div style={{ position: 'relative' }}>
             {isGuest ? (
               <button
                 type="button"
@@ -342,13 +438,14 @@ export const UrbanHeaderMegaMenu = () => {
               color: 'var(--text-main)',
               cursor: 'pointer'
             }}
+            aria-label="Menyu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Search input bar (matches IMG_20261024_095617_296.jpg) */}
+      {/* Mobile Search input bar */}
       <div
         className="urban-mobile-search-row"
         style={{
@@ -361,15 +458,16 @@ export const UrbanHeaderMegaMenu = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="What are you looking for?"
+            placeholder="Mebel yoki to‘plam qidirish..."
+            className="urban-search-input"
             style={{
               width: '100%',
-              padding: '0.65rem 2.8rem 0.65rem 1.1rem',
-              borderRadius: '8px',
-              border: '1px solid var(--border-subtle)',
+              padding: '0.6rem 2.5rem 0.6rem 1rem',
+              borderRadius: 'var(--radius-full)',
+              border: '1.5px solid var(--border-subtle)',
               backgroundColor: 'var(--bg-secondary)',
               color: 'var(--text-main)',
-              fontSize: '0.88rem',
+              fontSize: '0.86rem',
               outline: 'none'
             }}
           />
@@ -391,91 +489,140 @@ export const UrbanHeaderMegaMenu = () => {
         </form>
       </div>
 
-      {/* Megamenu Category Navigation Bar */}
+      {/* Megamenu Category Navigation Bar (Visible on Desktop & Mobile Scrollable Bar) */}
       <div
         className="urban-megamenu-nav-row"
         style={{
           borderTop: '1px solid var(--border-subtle)',
-          backgroundColor: 'var(--bg-card)'
+          backgroundColor: 'var(--bg-card)',
+          position: 'relative'
         }}
       >
         <div
-          className="container"
+          className="container no-scrollbar"
           style={{
             maxWidth: '1280px',
             margin: '0 auto',
             padding: '0 1.25rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '1.75rem',
+            gap: '1.25rem',
             overflowX: 'auto',
             whiteSpace: 'nowrap',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
           }}
         >
-          {navCategories.map((cat) => (
-            <div
-              key={cat.id}
-              onMouseEnter={() => cat.hasMegamenu && setActiveMegamenu(cat.id)}
-              onMouseLeave={() => cat.hasMegamenu && setActiveMegamenu(null)}
-              style={{ position: 'static' }}
-            >
-              <Link
-                to={cat.link || `/furniture?category=${cat.id}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.75rem 0',
-                  fontSize: '0.84rem',
-                  fontWeight: 600,
-                  color: 'var(--text-main)',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
-                  position: 'relative'
-                }}
-                className="urban-megamenu-item"
+          {navCategories.map((cat) => {
+            const isSections = cat.id === 'sections';
+
+            return (
+              <div
+                key={cat.id}
+                onMouseEnter={() => cat.hasMegamenu && setActiveMegamenu(cat.id)}
+                onMouseLeave={() => cat.hasMegamenu && setActiveMegamenu(null)}
+                style={{ position: 'static' }}
               >
-                <span>{cat.label}</span>
-                {cat.badge && (
-                  <span
-                    style={{
-                      fontSize: '0.65rem',
-                      fontWeight: 800,
-                      backgroundColor: cat.id === 'new-arrivals' ? '#3b82f6' : '#ef4444',
-                      color: '#ffffff',
-                      padding: '0.1rem 0.4rem',
-                      borderRadius: '4px'
+                {isSections ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.innerWidth <= 992) {
+                        setMobileSectionsOpen(!mobileSectionsOpen);
+                      } else {
+                        setActiveMegamenu(activeMegamenu === 'sections' ? null : 'sections');
+                      }
                     }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.75rem 0.5rem',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      color: activeMegamenu === 'sections' || mobileSectionsOpen ? 'var(--figma-coral, #FA6D58)' : 'var(--text-main)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    className="urban-megamenu-item"
                   >
-                    {cat.badge}
-                  </span>
+                    <span>{cat.label}</span>
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        backgroundColor: '#0071e3',
+                        color: '#ffffff',
+                        padding: '0.1rem 0.45rem',
+                        borderRadius: '980px'
+                      }}
+                    >
+                      {cat.badge}
+                    </span>
+                    <ChevronDown size={13} color="var(--text-muted)" />
+                  </button>
+                ) : (
+                  <Link
+                    to={cat.link}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.75rem 0.5rem',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      color: 'var(--text-main)',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    className="urban-megamenu-item"
+                  >
+                    <span>{cat.label}</span>
+                    {cat.badge && (
+                      <span
+                        style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
+                          backgroundColor: cat.id === 'deal-zone' ? '#ef4444' : cat.id === 'craftsmen' ? '#0071e3' : 'var(--figma-coral, #FA6D58)',
+                          color: '#ffffff',
+                          padding: '0.1rem 0.45rem',
+                          borderRadius: '980px'
+                        }}
+                      >
+                        {cat.badge}
+                      </span>
+                    )}
+                  </Link>
                 )}
-                {cat.hasMegamenu && <ChevronDown size={12} color="var(--text-muted)" />}
-              </Link>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* FLYOUT MEGAMENU FOR NEW ARRIVALS (Matches the screenshot megamenu perfectly!) */}
-      {activeMegamenu === 'new-arrivals' && (
+      {/* FLYOUT MEGAMENU FOR "BO‘LIMLAR" (Grouped by Category with Direct Section Anchors) */}
+      {activeMegamenu === 'sections' && (
         <div
-          onMouseEnter={() => setActiveMegamenu('new-arrivals')}
+          onMouseEnter={() => setActiveMegamenu('sections')}
           onMouseLeave={() => setActiveMegamenu(null)}
-          className="urban-megamenu-flyout"
+          className="urban-megamenu-flyout apple-card"
           style={{
             position: 'absolute',
             top: '100%',
             left: 0,
             right: 0,
             backgroundColor: 'var(--bg-card)',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.14)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.18)',
             borderTop: '2px solid var(--figma-coral, #FA6D58)',
             borderBottom: '1px solid var(--border-subtle)',
             padding: '2rem 1.5rem',
-            zIndex: 999
+            zIndex: 999,
+            maxHeight: '80vh',
+            overflowY: 'auto'
           }}
         >
           <div
@@ -484,131 +631,181 @@ export const UrbanHeaderMegaMenu = () => {
               maxWidth: '1280px',
               margin: '0 auto',
               display: 'grid',
-              gridTemplateColumns: 'repeat(6, 1fr) 260px',
-              gap: '1.5rem'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+              gap: '1.75rem'
             }}
           >
-            {/* Col 1: Beds */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Beds (Karavotlar)
+            {homepageSectionGroups.map((group, idx) => (
+              <div key={idx}>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    fontWeight: 800,
+                    color: 'var(--text-main)',
+                    marginBottom: '0.85rem',
+                    paddingBottom: '0.35rem',
+                    borderBottom: '1.5px solid var(--border-subtle)'
+                  }}
+                >
+                  {group.group}
+                </div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                  {group.items.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => handleJumpToSection(item.id)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: '0.2rem 0',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.82rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          textAlign: 'left',
+                          transition: 'all 0.2s ease',
+                          width: '100%'
+                        }}
+                        className="urban-section-jump-btn"
+                      >
+                        <span style={{ lineHeight: 1.3 }}>{item.label}</span>
+                        {item.badge && (
+                          <span
+                            style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 800,
+                              backgroundColor: item.badge === 'Aksiya' ? '#fee2e2' : item.badge === 'Yangi' ? '#dbeafe' : 'var(--bg-secondary)',
+                              color: item.badge === 'Aksiya' ? '#dc2626' : item.badge === 'Yangi' ? '#1d4ed8' : 'var(--text-main)',
+                              padding: '0.05rem 0.35rem',
+                              borderRadius: '4px',
+                              marginLeft: 'auto',
+                              flexShrink: 0
+                            }}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>King Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Queen Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Single Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Hydraulic Storage Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Beds Without Storage</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Poster Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Upholstered Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Bunk Beds</Link></li>
-              </ul>
-            </div>
+            ))}
+          </div>
 
-            {/* Col 2: Mattresses */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Mattresses (Matraslar)
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>King Size Mattress</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Queen Size Mattress</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Single Bed Mattress</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Memory Foam</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Latex Mattress</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Orthopedic Mattress</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Spring Mattress</Link></li>
-              </ul>
-            </div>
-
-            {/* Col 3: Wardrobes */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Wardrobes (Garderob)
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>1 Door Wardrobe</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>2 Door Wardrobe</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>3 Door Wardrobe</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>4 Door Wardrobe</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Sliding Wardrobe</Link></li>
-              </ul>
-            </div>
-
-            {/* Col 4: Bedroom Storage */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Bedroom Storage
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Dressing Tables</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Bedside Tables</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Chest Of Drawers</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Benches</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Storage Chests</Link></li>
-              </ul>
-            </div>
-
-            {/* Col 5: Kids Room & Pet */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Kids & Others
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Bunk Beds</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Kids Wardrobes</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Kids Tables & Chairs</Link></li>
-                <li><Link to="/furniture" style={{ color: 'inherit', textDecoration: 'none' }}>Pet Beds</Link></li>
-              </ul>
-            </div>
-
-            {/* Col 6: New Collections */}
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                Kolleksiyalar
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <li><Link to="/furniture" style={{ color: 'var(--figma-coral, #FA6D58)', fontWeight: 700, textDecoration: 'none' }}>Toledo Collection</Link></li>
-                <li><Link to="/furniture" style={{ color: 'var(--figma-coral, #FA6D58)', fontWeight: 700, textDecoration: 'none' }}>Atmos Collection</Link></li>
-                <li><Link to="/furniture" style={{ color: 'var(--figma-coral, #FA6D58)', fontWeight: 700, textDecoration: 'none' }}>Astra Collection</Link></li>
-                <li><Link to="/furniture" style={{ color: 'var(--figma-coral, #FA6D58)', fontWeight: 700, textDecoration: 'none' }}>Bloom Collection</Link></li>
-              </ul>
-            </div>
-
-            {/* Col 7: Promotional Graphic */}
-            <div
+          <div
+            style={{
+              maxWidth: '1280px',
+              margin: '1.5rem auto 0',
+              paddingTop: '1rem',
+              borderTop: '1px solid var(--border-subtle)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.78rem',
+              color: 'var(--text-light)'
+            }}
+          >
+            <span>💡 Bosh sahifadagi istalgan bo‘lim ustiga bossangiz, sahifa o‘sha qismga ravon o‘tadi.</span>
+            <button
+              type="button"
+              onClick={() => setActiveMegamenu(null)}
               style={{
-                borderRadius: '8px',
-                overflow: 'hidden',
-                position: 'relative',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                padding: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                minHeight: '220px'
+                background: 'none',
+                border: 'none',
+                color: 'var(--figma-coral, #FA6D58)',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.78rem'
               }}
             >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%)' }} />
-              <div style={{ position: 'relative', zIndex: 2, color: '#ffffff' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#fbbf24', fontWeight: 700 }}>Yangi To‘plam</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.2rem 0 0.5rem' }}>Beds from 2,699,000 so‘m</div>
-                <Link
-                  to="/furniture"
-                  className="btn btn-primary btn-sm"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.76rem', borderRadius: '4px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  <span>Shop Now</span> <ArrowRight size={13} />
-                </Link>
+              Yopish &times;
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Drawer For "Bo‘limlar" Categories */}
+      {mobileSectionsOpen && (
+        <div
+          onClick={() => setMobileSectionsOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              padding: '1.5rem 1.25rem',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: '0 -10px 40px rgba(0,0,0,0.2)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Layers size={18} color="var(--figma-coral, #FA6D58)" />
+                <span>Barcha Sayt Bo‘limlari</span>
               </div>
+              <button
+                type="button"
+                onClick={() => setMobileSectionsOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {homepageSectionGroups.map((group, idx) => (
+                <div key={idx}>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--figma-coral, #FA6D58)', marginBottom: '0.5rem' }}>
+                    {group.group}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.45rem' }}>
+                    {group.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleJumpToSection(item.id)}
+                        style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: '10px',
+                          padding: '0.55rem 0.65rem',
+                          textAlign: 'left',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          color: 'var(--text-main)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* Mobile Drawer Menu */}
+      {/* Regular Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div
           style={{
@@ -661,15 +858,29 @@ export const UrbanHeaderMegaMenu = () => {
           border-color: var(--figma-coral, #FA6D58) !important;
           box-shadow: 0 0 0 3px rgba(250, 109, 88, 0.15) !important;
         }
+        .urban-megamenu-item {
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          border-radius: 8px !important;
+        }
         .urban-megamenu-item:hover {
           color: var(--figma-coral, #FA6D58) !important;
+          background-color: rgba(250, 109, 88, 0.08) !important;
+          transform: translateY(-1px);
+        }
+        .urban-section-jump-btn:hover {
+          color: var(--figma-coral, #FA6D58) !important;
+          transform: translateX(4px);
         }
         @media (max-width: 992px) {
-          .urban-desktop-search, .urban-megamenu-nav-row, .urban-desktop-only, .urban-icon-label {
+          .urban-desktop-search, .urban-desktop-only, .urban-icon-label {
             display: none !important;
           }
-          .urban-mobile-search-row, .urban-mobile-store-icon {
+          .urban-mobile-search-row, .urban-mobile-store-icon, .urban-mobile-menu-btn {
             display: block !important;
+          }
+          .urban-megamenu-nav-row {
+            display: block !important;
+            padding: 0.15rem 0;
           }
         }
       `}</style>

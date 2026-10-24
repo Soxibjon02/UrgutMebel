@@ -1,14 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
+import { dataService, getStored } from '../../services/dataService';
+import { initialCategories } from '../../data/mockData';
 
-export const UrbanTopCategoriesCurated = () => {
+export const UrbanTopCategoriesCurated = ({ title, subtitle }) => {
+  const [categories, setCategories] = useState(() => getStored('categories', initialCategories));
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const list = await dataService.getCategories();
+        if (list && list.length > 0) {
+          setCategories(list);
+        }
+      } catch (err) {
+        console.warn('Error loading categories:', err);
+      }
+    };
+    loadCategories();
+
+    const handleUpdate = () => loadCategories();
+    window.addEventListener('urgut_store_categories_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('urgut_store_categories_updated', handleUpdate);
+    };
+  }, []);
+
+  const activeCategories = (categories || []).filter((c) => c.is_active !== false);
+  const featuredCategory = activeCategories[0] || initialCategories[0];
+  const otherCategories = activeCategories.slice(1, 5);
+
   return (
-    <section className="urban-top-categories-section" style={{ padding: '2rem 0' }}>
+    <section className="urban-top-categories-section" style={{ padding: '2.5rem 0' }}>
       <div className="container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.25rem' }}>
-        <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1.25rem', letterSpacing: '-0.01em' }}>
-          Top Categories
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.25rem', letterSpacing: '-0.02em' }}>
+              {title || "Top Mebel Kategoriyalari"}
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+              {subtitle || "Urgutning eng sara duradgorlik durdonalari va zamonaviy xonadon to‘plamlari"}
+            </p>
+          </div>
+          <Link
+            to="/categories"
+            style={{
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              color: 'var(--figma-coral, #FA6D58)',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem'
+            }}
+          >
+            <span>Barcha toifalarni ko‘rish</span>
+            <ArrowUpRight size={15} />
+          </Link>
+        </div>
 
         <div
           className="urban-curated-grid"
@@ -18,58 +68,63 @@ export const UrbanTopCategoriesCurated = () => {
             gap: '1.25rem'
           }}
         >
-          {/* Left Large Card: Hydraulic Storage Beds */}
-          <Link
-            to="/furniture?category=cat-bedroom"
-            style={{
-              position: 'relative',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              minHeight: '440px',
-              backgroundColor: '#1f1e24',
-              backgroundImage: 'url(https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              textDecoration: 'none',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              padding: '2rem',
-              color: '#ffffff',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.08)'
-            }}
-            className="urban-curated-large-card"
-          >
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
-            <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem' }}>
-              <div>
-                <h3 style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.6rem)', fontWeight: 800, margin: '0 0 0.35rem', color: '#ffffff' }}>
-                  Hydraulic Storage Beds | 140+ Options
-                </h3>
-                <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f3f4f6' }}>
-                  from <span style={{ color: '#fbbf24', fontWeight: 900 }}>2,699,000 so‘m</span>
+          {/* Left Large Card */}
+          {featuredCategory && (
+            <Link
+              to={`/furniture?category=${featuredCategory.id}`}
+              style={{
+                position: 'relative',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                minHeight: '440px',
+                backgroundColor: '#1f1e24',
+                backgroundImage: `url(${featuredCategory.image_url || featuredCategory.image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80'})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                textDecoration: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                padding: '2rem',
+                color: '#ffffff',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+                transition: 'transform 0.3s ease'
+              }}
+              className="urban-curated-large-card"
+            >
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
+              <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--figma-coral, #FA6D58)', textTransform: 'uppercase', letterSpacing: '0.08em', backgroundColor: 'rgba(0,0,0,0.4)', padding: '0.2rem 0.55rem', borderRadius: '4px', display: 'inline-block', marginBottom: '0.5rem' }}>
+                    Tanlangan To‘plam
+                  </span>
+                  <h3 style={{ fontSize: 'clamp(1.3rem, 2.5vw, 1.8rem)', fontWeight: 800, margin: '0 0 0.35rem', color: '#ffffff' }}>
+                    {featuredCategory.name}
+                  </h3>
+                  <div style={{ fontSize: '0.88rem', color: '#e5e7eb', maxWidth: '380px' }}>
+                    {featuredCategory.description || "Uyingiz uchun eng sara zamonaviy mebellar"}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--figma-coral, #FA6D58)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 14px rgba(250, 109, 88, 0.4)'
+                  }}
+                >
+                  <ArrowUpRight size={22} />
                 </div>
               </div>
-
-              {/* Circular arrow button */}
-              <div
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  backgroundColor: '#4a1525',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}
-              >
-                <ArrowUpRight size={22} />
-              </div>
-            </div>
-          </Link>
+            </Link>
+          )}
 
           {/* Right 4-Pack Grid */}
           <div
@@ -80,121 +135,48 @@ export const UrbanTopCategoriesCurated = () => {
             }}
             className="urban-curated-subpack"
           >
-            {/* 1. 3-Seater Sofas */}
-            <Link
-              to="/furniture?category=cat-living"
-              style={{
-                position: 'relative',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                minHeight: '210px',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                padding: '1.25rem',
-                color: '#ffffff'
-              }}
-              className="urban-curated-subcard"
-            >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700 }}>3-Seater Sofas | 1200+ Options</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fbbf24', marginTop: '0.2rem' }}>from 1,399,000 so‘m</div>
-              </div>
-            </Link>
-
-            {/* 2. Shoe Racks */}
-            <Link
-              to="/furniture?category=cat-wardrobe"
-              style={{
-                position: 'relative',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                minHeight: '210px',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=600&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                padding: '1.25rem',
-                color: '#ffffff'
-              }}
-              className="urban-curated-subcard"
-            >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700 }}>Shoe Racks | 150+ Options</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fbbf24', marginTop: '0.2rem' }}>from 299,000 so‘m</div>
-              </div>
-            </Link>
-
-            {/* 3. Coffee Tables */}
-            <Link
-              to="/furniture?category=cat-living"
-              style={{
-                position: 'relative',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                minHeight: '210px',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=600&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                padding: '1.25rem',
-                color: '#ffffff'
-              }}
-              className="urban-curated-subcard"
-            >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700 }}>Coffee Tables | 550+ Options</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fbbf24', marginTop: '0.2rem' }}>from 249,000 so‘m</div>
-              </div>
-            </Link>
-
-            {/* 4. Dining Sets */}
-            <Link
-              to="/furniture?category=cat-dining"
-              style={{
-                position: 'relative',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                minHeight: '210px',
-                backgroundImage: 'url(https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                padding: '1.25rem',
-                color: '#ffffff'
-              }}
-              className="urban-curated-subcard"
-            >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700 }}>Dining Sets | 750+ Options</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fbbf24', marginTop: '0.2rem' }}>from 1,699,000 so‘m</div>
-              </div>
-            </Link>
+            {otherCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/furniture?category=${cat.id}`}
+                style={{
+                  position: 'relative',
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  minHeight: '210px',
+                  backgroundImage: `url(${cat.image_url || cat.image || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80'})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '1.25rem',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
+                  transition: 'transform 0.25s ease'
+                }}
+                className="urban-curated-subcard"
+              >
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%)', zIndex: 1 }} />
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#ffffff' }}>{cat.name}</div>
+                  <div style={{ fontSize: '0.76rem', color: '#fbbf24', marginTop: '0.2rem', fontWeight: 700 }}>
+                    Kolleksiyani ko‘rish &rarr;
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
 
       <style>{`
-        .urban-curated-large-card:hover, .urban-curated-subcard:hover {
+        .urban-curated-large-card:hover {
           transform: translateY(-3px);
-          box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+        }
+        .urban-curated-subcard:hover {
+          transform: translateY(-3px);
         }
         @media (max-width: 900px) {
           .urban-curated-grid {
@@ -202,6 +184,14 @@ export const UrbanTopCategoriesCurated = () => {
           }
           .urban-curated-large-card {
             min-height: 280px !important;
+          }
+          .urban-curated-subpack {
+            grid-template-columns: 1fr 1fr !important;
+          }
+        }
+        @media (max-width: 540px) {
+          .urban-curated-subpack {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>

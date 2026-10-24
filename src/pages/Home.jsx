@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { QuickBuyModal } from '../components/QuickBuyModal';
 import { UrbanHeroSlider } from '../components/UrbanHeroSlider';
 import { UrbanTrustBadges } from '../components/UrbanTrustBadges';
@@ -51,9 +52,26 @@ import {
 import { dataService, DEFAULT_HOME_SECTIONS, getStored } from '../services/dataService';
 
 export const Home = () => {
+  const [searchParams] = useSearchParams();
   const [quickBuyProduct, setQuickBuyProduct] = useState(null);
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
   const [sections, setSections] = useState(() => getStored('home_sections', DEFAULT_HOME_SECTIONS));
+
+  // Auto-scroll to section if URL has ?section=id or #id
+  useEffect(() => {
+    const targetSection = searchParams.get('section') || window.location.hash.replace('#', '');
+    if (targetSection) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(targetSection);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          el.classList.add('section-highlight-pulse');
+          setTimeout(() => el.classList.remove('section-highlight-pulse'), 2500);
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, sections]);
 
   const handleOpenQuickBuy = (product) => {
     setQuickBuyProduct(product);
@@ -300,7 +318,16 @@ export const Home = () => {
     <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', minHeight: '100vh' }}>
       
       {/* Dynamic Sections Rendered Exactly According to Super Admin Order & Visibility */}
-      {sortedActiveSections.map((sec) => renderSection(sec))}
+      {sortedActiveSections.map((sec) => (
+        <div
+          key={sec.id}
+          id={sec.id}
+          className="home-section-anchor"
+          style={{ scrollMarginTop: '110px' }}
+        >
+          {renderSection(sec)}
+        </div>
+      ))}
 
       {/* Mobile Floating Nearest Store Bar */}
       <UrbanNearestStoreBar />

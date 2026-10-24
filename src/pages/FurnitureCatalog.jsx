@@ -13,31 +13,44 @@ import {
   SlidersHorizontal,
   RotateCcw,
   Store,
-  Star
+  Star,
+  Tag,
+  Percent,
+  Sparkles,
+  Bed,
+  Sofa,
+  UtensilsCrossed,
+  Layers
 } from 'lucide-react';
 
 export const FurnitureCatalog = () => {
   const { settings } = useSettings();
   const { t, language, getLocalized } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter States
+  // Filter States extracted from URL
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedFilter, setSelectedFilter] = useState(searchParams.get('filter') || 'all'); // 'discount' | 'all'
+  const [selectedSub, setSelectedSub] = useState(searchParams.get('sub') || ''); // e.g. 'matras'
   const [selectedStore, setSelectedStore] = useState(searchParams.get('store') || 'all');
   const [maxPrice, setMaxPrice] = useState(30000000);
   const [selectedColor, setSelectedColor] = useState('all');
-  // Default sort is by accumulated star ratings (Highest stars first)
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'rating_desc');
   const [visibleCount, setVisibleCount] = useState(12);
+
+  // Sub-category filter specifically for discount page
+  const [discountCategoryFilter, setDiscountCategoryFilter] = useState('all');
 
   // Mobile filter sidebar toggle
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  // Load initial data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -56,16 +69,42 @@ export const FurnitureCatalog = () => {
       }
     };
     loadData();
+
+    // Listen to category updates from admin
+    const handleCategoryUpdate = () => {
+      dataService.getCategories().then((cats) => setCategories(cats || []));
+    };
+    window.addEventListener('urgut_store_categories_updated', handleCategoryUpdate);
+    return () => {
+      window.removeEventListener('urgut_store_categories_updated', handleCategoryUpdate);
+    };
   }, []);
 
+  // Sync state with URL search parameters
   useEffect(() => {
-    const cat = searchParams.get('category');
-    if (cat) setSelectedCategory(cat);
-    const search = searchParams.get('search');
-    if (search) setSearchQuery(search);
+    const cat = searchParams.get('category') || 'all';
+    setSelectedCategory(cat);
+
+    const filter = searchParams.get('filter') || 'all';
+    setSelectedFilter(filter);
+
+    const sub = searchParams.get('sub') || '';
+    setSelectedSub(sub);
+
+    const search = searchParams.get('search') || '';
+    setSearchQuery(search);
+
+    const store = searchParams.get('store') || 'all';
+    setSelectedStore(store);
+
+    const sort = searchParams.get('sort') || (filter === 'discount' ? 'discount_desc' : 'rating_desc');
+    setSortBy(sort);
+
+    // Scroll top smoothly on category/filter change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [searchParams]);
 
-  // Swatch colors matching Figma
+  // Color Swatches
   const figmaColorSwatches = [
     { label: 'Qora / Antrasit', color: '#1F2937', val: 'qora' },
     { label: 'Yalpiz yashil', color: '#A7D7C5', val: 'yashil' },
@@ -75,35 +114,153 @@ export const FurnitureCatalog = () => {
     { label: 'Och sarg‘ish', color: '#F7E7CE', val: 'krem' }
   ];
 
+  // Helper to match category with aliases
+  const isProductInCategory = (prod, targetCategory) => {
+    if (!targetCategory || targetCategory === 'all') return true;
+    const catLower = targetCategory.toLowerCase();
+
+    if (prod.category_id === targetCategory) return true;
+
+    // Check slug from loaded categories
+    const matchedCategory = categories.find((c) => c.id === targetCategory || c.slug === targetCategory);
+    if (matchedCategory && (prod.category_id === matchedCategory.id || prod.category_id === matchedCategory.slug)) {
+      return true;
+    }
+
+    // Mehmonxona (cat-1 / cat-living)
+    if (catLower === 'cat-1' || catLower === 'mehmonxona' || catLower === 'cat-living') {
+      return (
+        prod.category_id === 'cat-1' ||
+        prod.category_id === 'cat-living' ||
+        prod.tags?.some((t) => ['mehmonxona', 'vitrina', 'divan', 'tv podstavka'].includes(t.toLowerCase()))
+      );
+    }
+
+    // Yotoqxona (cat-2 / cat-bedroom)
+    if (catLower === 'cat-2' || catLower === 'yotoqxona' || catLower === 'cat-bedroom') {
+      return (
+        prod.category_id === 'cat-2' ||
+        prod.category_id === 'cat-bedroom' ||
+        prod.tags?.some((t) => ['yotoqxona', 'karavot', 'krovat', 'shkaf', 'matras'].includes(t.toLowerCase()))
+      );
+    }
+
+    // Oshxona (cat-3 / cat-dining / kitchen)
+    if (catLower === 'cat-3' || catLower === 'oshxona' || catLower === 'cat-dining') {
+      return (
+        prod.category_id === 'cat-3' ||
+        prod.category_id === 'cat-dining' ||
+        prod.tags?.some((t) => ['oshxona', 'stol', 'stul', 'garnitur', 'bufet'].includes(t.toLowerCase()))
+      );
+    }
+
+    // Ofis (cat-4 / ofis)
+    if (catLower === 'cat-4' || catLower === 'ofis') {
+      return (
+        prod.category_id === 'cat-4' ||
+        prod.tags?.some((t) => ['ofis', 'ish', 'yozuv stoli', 'kreslo'].includes(t.toLowerCase()))
+      );
+    }
+
+    // Bolalar (cat-5 / bolalar)
+    if (catLower === 'cat-5' || catLower === 'bolalar') {
+      return (
+        prod.category_id === 'cat-5' ||
+        prod.tags?.some((t) => ['bolalar', 'karavot', 'kichik'].includes(t.toLowerCase()))
+      );
+    }
+
+    // Yumshoq mebellar / Divanlar (cat-6 / cat-sofas / yumshoq-mebellar)
+    if (catLower === 'cat-6' || catLower === 'yumshoq-mebellar' || catLower === 'cat-sofas' || catLower === 'divanlar') {
+      return (
+        prod.category_id === 'cat-6' ||
+        prod.category_id === 'cat-sofas' ||
+        prod.tags?.some((t) => ['divan', 'kreslo', 'yumshoq', 'sofa'].includes(t.toLowerCase()))
+      );
+    }
+
+    return false;
+  };
+
+  // Helper for matras subcategory
+  const isProductMatras = (prod) => {
+    const q = 'matras';
+    return (
+      prod.name?.toLowerCase().includes(q) ||
+      prod.tags?.some((t) => t.toLowerCase().includes(q)) ||
+      prod.description?.toLowerCase().includes(q) ||
+      prod.material?.toLowerCase().includes(q)
+    );
+  };
+
+  // Check if a product is actually discounted
+  const isProductDiscounted = (prod) => {
+    return (
+      prod.discount_price &&
+      Number(prod.discount_price) > 0 &&
+      Number(prod.discount_price) < Number(prod.price)
+    );
+  };
+
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
+    // 1. DISCOUNT ONLY FILTER (When accessed via /furniture?filter=discount)
+    if (selectedFilter === 'discount') {
+      result = result.filter(isProductDiscounted);
+
+      // If user toggled a category inside the discount page
+      if (discountCategoryFilter !== 'all') {
+        result = result.filter((p) => isProductInCategory(p, discountCategoryFilter));
+      }
+    }
+
+    // 2. SUBCATEGORY FILTER (e.g. Matras)
+    if (selectedSub === 'matras') {
+      result = result.filter(isProductMatras);
+    }
+
+    // 3. MAIN CATEGORY FILTER (If not on discount-only page or if specified)
+    if (selectedCategory !== 'all' && selectedFilter !== 'discount') {
+      result = result.filter((p) => isProductInCategory(p, selectedCategory));
+    }
+
+    // 4. SEARCH QUERY
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q) ||
-          p.material?.toLowerCase().includes(q)
+          p.material?.toLowerCase().includes(q) ||
+          p.tags?.some((t) => t.toLowerCase().includes(q))
       );
     }
 
-    if (selectedCategory !== 'all') {
-      result = result.filter((p) => p.category_id === selectedCategory);
-    }
-
+    // 5. COLOR FILTER
     if (selectedColor !== 'all') {
       result = result.filter((p) => p.colors?.some((c) => c.toLowerCase().includes(selectedColor)));
     }
 
+    // 6. STORE FILTER
     if (selectedStore !== 'all') {
       result = result.filter((p) => p.store_id === selectedStore);
     }
 
+    // 7. PRICE FILTER
     result = result.filter((p) => (p.discount_price || p.price) <= maxPrice);
 
+    // 8. SORTING
     switch (sortBy) {
+      case 'discount_desc':
+        // Sort highest discount percentage first
+        result.sort((a, b) => {
+          const discountA = a.price ? (a.price - (a.discount_price || a.price)) / a.price : 0;
+          const discountB = b.price ? (b.price - (b.discount_price || b.price)) / b.price : 0;
+          return discountB - discountA;
+        });
+        break;
       case 'price_asc':
         result.sort((a, b) => (a.discount_price || a.price) - (b.discount_price || b.price));
         break;
@@ -118,7 +275,7 @@ export const FurnitureCatalog = () => {
         break;
       case 'rating_desc':
       default:
-        // "mebellar bo'limidagi elonlar yig'ilgan yulduzlar bo'yicha reyting shaklida chiqadi eng kam yulduz to'plagan elon pastga tushib ketaveradi"
+        // Highest stars and review count
         result.sort((a, b) => {
           const ratingA = Number(a.rating) || 0;
           const ratingB = Number(b.rating) || 0;
@@ -129,13 +286,41 @@ export const FurnitureCatalog = () => {
     }
 
     return result;
-  }, [products, searchQuery, selectedCategory, selectedStore, selectedColor, maxPrice, sortBy]);
+  }, [
+    products,
+    categories,
+    searchQuery,
+    selectedCategory,
+    selectedFilter,
+    selectedSub,
+    discountCategoryFilter,
+    selectedStore,
+    selectedColor,
+    maxPrice,
+    sortBy
+  ]);
 
   const displayedProducts = filteredProducts.slice(0, visibleCount);
 
+  // Discount counts by category for the discount pill bar
+  const discountStats = useMemo(() => {
+    const discountedAll = products.filter(isProductDiscounted);
+    return {
+      all: discountedAll.length,
+      living: discountedAll.filter((p) => isProductInCategory(p, 'cat-1')).length,
+      bedroom: discountedAll.filter((p) => isProductInCategory(p, 'cat-2')).length,
+      dining: discountedAll.filter((p) => isProductInCategory(p, 'cat-3')).length,
+      sofas: discountedAll.filter((p) => isProductInCategory(p, 'cat-6')).length
+    };
+  }, [products]);
+
+  // Reset all filters
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
+    setSelectedFilter('all');
+    setSelectedSub('');
+    setDiscountCategoryFilter('all');
     setSelectedStore('all');
     setSelectedColor('all');
     setMaxPrice(30000000);
@@ -143,19 +328,196 @@ export const FurnitureCatalog = () => {
     setSearchParams({});
   };
 
+  // =========================================================================
+  // DYNAMIC HERO BANNER CONFIGURATION (Replaces hardcoded Sofas and Armchairs)
+  // =========================================================================
+  const getBannerConfig = () => {
+    // 1. Aksiya va Chegirmalar
+    if (selectedFilter === 'discount') {
+      return {
+        badgeText: '-50% GACHA',
+        badgeBg: '#ef4444',
+        tagText: '🔥 KATTA MAVSUMIY AKSIYA',
+        tagColor: '#ef4444',
+        title: 'Aksiya va Chegirmalar',
+        desc: 'Urgut Mebel Markazidagi barcha chegirmali mahsulotlar to‘plami! Eng sara sifatli mebellarni maxsus arzon narxlarda xarid qiling.',
+        btnText: 'AKSIYADAGI MEBELLARNI KO‘RISH',
+        leftBg: 'rgba(239, 68, 68, 0.08)',
+        rightBg: 'rgba(239, 68, 68, 0.04)',
+        slides: [
+          'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 2. Matraslar (sub=matras)
+    if (selectedSub === 'matras') {
+      return {
+        badgeText: '💤 ORTOPEDIK',
+        badgeBg: '#0ea5e9',
+        tagText: 'SOG‘LOM VA OROMBAXSH UYQU',
+        tagColor: '#0ea5e9',
+        title: 'Ortopedik & Anatomik Matraslar',
+        desc: '7-zonaviy mustaqil prujinali, xotirali Memory Foam va tabiiy lateksli premium matraslar. Umurtqa salomatligi uchun ideal tanlov.',
+        btnText: 'MATRASLARNI SARALASH',
+        leftBg: 'rgba(14, 165, 233, 0.08)',
+        rightBg: 'rgba(14, 165, 233, 0.04)',
+        slides: [
+          'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1582582621959-48d27397dc69?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 3. Divanlar / Yumshoq Mebellar (cat-6)
+    if (selectedCategory === 'cat-6' || selectedCategory === 'yumshoq-mebellar' || selectedCategory === 'cat-sofas') {
+      return {
+        badgeText: '-35%',
+        badgeBg: 'var(--figma-coral, #FA6D58)',
+        tagText: 'YUMSHOQ MEBELLAR TO‘PLAMI',
+        tagColor: 'var(--figma-coral, #FA6D58)',
+        title: 'Sofas and Armchairs (Yumshoq Mebellar)',
+        desc: 'Eng sara zamonaviy yumshoq mebellar to‘plami. Hashamatli burchak divanlar, qulay dam olish kreslolari va transformer divanlar.',
+        btnText: 'BARCHA DIVANLARNI KO‘RISH',
+        leftBg: 'var(--figma-pastel-blue, #E8F0F8)',
+        rightBg: 'var(--figma-pastel-peach, #FDF0ED)',
+        slides: settings.sofas_hero_slides && settings.sofas_hero_slides.length > 0 ? settings.sofas_hero_slides : [
+          'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 4. Mehmonxona (cat-1)
+    if (selectedCategory === 'cat-1' || selectedCategory === 'mehmonxona' || selectedCategory === 'cat-living') {
+      const catObj = categories.find((c) => c.id === 'cat-1');
+      return {
+        badgeText: '👑 SHINAM',
+        badgeBg: '#f59e0b',
+        tagText: 'MEHMONXONA TO‘PLAMI',
+        tagColor: '#f59e0b',
+        title: catObj?.name || 'Mehmonxona Mebellari',
+        desc: catObj?.description || 'Xonadoningizga fayz bag‘ishlovchi premium yumshoq divanlar, hashamatli vitrinalar, TV podstavkalar va kofe stollari.',
+        btnText: 'MEHMONXONANI KO‘RISH',
+        leftBg: 'rgba(245, 158, 11, 0.08)',
+        rightBg: 'rgba(245, 158, 11, 0.04)',
+        slides: [
+          catObj?.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 5. Yotoqxona (cat-2)
+    if (selectedCategory === 'cat-2' || selectedCategory === 'yotoqxona' || selectedCategory === 'cat-bedroom') {
+      const catObj = categories.find((c) => c.id === 'cat-2');
+      return {
+        badgeText: '✨ LUXURY',
+        badgeBg: '#8b5cf6',
+        tagText: 'YOTOQXONA MEBELLARI',
+        tagColor: '#8b5cf6',
+        title: catObj?.name || 'Yotoqxona Mebellari',
+        desc: catObj?.description || 'Sokin va qulay uyqu bag‘ishlovchi zamonaviy krovatlar, keng kupe shkaflar, nafis komodlar va tualet stollari.',
+        btnText: 'YOTOQXONA TO‘PLAMINI KO‘RISH',
+        leftBg: 'rgba(139, 92, 246, 0.08)',
+        rightBg: 'rgba(139, 92, 246, 0.04)',
+        slides: [
+          catObj?.image_url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1540518614846-7ede433c4ef4?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 6. Oshxona & Stol (cat-3)
+    if (selectedCategory === 'cat-3' || selectedCategory === 'oshxona' || selectedCategory === 'cat-dining') {
+      const catObj = categories.find((c) => c.id === 'cat-3');
+      return {
+        badgeText: '🍽️ BARDOSH',
+        badgeBg: '#10b981',
+        tagText: 'OSHXONA & OVQATLANISH',
+        tagColor: '#10b981',
+        title: catObj?.name || 'Oshxona Mebellari & Ovqatlanish Stollari',
+        desc: catObj?.description || 'Namlikka va issiqqa chidamli akril garniturlar, tabiiy eman stollar va qulay ovqatlanish stullari to‘plami.',
+        btnText: 'OSHXONA MEBELLARINI KO‘RISH',
+        leftBg: 'rgba(16, 185, 129, 0.08)',
+        rightBg: 'rgba(16, 185, 129, 0.04)',
+        slides: [
+          catObj?.image_url || 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=1000&q=80',
+          'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=1000&q=80'
+        ]
+      };
+    }
+
+    // 7. Dynamic match for custom admin categories
+    if (selectedCategory !== 'all') {
+      const catObj = categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory);
+      if (catObj) {
+        return {
+          badgeText: '⭐️ TO‘PLAM',
+          badgeBg: 'var(--figma-coral, #FA6D58)',
+          tagText: 'URGUT MEBEL MARKAZI',
+          tagColor: 'var(--figma-coral, #FA6D58)',
+          title: getLocalized(catObj, 'name') || catObj.name,
+          desc: catObj.description || 'Urgutning yetakchi do‘konlari va ustalarining sara mebellari.',
+          btnText: 'TO‘PLAMNI KO‘RISH',
+          leftBg: 'var(--figma-pastel-blue, #E8F0F8)',
+          rightBg: 'var(--figma-pastel-peach, #FDF0ED)',
+          slides: catObj.image_url
+            ? [catObj.image_url]
+            : ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80']
+        };
+      }
+    }
+
+    // 8. Default: Barcha Mebellar Katalogi
+    return {
+      badgeText: '✨ BARCHASI',
+      badgeBg: 'var(--figma-coral, #FA6D58)',
+      tagText: 'URGUT MEBEL MARKAZI',
+      tagColor: 'var(--figma-coral, #FA6D58)',
+      title: 'Barcha Mebellar Katalogi',
+      desc: 'Urgut Mebel Markazining barcha do‘konlari va usta hunarmandlari mahsulotlari. Qulay narxlar, yuqori sifat va rasmiy kafolat bilan.',
+      btnText: 'MAHSULOTLARNI SARALASH',
+      leftBg: 'var(--figma-pastel-blue, #E8F0F8)',
+      rightBg: 'var(--figma-pastel-peach, #FDF0ED)',
+      slides: [
+        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80'
+      ]
+    };
+  };
+
+  const bannerConfig = getBannerConfig();
+
+  // Condition to show Autumn Collection (ONLY on unfiltered main catalog)
+  const showAutumnCollection =
+    selectedCategory === 'all' &&
+    selectedFilter !== 'discount' &&
+    !selectedSub &&
+    !searchQuery.trim();
+
   return (
     <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-main)' }}>
       
       {/* ==============================================================
-          1. FIGMA SPLIT HERO BANNER (Sale Off -35% Sofas and Armchairs)
+          1. DYNAMIC CATEGORY HERO BANNER (Adapted to the active section)
           ============================================================== */}
-      <section style={{ padding: '2rem 1.5rem 3.5rem' }}>
+      <section style={{ padding: '2rem 1.25rem 2.5rem' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
-          <div className="figma-split-hero">
-            {/* Left: Soft Pastel Blue with Slideshow */}
+          <div className="figma-split-hero" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            
+            {/* Left: Slideshow with tailored background */}
             <div
               style={{
-                backgroundColor: 'var(--figma-pastel-blue)',
+                backgroundColor: bannerConfig.leftBg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -166,22 +528,18 @@ export const FurnitureCatalog = () => {
               }}
             >
               <HeaderAfishaSlideshow
-                images={settings.sofas_hero_slides && settings.sofas_hero_slides.length > 0 ? settings.sofas_hero_slides : [
-                  "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1000&q=80",
-                  "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1000&q=80",
-                  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1000&q=80"
-                ]}
-                alt="Sofas and Armchairs"
+                images={bannerConfig.slides}
+                alt={bannerConfig.title}
                 interval={3500}
                 objectFit="contain"
               />
             </div>
 
-            {/* Right: Soft Peach Card with -35% badge */}
+            {/* Right: Info Card with Dynamic Badge & Title */}
             <div
               style={{
-                backgroundColor: 'var(--figma-pastel-peach)',
-                padding: '4rem 3.5rem',
+                backgroundColor: bannerConfig.rightBg,
+                padding: '3.5rem 3rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -189,62 +547,91 @@ export const FurnitureCatalog = () => {
                 position: 'relative'
               }}
             >
-              {/* -35% Circular Badge */}
+              {/* Dynamic Badge */}
               <div
                 style={{
                   position: 'absolute',
-                  top: '2.5rem',
-                  right: '2.5rem',
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--figma-coral)',
+                  top: '2rem',
+                  right: '2rem',
+                  minWidth: '60px',
+                  height: '60px',
+                  padding: '0 10px',
+                  borderRadius: '30px',
+                  backgroundColor: bannerConfig.badgeBg,
                   color: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
-                  fontSize: '1.05rem'
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
                 }}
               >
-                -35%
+                {bannerConfig.badgeText}
               </div>
 
               <span
                 style={{
-                  color: 'var(--figma-coral)',
+                  color: bannerConfig.tagColor,
                   fontSize: '0.85rem',
-                  fontWeight: 700,
+                  fontWeight: 800,
                   textTransform: 'uppercase',
                   letterSpacing: '0.12em',
-                  marginBottom: '0.75rem'
+                  marginBottom: '0.75rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
                 }}
               >
-                {t('hero.sale_off', 'Sale Off')}
+                {bannerConfig.tagText}
               </span>
+
               <h1
                 style={{
-                  fontSize: 'clamp(2.2rem, 4vw, 3rem)',
+                  fontSize: 'clamp(2rem, 3.6vw, 2.8rem)',
                   fontWeight: 800,
                   color: 'var(--text-main)',
-                  lineHeight: 1.15,
+                  lineHeight: 1.2,
                   margin: '0 0 1rem'
                 }}
               >
-                {t('hero.sofas_title', 'Sofas and Armchairs')}
+                {bannerConfig.title}
               </h1>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', marginBottom: '2rem' }}>
-                {t('hero.sofas_desc', 'Eng sara zamonaviy yumshoq mebellar to‘plami. Qulaylik va xonadon go‘zalligi bir joyda.')}
+
+              <p
+                style={{
+                  color: 'var(--text-muted)',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.6,
+                  maxWidth: '440px',
+                  marginBottom: '1.75rem'
+                }}
+              >
+                {bannerConfig.desc}
               </p>
+
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedCategory('all');
-                  window.scrollTo({ top: 600, behavior: 'smooth' });
+                  const target = document.getElementById('catalog-products-main');
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 550, behavior: 'smooth' });
+                  }
                 }}
                 className="btn-figma-coral"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.8rem 1.6rem',
+                  borderRadius: '980px',
+                  fontWeight: 700
+                }}
               >
-                {t('hero.check_all_items', 'CHECK ALL ITEMS >')}
+                <span>{bannerConfig.btnText}</span>
+                <span>&gt;</span>
               </button>
             </div>
           </div>
@@ -252,9 +639,156 @@ export const FurnitureCatalog = () => {
       </section>
 
       {/* ==============================================================
+          SPECIAL: DISCOUNT CATEGORY QUICK FILTER PILLS (Only on Aksiya)
+          ============================================================== */}
+      {selectedFilter === 'discount' && (
+        <section style={{ padding: '0 1.25rem 2rem' }}>
+          <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
+            <div
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                borderRadius: '12px',
+                border: '1.5px solid rgba(239, 68, 68, 0.25)',
+                padding: '1.25rem 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                boxShadow: '0 4px 20px rgba(239, 68, 68, 0.06)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ef4444'
+                  }}
+                >
+                  <Percent size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                    Aksiyadagi Mebellar Kategoriyasi
+                  </h3>
+                  <p style={{ margin: '0.15rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Faqat faol chegirmaga ega sara mebellar ro‘yxati ({discountStats.all} ta mahsulot)
+                  </p>
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setDiscountCategoryFilter('all')}
+                  style={{
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '980px',
+                    border: '1px solid',
+                    borderColor: discountCategoryFilter === 'all' ? '#ef4444' : 'var(--border-subtle)',
+                    backgroundColor: discountCategoryFilter === 'all' ? '#ef4444' : 'transparent',
+                    color: discountCategoryFilter === 'all' ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Barcha Aksiyalar ({discountStats.all})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiscountCategoryFilter('cat-6')}
+                  style={{
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '980px',
+                    border: '1px solid',
+                    borderColor: discountCategoryFilter === 'cat-6' ? '#ef4444' : 'var(--border-subtle)',
+                    backgroundColor: discountCategoryFilter === 'cat-6' ? '#ef4444' : 'transparent',
+                    color: discountCategoryFilter === 'cat-6' ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Divanlar & Kreslo ({discountStats.sofas})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiscountCategoryFilter('cat-1')}
+                  style={{
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '980px',
+                    border: '1px solid',
+                    borderColor: discountCategoryFilter === 'cat-1' ? '#ef4444' : 'var(--border-subtle)',
+                    backgroundColor: discountCategoryFilter === 'cat-1' ? '#ef4444' : 'transparent',
+                    color: discountCategoryFilter === 'cat-1' ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Mehmonxona ({discountStats.living})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiscountCategoryFilter('cat-2')}
+                  style={{
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '980px',
+                    border: '1px solid',
+                    borderColor: discountCategoryFilter === 'cat-2' ? '#ef4444' : 'var(--border-subtle)',
+                    backgroundColor: discountCategoryFilter === 'cat-2' ? '#ef4444' : 'transparent',
+                    color: discountCategoryFilter === 'cat-2' ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Yotoqxona ({discountStats.bedroom})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiscountCategoryFilter('cat-3')}
+                  style={{
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '980px',
+                    border: '1px solid',
+                    borderColor: discountCategoryFilter === 'cat-3' ? '#ef4444' : 'var(--border-subtle)',
+                    backgroundColor: discountCategoryFilter === 'cat-3' ? '#ef4444' : 'transparent',
+                    color: discountCategoryFilter === 'cat-3' ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Oshxona & Stol ({discountStats.dining})
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ==============================================================
           2. MAIN CATALOG SECTION WITH SIDEBAR & PRODUCTS
           ============================================================== */}
-      <section style={{ padding: '1rem 1.5rem 5rem' }}>
+      <section id="catalog-products-main" style={{ padding: '1rem 1.25rem 5rem' }}>
         <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
           
           {/* Top Sort & Count Bar */}
@@ -264,13 +798,47 @@ export const FurnitureCatalog = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               paddingBottom: '1.5rem',
-              marginBottom: '2.5rem',
+              marginBottom: '2rem',
               borderBottom: '1px solid var(--border-subtle)',
               flexWrap: 'wrap',
               gap: '1rem'
             }}
           >
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              {selectedFilter === 'discount' && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    color: '#ef4444',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '6px',
+                    fontWeight: 800,
+                    marginRight: '0.65rem'
+                  }}
+                >
+                  <Percent size={13} /> AKSIYA
+                </span>
+              )}
+              {selectedSub === 'matras' && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    color: '#0ea5e9',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '6px',
+                    fontWeight: 800,
+                    marginRight: '0.65rem'
+                  }}
+                >
+                  MATRASLAR
+                </span>
+              )}
               {language === 'ru'
                 ? <>Найдено всего <strong>{filteredProducts.length}</strong> товаров</>
                 : language === 'en'
@@ -294,6 +862,9 @@ export const FurnitureCatalog = () => {
                   fontWeight: 600
                 }}
               >
+                {selectedFilter === 'discount' && (
+                  <option value="discount_desc">🔥 Eng katta chegirma foizi bo‘yicha</option>
+                )}
                 <option value="rating_desc">⭐ {t('catalog.sort_rating', 'Yulduzlar bo‘yicha (Reyting: Yuqoridan pastga)')}</option>
                 <option value="price_asc">{t('catalog.sort_price_asc', 'Narx: Arzondan qimmatga')}</option>
                 <option value="price_desc">{t('catalog.sort_price_desc', 'Narx: Qimmatdan arzonga')}</option>
@@ -317,7 +888,7 @@ export const FurnitureCatalog = () => {
             style={{
               display: 'grid',
               gridTemplateColumns: '260px 1fr',
-              gap: '3.5rem',
+              gap: '3rem',
               alignItems: 'flex-start'
             }}
             className="catalog-layout"
@@ -332,39 +903,73 @@ export const FurnitureCatalog = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   <button
                     type="button"
-                    onClick={() => setSelectedCategory('all')}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSelectedSub('');
+                      if (selectedFilter === 'discount') {
+                        setDiscountCategoryFilter('all');
+                      }
+                    }}
                     style={{
                       background: 'none',
                       border: 'none',
                       textAlign: 'left',
                       fontSize: '0.9rem',
-                      fontWeight: selectedCategory === 'all' ? 700 : 500,
-                      color: selectedCategory === 'all' ? 'var(--figma-coral)' : 'var(--text-muted)',
+                      fontWeight: selectedCategory === 'all' && !selectedSub ? 700 : 500,
+                      color: selectedCategory === 'all' && !selectedSub ? 'var(--figma-coral)' : 'var(--text-muted)',
                       cursor: 'pointer',
                       padding: 0
                     }}
                   >
                     {t('catalog.all', 'Barcha Mebellar')}
                   </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        fontSize: '0.9rem',
-                        fontWeight: selectedCategory === cat.id ? 700 : 500,
-                        color: selectedCategory === cat.id ? 'var(--figma-coral)' : 'var(--text-muted)',
-                        cursor: 'pointer',
-                        padding: 0
-                      }}
-                    >
-                      {getLocalized(cat, 'name') || cat.name}
-                    </button>
-                  ))}
+
+                  {categories.map((cat) => {
+                    const isSelected = selectedCategory === cat.id || selectedCategory === cat.slug;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCategory(cat.id);
+                          setSelectedSub('');
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          textAlign: 'left',
+                          fontSize: '0.9rem',
+                          fontWeight: isSelected ? 700 : 500,
+                          color: isSelected ? 'var(--figma-coral)' : 'var(--text-muted)',
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                      >
+                        {getLocalized(cat, 'name') || cat.name}
+                      </button>
+                    );
+                  })}
+
+                  {/* Dedicated Matras subcategory button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSub('matras');
+                      setSelectedCategory('cat-2');
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      fontWeight: selectedSub === 'matras' ? 700 : 500,
+                      color: selectedSub === 'matras' ? 'var(--figma-coral)' : 'var(--text-muted)',
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    Ortopedik Matraslar
+                  </button>
                 </div>
               </div>
 
@@ -521,7 +1126,7 @@ export const FurnitureCatalog = () => {
                     textAlign: 'center',
                     backgroundColor: 'var(--bg-card)',
                     border: '1px solid var(--border-subtle)',
-                    borderRadius: '4px'
+                    borderRadius: '12px'
                   }}
                 >
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
@@ -548,7 +1153,7 @@ export const FurnitureCatalog = () => {
                     ))}
                   </div>
 
-                  {/* Centered Load More button */}
+                  {/* Load More Button */}
                   {visibleCount < filteredProducts.length && (
                     <div style={{ textAlign: 'center', marginTop: '3.5rem' }}>
                       <button
@@ -569,8 +1174,11 @@ export const FurnitureCatalog = () => {
 
       {/* ==============================================================
           3. SIGNATURE AUTUMN COLLECTION CAROUSEL
+          (ONLY displayed on unfiltered main catalog, NEVER on filtered views!)
           ============================================================== */}
-      <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
+      {showAutumnCollection && (
+        <FigmaCollectionCarousel title={t('hero.autumn_collection', 'Autumn Collection')} />
+      )}
 
       {/* Responsive layout styles */}
       <style>{`
@@ -585,8 +1193,9 @@ export const FurnitureCatalog = () => {
             display: block !important;
             margin-bottom: 2rem;
             padding: 1.5rem;
-            background: #FAFAFA;
-            border: 1px solid #ECECEC;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
           }
           .catalog-mobile-filter-btn {
             display: inline-flex !important;

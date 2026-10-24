@@ -2086,3 +2086,66 @@ h1, h2, h3, h4, .apple-heading {
   border: 1px solid rgba(0, 113, 227, 0.2);
 }
 
+/* ====================================================================
+   APPLE & FIGMA SECTION HIGHLIGHT & MEGABAR HOVER ANIMATIONS
+   ==================================================================== */
+@keyframes sectionHighlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(250, 109, 88, 0.7);
+    outline: 2px solid rgba(250, 109, 88, 0.9);
+    background-color: rgba(250, 109, 88, 0.12);
+  }
+  40% {
+    box-shadow: 0 0 45px 12px rgba(250, 109, 88, 0.4);
+    outline: 2px solid rgba(250, 109, 88, 0.6);
+    background-color: rgba(250, 109, 88, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 109, 88, 0);
+    outline: 2px solid transparent;
+    background-color: transparent;
+  }
+}
+
+.section-highlight-pulse {
+  animation: sectionHighlightPulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  border-radius: 16px !important;
+  scroll-margin-top: 110px !important;
+}
+
+/* Nav Bar & Buttons Hover */
+.urban-megamenu-item {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative;
+}
+.urban-megamenu-item:hover {
+  color: var(--figma-coral, #FA6D58) !important;
+  transform: translateY(-2px);
+  background-color: rgba(250, 109, 88, 0.08) !important;
+  border-radius: 8px;
+}
+.urban-megamenu-item:hover span {
+  color: var(--figma-coral, #FA6D58) !important;
+}
+
+/* Footer Links & Buttons Hover Effects */
+.urban-mega-footer .urban-footer-list a {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: inline-block;
+  position: relative;
+}
+.urban-mega-footer .urban-footer-list a:hover {
+  color: var(--figma-coral, #FA6D58) !important;
+  transform: translateX(5px);
+}
+.urban-mega-footer .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Mobile Nav chip bar */
+.urban-megamenu-nav-row {
+  display: block !important;
+}
+
+

@@ -361,7 +361,17 @@ export const dataService = {
         console.warn('Supabase getProducts error:', e);
       }
     }
-    return getStored('products', initialProducts);
+    const stored = getStored('products', initialProducts);
+    if (Array.isArray(stored) && stored.length > 0) {
+      const storedIds = new Set(stored.map((p) => p.id));
+      const missing = initialProducts.filter((p) => !storedIds.has(p.id));
+      if (missing.length > 0) {
+        const merged = [...stored, ...missing];
+        setStored('products', merged, false);
+        return merged;
+      }
+    }
+    return stored;
   },
 
   async getProductById(id) {
