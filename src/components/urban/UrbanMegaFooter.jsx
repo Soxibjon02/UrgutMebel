@@ -264,49 +264,10 @@ export const UrbanMegaFooter = () => {
           </div>
         </div>
 
-        {/* Preferred Payment Methods */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.75rem',
-            padding: '1.25rem 0',
-            borderTop: '1px solid #e7ded5',
-            borderBottom: '1px solid #e7ded5'
-          }}
-        >
-          <div style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 600 }}>
-            Choose from your preferred payment methods:
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#0ea5e9' }}>PAYME</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#10b981' }}>CLICK</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#7c3aed' }}>UZUM NASIYA</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#f59e0b' }}>UZCARD</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#f97316' }}>HUMO</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#1e40af' }}>VISA</span>
-            <span style={{ padding: '0.3rem 0.75rem', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', fontWeight: 800, fontSize: '0.75rem', color: '#dc2626' }}>MASTERCARD</span>
-          </div>
-        </div>
-
-        {/* Popular Furniture & Decor Categories SEO tags */}
-        <div style={{ padding: '1.5rem 0', fontSize: '0.76rem', color: '#6b7280', lineHeight: 1.6 }}>
-          <div style={{ marginBottom: '0.65rem' }}>
-            <strong style={{ color: '#111827' }}>Mashhur Mebel Kategoriyalari: </strong>
-            Divanlar, Kreslolar, Burchakli Divanlar, Qattiq Yog‘och Karavotlar, Gidravlik Saqlagichli Karavotlar, Shkaflar, Kupe Garderoblar, Kofe Stollari, TV Podstavkalar, Ovqatlanish Stol-Stullari, Yozuv Stollari, Bolalar Mebellari.
-          </div>
-          <div>
-            <strong style={{ color: '#111827' }}>Mashhur Uy Dekori: </strong>
-            Yostiqlar, Stol Lampalari, Torsherlar, Osilma Qandillar, Devor Oynalari, Gilamlar, Tovoqlar, Devor San’ati, Hovli Mebellari.
-          </div>
-        </div>
-
         {/* Copyright */}
         <div
           style={{
-            paddingTop: '1.25rem',
+            paddingTop: '1.75rem',
             borderTop: '1px solid #e7ded5',
             textAlign: 'center',
             fontSize: '0.78rem',
