@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage, LANGUAGES } from '../context/LanguageContext';
 import { Globe, ChevronDown } from 'lucide-react';
 
-export const LanguageSwitcher = ({ isMobile = false }) => {
+export const LanguageSwitcher = ({ isMobile = false, direction = 'down' }) => {
   const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -21,7 +21,7 @@ export const LanguageSwitcher = ({ isMobile = false }) => {
 
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', width: '100%' }}>
         {LANGUAGES.map((l) => {
           const isActive = l.code === language;
           return (
@@ -30,23 +30,23 @@ export const LanguageSwitcher = ({ isMobile = false }) => {
               type="button"
               onClick={() => setLanguage(l.code)}
               style={{
-                flex: 1,
-                padding: '0.5rem 0.6rem',
-                borderRadius: '8px',
-                border: isActive ? '1.5px solid var(--figma-coral)' : '1px solid var(--border-subtle)',
-                backgroundColor: isActive ? 'var(--primary-light, rgba(250, 109, 88, 0.15))' : 'var(--bg-secondary)',
-                color: isActive ? 'var(--figma-coral)' : 'var(--text-main)',
-                fontSize: '0.82rem',
-                fontWeight: isActive ? 800 : 600,
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.35rem',
-                transition: 'all 0.2s ease'
+                gap: '0.45rem',
+                padding: '0.65rem 0.5rem',
+                borderRadius: '10px',
+                border: isActive ? '1.5px solid var(--figma-coral, #FA6D58)' : '1px solid var(--border-subtle, rgba(0,0,0,0.08))',
+                backgroundColor: isActive ? 'rgba(250, 109, 88, 0.12)' : 'var(--bg-secondary, #F8F9FA)',
+                color: isActive ? 'var(--figma-coral, #FA6D58)' : 'var(--text-main, #1F2937)',
+                fontSize: '0.88rem',
+                fontWeight: isActive ? 800 : 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: isActive ? '0 2px 6px rgba(250, 109, 88, 0.2)' : 'none'
               }}
             >
-              <span>{l.flag}</span>
+              <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{l.flag}</span>
               <span>{l.short}</span>
             </button>
           );
@@ -86,13 +86,14 @@ export const LanguageSwitcher = ({ isMobile = false }) => {
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 6px)',
+            ...(direction === 'up'
+              ? { bottom: 'calc(100% + 6px)', top: 'auto', boxShadow: '0 -12px 30px rgba(0, 0, 0, 0.25)' }
+              : { top: 'calc(100% + 6px)', bottom: 'auto', boxShadow: '0 12px 30px rgba(0, 0, 0, 0.25)' }),
             right: 0,
             minWidth: '150px',
             backgroundColor: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
-            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.25)',
             zIndex: 1000,
             overflow: 'hidden',
             padding: '0.35rem'

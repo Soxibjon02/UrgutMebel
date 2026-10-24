@@ -982,8 +982,11 @@ export const UrbanHeaderMegaMenu = () => {
               <span>Showroomlar xaritasi</span>
             </Link>
 
-            <div style={{ padding: '0.5rem 0.5rem 0' }}>
-              <LanguageSwitcher />
+            <div style={{ padding: '0.4rem 0.5rem 0' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Til / Язык / Language
+              </div>
+              <LanguageSwitcher isMobile={true} />
             </div>
           </div>
         </div>
