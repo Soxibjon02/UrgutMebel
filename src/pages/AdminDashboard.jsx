@@ -53,6 +53,7 @@ import {
   CheckCircle2,
   Clock,
   Phone,
+  MapPin,
   Send,
   Wifi,
   SlidersHorizontal,
@@ -4918,139 +4919,251 @@ export const AdminDashboard = () => {
 
       {/* STORE CREATE/EDIT MODAL */}
       {storeModalOpen && (
-        <div className="modal-overlay" onClick={() => setStoreModalOpen(false)}>
-          <div className="modal-content" style={{ maxWidth: '600px', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '1.25rem' }}>
-              {editingStore ? 'Do‘kon Profilini Tahrirlash' : 'Yangi Mebel Do‘koni Qo‘shish'}
-            </h3>
-            <form onSubmit={handleSaveStore}>
-              <div className="form-group">
-                <label className="form-label">Do‘kon / Fabrika Nomi *</label>
-                <input
-                  type="text"
-                  required
-                  name="name"
-                  defaultValue={editingStore?.name || ''}
-                  placeholder="Masalan: Urgut Shahar Mebel Markazi"
-                  className="form-input"
-                />
+        <div className="modal-backdrop" onClick={() => setStoreModalOpen(false)}>
+          <div
+            className="modal-content apple-card custom-modal-scroll"
+            style={{
+              maxWidth: '680px',
+              width: '95%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: '24px',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
+              boxShadow: '0 25px 70px rgba(0, 0, 0, 0.45)',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1.25rem 1.75rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                backgroundColor: 'var(--bg-card)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--figma-coral, #FA6D58)', fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>
+                  <Store size={14} /> SUPER ADMIN • MEBEL DO‘KONLARI
+                </div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                  {editingStore ? 'Do‘kon Profilini Tahrirlash' : 'Yangi Mebel Do‘koni Qo‘shish'}
+                </h3>
               </div>
+              <button
+                type="button"
+                onClick={() => setStoreModalOpen(false)}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                title="Yopish"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-              <div className="dashboard-form-row">
-                <div className="form-group">
-                  <label className="form-label">Telefon Raqami *</label>
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSaveStore} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div
+                className="custom-modal-scroll"
+                style={{
+                  padding: '1.5rem 1.75rem',
+                  overflowY: 'auto',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.15rem'
+                }}
+              >
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Do‘kon / Fabrika Nomi <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
                     required
-                    name="phone"
-                    defaultValue={editingStore?.phone || '+998 90 '}
-                    placeholder="+998 90 123 45 67"
+                    name="name"
+                    defaultValue={editingStore?.name || ''}
+                    placeholder="Masalan: Urgut Shahar Mebel Markazi"
                     className="form-input"
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Mas‘ul Menedjer Ismi</label>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Telefon Raqami <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      name="phone"
+                      defaultValue={editingStore?.phone || '+998 90 '}
+                      placeholder="+998 90 123 45 67"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Mas‘ul Menedjer Ismi
+                    </label>
+                    <input
+                      type="text"
+                      name="manager_name"
+                      defaultValue={editingStore?.manager_name || ''}
+                      placeholder="Masalan: Jamshid Rustamov"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Manzil <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
-                    name="manager_name"
-                    defaultValue={editingStore?.manager_name || ''}
-                    placeholder="Masalan: Jamshid Rustamov"
+                    required
+                    name="address"
+                    defaultValue={editingStore?.address || ''}
+                    placeholder="Masalan: Urgut shahri, Navoiy shoh ko‘chasi, 45-uy"
                     className="form-input"
                   />
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label className="form-label">Manzil *</label>
-                <input
-                  type="text"
-                  required
-                  name="address"
-                  defaultValue={editingStore?.address || ''}
-                  placeholder="Masalan: Urgut shahri, Navoiy shoh ko‘chasi, 45-uy"
-                  className="form-input"
-                />
-              </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Ish Vaqti
+                    </label>
+                    <input
+                      type="text"
+                      name="working_hours"
+                      defaultValue={editingStore?.working_hours || '08:30 - 20:00 (Dam olish kunlarisiz)'}
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                      Reyting (1.0 dan 5.0 gacha)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="1"
+                      max="5"
+                      name="rating"
+                      defaultValue={editingStore?.rating || 4.95}
+                      className="form-input"
+                    />
+                  </div>
+                </div>
 
-              <div className="dashboard-form-row">
-                <div className="form-group">
-                  <label className="form-label">Ish Vaqti</label>
-                  <input
-                    type="text"
-                    name="working_hours"
-                    defaultValue={editingStore?.working_hours || '08:30 - 20:00 (Dam olish kunlarisiz)'}
-                    className="form-input"
+                <div>
+                  <ImageUploadField
+                    label="Do‘kon Banner Rasmi"
+                    name="banner"
+                    value={editingStore?.banner || ''}
+                    folder="stores"
+                    placeholder="https://... yoki faylni tanlab yuklang"
+                    helperText="Do'kon sahifasi tepasidagi keng formatdagi afisha rasmi."
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Reyting (1.0 dan 5.0 gacha)</label>
-                  <input
-                    type="number"
-                    step="0.05"
-                    min="1"
-                    max="5"
-                    name="rating"
-                    defaultValue={editingStore?.rating || 4.95}
-                    className="form-input"
+
+                <div>
+                  <ImageUploadField
+                    label="Do‘kon Logotipi"
+                    name="logo"
+                    value={editingStore?.logo || ''}
+                    folder="stores"
+                    placeholder="https://... yoki faylni tanlab yuklang"
+                    helperText="Do'konning dumaloq/kvadrat brend logotipi."
                   />
+                </div>
+
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Do‘kon Haqida Tavsif
+                  </label>
+                  <textarea
+                    rows={3}
+                    name="description"
+                    defaultValue={editingStore?.description || ''}
+                    placeholder="Do'kon ixtisosligi, assortimenti va xizmatlari..."
+                    className="form-input"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0.85rem 1rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', margin: 0, width: '100%' }}>
+                    <input
+                      type="checkbox"
+                      name="verified"
+                      defaultChecked={editingStore ? editingStore.verified !== false : true}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--figma-coral, #FA6D58)' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-main)' }}>
+                        Rasmiy Tasdiqlangan Do‘kon nishoni (Verified)
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Foydalanuvchilarga yashil nishon bilan ko‘rinadi
+                      </div>
+                    </div>
+                  </label>
                 </div>
               </div>
 
-              <ImageUploadField
-                label="Do‘kon Banner Rasmi"
-                name="banner"
-                value={editingStore?.banner || ''}
-                folder="stores"
-                placeholder="https://... yoki faylni tanlab yuklang"
-                helperText="Do'kon sahifasi tepasidagi keng formatdagi rasm."
-              />
-
-              <ImageUploadField
-                label="Do‘kon Logotipi"
-                name="logo"
-                value={editingStore?.logo || ''}
-                folder="stores"
-                placeholder="https://... yoki faylni tanlab yuklang"
-                helperText="Do'konning dumaloq/kvadrat logotipi."
-              />
-
-              <div className="form-group">
-                <label className="form-label">Do‘kon Haqida Tavsif</label>
-                <textarea
-                  rows={3}
-                  name="description"
-                  defaultValue={editingStore?.description || ''}
-                  placeholder="Do'kon ixtisosligi, assortimenti va xizmatlari..."
-                  className="form-textarea"
-                />
-              </div>
-
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                  <input
-                    type="checkbox"
-                    name="verified"
-                    defaultChecked={editingStore ? editingStore.verified !== false : true}
-                  />
-                  <span>Rasmiy Tasdiqlangan Do‘kon nishoni (Verified)</span>
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+              {/* Sticky Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  padding: '1.1rem 1.75rem',
+                  borderTop: '1px solid var(--border-subtle)',
+                  backgroundColor: 'var(--bg-card)'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setStoreModalOpen(false)}
                   className="btn btn-secondary"
-                  style={{ flex: 1 }}
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '10px' }}
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ flex: 1 }}
+                  style={{
+                    padding: '0.65rem 1.5rem',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    boxShadow: '0 4px 14px rgba(250, 109, 88, 0.35)'
+                  }}
                 >
-                  Saqlash
+                  <Check size={16} /> Saqlash va Saytda Yangilash
                 </button>
               </div>
             </form>
