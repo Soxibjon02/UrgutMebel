@@ -15,7 +15,8 @@ import {
   initialContactMessages,
   initialNewsletterSubscribers,
   initialStores,
-  initialDiscountRequests
+  initialDiscountRequests,
+  initialCollections
 } from '../data/mockData';
 
 // Helper to get from local storage or fallback to initial
@@ -287,15 +288,135 @@ export const dataService = {
           .from('categories')
           .select('*')
           .order('display_order', { ascending: true });
-        if (!error && Array.isArray(data)) {
-          setStored('categories', data, false);
-          return data;
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const existingIds = new Set(data.map((c) => c.id));
+          const missing = initialCategories.filter((c) => !existingIds.has(c.id));
+          const fullList = missing.length > 0 ? [...data, ...missing] : data;
+          setStored('categories', fullList, false);
+          return fullList;
         }
       } catch (e) {
         console.warn('Supabase getCategories error:', e);
       }
     }
-    return getStored('categories', initialCategories);
+    const stored = getStored('categories', initialCategories);
+    if (Array.isArray(stored) && stored.length > 0) {
+      const storedIds = new Set(stored.map((c) => c.id));
+      const missing = initialCategories.filter((c) => !storedIds.has(c.id));
+      if (missing.length > 0) {
+        const merged = [...stored, ...missing];
+        setStored('categories', merged, false);
+        return merged;
+      }
+    }
+    return stored;
+  },
+
+  // Collections (Kolleksiyalar Boshqaruvi)
+  async getCollections() {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('collections')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const existingIds = new Set(data.map((c) => c.id));
+          const missing = initialCollections.filter((c) => !existingIds.has(c.id));
+          const fullList = missing.length > 0 ? [...data, ...missing] : data;
+          setStored('collections', fullList, false);
+          return fullList;
+        }
+      } catch (e) {
+        console.warn('Supabase getCollections error:', e);
+      }
+    }
+    const stored = getStored('collections', initialCollections);
+    if (Array.isArray(stored) && stored.length > 0) {
+      const storedIds = new Set(stored.map((c) => c.id));
+      const missing = initialCollections.filter((c) => !storedIds.has(c.id));
+      if (missing.length > 0) {
+        const merged = [...stored, ...missing];
+        setStored('collections', merged, false);
+        return merged;
+      }
+    }
+    return stored;
+  },
+
+  async getCollectionById(id) {
+    const list = await this.getCollections();
+    return list.find((c) => c.id === id || c.slug === id) || null;
+  },
+
+  async saveCollection(col) {
+    const current = await this.getCollections();
+    const slug = col.slug || col.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `col-${Date.now()}`;
+    const newCol = col.id ? { ...col, slug, updated_at: new Date().toISOString() } : {
+      ...col,
+      id: `col-${Date.now()}`,
+      slug,
+      product_ids: Array.isArray(col.product_ids) ? col.product_ids : [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('collections').upsert({
+          id: newCol.id,
+          title: newCol.title,
+          slug: newCol.slug,
+          subtitle: newCol.subtitle || '',
+          badge: newCol.badge || '',
+          description: newCol.description || '',
+          cover_image: newCol.cover_image || '',
+          product_ids: newCol.product_ids || [],
+          display_order: Number(newCol.display_order) || 0,
+          is_active: newCol.is_active !== false
+        });
+      } catch (e) {
+        console.warn('Supabase saveCollection error:', e);
+      }
+    }
+
+    const updated = col.id
+      ? current.map((c) => (c.id === col.id ? { ...c, ...newCol } : c))
+      : [newCol, ...current];
+
+    setStored('collections', updated, true);
+    return updated;
+  },
+
+  async deleteCollection(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('collections').delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteCollection error:', e);
+      }
+    }
+    const current = await this.getCollections();
+    const updated = current.filter((c) => c.id !== id);
+    setStored('collections', updated, true);
+    return updated;
+  },
+
+  async addProductToCollection(collectionId, productId) {
+    const current = await this.getCollections();
+    const target = current.find((c) => c.id === collectionId);
+    if (!target) return current;
+    const prodIds = new Set(target.product_ids || []);
+    prodIds.add(productId);
+    return this.saveCollection({ ...target, product_ids: Array.from(prodIds) });
+  },
+
+  async removeProductFromCollection(collectionId, productId) {
+    const current = await this.getCollections();
+    const target = current.find((c) => c.id === collectionId);
+    if (!target) return current;
+    const prodIds = (target.product_ids || []).filter((id) => id !== productId);
+    return this.saveCollection({ ...target, product_ids: prodIds });
   },
 
   async saveCategory(category) {

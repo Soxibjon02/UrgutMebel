@@ -49,19 +49,23 @@ export const FurnitureCatalog = () => {
 
   // Mobile filter sidebar toggle
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState('all');
 
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [prodList, catList, storeList] = await Promise.all([
+        const [prodList, catList, storeList, colList] = await Promise.all([
           dataService.getProducts(),
           dataService.getCategories(),
-          dataService.getStores()
+          dataService.getStores(),
+          dataService.getCollections()
         ]);
         setProducts(prodList || []);
         setCategories(catList || []);
         setStores(storeList || []);
+        setCollections(colList || []);
       } catch (e) {
         console.error('Error loading products:', e);
       } finally {
@@ -70,13 +74,18 @@ export const FurnitureCatalog = () => {
     };
     loadData();
 
-    // Listen to category updates from admin
+    // Listen to category and collection updates from admin
     const handleCategoryUpdate = () => {
       dataService.getCategories().then((cats) => setCategories(cats || []));
     };
+    const handleCollectionsUpdate = () => {
+      dataService.getCollections().then((cols) => setCollections(cols || []));
+    };
     window.addEventListener('urgut_store_categories_updated', handleCategoryUpdate);
+    window.addEventListener('urgut_store_collections_updated', handleCollectionsUpdate);
     return () => {
       window.removeEventListener('urgut_store_categories_updated', handleCategoryUpdate);
+      window.removeEventListener('urgut_store_collections_updated', handleCollectionsUpdate);
     };
   }, []);
 
@@ -96,6 +105,9 @@ export const FurnitureCatalog = () => {
 
     const store = searchParams.get('store') || 'all';
     setSelectedStore(store);
+
+    const col = searchParams.get('collection') || 'all';
+    setSelectedCollection(col);
 
     const sort = searchParams.get('sort') || (filter === 'discount' ? 'discount_desc' : 'rating_desc');
     setSortBy(sort);
@@ -119,7 +131,7 @@ export const FurnitureCatalog = () => {
     if (!targetCategory || targetCategory === 'all') return true;
     const catLower = targetCategory.toLowerCase();
 
-    if (prod.category_id === targetCategory) return true;
+    if (prod.category_id === targetCategory || prod.category_id?.toLowerCase() === catLower) return true;
 
     // Check slug from loaded categories
     const matchedCategory = categories.find((c) => c.id === targetCategory || c.slug === targetCategory);
@@ -145,12 +157,13 @@ export const FurnitureCatalog = () => {
       );
     }
 
-    // Oshxona (cat-3 / cat-dining / kitchen)
-    if (catLower === 'cat-3' || catLower === 'oshxona' || catLower === 'cat-dining') {
+    // Oshxona (cat-3 / cat-dining / kitchen / cat-dining-sets)
+    if (catLower === 'cat-3' || catLower === 'oshxona' || catLower === 'cat-dining' || catLower === 'cat-dining-sets') {
       return (
         prod.category_id === 'cat-3' ||
         prod.category_id === 'cat-dining' ||
-        prod.tags?.some((t) => ['oshxona', 'stol', 'stul', 'garnitur', 'bufet'].includes(t.toLowerCase()))
+        prod.category_id === 'cat-dining-sets' ||
+        prod.tags?.some((t) => ['oshxona', 'stol', 'stul', 'garnitur', 'bufet', 'dining'].includes(t.toLowerCase()))
       );
     }
 
@@ -170,12 +183,135 @@ export const FurnitureCatalog = () => {
       );
     }
 
-    // Yumshoq mebellar / Divanlar (cat-6 / cat-sofas / yumshoq-mebellar)
-    if (catLower === 'cat-6' || catLower === 'yumshoq-mebellar' || catLower === 'cat-sofas' || catLower === 'divanlar') {
+    // Yumshoq mebellar / Divanlar (cat-6 / cat-sofas / yumshoq-mebellar / sofas)
+    if (catLower === 'cat-6' || catLower === 'yumshoq-mebellar' || catLower === 'cat-sofas' || catLower === 'divanlar' || catLower === 'sofas') {
       return (
         prod.category_id === 'cat-6' ||
         prod.category_id === 'cat-sofas' ||
-        prod.tags?.some((t) => ['divan', 'kreslo', 'yumshoq', 'sofa'].includes(t.toLowerCase()))
+        prod.tags?.some((t) => ['divan', 'kreslo', 'yumshoq', 'sofa'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('divan')
+      );
+    }
+
+    // Shoe Racks (cat-shoe-racks / shoe-racks)
+    if (catLower === 'cat-shoe-racks' || catLower === 'shoe-racks') {
+      return (
+        prod.category_id === 'cat-shoe-racks' ||
+        prod.tags?.some((t) => ['shoe', 'poyabzal', 'shoe-racks'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('poyabzal')
+      );
+    }
+
+    // Beds / Hydraulic Beds (cat-beds / beds)
+    if (catLower === 'cat-beds' || catLower === 'beds' || catLower === 'hydraulic-beds') {
+      return (
+        prod.category_id === 'cat-beds' ||
+        prod.tags?.some((t) => ['bed', 'karavot', 'krovat'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('karavot')
+      );
+    }
+
+    // Lounge Chairs (cat-lounge-chairs / lounge-chairs)
+    if (catLower === 'cat-lounge-chairs' || catLower === 'lounge-chairs' || catLower === 'chairs') {
+      return (
+        prod.category_id === 'cat-lounge-chairs' ||
+        prod.tags?.some((t) => ['lounge', 'kreslo', 'chairs'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('kreslo')
+      );
+    }
+
+    // Coffee Tables (cat-coffee-tables / coffee-tables)
+    if (catLower === 'cat-coffee-tables' || catLower === 'coffee-tables') {
+      return (
+        prod.category_id === 'cat-coffee-tables' ||
+        prod.tags?.some((t) => ['coffee', 'kofe', 'jurnal'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('kofe') || prod.name?.toLowerCase().includes('jurnal')
+      );
+    }
+
+    // TV Units (cat-tv-units / tv-units)
+    if (catLower === 'cat-tv-units' || catLower === 'tv-units') {
+      return (
+        prod.category_id === 'cat-tv-units' ||
+        prod.tags?.some((t) => ['tv', 'tv-units', 'podstavka'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('tv')
+      );
+    }
+
+    // Wardrobes (cat-wardrobes / wardrobes)
+    if (catLower === 'cat-wardrobes' || catLower === 'wardrobes') {
+      return (
+        prod.category_id === 'cat-wardrobes' ||
+        prod.tags?.some((t) => ['wardrobe', 'wardrobes', 'shkaf', 'garderob'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('shkaf')
+      );
+    }
+
+    // Chest of Drawers (cat-chest-drawers / chest-of-drawers)
+    if (catLower === 'cat-chest-drawers' || catLower === 'chest-of-drawers') {
+      return (
+        prod.category_id === 'cat-chest-drawers' ||
+        prod.tags?.some((t) => ['chest', 'komod', 'tortma'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('komod')
+      );
+    }
+
+    // Mattresses (cat-mattresses / mattresses)
+    if (catLower === 'cat-mattresses' || catLower === 'mattresses') {
+      return prod.category_id === 'cat-mattresses' || isProductMatras(prod);
+    }
+
+    // Study Tables (cat-study-tables / study-tables / study)
+    if (catLower === 'cat-study-tables' || catLower === 'study-tables' || catLower === 'study') {
+      return (
+        prod.category_id === 'cat-study-tables' ||
+        prod.tags?.some((t) => ['study', 'yozuv stoli', 'ish stoli'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('stol')
+      );
+    }
+
+    // C-Tables (cat-c-tables / c-tables)
+    if (catLower === 'cat-c-tables' || catLower === 'c-tables') {
+      return (
+        prod.category_id === 'cat-c-tables' ||
+        prod.tags?.some((t) => ['c-table', 'c-tables', 'yon stol'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('c-')
+      );
+    }
+
+    // Bookshelves (cat-bookshelves / bookshelves)
+    if (catLower === 'cat-bookshelves' || catLower === 'bookshelves') {
+      return (
+        prod.category_id === 'cat-bookshelves' ||
+        prod.tags?.some((t) => ['bookshelf', 'bookshelves', 'kitob'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('kitob')
+      );
+    }
+
+    // Sideboards (cat-sideboards / sideboards)
+    if (catLower === 'cat-sideboards' || catLower === 'sideboards') {
+      return (
+        prod.category_id === 'cat-sideboards' ||
+        prod.tags?.some((t) => ['sideboard', 'sideboards', 'bufet'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('bufet')
+      );
+    }
+
+    // Recliners (cat-recliners / recliners)
+    if (catLower === 'cat-recliners' || catLower === 'recliners') {
+      return (
+        prod.category_id === 'cat-recliners' ||
+        prod.tags?.some((t) => ['recliner', 'recliners', 'reklayner'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('reklayner')
+      );
+    }
+
+    // Decor (cat-decor / decor)
+    if (catLower === 'cat-decor' || catLower === 'decor') {
+      return (
+        prod.category_id === 'cat-decor' ||
+        prod.tags?.some((t) => ['decor', 'dekor', 'chiroq', 'yoruglik'].includes(t.toLowerCase())) ||
+        prod.name?.toLowerCase().includes('dekor')
       );
     }
 
@@ -213,6 +349,22 @@ export const FurnitureCatalog = () => {
       // If user toggled a category inside the discount page
       if (discountCategoryFilter !== 'all') {
         result = result.filter((p) => isProductInCategory(p, discountCategoryFilter));
+      }
+    }
+
+    // 1b. UNDER 1,000,000 SO'M FILTER (When accessed via /furniture?filter=under1m)
+    if (selectedFilter === 'under1m') {
+      result = result.filter((p) => {
+        const effPrice = p.discount_price && Number(p.discount_price) > 0 ? Number(p.discount_price) : Number(p.price);
+        return effPrice <= 1000000;
+      });
+    }
+
+    // 1c. COLLECTION FILTER (When accessed via /furniture?collection=col-id)
+    if (selectedCollection && selectedCollection !== 'all') {
+      const activeCol = collections.find((c) => c.id === selectedCollection || c.slug === selectedCollection);
+      if (activeCol && Array.isArray(activeCol.product_ids) && activeCol.product_ids.length > 0) {
+        result = result.filter((p) => activeCol.product_ids.includes(p.id));
       }
     }
 
@@ -332,6 +484,25 @@ export const FurnitureCatalog = () => {
   // DYNAMIC HERO BANNER CONFIGURATION (Replaces hardcoded Sofas and Armchairs)
   // =========================================================================
   const getBannerConfig = () => {
+    // 0. Selected Collection
+    if (selectedCollection && selectedCollection !== 'all') {
+      const colObj = collections.find((c) => c.id === selectedCollection || c.slug === selectedCollection);
+      if (colObj) {
+        return {
+          badgeText: colObj.badge || 'KOLLEKSIYA',
+          badgeBg: 'var(--figma-coral, #FA6D58)',
+          tagText: 'EKSKLYUZIV KOLLEKSIYA',
+          tagColor: 'var(--figma-coral, #FA6D58)',
+          title: colObj.title,
+          desc: colObj.description || colObj.subtitle || 'Urgut mebellari eksklyuziv to‘plami.',
+          btnText: 'TO‘PLAMNI KO‘RISH',
+          leftBg: 'var(--figma-pastel-blue, #E8F0F8)',
+          rightBg: 'var(--figma-pastel-peach, #FDF0ED)',
+          slides: [colObj.cover_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80']
+        };
+      }
+    }
+
     // 1. Aksiya va Chegirmalar
     if (selectedFilter === 'discount') {
       return {
@@ -501,6 +672,8 @@ export const FurnitureCatalog = () => {
   const showAutumnCollection =
     selectedCategory === 'all' &&
     selectedFilter !== 'discount' &&
+    selectedFilter !== 'under1m' &&
+    selectedCollection === 'all' &&
     !selectedSub &&
     !searchQuery.trim();
 

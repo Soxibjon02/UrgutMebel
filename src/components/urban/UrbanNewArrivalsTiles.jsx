@@ -8,21 +8,21 @@ export const UrbanNewArrivalsTiles = () => {
       title: 'BEDS',
       subtitle: 'Refresh and ignite serenity',
       image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80',
-      link: '/furniture?category=cat-bedroom'
+      link: '/furniture?category=cat-beds'
     },
     {
       id: 'sofas',
       title: 'SOFAS',
       subtitle: 'Invite moments of togetherness',
       image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
-      link: '/furniture?category=cat-living'
+      link: '/furniture?category=cat-sofas'
     },
     {
       id: 'dining',
       title: 'DINING SETS',
       subtitle: 'Where memories meet meals',
       image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80',
-      link: '/furniture?category=cat-dining'
+      link: '/furniture?category=cat-dining-sets'
     }
   ];
 

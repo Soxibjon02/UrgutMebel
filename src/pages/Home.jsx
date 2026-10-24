@@ -128,7 +128,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Shoe Racks"}
-            viewAllLink={sec.link || "/furniture?category=cat-wardrobe"}
+            viewAllLink={sec.link || "/furniture?category=cat-shoe-racks"}
             products={urbanShoeRacks}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -156,7 +156,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Lounge Chairs"}
-            viewAllLink={sec.link || "/furniture?category=cat-living"}
+            viewAllLink={sec.link || "/furniture?category=cat-lounge-chairs"}
             products={urbanLoungeChairs}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -168,7 +168,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Hydraulic Beds"}
-            viewAllLink={sec.link || "/furniture?category=cat-bedroom"}
+            viewAllLink={sec.link || "/furniture?category=cat-beds"}
             products={urbanHydraulicBeds}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -202,7 +202,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Coffee Tables"}
-            viewAllLink={sec.link || "/furniture?category=cat-living"}
+            viewAllLink={sec.link || "/furniture?category=cat-coffee-tables"}
             products={urbanCoffeeTables}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -212,7 +212,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore TV Units"}
-            viewAllLink={sec.link || "/furniture?category=cat-living"}
+            viewAllLink={sec.link || "/furniture?category=cat-tv-units"}
             products={urbanTvUnits}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -224,7 +224,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Drink & C Tables"}
-            viewAllLink={sec.link || "/furniture?category=cat-living"}
+            viewAllLink={sec.link || "/furniture?category=cat-c-tables"}
             products={urbanCTables}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -242,7 +242,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Wardrobes"}
-            viewAllLink={sec.link || "/furniture?category=cat-wardrobe"}
+            viewAllLink={sec.link || "/furniture?category=cat-wardrobes"}
             products={urbanWardrobes}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -252,7 +252,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Chest Of Drawers"}
-            viewAllLink={sec.link || "/furniture?category=cat-bedroom"}
+            viewAllLink={sec.link || "/furniture?category=cat-chest-drawers"}
             products={urbanChestOfDrawers}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -266,7 +266,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Bookshelves"}
-            viewAllLink={sec.link || "/furniture?category=cat-office"}
+            viewAllLink={sec.link || "/furniture?category=cat-bookshelves"}
             products={urbanBookshelves}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -276,7 +276,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Sideboards"}
-            viewAllLink={sec.link || "/furniture?category=cat-dining"}
+            viewAllLink={sec.link || "/furniture?category=cat-sideboards"}
             products={urbanSideboards}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -290,7 +290,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Recliners"}
-            viewAllLink={sec.link || "/furniture?category=cat-living"}
+            viewAllLink={sec.link || "/furniture?category=cat-recliners"}
             products={urbanRecliners}
             onQuickBuy={handleOpenQuickBuy}
           />
@@ -300,7 +300,7 @@ export const Home = () => {
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Study Tables"}
-            viewAllLink={sec.link || "/furniture?category=cat-office"}
+            viewAllLink={sec.link || "/furniture?category=cat-study-tables"}
             products={urbanStudyTables}
             onQuickBuy={handleOpenQuickBuy}
           />

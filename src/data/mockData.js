@@ -33,6 +33,23 @@ export const initialSettings = {
   ]
 };
 
+import {
+  urbanShoeRacks,
+  urbanLoungeChairs,
+  urbanHydraulicBeds,
+  urbanPartnerBrands,
+  urbanSolidWoodBrands,
+  urbanCoffeeTables,
+  urbanTvUnits,
+  urbanCTables,
+  urbanWardrobes,
+  urbanChestOfDrawers,
+  urbanBookshelves,
+  urbanSideboards,
+  urbanRecliners,
+  urbanStudyTables
+} from './urbanProductsData';
+
 export const initialCategories = [
   {
     id: "cat-1",
@@ -87,6 +104,214 @@ export const initialCategories = [
     image_url: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80",
     display_order: 6,
     is_active: true
+  },
+  {
+    id: "cat-shoe-racks",
+    name: "Poyabzal Javonlari (Shoe Racks)",
+    slug: "shoe-racks",
+    description: "Ixcham va sig‘imli poyabzal javonlari, dahliz shkaflari",
+    image_url: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80",
+    display_order: 7,
+    is_active: true
+  },
+  {
+    id: "cat-beds",
+    name: "Karavotlar & Hydraulic Beds",
+    slug: "beds",
+    description: "Gidravlik ko‘tariluvchi qutili karavotlar, massiv yog‘och krovatlar",
+    image_url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+    display_order: 8,
+    is_active: true
+  },
+  {
+    id: "cat-sofas",
+    name: "Divanlar & Sofas",
+    slug: "sofas",
+    description: "3-o‘rinli, transformatsiyalanuvchi va relaks divanlar",
+    image_url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80",
+    display_order: 9,
+    is_active: true
+  },
+  {
+    id: "cat-lounge-chairs",
+    name: "Kreslolar & Lounge Chairs",
+    slug: "lounge-chairs",
+    description: "Dam olish uchun shinam va gulli dizayndagi lounge kreslolar",
+    image_url: "https://images.unsplash.com/photo-1580481077195-c9233634e70e?auto=format&fit=crop&w=800&q=80",
+    display_order: 10,
+    is_active: true
+  },
+  {
+    id: "cat-coffee-tables",
+    name: "Kofe & Jurnal Stollari",
+    slug: "coffee-tables",
+    description: "Yong‘oq va marmar qoplamali zamonaviy kofe stollari",
+    image_url: "https://images.unsplash.com/photo-1533090161767-e6ffed986b88?auto=format&fit=crop&w=800&q=80",
+    display_order: 11,
+    is_active: true
+  },
+  {
+    id: "cat-tv-units",
+    name: "TV Stendlar & Devor Bloklari",
+    slug: "tv-units",
+    description: "Katta ekranli televizorlar va media uskunalar uchun podstavkalar",
+    image_url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80",
+    display_order: 12,
+    is_active: true
+  },
+  {
+    id: "cat-wardrobes",
+    name: "Kiyim Shkaflari & Wardrobes",
+    slug: "wardrobes",
+    description: "Kupe va eshikli sig‘imli kiyim shkaflari, oynali fasadlar",
+    image_url: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80",
+    display_order: 13,
+    is_active: true
+  },
+  {
+    id: "cat-chest-drawers",
+    name: "Komodlar & Chest of Drawers",
+    slug: "chest-of-drawers",
+    description: "Ko‘p tortmali qulay va shinam yotoqxona komodlari",
+    image_url: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=800&q=80",
+    display_order: 14,
+    is_active: true
+  },
+  {
+    id: "cat-mattresses",
+    name: "Matraslar & To‘shaklar",
+    slug: "mattresses",
+    description: "7-zonaviy ortopedik va xotirali Memory Foam matraslar",
+    image_url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80",
+    display_order: 15,
+    is_active: true
+  },
+  {
+    id: "cat-dining-sets",
+    name: "Oshxona & Ovqatlanish Stollari",
+    slug: "dining-sets",
+    description: "Oilaviy davralar va mehmondorchilik uchun yog‘och stollar va stullar",
+    image_url: "https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=800&q=80",
+    display_order: 16,
+    is_active: true
+  },
+  {
+    id: "cat-study-tables",
+    name: "Yozuv & Ish Stollari",
+    slug: "study-tables",
+    description: "Noutbuk va kitoblar uchun qulay o‘qish va ish stollari",
+    image_url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80",
+    display_order: 17,
+    is_active: true
+  },
+  {
+    id: "cat-c-tables",
+    name: "C-stollar & Drink Tables",
+    slug: "c-tables",
+    description: "Divan yoniga qo‘yiladigan ixcham va ko‘chma stollar",
+    image_url: "https://images.unsplash.com/photo-1533090161767-e6ffed986b88?auto=format&fit=crop&w=800&q=80",
+    display_order: 18,
+    is_active: true
+  },
+  {
+    id: "cat-bookshelves",
+    name: "Kitob Javonlari & Stellajlar",
+    slug: "bookshelves",
+    description: "Zamonaviy ochiq va yopiq javonlar, kitob va suvenirlar uchun",
+    image_url: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80",
+    display_order: 19,
+    is_active: true
+  },
+  {
+    id: "cat-sideboards",
+    name: "Bufetlar & Sideboards",
+    slug: "sideboards",
+    description: "Idishlar va qimmatbaho buyumlar uchun nafis servant va bufetlar",
+    image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80",
+    display_order: 20,
+    is_active: true
+  },
+  {
+    id: "cat-recliners",
+    name: "Reklayner Kreslolar",
+    slug: "recliners",
+    description: "Oyoq tayanchi ko‘tariluvchi va orqaga suyanuvchi qulay kreslolar",
+    image_url: "https://images.unsplash.com/photo-1580481077195-c9233634e70e?auto=format&fit=crop&w=800&q=80",
+    display_order: 21,
+    is_active: true
+  },
+  {
+    id: "cat-decor",
+    name: "Uy Dekori & Yoritish",
+    slug: "decor",
+    description: "Torsherlar, lampalar, dekorativ yostiqlar va devor bezaklari",
+    image_url: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80",
+    display_order: 22,
+    is_active: true
+  }
+];
+
+export const initialCollections = [
+  {
+    id: "col-atmos",
+    slug: "atmos-collection",
+    title: "The New ATMOS Collection",
+    subtitle: "Zamonaviy shahar hayoti uchun qulay va jozibador mebellar",
+    badge: "NEW 2026",
+    cover_image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80",
+    description: "Yashash xonasi va dam olish zonalari uchun eng so‘nggi zamonaviy dizayn uslubidagi mebellar to‘plami. Yog‘och va yumshoq matolarning mukammal uyg‘unligi.",
+    product_ids: ["lounge-1", "lounge-2", "coffee-1", "tv-1", "prod-1", "c-1"],
+    is_active: true,
+    display_order: 1
+  },
+  {
+    id: "col-autumn",
+    slug: "autumn-collection",
+    title: "Autumn Exclusive Collection",
+    subtitle: "Kuzgi issiqlik, sokinlik va shinamlik baxsh etuvchi to‘plam",
+    badge: "SEASONAL",
+    cover_image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80",
+    description: "Tabiiy yog‘och ohanglari, iliq ranglar va nafis teksturalar bilan yaratilgan kuzgi mebellar to‘plami.",
+    product_ids: ["prod-1", "prod-2", "bed-hyd-1", "shoe-1", "lounge-3"],
+    is_active: true,
+    display_order: 2,
+    has_slideshow: true
+  },
+  {
+    id: "col-toledo",
+    slug: "toledo-collection",
+    title: "Toledo Royal Collection",
+    subtitle: "Ispancha nafislik va mustahkam yog‘och durdonalari",
+    badge: "LUXURY",
+    cover_image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+    description: "Klassik o‘ymakorlik san'ati va olijanob yog‘och turlaridan yasalgan elita mebellar to‘plami.",
+    product_ids: ["prod-9", "wardrobe-1", "sideboard-1", "chest-1"],
+    is_active: true,
+    display_order: 3
+  },
+  {
+    id: "col-astra",
+    slug: "astra-collection",
+    title: "Astra Minimalist Collection",
+    subtitle: "Kosmik qulaylik, yengil chiziqlar va ergonomika",
+    badge: "TRENDING",
+    cover_image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+    description: "Kichik va o‘rta xonadonlar uchun maksimal qulaylik beruvchi ixcham va ko‘p funksiyali modullar.",
+    product_ids: ["c-2", "study-1", "book-1", "prod-10"],
+    is_active: true,
+    display_order: 4
+  },
+  {
+    id: "col-bloom",
+    slug: "bloom-collection",
+    title: "Bloom Living Collection",
+    subtitle: "Yorqin ranglar, tabiiy matolar va tabiat nafasi",
+    badge: "POPULAR",
+    cover_image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80",
+    description: "Oshxona va dam olish burchaklari uchun qulay stullar, rang-barang garniturlar to‘plami.",
+    product_ids: ["prod-3", "prod-8", "lounge-4", "sideboard-2"],
+    is_active: true,
+    display_order: 5
   }
 ];
 
@@ -249,7 +474,7 @@ export const initialDiscountRequests = [
   }
 ];
 
-export const initialProducts = [
+const baseInitialProducts = [
   {
     id: "prod-1",
     category_id: "cat-1",
@@ -710,6 +935,63 @@ export const initialProducts = [
     reviews_count: 35,
     likes_count: 82
   }
+];
+
+const convertUrbanItem = (item, catId, tag) => ({
+  id: item.id,
+  category_id: catId,
+  store_id: 'store-1',
+  store_name: 'Urgut Shahar Mebel Markazi',
+  store_phone: '+998 90 456 78 90',
+  craftsman_id: 'craft-soxib',
+  name: item.name,
+  slug: item.id,
+  price: Number(item.original_price || item.price),
+  discount_price: item.original_price ? Number(item.price) : null,
+  stock: 12,
+  material: "Quritilgan tabiiy yog'och, laminatsiyalangan DSP va MDF, metall furnituralar",
+  dimensions: "Standart qulay o'lcham",
+  colors: ["Klassik yong'oq", "Tabiiy eman", "Wenge"],
+  description: `${item.name}. Urgut mebel ustalari tomonidan puxta yasalgan, 3 yillik rasmiy kafolatga ega zamonaviy mebel mahsuloti.`,
+  specifications: {
+    "Brend": item.brand || "Urgut Mebel",
+    "Material": "Kafolatlangan tabiiy yog'och / MDF",
+    "Kafolat": "3 yil rasmiy kafolat",
+    "Yetkazib berish": "Samarqand va butun O‘zbekiston bo‘ylab bepul"
+  },
+  images: [item.image],
+  image_url: item.image,
+  is_published: true,
+  is_featured: true,
+  is_new: true,
+  is_popular: true,
+  is_trending: false,
+  tags: [tag, item.category || tag, "urgut", "mebel"],
+  rating: Number(item.rating) || 4.8,
+  reviews_count: Number(item.reviews) || 28,
+  likes_count: 45
+});
+
+export const normalizedUrbanProducts = [
+  ...(urbanShoeRacks || []).map(i => convertUrbanItem(i, 'cat-shoe-racks', 'shoe-racks')),
+  ...(urbanLoungeChairs || []).map(i => convertUrbanItem(i, 'cat-lounge-chairs', 'lounge-chairs')),
+  ...(urbanHydraulicBeds || []).map(i => convertUrbanItem(i, 'cat-beds', 'beds')),
+  ...(urbanCoffeeTables || []).map(i => convertUrbanItem(i, 'cat-coffee-tables', 'coffee-tables')),
+  ...(urbanTvUnits || []).map(i => convertUrbanItem(i, 'cat-tv-units', 'tv-units')),
+  ...(urbanCTables || []).map(i => convertUrbanItem(i, 'cat-c-tables', 'c-tables')),
+  ...(urbanWardrobes || []).map(i => convertUrbanItem(i, 'cat-wardrobes', 'wardrobes')),
+  ...(urbanChestOfDrawers || []).map(i => convertUrbanItem(i, 'cat-chest-drawers', 'chest-of-drawers')),
+  ...(urbanBookshelves || []).map(i => convertUrbanItem(i, 'cat-bookshelves', 'bookshelves')),
+  ...(urbanSideboards || []).map(i => convertUrbanItem(i, 'cat-sideboards', 'sideboards')),
+  ...(urbanRecliners || []).map(i => convertUrbanItem(i, 'cat-recliners', 'recliners')),
+  ...(urbanStudyTables || []).map(i => convertUrbanItem(i, 'cat-study-tables', 'study-tables')),
+  ...(urbanPartnerBrands || []).map(i => convertUrbanItem(i, i.category === 'tv-units' ? 'cat-tv-units' : 'cat-wardrobes', 'partner-brands')),
+  ...(urbanSolidWoodBrands || []).map(i => convertUrbanItem(i, 'cat-coffee-tables', 'solid-wood'))
+];
+
+export const initialProducts = [
+  ...baseInitialProducts,
+  ...normalizedUrbanProducts
 ];
 
 export const initialCraftsmen = [

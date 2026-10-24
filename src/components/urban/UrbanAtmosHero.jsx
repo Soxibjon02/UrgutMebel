@@ -18,7 +18,7 @@ export const UrbanAtmosHero = () => {
         >
           {/* Main Atmos Card (Left) */}
           <Link
-            to="/furniture"
+            to="/collections"
             style={{
               position: 'relative',
               minHeight: '440px',
@@ -116,7 +116,7 @@ export const UrbanAtmosHero = () => {
           >
             {/* Tile 1: Living Room */}
             <Link
-              to="/furniture?category=cat-living"
+              to="/furniture?category=cat-1"
               style={{
                 position: 'relative',
                 borderRadius: '8px',
@@ -144,7 +144,7 @@ export const UrbanAtmosHero = () => {
 
             {/* Tile 2: Bedroom */}
             <Link
-              to="/furniture?category=cat-bedroom"
+              to="/furniture?category=cat-2"
               style={{
                 position: 'relative',
                 borderRadius: '8px',
@@ -172,7 +172,7 @@ export const UrbanAtmosHero = () => {
 
             {/* Tile 3: Dining Room */}
             <Link
-              to="/furniture?category=cat-dining"
+              to="/furniture?category=cat-3"
               style={{
                 position: 'relative',
                 borderRadius: '8px',
@@ -200,7 +200,7 @@ export const UrbanAtmosHero = () => {
 
             {/* Tile 4: Explore All */}
             <Link
-              to="/furniture"
+              to="/collections"
               style={{
                 position: 'relative',
                 borderRadius: '8px',

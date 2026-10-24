@@ -13,13 +13,15 @@ import {
   initialBanners,
   initialSettings,
   initialStores,
-  initialDiscountRequests
+  initialDiscountRequests,
+  initialCollections
 } from '../data/mockData';
 import {
   Shield,
   LayoutDashboard,
   Package,
   Layers,
+  Sparkles,
   ShoppingBag,
   Sliders,
   Users,
@@ -92,6 +94,15 @@ export const AdminDashboard = () => {
   const [editingSection, setEditingSection] = useState(null);
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
   const [sectionCategoryFilter, setSectionCategoryFilter] = useState('ALL');
+
+  // Collections State (Super Admin)
+  const [collections, setCollections] = useState(() => getStored('collections', initialCollections));
+  const [collectionModalOpen, setCollectionModalOpen] = useState(false);
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [assignProductsModalOpen, setAssignProductsModalOpen] = useState(false);
+  const [selectedColForProducts, setSelectedColForProducts] = useState(null);
+  const [colProductSearch, setColProductSearch] = useState('');
+  const [colCategoryFilter, setColCategoryFilter] = useState('ALL');
 
   // Product Filtering by Category & Search (Super Admin & Store Manager)
   const [productCategoryFilter, setProductCategoryFilter] = useState('ALL');
@@ -233,7 +244,7 @@ export const AdminDashboard = () => {
   const loadAllData = async () => {
     try {
       checkHealth();
-      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs, secList] = await Promise.all([
+      const [prods, cats, cOrders, sOrders, crafts, comms, bans, mgrs, usrs, strs, dReqs, secList, colList] = await Promise.all([
         dataService.getProducts(),
         dataService.getCategories(),
         dataService.getCustomOrders(),
@@ -245,7 +256,8 @@ export const AdminDashboard = () => {
         dataService.getUsers(),
         dataService.getStores(),
         dataService.getDiscountRequests(),
-        dataService.getHomeSections()
+        dataService.getHomeSections(),
+        dataService.getCollections()
       ]);
       setProducts(prods || []);
       setCategories(cats || []);
@@ -259,6 +271,7 @@ export const AdminDashboard = () => {
       setStores(strs || []);
       setDiscountRequests(dReqs || []);
       if (secList && secList.length > 0) setHomeSections(secList);
+      if (colList && colList.length > 0) setCollections(colList);
     } catch (e) {
       console.error(e);
     }
@@ -302,6 +315,7 @@ export const AdminDashboard = () => {
     window.addEventListener('urgut_store_stores_updated', handleUpdate);
     window.addEventListener('urgut_store_discount_requests_updated', handleUpdate);
     window.addEventListener('urgut_store_products_updated', handleUpdate);
+    window.addEventListener('urgut_store_collections_updated', handleUpdate);
     window.addEventListener('urgut_realtime_event', handleUpdate);
 
     const unsubRealtime = realtimeService.subscribe(() => {
@@ -763,6 +777,78 @@ export const AdminDashboard = () => {
     }
   };
 
+  // ==========================================
+  // COLLECTIONS CRUD & PRODUCT ASSIGNMENT
+  // ==========================================
+  const handleOpenAddCollection = () => {
+    setEditingCollection(null);
+    setCollectionModalOpen(true);
+  };
+
+  const handleOpenEditCollection = (col) => {
+    setEditingCollection({ ...col });
+    setCollectionModalOpen(true);
+  };
+
+  const handleSaveCollection = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const title = form.title.value.trim();
+    if (!title) {
+      addToast("Kolleksiya nomini kiriting!", 'warning');
+      return;
+    }
+    const colData = {
+      ...(editingCollection || {}),
+      title,
+      slug: form.slug.value.trim() || editingCollection?.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      subtitle: form.subtitle?.value?.trim() || '',
+      badge: form.badge?.value?.trim() || '',
+      cover_image: form.cover_image?.value?.trim() || editingCollection?.cover_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80',
+      description: form.description?.value?.trim() || '',
+      display_order: Number(form.display_order?.value) || 0,
+      is_active: form.is_active ? form.is_active.checked : true,
+      product_ids: Array.isArray(editingCollection?.product_ids) ? editingCollection.product_ids : []
+    };
+
+    setCollectionModalOpen(false);
+    setEditingCollection(null);
+    addToast('Kolleksiya saqlanmoqda...', 'info');
+    const updated = await dataService.saveCollection(colData);
+    setCollections(updated);
+    addToast(`"${title}" kolleksiyasi muvaffaqiyatli saqlandi!`, 'success');
+  };
+
+  const handleDeleteCollection = async (id) => {
+    if (window.confirm("Rostdan ham ushbu kolleksiyani o‘chirmoqchimisiz?")) {
+      addToast('Kolleksiya o‘chirilmoqda...', 'info');
+      const updated = await dataService.deleteCollection(id);
+      setCollections(updated);
+      addToast('Kolleksiya o‘chirildi', 'success');
+    }
+  };
+
+  const handleOpenAssignProducts = (col) => {
+    setSelectedColForProducts({ ...col, product_ids: [...(col.product_ids || [])] });
+    setAssignProductsModalOpen(true);
+  };
+
+  const handleToggleProductInCollection = async (productId) => {
+    if (!selectedColForProducts) return;
+    const currentIds = new Set(selectedColForProducts.product_ids || []);
+    if (currentIds.has(productId)) {
+      currentIds.delete(productId);
+    } else {
+      currentIds.add(productId);
+    }
+    const newProductIds = Array.from(currentIds);
+    const updatedCol = { ...selectedColForProducts, product_ids: newProductIds };
+    setSelectedColForProducts(updatedCol);
+
+    const updatedList = await dataService.saveCollection(updatedCol);
+    setCollections(updatedList);
+  };
+
   // Craftsman CRUD
   const handleSaveCraftsman = async (e) => {
     e.preventDefault();
@@ -995,6 +1081,7 @@ export const AdminDashboard = () => {
     { id: 'stores', label: `Do‘konlar (${stores.length})`, shortLabel: `Do‘konlar (${stores.length})`, icon: Store },
     { id: 'discount_requests', label: `Chegirma So‘rovlari (${discountRequests.filter(r => r.status === 'PENDING').length} yangi)`, shortLabel: `So‘rovlar (${discountRequests.length})`, icon: Send },
     { id: 'categories', label: `Kategoriyalar (${categories.length})`, shortLabel: `Toifalar (${categories.length})`, icon: Layers },
+    { id: 'collections', label: `Kolleksiyalar Boshqaruvi (${collections.length})`, shortLabel: `Kolleksiyalar (${collections.length})`, icon: Sparkles },
     { id: 'banners', label: `E'lonlar & Bannerlar (${banners.length})`, shortLabel: `E'lonlar (${banners.length})`, icon: ImageIcon },
     { id: 'slides', label: 'Header Slayd Shou Boshqaruvi', shortLabel: 'Slaydlar', icon: ImageIcon },
     { id: 'craftsmen', label: `Ustalar (${craftsmen.length})`, shortLabel: `Ustalar (${craftsmen.length})`, icon: Award },
@@ -2750,6 +2837,144 @@ export const AdminDashboard = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* TAB: COLLECTIONS CRUD & PRODUCTS ASSIGNMENT */}
+        {activeTab === 'collections' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', background: 'rgba(217, 119, 6, 0.12)', color: 'var(--wood-amber)', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  <Sparkles size={14} /> SUPER ADMIN • MEBEL KOLLEKSIYALARI
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Kolleksiyalar Boshqaruvi</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
+                  Saytdagi barcha maxsus mebel kolleksiyalarini boshqaring, yangi kolleksiya yarating, banner va tavsiflarini o‘zgartiring hamda mebellarni biriktiring.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <a
+                  href="/collections"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-secondary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem' }}
+                >
+                  <Eye size={16} /> Saytda Ko‘rish
+                </a>
+                <button
+                  type="button"
+                  onClick={handleOpenAddCollection}
+                  className="btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem' }}
+                >
+                  <Plus size={16} /> Yangi Kolleksiya Yaratish
+                </button>
+              </div>
+            </div>
+
+            {collections.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }}>
+                <Sparkles size={48} style={{ color: 'var(--wood-amber)', opacity: 0.6, margin: '0 auto 1rem' }} />
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Hozircha hech qanday kolleksiya yaratilmagan</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Yangi eksklyuziv mebel to‘plamini yaratish uchun yuqoridagi tugmani bosing.</p>
+                <button type="button" onClick={handleOpenAddCollection} className="btn btn-primary">
+                  <Plus size={16} /> Kolleksiya Qo‘shish
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                {collections.map((col) => {
+                  const attachedCount = (col.product_ids || []).length;
+                  return (
+                    <div
+                      key={col.id}
+                      className="glass-card"
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        backdropFilter: 'blur(8px)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '1.25rem',
+                        border: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {/* Image cover & badges */}
+                      <div style={{ position: 'relative', width: '100%', height: '170px', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.85rem' }}>
+                        <img
+                          src={col.cover_image}
+                          alt={col.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)' }} />
+                        {col.badge && (
+                          <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'var(--gold-gradient)', color: '#fff', fontSize: '0.72rem', fontWeight: 800, padding: '0.25rem 0.65rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {col.badge}
+                          </div>
+                        )}
+                        <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.55rem', borderRadius: '6px' }}>
+                            {attachedCount} ta mebel
+                          </span>
+                          <span style={{ background: col.is_active !== false ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)', color: '#fff', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.55rem', borderRadius: '6px' }}>
+                            {col.is_active !== false ? 'Faol' : 'Yashirilgan'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div style={{ flex: 1, marginBottom: '1rem' }}>
+                        <h4 style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', margin: '0 0 0.35rem 0' }}>
+                          {col.title}
+                        </h4>
+                        {col.subtitle && (
+                          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--wood-amber)', marginBottom: '0.4rem' }}>
+                            {col.subtitle}
+                          </div>
+                        )}
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.45, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {col.description || 'Kolleksiya haqida qo‘shimcha tavsif kiritilmagan.'}
+                        </p>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.85rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAssignProducts(col)}
+                          className="btn btn-primary"
+                          style={{ width: '100%', justifyContent: 'center', fontSize: '0.85rem', padding: '0.55rem 0.8rem', gap: '0.4rem' }}
+                        >
+                          <Package size={15} /> Mebellarni Biriktirish ({attachedCount})
+                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCollection(col)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ flex: 1, justifyContent: 'center', gap: '0.35rem' }}
+                          >
+                            <Edit2 size={13} /> Tahrirlash
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCollection(col.id)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ color: '#ef4444', justifyContent: 'center', gap: '0.35rem' }}
+                          >
+                            <Trash2 size={13} /> O‘chirish
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -5013,6 +5238,313 @@ export const AdminDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE / EDIT COLLECTION */}
+      {collectionModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content apple-card" style={{ maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={20} style={{ color: 'var(--wood-amber)' }} />
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>
+                  {editingCollection ? 'Kolleksiyani Tahrirlash' : 'Yangi Kolleksiya Yaratish'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCollectionModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCollection}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Kolleksiya Nomi <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    required
+                    defaultValue={editingCollection?.title || ''}
+                    placeholder="Masalan: Atmos Kolleksiyasi"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Slug (URL identifikatori)
+                  </label>
+                  <input
+                    type="text"
+                    name="slug"
+                    defaultValue={editingCollection?.slug || ''}
+                    placeholder="Masalan: atmos-collection"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Kichik Sarlavha (Subtitle)
+                  </label>
+                  <input
+                    type="text"
+                    name="subtitle"
+                    defaultValue={editingCollection?.subtitle || ''}
+                    placeholder="Masalan: Shinam va zamonaviy interyer to‘plami"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Yorliq (Badge)
+                  </label>
+                  <input
+                    type="text"
+                    name="badge"
+                    defaultValue={editingCollection?.badge || ''}
+                    placeholder="Masalan: THE NEW ATMOS, 2026 TREND"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <ImageUploadField
+                  label="Kolleksiya Asosiy Muqova Rasmi (Cover Image)"
+                  name="cover_image"
+                  defaultValue={editingCollection?.cover_image || ''}
+                  folder="collections"
+                  placeholder="https://... yoki kompyuterdan fayl tanlang"
+                  helperText="Kolleksiyalar sahifasida va bosh sahifa kartalarida aks etadigan yuqori sifatli banner rasmi."
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                  Kolleksiya Tavsifi
+                </label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  defaultValue={editingCollection?.description || ''}
+                  placeholder="Ushbu to‘plam haqida mijozlar uchun jozibador qisqacha ma’lumot..."
+                  className="form-input"
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    Tartib Raqami (Display Order)
+                  </label>
+                  <input
+                    type="number"
+                    name="display_order"
+                    defaultValue={editingCollection?.display_order || 0}
+                    className="form-input"
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      defaultChecked={editingCollection?.is_active !== false}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--wood-amber)' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                        Kolleksiya saytda ko‘rinsin (Faol)
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        Belgini olsangiz, foydalanuvchilardan yashiriladi
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setCollectionModalOpen(false)}
+                  className="btn btn-secondary"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ fontWeight: 700 }}
+                >
+                  <Check size={16} /> Saqlash va Saytda Yangilash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ASSIGN PRODUCTS TO COLLECTION */}
+      {assignProductsModalOpen && selectedColForProducts && (
+        <div className="modal-backdrop">
+          <div className="modal-content apple-card" style={{ maxWidth: '820px', width: '95%', maxHeight: '88vh', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--wood-amber)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                  <Sparkles size={13} /> Kolleksiya Mebellari
+                </div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0' }}>
+                  "{selectedColForProducts.title}" Kolleksiyasiga Mebellarni Biriktirish
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  Kolleksiyaga qo‘shmoqchi bo‘lgan mebellarni belgilang. Tanlangan: <strong>{(selectedColForProducts.product_ids || []).length} ta</strong> mebel.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAssignProductsModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* Search & Filter toolbar */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  value={colProductSearch}
+                  onChange={(e) => setColProductSearch(e.target.value)}
+                  placeholder="Mebel nomi bo‘yicha qidirish..."
+                  className="form-input"
+                  style={{ paddingLeft: '2.4rem' }}
+                />
+              </div>
+
+              <select
+                value={colCategoryFilter}
+                onChange={(e) => setColCategoryFilter(e.target.value)}
+                className="form-input"
+                style={{ minWidth: '190px', width: 'auto' }}
+              >
+                <option value="ALL">Barcha Kategoriyalar</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Products List with Checkboxes */}
+            <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border-subtle)', borderRadius: '10px', background: 'var(--bg-secondary)', padding: '0.5rem' }}>
+              {(() => {
+                const filteredProducts = products.filter((p) => {
+                  const matchSearch = !colProductSearch || p.name.toLowerCase().includes(colProductSearch.toLowerCase());
+                  const matchCat = colCategoryFilter === 'ALL' || p.category_id === colCategoryFilter || p.category === colCategoryFilter;
+                  return matchSearch && matchCat;
+                });
+
+                if (filteredProducts.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                      Qidiruv bo‘yicha mebellar topilmadi.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {filteredProducts.map((p) => {
+                      const isAssigned = (selectedColForProducts.product_ids || []).includes(p.id);
+                      const catName = categories.find((c) => c.id === p.category_id)?.name || p.category || 'Mebel';
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => handleToggleProductInCollection(p.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.85rem',
+                            padding: '0.65rem 0.85rem',
+                            borderRadius: '8px',
+                            background: isAssigned ? 'rgba(217, 119, 6, 0.12)' : 'var(--bg-card)',
+                            border: isAssigned ? '1.5px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isAssigned}
+                            onChange={() => {}} // handled by parent div onClick
+                            style={{ width: '18px', height: '18px', accentColor: 'var(--wood-amber)', cursor: 'pointer' }}
+                          />
+
+                          <img
+                            src={p.image_url || p.images?.[0] || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=120&q=80'}
+                            alt={p.name}
+                            style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }}
+                          />
+
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {p.name}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.6rem', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                              <span style={{ color: 'var(--wood-amber)', fontWeight: 600 }}>{catName}</span>
+                              {p.store_name && <span>• {p.store_name}</span>}
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                              {(p.discount_price || p.price)?.toLocaleString()} so‘m
+                            </div>
+                            {p.discount_price && (
+                              <div style={{ fontSize: '0.75rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                                {p.price?.toLocaleString()} so‘m
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.85rem' }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Belgilangan mebellar darhol kolleksiyaga biriktiriladi.
+              </div>
+              <button
+                type="button"
+                onClick={() => setAssignProductsModalOpen(false)}
+                className="btn btn-primary"
+                style={{ fontWeight: 700, padding: '0.6rem 1.5rem' }}
+              >
+                <Check size={16} /> Tayyor / Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}

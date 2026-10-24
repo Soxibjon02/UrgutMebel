@@ -42,6 +42,7 @@ import { BlogPage } from './pages/BlogPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { StoresPage } from './pages/StoresPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
+import { CollectionsPage } from './pages/CollectionsPage';
 
 function App() {
   return (
@@ -63,6 +64,8 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/furniture" element={<FurnitureCatalog />} />
                         <Route path="/furniture/:id" element={<ProductDetail />} />
+                        <Route path="/product/:id" element={<ProductDetail />} />
+                        <Route path="/collections" element={<CollectionsPage />} />
                         <Route path="/categories" element={<CategoriesPage />} />
                         <Route path="/custom-order" element={<CustomOrderPage />} />
                         <Route path="/craftsmen" element={<CraftsmenDirectory />} />

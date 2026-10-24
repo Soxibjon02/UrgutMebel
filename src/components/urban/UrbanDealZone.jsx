@@ -95,7 +95,7 @@ export const UrbanDealZone = () => {
 
           {/* Deal 3: Decor Sale Up to 70% Off */}
           <Link
-            to="/furniture?category=decor"
+            to="/furniture?category=cat-decor"
             style={{
               position: 'relative',
               borderRadius: '8px',

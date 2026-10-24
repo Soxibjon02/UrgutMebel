@@ -75,12 +75,15 @@ export const UrbanProductRow = ({ title, viewAllLink = '/furniture', products = 
               }}
             >
               {/* Image Box */}
-              <div
+              <Link
+                to={`/furniture/${item.id}`}
                 style={{
+                  display: 'block',
                   position: 'relative',
                   paddingTop: '80%',
                   overflow: 'hidden',
-                  backgroundColor: 'var(--bg-secondary)'
+                  backgroundColor: 'var(--bg-secondary)',
+                  cursor: 'pointer'
                 }}
               >
                 <img
@@ -121,7 +124,7 @@ export const UrbanProductRow = ({ title, viewAllLink = '/furniture', products = 
                     {item.discount}
                   </div>
                 )}
-              </div>
+              </Link>
 
               {/* Product Info */}
               <div style={{ padding: '0.9rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -153,7 +156,7 @@ export const UrbanProductRow = ({ title, viewAllLink = '/furniture', products = 
                   }}
                   title={item.name}
                 >
-                  <Link to={`/furniture`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <Link to={`/furniture/${item.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                     {item.name}
                   </Link>
                 </h3>

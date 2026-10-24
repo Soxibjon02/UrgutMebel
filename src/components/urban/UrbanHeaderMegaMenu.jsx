@@ -54,15 +54,16 @@ export const UrbanHeaderMegaMenu = () => {
   // Nav categories in top bar (Asosiy is first)
   const navCategories = [
     { id: 'home', label: 'Asosiy', icon: Home, link: '/' },
+    { id: 'collections', label: 'Kolleksiyalar', badge: 'Yangi', link: '/collections' },
     { id: 'custom-order', label: 'Maxsus Buyurtma', badge: '✨ Buyurtma', link: '/custom-order' },
     { id: 'craftsmen', label: 'Ustalar', badge: '🔨 Ustalar', link: '/craftsmen' },
     { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', link: '/furniture?filter=discount' },
     { id: 'sections', label: 'Bo‘limlar', badge: 'Barchasi', hasMegamenu: true },
-    { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-6' },
+    { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-sofas' },
     { id: 'living', label: 'Mehmonxona', link: '/furniture?category=cat-1' },
     { id: 'bedroom', label: 'Yotoqxona', link: '/furniture?category=cat-2' },
     { id: 'dining', label: 'Oshxona & Stol', link: '/furniture?category=cat-3' },
-    { id: 'mattresses', label: 'Matras', link: '/furniture?category=cat-2&sub=matras' }
+    { id: 'mattresses', label: 'Matras', link: '/furniture?category=cat-mattresses' }
   ];
 
   // All 37 Homepage Sections Logically Categorized for Instant Smooth Jumps
@@ -89,6 +90,7 @@ export const UrbanHeaderMegaMenu = () => {
     {
       group: '✨ Toifalar & Ilhom',
       items: [
+        { id: 'atmos_hero', label: 'Atmos Yangi Kolleksiyasi', badge: 'Kolleksiya' },
         { id: 'category_pills', label: 'Tezkor Mebel Toifalari' },
         { id: 'top_categories', label: 'Asosiy Top Kategoriyalar', badge: 'Sara' },
         { id: 'video_reels', label: 'Video Lavhalar (Watch & Shop)' },
