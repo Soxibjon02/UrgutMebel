@@ -154,6 +154,9 @@ export const CustomOrderPage = () => {
         ...formData,
         user_id: user.id,
         user_role: user.role,
+        customer_name: formData.full_name || user.full_name || 'Mijoz',
+        customer_phone: formData.phone || user.phone || '',
+        customer_email: formData.email || user.email || '',
         files: uploadedFiles,
         status: 'NEW'
       });

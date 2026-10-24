@@ -66,9 +66,12 @@ export const CheckoutPage = () => {
         ...formData,
         user_id: user.id,
         user_role: user.role,
+        customer_name: formData.full_name || user.full_name || 'Mijoz',
+        customer_phone: formData.phone || user.phone || '',
+        customer_email: user.email || formData.email || '',
         items: itemsSnapshot,
         total_amount: totalAmount,
-        status: 'processing'
+        status: 'PENDING'
       });
 
       clearCart();

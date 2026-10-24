@@ -50,6 +50,39 @@ const setStored = (key, value, broadcast = false) => {
   }
 };
 
+// Check if an order (standard or custom) belongs to the given user
+export const isOrderOwnedByUser = (order, userObj) => {
+  if (!order || !userObj) return false;
+
+  // 1. Direct ID comparison
+  const orderUserId = order.user_id || order.customer_id;
+  if (orderUserId && userObj.id && String(orderUserId) === String(userObj.id)) {
+    return true;
+  }
+
+  // 2. Email comparison
+  const orderEmail = (order.customer_email || order.email || '').trim().toLowerCase();
+  const userEmail = (userObj.email || '').trim().toLowerCase();
+  if (orderEmail && userEmail && orderEmail.includes('@') && orderEmail === userEmail) {
+    return true;
+  }
+
+  // 3. Phone comparison (digits only, matching at least last 7 digits)
+  const orderPhoneDigits = (order.customer_phone || order.phone || '').replace(/\D/g, '');
+  const userPhoneDigits = (userObj.phone || '').replace(/\D/g, '');
+  if (orderPhoneDigits && userPhoneDigits && orderPhoneDigits.length >= 7 && userPhoneDigits.length >= 7) {
+    if (
+      orderPhoneDigits === userPhoneDigits ||
+      orderPhoneDigits.endsWith(userPhoneDigits) ||
+      userPhoneDigits.endsWith(orderPhoneDigits)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 // Whitelist only columns existing in Supabase public.settings table
 const sanitizeSettingsPayload = (settingsObj = {}) => {
   const VALID_SETTINGS_COLS = [
@@ -655,6 +688,13 @@ export const dataService = {
     return orders.find((o) => o.id === id || o.order_number === id) || null;
   },
 
+  // Personal user custom orders for customer cabinet
+  async getUserCustomOrders(userObj) {
+    const all = await this.getCustomOrders();
+    if (!userObj) return [];
+    return (all || []).filter((o) => isOrderOwnedByUser(o, userObj));
+  },
+
   async createCustomOrder(orderData) {
     // FAQATGINA ODDIY MIJOZ (CUSTOMER) BUYURTMA BERA OLADI!
     // Super admin, manager va usta chalkashliklarning oldini olish uchun buyurtma bera olmaydi.
@@ -993,6 +1033,13 @@ export const dataService = {
     return getStored('standard_orders', []);
   },
 
+  // Personal user standard orders for customer cabinet
+  async getUserStandardOrders(userObj) {
+    const all = await this.getStandardOrders();
+    if (!userObj) return [];
+    return (all || []).filter((o) => isOrderOwnedByUser(o, userObj));
+  },
+
   async createStandardOrder(orderData) {
     // FAQATGINA ODDIY MIJOZ (CUSTOMER) BUYURTMA BERA OLADI!
     // Super admin, manager va usta chalkashliklarning oldini olish uchun buyurtma bera olmaydi.
@@ -1016,8 +1063,10 @@ export const dataService = {
       ...orderData,
       id: `ord-std-${Date.now()}`,
       order_number: orderNumber,
-      customer_name: orderData.full_name || orderData.customer_name || 'Mijoz',
-      customer_phone: orderData.phone || orderData.customer_phone || '',
+      user_id: orderData.user_id || null,
+      customer_name: orderData.customer_name || orderData.full_name || 'Mijoz',
+      customer_phone: orderData.customer_phone || orderData.phone || '',
+      customer_email: orderData.customer_email || orderData.email || '',
       shipping_address: orderData.address || orderData.shipping_address || '',
       notes: orderData.notes || '',
       payment_method: orderData.payment_method || 'cash_on_delivery',

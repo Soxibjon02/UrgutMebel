@@ -95,10 +95,16 @@ export const CustomerAccount = () => {
 
   useEffect(() => {
     const loadAccountData = async () => {
+      if (!user) {
+        setCustomOrders([]);
+        setStandardOrders([]);
+        setLoading(false);
+        return;
+      }
       try {
         const [cOrders, sOrders] = await Promise.all([
-          dataService.getCustomOrders(),
-          dataService.getStandardOrders()
+          dataService.getUserCustomOrders(user),
+          dataService.getUserStandardOrders(user)
         ]);
         setCustomOrders(cOrders || []);
         setStandardOrders(sOrders || []);
@@ -125,7 +131,7 @@ export const CustomerAccount = () => {
       window.removeEventListener('urgut_realtime_event', handleUpdate);
       unsubscribeRealtime();
     };
-  }, []);
+  }, [user]);
 
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
@@ -162,8 +168,8 @@ export const CustomerAccount = () => {
         addToast('Narx taklifi rad etildi. Menedjer siz bilan tez orada qayta bog‘lanadi.', 'info');
       }
       setSelectedOfferOrder(null);
-      const updated = await dataService.getCustomOrders();
-      setCustomOrders(updated);
+      const updated = await dataService.getUserCustomOrders(user);
+      setCustomOrders(updated || []);
     } catch (e) {
       console.error(e);
       addToast('Amalni bajarishda xatolik yuz berdi', 'error');

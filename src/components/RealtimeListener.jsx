@@ -15,55 +15,74 @@ export const RealtimeListener = () => {
 
       switch (event.type) {
         case 'CUSTOM_ORDER_STATUS_CHANGED': {
-          realtimeService.playNotificationSound('status');
-          const meta = getStatusMeta(event.newStatus, 'bilingual');
-          addToast(
-            `⚡ Buyurtma holati yangilandi / Status updated: № ${event.orderNumber || ''} • ${meta.bilingual}`,
-            'info',
-            5500
-          );
+          const isStaff = user && (user.role === 'admin' || user.role === 'manager' || user.role === 'craftsman');
+          const isOwner = user && event.userId && String(event.userId) === String(user.id);
+          if (isStaff || isOwner) {
+            realtimeService.playNotificationSound('status');
+            const meta = getStatusMeta(event.newStatus, 'bilingual');
+            addToast(
+              `⚡ Buyurtma holati yangilandi / Status updated: № ${event.orderNumber || ''} • ${meta.bilingual}`,
+              'info',
+              5500
+            );
+          }
           break;
         }
 
         case 'CUSTOM_ORDER_CREATED': {
-          // Play sound and show toast
-          realtimeService.playNotificationSound('order');
-          addToast(
-            `🔔 Yangi maxsus buyurtma qabul qilindi! / New Custom Order: № ${event.orderNumber || ''} (${event.customerName || 'Mijoz'})`,
-            'success',
-            6000
-          );
+          // New custom order alert is primarily for staff (admin & manager)
+          const isStaff = user && (user.role === 'admin' || user.role === 'manager');
+          if (isStaff) {
+            realtimeService.playNotificationSound('order');
+            addToast(
+              `🔔 Yangi maxsus buyurtma kelib tushdi! / New Custom Order: № ${event.orderNumber || ''} (${event.customerName || 'Mijoz'})`,
+              'success',
+              6000
+            );
+          }
           break;
         }
 
         case 'ORDER_STATUS_CHANGED': {
-          realtimeService.playNotificationSound('status');
-          const meta = getStatusMeta(event.newStatus, 'bilingual');
-          addToast(
-            `⚡ Xarid buyurtmasi yangilandi / Order updated: № ${event.orderNumber || ''} • ${meta.bilingual}`,
-            'info',
-            5500
-          );
+          const isStaff = user && (user.role === 'admin' || user.role === 'manager');
+          const isOwner = user && event.userId && String(event.userId) === String(user.id);
+          if (isStaff || isOwner) {
+            realtimeService.playNotificationSound('status');
+            const meta = getStatusMeta(event.newStatus, 'bilingual');
+            addToast(
+              `⚡ Xarid buyurtmasi holati yangilandi / Order updated: № ${event.orderNumber || ''} • ${meta.bilingual}`,
+              'info',
+              5500
+            );
+          }
           break;
         }
 
         case 'ORDER_CREATED': {
-          realtimeService.playNotificationSound('order');
-          addToast(
-            `🛒 Yangi xarid buyurtmasi tushdi! / New Store Order: № ${event.orderNumber || ''}`,
-            'success',
-            6000
-          );
+          // New store purchase order alert is for store staff (admin & manager)
+          const isStaff = user && (user.role === 'admin' || user.role === 'manager');
+          if (isStaff) {
+            realtimeService.playNotificationSound('order');
+            addToast(
+              `🛒 Yangi xarid buyurtmasi kelib tushdi! / New Store Order: № ${event.orderNumber || ''}`,
+              'success',
+              6000
+            );
+          }
           break;
         }
 
         case 'PRICE_OFFER_SENT': {
-          realtimeService.playNotificationSound('status');
-          addToast(
-            `💰 Buyurtma uchun narx taklifi tayyorlandi! / Price proposal ready: № ${event.orderNumber || ''}`,
-            'warning',
-            6000
-          );
+          const isStaff = user && (user.role === 'admin' || user.role === 'manager');
+          const isOwner = user && event.userId && String(event.userId) === String(user.id);
+          if (isStaff || isOwner) {
+            realtimeService.playNotificationSound('status');
+            addToast(
+              `💰 Buyurtmangiz uchun narx taklifi tayyorlandi! / Price proposal ready: № ${event.orderNumber || ''}`,
+              'warning',
+              6000
+            );
+          }
           break;
         }
 
