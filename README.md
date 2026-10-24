@@ -96,10 +96,28 @@ VITE_SUPABASE_ANON_KEY=your-actual-anon-key
 
 ---
 
-## 👥 Tizimda Rollarni Sinash (Instant Role Switcher)
+## 👥 Tizimda Rollarni Sinash va Avtomatik Kirish
+Tizim foydalanuvchining login va parolidan kelib chiqib, uning rolini avtomatik aniqlaydi va tegishli panelga yo‘naltiradi:
+- **Super Admin (`soxibgaybullayev439@gmail.com`):** To‘g‘ridan-to‘g‘ri `/admin` boshqaruv paneliga ochiladi.
+- **Do‘kon Menedjeri (`manager@urgutmebel.uz`):** O‘z do‘koni va e’lonlarini boshqarish uchun `/manager` paneliga yo‘naltiriladi.
+- **Mohir Usta:** Shaxsiy portfolioni ko‘rish va 14 kunlik ish jadvalini boshqarish uchun `/craftsman-dashboard` ochiladi.
+- **Oddiy Mijoz:** O‘z buyurtmalari va xaridlarini kuzatish uchun `/account` kabinetiga o‘tadi.
 
-Ekraning pastki chap burchagida interaktiv **Rolni Almashtirish (Role Switcher)** panelchasi o‘rnatilgan. Siz birgina tugma orqali:
-- **Mehmon (Guest)** rejimida cheklovlarni sinashingiz,
-- **Mijoz (Customer)** rejimida buyurtma va narx taklifini qabul qilishni,
-- **Menedjer (Manager)** rejimida `/manager` panelida narx kalkulyatorini ishlatishni,
-- **Admin (Admin)** rejimida `/admin` panelida sayt nomini o‘zgartirib barcha joyda sinab ko‘rishingiz mumkin!
+---
+
+## 🚀 Yangi Qo‘shilgan Imkoniyatlar (2026 Yangilanishi)
+
+1. **Bosh Sahifa Bo‘limlari Boshqaruvi (37 ta bo‘lim):**
+   - Super Admin barcha 37 ta blokning tartibini (Up/Down) o‘zgartirishi, faolligini yoqish/o‘chirish va matnlari/rasmlarini tahrirlashi mumkin.
+2. **Kategoriya va Do‘kon Bo‘yicha E’lonlar Tizimi:**
+   - E’lonlar kategoriya bo‘yicha filtrlanadi.
+   - Do‘kon menejeri o‘z do‘konidan, Super Admin esa istalgan do‘kondan e’lon kiritadi.
+   - Ustaning shaxsiy portfoliosi uchun mahsulotga usta biriktirish imkoniyati.
+   - Chegirmali mebellar o‘z toifasida yuqoriga chiqariladi.
+3. **Ustalar Katalogi va Interaktiv Ish Jadvali:**
+   - Do‘konga biriktirilganlik statusi (`🏪 Do‘kon nomi` yoki `🆓 Free / Mustaqil Usta`).
+   - 14 kunlik interaktiv kalendar (🟢 Bo‘sh, 🔴 Band, 🟠 Noaniq).
+   - Ustaning shaxsiy portfoliosi (shu usta yasagan mebel mahsulotlari e’lonlari).
+4. **To‘liq Apple Cupertino Dizayn Tizimi:**
+   - SF Pro tipografiyasi, muzlatilgan oyna (frosted glass), soch tolasi chegaralari va kapsulasimon (pill) tugmalar.
+
