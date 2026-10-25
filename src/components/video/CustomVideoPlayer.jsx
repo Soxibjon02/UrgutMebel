@@ -328,6 +328,33 @@ export const CustomVideoPlayer = ({
     }
   };
 
+  // Double-tap to seek -10s / +10s
+  const lastTapRef = useRef({ time: 0, x: 0 });
+  const [doubleTapFeedback, setDoubleTapFeedback] = useState(null);
+
+  const handleOverlayClick = (e) => {
+    const now = Date.now();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const isLeft = clickX < rect.width / 2;
+
+    if (now - lastTapRef.current.time < 320) {
+      // Double tap detected
+      if (isLeft) {
+        handleSeekDelta(-10);
+        setDoubleTapFeedback({ side: 'left', text: '-10 soniya' });
+      } else {
+        handleSeekDelta(10);
+        setDoubleTapFeedback({ side: 'right', text: '+10 soniya' });
+      }
+      setTimeout(() => setDoubleTapFeedback(null), 650);
+      lastTapRef.current = { time: 0, x: 0 };
+    } else {
+      lastTapRef.current = { time: now, x: clickX };
+      togglePlay();
+    }
+  };
+
   // Progress Bar click & drag
   const handleProgressSeek = (clientX) => {
     if (!progressTrackRef.current || !duration || !playerRef.current) return;
@@ -509,9 +536,9 @@ export const CustomVideoPlayer = ({
         />
       </div>
 
-      {/* 2. Transparent gesture overlay: Click to Play/Pause, Double-click to Fullscreen */}
+      {/* 2. Transparent gesture overlay: Double-tap to Seek -10s/+10s, Single tap to Play/Pause */}
       <div
-        onClick={togglePlay}
+        onClick={handleOverlayClick}
         onDoubleClick={toggleFullscreen}
         style={{
           position: 'absolute',
@@ -521,8 +548,41 @@ export const CustomVideoPlayer = ({
         }}
       />
 
+      {/* Double tap seek visual ripple feedback */}
+      {doubleTapFeedback && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            [doubleTapFeedback.side]: 0,
+            width: '42%',
+            backgroundColor: 'rgba(255, 255, 255, 0.16)',
+            borderTopRightRadius: doubleTapFeedback.side === 'left' ? '50%' : 0,
+            borderBottomRightRadius: doubleTapFeedback.side === 'left' ? '50%' : 0,
+            borderTopLeftRadius: doubleTapFeedback.side === 'right' ? '50%' : 0,
+            borderBottomLeftRadius: doubleTapFeedback.side === 'right' ? '50%' : 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: '6px',
+            color: '#ffffff',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            zIndex: 9,
+            pointerEvents: 'none',
+            animation: 'cvpFadeRipple 0.65s ease-out forwards'
+          }}
+        >
+          {doubleTapFeedback.side === 'left' ? <RotateCcw size={28} /> : <RotateCw size={28} />}
+          <span>{doubleTapFeedback.text}</span>
+        </div>
+      )}
+
       {/* 3. Top Gradient Header: Brand Tag + Video Title + HD Indicator */}
       <div
+        className="cvp-top-bar"
         style={{
           position: 'absolute',
           top: 0,
@@ -534,16 +594,17 @@ export const CustomVideoPlayer = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '1rem',
+          gap: '0.75rem',
           transition: 'opacity 0.28s ease, transform 0.28s ease',
           opacity: showControls || !isPlaying ? 1 : 0,
           transform: showControls || !isPlaying ? 'translateY(0)' : 'translateY(-8px)',
           pointerEvents: showControls || !isPlaying ? 'auto' : 'none'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, overflow: 'hidden' }}>
           {/* Brand Pill */}
           <div
+            className="cvp-brand-pill"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -566,6 +627,7 @@ export const CustomVideoPlayer = ({
               }}
             />
             <span
+              className="cvp-brand-text"
               style={{
                 fontSize: '0.74rem',
                 fontWeight: 800,
@@ -580,6 +642,7 @@ export const CustomVideoPlayer = ({
 
           {/* Video Title */}
           <span
+            className="cvp-top-title"
             style={{
               fontSize: '0.92rem',
               fontWeight: 700,
@@ -595,6 +658,7 @@ export const CustomVideoPlayer = ({
 
         {/* Quality indicator */}
         <div
+          className="cvp-quality-badge"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -768,13 +832,14 @@ export const CustomVideoPlayer = ({
 
       {/* 6. Modern Glassmorphic Bottom Control Bar */}
       <div
+        className="cvp-bottom-bar"
         style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
           zIndex: 10,
-          padding: '1.5rem 1.25rem 0.9rem',
+          padding: '1.4rem 1.25rem 0.85rem',
           background: 'linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 65%, transparent 100%)',
           display: 'flex',
           flexDirection: 'column',
@@ -788,6 +853,7 @@ export const CustomVideoPlayer = ({
         {/* Scrubber / Progress Bar */}
         <div
           ref={progressTrackRef}
+          className="cvp-scrubber-track"
           onMouseDown={handleProgressMouseDown}
           onMouseMove={handleProgressMouseMove}
           onMouseLeave={handleProgressMouseLeave}
@@ -883,19 +949,25 @@ export const CustomVideoPlayer = ({
 
         {/* Controls Deck: Buttons & Metadata */}
         <div
+          className="cvp-controls-row"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '1rem',
-            color: '#ffffff'
+            gap: '0.65rem',
+            color: '#ffffff',
+            width: '100%'
           }}
         >
           {/* Left Controls: Play/Pause, -10s, +10s, Volume, Time */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div
+            className="cvp-left-group"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}
+          >
             {/* Play/Pause */}
             <button
               type="button"
+              className="cvp-btn-play"
               onClick={togglePlay}
               aria-label={isPlaying ? 'Pauza' : 'Ijro'}
               style={{
@@ -923,6 +995,7 @@ export const CustomVideoPlayer = ({
             {/* Rewind 10s */}
             <button
               type="button"
+              className="cvp-btn-rewind"
               onClick={() => handleSeekDelta(-10)}
               title="10 soniya orqaga"
               style={{
@@ -945,6 +1018,7 @@ export const CustomVideoPlayer = ({
             {/* Fast-forward 10s */}
             <button
               type="button"
+              className="cvp-btn-forward"
               onClick={() => handleSeekDelta(10)}
               title="10 soniya oldinga"
               style={{
@@ -966,11 +1040,12 @@ export const CustomVideoPlayer = ({
 
             {/* Volume Control */}
             <div
-              className="custom-player-volume-group"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+              className="cvp-volume-group"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
             >
               <button
                 type="button"
+                className="cvp-btn-volume"
                 onClick={toggleMute}
                 aria-label={isMuted ? 'Ovozni yoqish' : 'Ovozni o‘chirish'}
                 style={{
@@ -992,12 +1067,13 @@ export const CustomVideoPlayer = ({
 
               <input
                 type="range"
+                className="cvp-volume-slider"
                 min="0"
                 max="100"
                 value={isMuted ? 0 : volume}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 style={{
-                  width: '65px',
+                  width: '60px',
                   height: '4px',
                   accentColor: 'var(--figma-coral, #FA6D58)',
                   cursor: 'pointer'
@@ -1008,12 +1084,14 @@ export const CustomVideoPlayer = ({
 
             {/* Time display */}
             <div
+              className="cvp-time-display"
               style={{
                 fontSize: '0.8rem',
                 fontFamily: 'monospace',
                 color: 'rgba(255,255,255,0.85)',
                 fontWeight: 600,
-                marginLeft: '0.25rem'
+                marginLeft: '0.15rem',
+                whiteSpace: 'nowrap'
               }}
             >
               <span>{formatTime(currentTime)}</span>
@@ -1023,11 +1101,15 @@ export const CustomVideoPlayer = ({
           </div>
 
           {/* Right Controls: Speed Selector, Next Video, Fullscreen */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
+          <div
+            className="cvp-right-group"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', position: 'relative', flexShrink: 0 }}
+          >
             {/* Next Video button if available */}
             {nextVideo && onNext && (
               <button
                 type="button"
+                className="cvp-btn-next"
                 onClick={onNext}
                 title={`Keyingi video: ${nextVideo.title}`}
                 style={{
@@ -1047,9 +1129,10 @@ export const CustomVideoPlayer = ({
             )}
 
             {/* Playback speed selector */}
-            <div style={{ position: 'relative' }}>
+            <div className="cvp-btn-speed-group" style={{ position: 'relative' }}>
               <button
                 type="button"
+                className="cvp-btn-speed"
                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
                 style={{
                   background: 'rgba(255,255,255,0.12)',
@@ -1057,10 +1140,10 @@ export const CustomVideoPlayer = ({
                   color: '#ffffff',
                   fontSize: '0.76rem',
                   fontWeight: 800,
-                  padding: '0.2rem 0.5rem',
+                  padding: '0.2rem 0.45rem',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  minWidth: '42px',
+                  minWidth: '38px',
                   textAlign: 'center'
                 }}
               >
@@ -1118,6 +1201,7 @@ export const CustomVideoPlayer = ({
             {/* Fullscreen toggle */}
             <button
               type="button"
+              className="cvp-btn-fullscreen"
               onClick={toggleFullscreen}
               aria-label={isFullscreen ? 'Kichik ekran' : 'Katta ekran'}
               style={{
@@ -1137,6 +1221,89 @@ export const CustomVideoPlayer = ({
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes cvpFadeRipple {
+          0% { opacity: 0; transform: scale(0.85); }
+          50% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        @media (max-width: 768px) {
+          .cvp-top-bar {
+            padding: 0.65rem 0.85rem !important;
+          }
+          .cvp-bottom-bar {
+            padding: 0.9rem 0.85rem 0.55rem !important;
+            gap: 0.45rem !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .cvp-top-title {
+            display: none !important;
+          }
+          .cvp-volume-slider {
+            display: none !important;
+          }
+          .cvp-top-bar {
+            padding: 0.5rem 0.65rem !important;
+          }
+          .cvp-brand-text {
+            font-size: 0.68rem !important;
+          }
+          .cvp-quality-badge {
+            padding: 0.15rem 0.45rem !important;
+            font-size: 0.68rem !important;
+          }
+          .cvp-bottom-bar {
+            padding: 0.65rem 0.6rem 0.45rem !important;
+            gap: 0.35rem !important;
+          }
+          .cvp-controls-row {
+            gap: 0.35rem !important;
+          }
+          .cvp-left-group {
+            gap: 0.45rem !important;
+          }
+          .cvp-right-group {
+            gap: 0.45rem !important;
+          }
+          .cvp-time-display {
+            font-size: 0.72rem !important;
+            margin-left: 0 !important;
+          }
+          .cvp-btn-play svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .cvp-btn-fullscreen svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .cvp-btn-speed {
+            padding: 0.15rem 0.4rem !important;
+            font-size: 0.72rem !important;
+            min-width: 36px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .cvp-btn-rewind,
+          .cvp-btn-forward {
+            display: none !important;
+          }
+          .cvp-time-display {
+            font-size: 0.7rem !important;
+          }
+          .cvp-brand-text {
+            font-size: 0.65rem !important;
+          }
+          .cvp-left-group {
+            gap: 0.35rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

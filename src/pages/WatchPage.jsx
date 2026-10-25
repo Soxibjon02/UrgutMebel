@@ -192,7 +192,7 @@ export const WatchPage = () => {
 
   return (
     <div className="watch-page-container" style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', padding: '1.5rem 0 4rem' }}>
-      <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 1.25rem' }}>
+      <div className="container watch-page-inner" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 1.25rem' }}>
         
         {/* Top Breadcrumb Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -210,7 +210,7 @@ export const WatchPage = () => {
             </span>
           </div>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', background: 'var(--bg-card)', padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)' }}>
+          <div className="watch-official-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', background: 'var(--bg-card)', padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-subtle)' }}>
             <ShieldCheck size={14} color="#16a34a" />
             <span>Urgut Mebel Markazi • Rasmiy Video Player</span>
           </div>
@@ -548,7 +548,21 @@ export const WatchPage = () => {
         @media (max-width: 1024px) {
           .watch-layout-grid {
             grid-template-columns: 1fr !important;
-            gap: 2.5rem !important;
+            gap: 2rem !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .watch-page-container {
+            padding: 0.75rem 0 3rem !important;
+          }
+          .watch-page-inner {
+            padding: 0 0.5rem !important;
+          }
+          .watch-official-badge {
+            display: none !important;
+          }
+          .watch-layout-grid {
+            gap: 1.5rem !important;
           }
         }
       `}</style>
