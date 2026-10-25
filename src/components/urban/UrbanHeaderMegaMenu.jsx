@@ -44,7 +44,7 @@ export const UrbanHeaderMegaMenu = () => {
   const isStaff = isAdmin || isManager || isCraftsman;
   const profilePath = isAdmin ? '/admin' : isManager ? '/manager' : isCraftsman ? '/craftsman-dashboard' : '/account';
   const { t } = useLanguage();
-  const { isDark, toggleTheme } = useSettings();
+  const { settings, isDark, toggleTheme } = useSettings();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMegamenu, setActiveMegamenu] = useState(null);
@@ -206,6 +206,30 @@ export const UrbanHeaderMegaMenu = () => {
         zIndex: 900
       }}
     >
+      {/* Top Header Announcement Bar from System Settings */}
+      {settings?.announcement && (
+        <div
+          className="urban-header-announcement-bar"
+          style={{
+            backgroundColor: 'var(--figma-coral, #FA6D58)',
+            color: '#ffffff',
+            padding: '0.4rem 1rem',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            letterSpacing: '0.02em',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+          }}
+        >
+          <Flame size={15} />
+          <span>{settings.announcement}</span>
+        </div>
+      )}
+
       {/* Upper Main Bar: Logo, Search, Action Icons */}
       <div
         className="container urban-header-main-container"
@@ -219,35 +243,48 @@ export const UrbanHeaderMegaMenu = () => {
           gap: '1.5rem'
         }}
       >
-        {/* Brand Logo */}
+        {/* Brand Logo & Name (Dynamic from System Settings) */}
         <Link
           to="/"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.55rem',
+            gap: '0.65rem',
             textDecoration: 'none',
             flexShrink: 0
           }}
         >
-          <div
-            className="urban-header-logo-icon"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--figma-coral, #FA6D58)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontWeight: 900,
-              fontSize: '1.2rem',
-              boxShadow: '0 4px 12px rgba(250, 109, 88, 0.3)'
-            }}
-          >
-            U
-          </div>
+          {settings?.logo_url ? (
+            <img
+              src={settings.logo_url}
+              alt={settings.site_name || 'Urgut Mebel'}
+              style={{
+                height: '42px',
+                maxWidth: '140px',
+                objectFit: 'contain',
+                borderRadius: '8px'
+              }}
+            />
+          ) : (
+            <div
+              className="urban-header-logo-icon"
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--figma-coral, #FA6D58)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: '1.25rem',
+                boxShadow: '0 4px 12px rgba(250, 109, 88, 0.3)'
+              }}
+            >
+              U
+            </div>
+          )}
           <div>
             <div
               className="urban-header-logo-title"
@@ -256,11 +293,11 @@ export const UrbanHeaderMegaMenu = () => {
                 fontSize: '1.25rem',
                 fontWeight: 800,
                 color: 'var(--text-main)',
-                lineHeight: 1.1,
+                lineHeight: 1.15,
                 letterSpacing: '-0.02em'
               }}
             >
-              Urgut Mebel
+              {settings?.site_name || 'Urgut Mebel'}
             </div>
             <div
               className="urban-header-logo-sub"
@@ -268,11 +305,15 @@ export const UrbanHeaderMegaMenu = () => {
                 fontSize: '0.62rem',
                 color: 'var(--figma-coral, #FA6D58)',
                 fontWeight: 700,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase'
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                maxWidth: '220px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
               }}
             >
-              Markazi & Dizayn
+              {settings?.site_tagline || 'Markazi & Dizayn'}
             </div>
           </div>
         </Link>

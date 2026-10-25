@@ -73,7 +73,9 @@ import {
   Filter,
   Film,
   Play,
-  Video
+  Video,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import ImageUploadField from '../components/ImageUploadField';
 import { StatusBadge } from '../components/StatusBadge';
@@ -87,6 +89,23 @@ export const AdminDashboard = () => {
   const { addToast } = useNotification();
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('urgut_admin_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('urgut_admin_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Datasets - Instantaneous cache hydration so UI NEVER flashes (0)!
   const [products, setProducts] = useState(() => getStored('products', initialProducts));
@@ -1576,48 +1595,81 @@ export const AdminDashboard = () => {
         })}
       </div>
 
-      {/* Mobile Menu Dropdown Drawer */}
+      {/* Mobile Sliding Sidebar Drawer (User requested: side bar uchun alohida scroll va yopib ochish mobile uchun mos) */}
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
+          className="admin-mobile-drawer-backdrop"
           style={{
             position: 'fixed',
             inset: 0,
             backgroundColor: 'rgba(0,0,0,0.65)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            zIndex: 9999,
+            zIndex: 99999,
             display: 'flex',
-            flexDirection: 'column',
             justifyContent: 'flex-start'
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: 'var(--bg-primary)',
+              width: '300px',
+              maxWidth: '85vw',
+              height: '100%',
+              backgroundColor: 'var(--bg-card)',
               color: 'var(--text-main)',
-              padding: '1.25rem',
-              borderBottomLeftRadius: '22px',
-              borderBottomRightRadius: '22px',
-              boxShadow: 'var(--shadow-xl)',
-              borderBottom: '1.5px solid var(--border-subtle)',
-              maxHeight: '82vh',
-              overflowY: 'auto'
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '10px 0 40px rgba(0,0,0,0.35)',
+              borderRight: '1.5px solid var(--border-subtle)',
+              animation: 'adminSlideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.75rem' }}>
-              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--wood-amber)' }}>Admin Bo‘limlari</div>
+            <div style={{ padding: '1.25rem 1.25rem 0.85rem', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                  <Shield size={16} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{settings.site_name}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--wood-amber)', fontWeight: 700 }}>SUPER ADMIN PANEL</div>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '4px' }}
+                aria-label="Yopish"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '6px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer'
+                }}
               >
-                <X size={22} />
+                <X size={18} />
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
+            {/* Independent scrollable menu list */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '0.85rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.4rem'
+              }}
+            >
               {adminTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -1632,44 +1684,113 @@ export const AdminDashboard = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.55rem',
-                      padding: '0.75rem 0.8rem',
+                      gap: '0.75rem',
+                      padding: '0.75rem 0.9rem',
                       borderRadius: 'var(--radius-md)',
-                      fontSize: '0.82rem',
+                      fontSize: '0.86rem',
                       fontWeight: 600,
                       color: isActive ? '#ffffff' : 'var(--text-main)',
-                      backgroundColor: isActive ? 'var(--wood-amber)' : 'var(--bg-secondary)',
-                      border: isActive ? '1px solid var(--wood-amber)' : '1px solid var(--border-subtle)',
+                      backgroundColor: isActive ? 'var(--wood-amber)' : 'transparent',
+                      border: isActive ? '1px solid var(--wood-amber)' : '1px solid transparent',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      minHeight: '48px',
-                      boxShadow: isActive ? '0 4px 12px rgba(194, 109, 46, 0.3)' : 'none',
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <Icon size={16} style={{ flexShrink: 0 }} />
-                    <span style={{ lineHeight: 1.25 }}>{tab.label}</span>
+                    <Icon size={17} style={{ flexShrink: 0 }} />
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}
             </div>
+
+            <div style={{ padding: '1rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              <div>Foydalanuvchi: {user.full_name}</div>
+              <div style={{ color: 'var(--status-success)', marginTop: '0.2rem' }}>● Tizim faol</div>
+            </div>
           </div>
         </div>
       )}
-      
-      {/* Sidebar Navigation (Desktop) */}
-      <aside className="admin-sidebar-desktop">
-        <div style={{ padding: '1.5rem 1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '2rem' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-              <Shield size={18} />
+
+      {/* Mobile Floating Menu Button (Appears when scrolled so user can always open sidebar) */}
+      <button
+        type="button"
+        onClick={() => setMobileMenuOpen(true)}
+        className="admin-mobile-floating-toggle"
+        title="Admin Menyusi"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '20px',
+          zIndex: 9999,
+          backgroundColor: 'var(--figma-coral, #FA6D58)',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '999px',
+          padding: '0.65rem 1.15rem',
+          display: 'none',
+          alignItems: 'center',
+          gap: '0.5rem',
+          fontSize: '0.84rem',
+          fontWeight: 800,
+          boxShadow: '0 8px 24px rgba(250, 109, 88, 0.45)',
+          cursor: 'pointer'
+        }}
+      >
+        <Menu size={18} />
+        <span>Menyu</span>
+      </button>
+
+      {/* Sidebar Navigation (Desktop: Sticky, Independent Scroll, Collapsible) */}
+      <aside className={`admin-sidebar-desktop ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        <div style={{ padding: sidebarCollapsed ? '1.25rem 0.5rem' : '1.5rem 1.25rem' }}>
+          {/* Header */}
+          <div
+            className="admin-sidebar-header-box"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.75rem',
+              gap: '0.65rem'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                <Shield size={18} />
+              </div>
+              <div className="admin-sidebar-text" style={{ minWidth: 0, overflow: 'hidden' }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{settings.site_name}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--wood-amber)', fontWeight: 700, letterSpacing: '0.04em' }}>SUPER ADMIN</div>
+              </div>
             </div>
-            <div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>{settings.site_name}</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--wood-amber)', fontWeight: 700 }}>SUPER ADMIN PANEL</div>
-            </div>
+
+            {/* Collapse / Expand Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleSidebarCollapse}
+              className="admin-sidebar-toggle-btn"
+              title={sidebarCollapsed ? "Menyuni kengaytirish" : "Menyuni yig‘ish"}
+              style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-main)',
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
           </div>
 
+          {/* Nav List with Independent Scroll */}
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             {adminTabs.map((tab) => {
               const Icon = tab.icon;
@@ -1679,18 +1800,29 @@ export const AdminDashboard = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
+                  title={sidebarCollapsed ? tab.label : ''}
                   className={`admin-sidebar-tab-btn ${isActive ? 'active' : ''}`}
                 >
-                  <Icon size={17} /> {tab.label}
+                  <Icon size={17} style={{ flexShrink: 0 }} />
+                  <span className="admin-sidebar-text" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {tab.label}
+                  </span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          <div>Foydalanuvchi: {user.full_name}</div>
-          <div style={{ color: 'var(--status-success)', marginTop: '0.2rem' }}>● Tizim faol</div>
+        <div className="admin-sidebar-footer" style={{ padding: sidebarCollapsed ? '1rem 0.5rem' : '1.25rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <div className="admin-sidebar-footer-info">
+            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Foydalanuvchi: {user.full_name}</div>
+            <div style={{ color: 'var(--status-success)', marginTop: '0.2rem' }}>● Tizim faol</div>
+          </div>
+          {sidebarCollapsed && (
+            <div style={{ display: 'flex', justifyContent: 'center' }} title={`Foydalanuvchi: ${user.full_name}`}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--status-success)' }} />
+            </div>
+          )}
         </div>
       </aside>
 

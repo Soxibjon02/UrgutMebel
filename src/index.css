@@ -1213,23 +1213,76 @@ select:-webkit-autofill:focus {
 
 .admin-sidebar-desktop {
   width: 270px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--bg-card) !important;
   color: var(--text-main) !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex-shrink: 0;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
   border-right: 1px solid var(--border-subtle) !important;
+  z-index: 100;
+}
+
+/* Custom sleek scrollbar for sidebar */
+.admin-sidebar-desktop::-webkit-scrollbar {
+  width: 5px;
+}
+.admin-sidebar-desktop::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar-desktop::-webkit-scrollbar-thumb {
+  background: rgba(250, 109, 88, 0.25);
+  border-radius: 999px;
+}
+.admin-sidebar-desktop::-webkit-scrollbar-thumb:hover {
+  background: var(--figma-coral, #FA6D58);
+}
+
+.admin-sidebar-desktop.collapsed {
+  width: 76px !important;
+}
+
+.admin-sidebar-desktop.collapsed .admin-sidebar-text,
+.admin-sidebar-desktop.collapsed .admin-sidebar-footer-info {
+  display: none !important;
+}
+
+.admin-sidebar-desktop.collapsed .admin-sidebar-tab-btn {
+  justify-content: center;
+  padding: 0.75rem 0;
+  gap: 0;
+}
+
+.admin-sidebar-desktop.collapsed .admin-sidebar-header-box {
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+@keyframes adminSlideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 [data-theme="dark"] .admin-sidebar-desktop {
-  background-color: rgba(18, 16, 14, 0.75) !important;
+  background-color: rgba(18, 16, 14, 0.85) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 [data-theme="light"] .admin-sidebar-desktop {
-  background-color: rgba(250, 248, 245, 0.95) !important;
+  background-color: rgba(250, 248, 245, 0.98) !important;
   border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -1390,6 +1443,10 @@ select:-webkit-autofill:focus {
 
   .admin-main-content {
     padding: 1.25rem 1rem calc(95px + env(safe-area-inset-bottom, 20px)) 1rem !important;
+  }
+
+  .admin-mobile-floating-toggle {
+    display: inline-flex !important;
   }
 
   .dashboard-grid-stats {

@@ -51,8 +51,10 @@ import {
 } from '../data/urbanProductsData';
 
 import { dataService, DEFAULT_HOME_SECTIONS, getStored } from '../services/dataService';
+import { useSettings } from '../context/SettingsContext';
 
 export const Home = () => {
+  const { settings } = useSettings();
   const [searchParams] = useSearchParams();
   const [quickBuyProduct, setQuickBuyProduct] = useState(null);
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
@@ -130,12 +132,12 @@ export const Home = () => {
         return (
           <UrbanHeroSlider
             key={sec.id}
-            title={sec.title}
-            subtitle={sec.subtitle}
-            badge={sec.badge}
-            banner_image={sec.banner_image}
-            primaryBtnText={sec.btn_text}
-            primaryBtnLink={sec.link}
+            title={settings?.hero_title || sec.title}
+            subtitle={settings?.hero_subtitle || sec.subtitle || settings?.site_tagline}
+            badge={sec.badge || settings?.hero_badge}
+            banner_image={settings?.hero_banner_image || sec.banner_image}
+            primaryBtnText={sec.btn_text || settings?.hero_btn_text}
+            primaryBtnLink={sec.link || settings?.hero_btn_link}
             autoplay_speed={sec.autoplay_speed}
           />
         );

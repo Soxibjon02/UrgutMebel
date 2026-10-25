@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp, Smartphone, Download, MapPin, Phone, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { usePwa } from '../../context/PwaContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export const UrbanMegaFooter = () => {
   const { isInstalled, installApp } = usePwa();
+  const { settings } = useSettings();
   const [openAccordions, setOpenAccordions] = useState({
     company: false,
     moreInfo: false,
@@ -252,16 +254,25 @@ export const UrbanMegaFooter = () => {
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
                 <MapPin size={16} color="var(--figma-coral, #FA6D58)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>Samarqand viloyati, Urgut tumani, Hunarmandlar shaharchasi, 24-bino</span>
+                <span>{settings?.address || 'Samarqand viloyati, Urgut tumani, Hunarmandlar shaharchasi, 24-bino'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Phone size={16} color="var(--figma-coral, #FA6D58)" style={{ flexShrink: 0 }} />
-                <a href="tel:+998904567890" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 700 }}>+998 90 456 78 90</a>
+                <a href={`tel:${(settings?.phone || '+998904567890').replace(/\s+/g, '')}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 700 }}>
+                  {settings?.phone || '+998 90 456 78 90'}
+                </a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Mail size={16} color="var(--figma-coral, #FA6D58)" style={{ flexShrink: 0 }} />
-                <span>info@urgutmebel.uz</span>
+                <a href={`mailto:${settings?.email || 'info@urgutmebel.uz'}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  {settings?.email || 'info@urgutmebel.uz'}
+                </a>
               </div>
+              {settings?.footer_about && (
+                <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '0.35rem', lineHeight: 1.45 }}>
+                  {settings.footer_about}
+                </div>
+              )}
               <div style={{ fontSize: '0.74rem', color: '#9ca3af', marginTop: '0.2rem' }}>
                 STIR / INN: 309874125 | Urgut Mebel MCHJ
               </div>
@@ -284,25 +295,33 @@ export const UrbanMegaFooter = () => {
             Like what you’re seeing? Follow us for more.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            {/* Telegram */}
+            <a
+              href={settings?.telegram?.startsWith('http') ? settings.telegram : `https://t.me/${(settings?.telegram || 'urgut_mebel').replace('@', '')}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#229ed9', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Telegram"
+            >
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            </a>
+            {/* Instagram */}
+            <a
+              href={settings?.instagram?.startsWith('http') ? settings.instagram : `https://instagram.com/${(settings?.instagram || 'urgut_mebel').replace('@', '')}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Instagram"
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/></svg>
+            </a>
             {/* Facebook */}
             <a href="https://facebook.com" target="_blank" rel="noreferrer" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#1877f2', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
             </a>
-            {/* Instagram */}
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/></svg>
-            </a>
-            {/* X / Twitter */}
-            <a href="https://x.com" target="_blank" rel="noreferrer" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
             {/* YouTube */}
             <a href="https://youtube.com" target="_blank" rel="noreferrer" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#ff0000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            </a>
-            {/* Telegram */}
-            <a href="https://t.me" target="_blank" rel="noreferrer" style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#229ed9', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
             </a>
           </div>
         </div>
@@ -317,7 +336,7 @@ export const UrbanMegaFooter = () => {
             color: '#9ca3af'
           }}
         >
-          &copy; 2012-2026 URGUT MEBEL MARKAZI. Barcha huquqlar himoyalangan.
+          {settings?.copyright_text || `© 2012-2026 ${settings?.site_name?.toUpperCase() || 'URGUT MEBEL MARKAZI'}. Barcha huquqlar himoyalangan.`}
         </div>
       </div>
 
