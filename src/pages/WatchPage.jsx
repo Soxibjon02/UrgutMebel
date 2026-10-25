@@ -20,6 +20,7 @@ import { dataService } from '../services/dataService';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 import { QuickBuyModal } from '../components/QuickBuyModal';
+import { CustomVideoPlayer } from '../components/video/CustomVideoPlayer';
 
 export const WatchPage = () => {
   const { id } = useParams();
@@ -49,7 +50,10 @@ export const WatchPage = () => {
 
         // Determine which video to play
         const targetId = id || searchParams.get('v');
-        let selected = activeList.find((v) => v.id === targetId || v.youtube_id === targetId);
+        let selected = null;
+        if (targetId) {
+          selected = activeList.find((v) => v.id === targetId || v.youtube_id === targetId);
+        }
         if (!selected && activeList.length > 0) {
           selected = activeList[0];
         }
@@ -106,8 +110,10 @@ export const WatchPage = () => {
   }, [activeVideo]);
 
   const handleSelectVideo = (video) => {
+    if (!video) return;
     setActiveVideo(video);
-    setSearchParams({ v: video.id });
+    navigate(`/watch/${video.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleShare = () => {
@@ -143,13 +149,14 @@ export const WatchPage = () => {
   };
 
   const handleFullscreen = () => {
-    if (playerContainerRef.current) {
+    const el = document.querySelector('.custom-video-player-root');
+    if (el) {
       if (!document.fullscreenElement) {
-        playerContainerRef.current.requestFullscreen().catch((err) => {
+        el.requestFullscreen().catch((err) => {
           console.warn('Fullscreen error:', err);
         });
       } else {
-        document.exitFullscreen();
+        document.exitFullscreen().catch(() => {});
       }
     }
   };
@@ -180,10 +187,8 @@ export const WatchPage = () => {
     );
   }
 
-  // YouTube embed URL with strict parameters to eliminate related videos and branding
-  const embedUrl = `https://www.youtube-nocookie.com/embed/${activeVideo.youtube_id}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&fs=1&playsinline=1&enablejsapi=1`;
-
   const otherVideos = videos.filter((v) => v.id !== activeVideo.id);
+  const nextVideo = otherVideos.length > 0 ? otherVideos[0] : null;
 
   return (
     <div className="watch-page-container" style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', padding: '1.5rem 0 4rem' }}>
@@ -216,95 +221,13 @@ export const WatchPage = () => {
           
           {/* LEFT: Video Player and Details */}
           <div>
-            {/* Cinematic Video Player Frame */}
-            <div
-              ref={playerContainerRef}
-              className="watch-player-frame"
-              style={{
-                position: 'relative',
-                width: '100%',
-                backgroundColor: '#000000',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-                aspectRatio: '16 / 9'
-              }}
-            >
-              {/* YouTube IFrame Embed */}
-              <iframe
-                title={activeVideo.title}
-                src={embedUrl}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  zIndex: 1
-                }}
-              />
-
-              {/* ANTI-DISTRACTION TOP BLOCKER (Prevents clicking YouTube video title / channel / share links) */}
-              <div
-                className="yt-shield-top"
-                title="Urgut Mebel Markazi Video Player"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '56px',
-                  zIndex: 2,
-                  pointerEvents: 'auto',
-                  cursor: 'default',
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0 1rem',
-                  gap: '0.75rem'
-                }}
-              >
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', padding: '0.25rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.04em' }}>
-                    URGUT MEBEL MARKAZI
-                  </span>
-                </div>
-                <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.9)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {activeVideo.title}
-                </span>
-              </div>
-
-              {/* ANTI-DISTRACTION BOTTOM-RIGHT LOGO BLOCKER (Covers YouTube watermark icon so user cannot click outside) */}
-              <div
-                className="yt-shield-logo"
-                title="Urgut Mebel Markazi"
-                style={{
-                  position: 'absolute',
-                  bottom: '8px',
-                  right: '48px',
-                  width: '95px',
-                  height: '42px',
-                  zIndex: 2,
-                  pointerEvents: 'auto',
-                  cursor: 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-              >
-                {/* Visual mask so YouTube watermark is hidden and not clickable */}
-                <div style={{ background: 'rgba(18, 18, 20, 0.95)', border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 800, color: 'var(--figma-coral, #FA6D58)', pointerEvents: 'none' }}>
-                  U.M.M 🛋️
-                </div>
-              </div>
-            </div>
+            {/* Custom Modern Video Player */}
+            <CustomVideoPlayer
+              video={activeVideo}
+              nextVideo={nextVideo}
+              onNext={() => nextVideo && handleSelectVideo(nextVideo)}
+              autoPlay={true}
+            />
 
             {/* Video Header & Actions */}
             <div style={{ marginTop: '1.25rem' }}>
