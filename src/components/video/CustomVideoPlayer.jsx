@@ -12,7 +12,6 @@ import {
   SkipForward,
   Loader2,
   Sparkles,
-  Settings,
   Check
 } from 'lucide-react';
 
@@ -37,14 +36,16 @@ export const CustomVideoPlayer = ({
   className = ''
 }) => {
   const containerRef = useRef(null);
+  const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const progressTrackRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const countdownIntervalRef = useRef(null);
+  const lastTapRef = useRef({ time: 0, x: 0 });
 
-  const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(true);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bufferedFraction, setBufferedFraction] = useState(0);
@@ -59,9 +60,72 @@ export const CustomVideoPlayer = ({
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [hasEnded, setHasEnded] = useState(false);
+  const [doubleTapFeedback, setDoubleTapFeedback] = useState(null);
 
-  // Generate unique player container ID
-  const playerIdRef = useRef(`custom-yt-engine-${Math.random().toString(36).substring(2, 9)}`);
+  // Send command to underlying YouTube iframe reliably via postMessage + API
+  const sendYtCommand = useCallback((func, args = []) => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func, args }),
+          '*'
+        );
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (playerRef.current && typeof playerRef.current[func] === 'function') {
+      try {
+        playerRef.current[func](...args);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  // Autohide controls on inactivity
+  const handleUserActivity = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+
+    if (isPlaying) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+        setShowSpeedMenu(false);
+      }, 2600);
+    }
+  }, [isPlaying]);
+
+  // Toggle Play / Pause
+  const togglePlay = useCallback(() => {
+    if (isPlaying) {
+      sendYtCommand('pauseVideo');
+      setIsPlaying(false);
+    } else {
+      if (hasEnded) {
+        sendYtCommand('seekTo', [0, true]);
+        setCurrentTime(0);
+        setHasEnded(false);
+        setCountdown(null);
+      }
+      sendYtCommand('playVideo');
+      setIsPlaying(true);
+      setIsBuffering(false);
+      setIsVideoLoaded(true);
+    }
+    handleUserActivity();
+  }, [isPlaying, hasEnded, sendYtCommand, handleUserActivity]);
+
+  // Seek forward / backward by exact seconds (e.g. 15s)
+  const handleSeekDelta = useCallback(
+    (seconds) => {
+      const targetTime = Math.max(0, Math.min(duration || 9999, currentTime + seconds));
+      setCurrentTime(targetTime);
+      sendYtCommand('seekTo', [targetTime, true]);
+      handleUserActivity();
+    },
+    [currentTime, duration, sendYtCommand, handleUserActivity]
+  );
 
   // Reset states when video changes
   useEffect(() => {
@@ -71,208 +135,97 @@ export const CustomVideoPlayer = ({
     setHasEnded(false);
     setCountdown(null);
     setIsBuffering(true);
+    setIsVideoLoaded(false);
+
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
     }
+
+    // Safety timeout: dismiss loading spinner after 2.2 seconds even if events lag
+    const timer = setTimeout(() => {
+      setIsBuffering(false);
+      setIsVideoLoaded(true);
+    }, 2200);
+
+    return () => clearTimeout(timer);
   }, [video?.id, video?.youtube_id]);
 
-  // Load YouTube IFrame API script once
-  const ensureYouTubeApi = useCallback(() => {
-    return new Promise((resolve) => {
-      if (window.YT && window.YT.Player) {
-        resolve(window.YT);
-        return;
-      }
-
-      // Check if script is already added
-      const existingScript = document.getElementById('youtube-iframe-api');
-      if (!existingScript) {
-        const tag = document.createElement('script');
-        tag.id = 'youtube-iframe-api';
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const firstScript = document.getElementsByTagName('script')[0];
-        firstScript.parentNode.insertBefore(tag, firstScript);
-      }
-
-      const prevOnReady = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (typeof prevOnReady === 'function') prevOnReady();
-        resolve(window.YT);
-      };
-    });
-  }, []);
-
-  // Initialize YT Player
+  // Listen to postMessage events from YouTube IFrame
   useEffect(() => {
-    if (!video?.youtube_id) return;
-
-    let isMounted = true;
-
-    ensureYouTubeApi().then((YT) => {
-      if (!isMounted) return;
-
-      // If player already exists, load new video
-      if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
-        try {
-          playerRef.current.loadVideoById(video.youtube_id);
-          if (autoPlay) {
-            playerRef.current.playVideo();
-          }
-          return;
-        } catch (e) {
-          console.warn('Error reusing YT player, recreating...', e);
-        }
-      }
-
-      const targetEl = document.getElementById(playerIdRef.current);
-      if (!targetEl) return;
-
+    const handleYtMessage = (event) => {
       try {
-        playerRef.current = new YT.Player(playerIdRef.current, {
-          videoId: video.youtube_id,
-          playerVars: {
-            autoplay: autoPlay ? 1 : 0,
-            controls: 0,
-            disablekb: 1,
-            enablejsapi: 1,
-            fs: 0,
-            iv_load_policy: 3,
-            modestbranding: 1,
-            playsinline: 1,
-            rel: 0,
-            showinfo: 0,
-            origin: window.location.origin
-          },
-          events: {
-            onReady: (event) => {
-              if (!isMounted) return;
-              setIsReady(true);
-              setIsBuffering(false);
-              event.target.setVolume(volume);
-              if (isMuted) event.target.mute();
-              else event.target.unMute();
+        if (typeof event.data !== 'string') return;
+        const data = JSON.parse(event.data);
 
-              const dur = event.target.getDuration();
-              if (dur && dur > 0) setDuration(dur);
-
-              if (autoPlay) {
-                event.target.playVideo();
-              }
-            },
-            onStateChange: (event) => {
-              if (!isMounted) return;
-              // YT.PlayerState: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
-              if (event.data === 1) {
-                setIsPlaying(true);
-                setIsBuffering(false);
-                setHasEnded(false);
-                const dur = event.target.getDuration();
-                if (dur && dur > 0) setDuration(dur);
-              } else if (event.data === 2) {
-                setIsPlaying(false);
-                setIsBuffering(false);
-              } else if (event.data === 3) {
-                setIsBuffering(true);
-              } else if (event.data === 0) {
-                // Video ended
-                setIsPlaying(false);
-                setHasEnded(true);
-                if (nextVideo && onNext) {
-                  startCountdown();
-                }
-              }
-            },
-            onError: (err) => {
-              console.warn('CustomVideoPlayer YT error:', err);
-              setIsBuffering(false);
+        if (data.event === 'onStateChange') {
+          // YT States: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering)
+          if (data.info === 1) {
+            setIsPlaying(true);
+            setIsBuffering(false);
+            setIsVideoLoaded(true);
+            setHasEnded(false);
+          } else if (data.info === 2) {
+            setIsPlaying(false);
+            setIsBuffering(false);
+          } else if (data.info === 3) {
+            setIsBuffering(true);
+          } else if (data.info === 0) {
+            setIsPlaying(false);
+            setHasEnded(true);
+            if (nextVideo && onNext) {
+              setCountdown(4);
+              if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = setInterval(() => {
+                setCountdown((prev) => {
+                  if (prev === null) return null;
+                  if (prev <= 1) {
+                    clearInterval(countdownIntervalRef.current);
+                    if (onNext) onNext();
+                    return null;
+                  }
+                  return prev - 1;
+                });
+              }, 1000);
             }
           }
-        });
-      } catch (err) {
-        console.error('Error creating YT player:', err);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [video?.youtube_id, ensureYouTubeApi]);
-
-  // Clean destroy on component unmount
-  useEffect(() => {
-    return () => {
-      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        try {
-          playerRef.current.destroy();
-          playerRef.current = null;
-        } catch (e) {
-          // ignore
+        } else if (data.event === 'infoDelivery') {
+          if (data.info) {
+            if (typeof data.info.currentTime === 'number' && !isDraggingProgress) {
+              setCurrentTime(data.info.currentTime);
+              if (data.info.currentTime > 0.2) {
+                setIsVideoLoaded(true);
+                setIsBuffering(false);
+              }
+            }
+            if (typeof data.info.duration === 'number' && data.info.duration > 0) {
+              setDuration(data.info.duration);
+            }
+            if (typeof data.info.videoLoadedFraction === 'number') {
+              setBufferedFraction(data.info.videoLoadedFraction);
+            }
+          }
         }
-      }
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
+      } catch (e) {
+        // Not a JSON message or not from YT
       }
     };
-  }, []);
 
-  // Poll current playback time & buffering progress
+    window.addEventListener('message', handleYtMessage);
+    return () => window.removeEventListener('message', handleYtMessage);
+  }, [isDraggingProgress, nextVideo, onNext]);
+
+  // Fallback: poll playback status & duration via postMessage listening ping
   useEffect(() => {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
-      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-        try {
-          const curr = playerRef.current.getCurrentTime();
-          const dur = playerRef.current.getDuration();
-          const loaded = playerRef.current.getVideoLoadedFraction();
-
-          if (!isDraggingProgress && typeof curr === 'number') {
-            setCurrentTime(curr);
-          }
-          if (dur && dur > 0) {
-            setDuration(dur);
-          }
-          if (typeof loaded === 'number') {
-            setBufferedFraction(loaded);
-          }
-        } catch (e) {
-          // player might be unmounting
-        }
-      }
-    }, 250);
+      sendYtCommand('getCurrentTime');
+      sendYtCommand('getDuration');
+    }, 400);
 
     return () => clearInterval(interval);
-  }, [isPlaying, isDraggingProgress]);
-
-  // Start auto-next countdown when video finishes
-  const startCountdown = () => {
-    setCountdown(4);
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === null) return null;
-        if (prev <= 1) {
-          clearInterval(countdownIntervalRef.current);
-          if (onNext) onNext();
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const cancelCountdown = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCountdown(null);
-  };
+  }, [isPlaying, sendYtCommand]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -283,55 +236,36 @@ export const CustomVideoPlayer = ({
     return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
-  // Autohide controls on inactivity
-  const handleUserActivity = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-
-    if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-        setShowSpeedMenu(false);
-      }, 2600);
-    }
-  };
-
-  // Toggle Play / Pause
-  const togglePlay = () => {
-    if (!playerRef.current) return;
-    try {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-      } else {
-        if (hasEnded) {
-          playerRef.current.seekTo(0, true);
-          setHasEnded(false);
-          setCountdown(null);
-        }
-        playerRef.current.playVideo();
+  // Global Keyboard Shortcuts (Space, 15s jump, F, M)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName) || e.target?.isContentEditable) {
+        return;
       }
-    } catch (e) {
-      console.warn('togglePlay error:', e);
-    }
-  };
 
-  // Seek forward / backward
-  const handleSeekDelta = (seconds) => {
-    if (!playerRef.current) return;
-    try {
-      const nextTime = Math.max(0, Math.min(duration, currentTime + seconds));
-      playerRef.current.seekTo(nextTime, true);
-      setCurrentTime(nextTime);
-      handleUserActivity();
-    } catch (e) {
-      console.warn('Seek delta error:', e);
-    }
-  };
+      if (e.code === 'Space' || e.key === 'k') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleSeekDelta(-15);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleSeekDelta(15);
+      } else if (e.key === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'm') {
+        e.preventDefault();
+        toggleMute();
+      }
+    };
 
-  // Double-tap to seek -10s / +10s
-  const lastTapRef = useRef({ time: 0, x: 0 });
-  const [doubleTapFeedback, setDoubleTapFeedback] = useState(null);
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [togglePlay, handleSeekDelta]);
 
+  // Double-tap to seek 15s on mobile or desktop overlay
   const handleOverlayClick = (e) => {
     const now = Date.now();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -341,11 +275,11 @@ export const CustomVideoPlayer = ({
     if (now - lastTapRef.current.time < 320) {
       // Double tap detected
       if (isLeft) {
-        handleSeekDelta(-10);
-        setDoubleTapFeedback({ side: 'left', text: '-10 soniya' });
+        handleSeekDelta(-15);
+        setDoubleTapFeedback({ side: 'left', text: '-15 soniya' });
       } else {
-        handleSeekDelta(10);
-        setDoubleTapFeedback({ side: 'right', text: '+10 soniya' });
+        handleSeekDelta(15);
+        setDoubleTapFeedback({ side: 'right', text: '+15 soniya' });
       }
       setTimeout(() => setDoubleTapFeedback(null), 650);
       lastTapRef.current = { time: 0, x: 0 };
@@ -357,12 +291,12 @@ export const CustomVideoPlayer = ({
 
   // Progress Bar click & drag
   const handleProgressSeek = (clientX) => {
-    if (!progressTrackRef.current || !duration || !playerRef.current) return;
+    if (!progressTrackRef.current || !duration) return;
     const rect = progressTrackRef.current.getBoundingClientRect();
     const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     const targetTime = pos * duration;
     setCurrentTime(targetTime);
-    playerRef.current.seekTo(targetTime, true);
+    sendYtCommand('seekTo', [targetTime, true]);
   };
 
   const handleProgressMouseDown = (e) => {
@@ -398,34 +332,27 @@ export const CustomVideoPlayer = ({
   // Volume & Mute
   const handleVolumeChange = (newVol) => {
     setVolume(newVol);
-    if (!playerRef.current) return;
-    try {
-      playerRef.current.setVolume(newVol);
-      if (newVol === 0) {
-        setIsMuted(true);
-        playerRef.current.mute();
-      } else if (isMuted) {
-        setIsMuted(false);
-        playerRef.current.unMute();
-      }
-    } catch (e) {
-      // ignore
+    sendYtCommand('setVolume', [newVol]);
+    if (newVol === 0) {
+      setIsMuted(true);
+      sendYtCommand('mute');
+    } else if (isMuted) {
+      setIsMuted(false);
+      sendYtCommand('unMute');
     }
   };
 
   const toggleMute = () => {
-    if (!playerRef.current) return;
-    try {
-      if (isMuted) {
-        playerRef.current.unMute();
-        setIsMuted(false);
-        if (volume === 0) setVolume(60);
-      } else {
-        playerRef.current.mute();
-        setIsMuted(true);
+    if (isMuted) {
+      sendYtCommand('unMute');
+      setIsMuted(false);
+      if (volume === 0) {
+        setVolume(60);
+        sendYtCommand('setVolume', [60]);
       }
-    } catch (e) {
-      // ignore
+    } else {
+      sendYtCommand('mute');
+      setIsMuted(true);
     }
   };
 
@@ -433,63 +360,29 @@ export const CustomVideoPlayer = ({
   const handleSetSpeed = (rate) => {
     setPlaybackRate(rate);
     setShowSpeedMenu(false);
-    if (playerRef.current && typeof playerRef.current.setPlaybackRate === 'function') {
-      try {
-        playerRef.current.setPlaybackRate(rate);
-      } catch (e) {
-        // ignore
-      }
-    }
+    sendYtCommand('setPlaybackRate', [rate]);
   };
 
   // Fullscreen
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch((err) => {
-        console.warn('Fullscreen request failed:', err);
-      });
+      containerRef.current.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
-    }
-  };
-
-  // Keyboard controls
-  const handleKeyDown = (e) => {
-    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
-
-    if (e.code === 'Space' || e.key === 'k') {
-      e.preventDefault();
-      togglePlay();
-    } else if (e.key === 'f') {
-      e.preventDefault();
-      toggleFullscreen();
-    } else if (e.key === 'm') {
-      e.preventDefault();
-      toggleMute();
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      handleSeekDelta(-5);
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      handleSeekDelta(5);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      handleVolumeChange(Math.min(100, volume + 10));
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      handleVolumeChange(Math.max(0, volume - 10));
     }
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   const bufferedPercent = Math.min(100, bufferedFraction * 100);
 
+  // YouTube embed URL with strict parameters: NO controls, NO branding, NO logo
+  const embedSrc = `https://www.youtube-nocookie.com/embed/${video?.youtube_id}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
+
   return (
     <div
       ref={containerRef}
       tabIndex={0}
-      onKeyDown={handleKeyDown}
       onMouseMove={handleUserActivity}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => {
@@ -514,41 +407,64 @@ export const CustomVideoPlayer = ({
         justifyContent: 'center'
       }}
     >
-      {/* 1. Underlying YouTube engine (IFrame with pointer-events: none, completely controlled via custom UI) */}
+      {/* 1. Underlying YouTube engine (Cropped by 6% on all sides so YouTube watermark/logo in bottom-right is 100% offscreen) */}
       <div
         style={{
           position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
+          top: '-6%',
+          left: '-6%',
+          width: '112%',
+          height: '112%',
           pointerEvents: 'none',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          zIndex: 1
         }}
       >
-        <div
-          id={playerIdRef.current}
+        <iframe
+          ref={iframeRef}
+          key={video?.youtube_id}
+          title={video?.title || 'Urgut Mebel Video'}
+          src={embedSrc}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           style={{
             width: '100%',
             height: '100%',
-            position: 'absolute',
-            inset: 0
+            border: 'none',
+            pointerEvents: 'none'
           }}
         />
       </div>
 
-      {/* 2. Transparent gesture overlay: Double-tap to Seek -10s/+10s, Single tap to Play/Pause */}
+      {/* 2. Poster / Thumbnail Splash Shield: Fades out only when the video actually starts playing, permanently eliminating the 1-2s YouTube logo flash */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url(${video?.videoThumb || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: isVideoLoaded ? 0 : 1,
+          transition: 'opacity 0.4s ease',
+          pointerEvents: 'none',
+          zIndex: 3
+        }}
+      >
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)' }} />
+      </div>
+
+      {/* 3. Transparent Gesture Overlay: Double-tap to Seek -15s/+15s, Single tap to Play/Pause */}
       <div
         onClick={handleOverlayClick}
         onDoubleClick={toggleFullscreen}
         style={{
           position: 'absolute',
           inset: 0,
-          zIndex: 5,
+          zIndex: 6,
           cursor: isPlaying ? 'default' : 'pointer'
         }}
       />
 
-      {/* Double tap seek visual ripple feedback */}
+      {/* 4. Double tap seek visual feedback ripple */}
       {doubleTapFeedback && (
         <div
           style={{
@@ -568,7 +484,7 @@ export const CustomVideoPlayer = ({
             flexDirection: 'column',
             gap: '6px',
             color: '#ffffff',
-            fontSize: '0.9rem',
+            fontSize: '0.92rem',
             fontWeight: 800,
             zIndex: 9,
             pointerEvents: 'none',
@@ -580,7 +496,7 @@ export const CustomVideoPlayer = ({
         </div>
       )}
 
-      {/* 3. Top Gradient Header: Brand Tag + Video Title + HD Indicator */}
+      {/* 5. Top Gradient Header: Brand Tag + Video Title + HD Indicator */}
       <div
         className="cvp-top-bar"
         style={{
@@ -662,7 +578,7 @@ export const CustomVideoPlayer = ({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
+            gap: '0.35rem',
             backgroundColor: 'rgba(255,255,255,0.1)',
             backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.15)',
@@ -680,8 +596,8 @@ export const CustomVideoPlayer = ({
         </div>
       </div>
 
-      {/* 4. Center State Indicators (Big Play Button or Buffering Spinner) */}
-      {isBuffering && (
+      {/* 6. Center State: Buffering Spinner (hidden as soon as playback starts) */}
+      {isBuffering && !isVideoLoaded && (
         <div
           style={{
             position: 'absolute',
@@ -690,23 +606,24 @@ export const CustomVideoPlayer = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '68px',
-            height: '68px',
+            width: '64px',
+            height: '64px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255,255,255,0.15)'
           }}
         >
           <Loader2
-            size={34}
+            size={32}
             color="var(--figma-coral, #FA6D58)"
             style={{ animation: 'spin 1s linear infinite' }}
           />
         </div>
       )}
 
-      {!isPlaying && !isBuffering && !hasEnded && (
+      {/* 7. Center Big Play Button (shown when paused) */}
+      {!isPlaying && isVideoLoaded && !hasEnded && (
         <button
           type="button"
           onClick={togglePlay}
@@ -734,7 +651,7 @@ export const CustomVideoPlayer = ({
         </button>
       )}
 
-      {/* 5. Auto-Next Countdown Screen when video ends */}
+      {/* 8. Auto-Next Countdown Screen when video ends */}
       {hasEnded && nextVideo && (
         <div
           style={{
@@ -781,7 +698,7 @@ export const CustomVideoPlayer = ({
             <button
               type="button"
               onClick={() => {
-                cancelCountdown();
+                if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
                 if (onNext) onNext();
               }}
               style={{
@@ -806,7 +723,7 @@ export const CustomVideoPlayer = ({
             <button
               type="button"
               onClick={() => {
-                cancelCountdown();
+                if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
                 togglePlay();
               }}
               style={{
@@ -830,7 +747,7 @@ export const CustomVideoPlayer = ({
         </div>
       )}
 
-      {/* 6. Modern Glassmorphic Bottom Control Bar */}
+      {/* 9. Modern Glassmorphic Bottom Control Bar */}
       <div
         className="cvp-bottom-bar"
         style={{
@@ -959,12 +876,12 @@ export const CustomVideoPlayer = ({
             width: '100%'
           }}
         >
-          {/* Left Controls: Play/Pause, -10s, +10s, Volume, Time */}
+          {/* Left Controls: Play/Pause, 15s Rewind, 15s Forward, Volume, Time */}
           <div
             className="cvp-left-group"
             style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}
           >
-            {/* Play/Pause */}
+            {/* Play/Pause Button */}
             <button
               type="button"
               className="cvp-btn-play"
@@ -992,12 +909,12 @@ export const CustomVideoPlayer = ({
               )}
             </button>
 
-            {/* Rewind 10s */}
+            {/* Rewind 15s (User requested 15s) */}
             <button
               type="button"
               className="cvp-btn-rewind"
-              onClick={() => handleSeekDelta(-10)}
-              title="10 soniya orqaga"
+              onClick={() => handleSeekDelta(-15)}
+              title="15 soniya orqaga"
               style={{
                 background: 'none',
                 border: 'none',
@@ -1008,19 +925,19 @@ export const CustomVideoPlayer = ({
                 gap: '2px',
                 padding: '4px',
                 fontSize: '0.72rem',
-                fontWeight: 700
+                fontWeight: 800
               }}
             >
               <RotateCcw size={17} />
-              <span>10</span>
+              <span>15</span>
             </button>
 
-            {/* Fast-forward 10s */}
+            {/* Fast-forward 15s (User requested 15s) */}
             <button
               type="button"
               className="cvp-btn-forward"
-              onClick={() => handleSeekDelta(10)}
-              title="10 soniya oldinga"
+              onClick={() => handleSeekDelta(15)}
+              title="15 soniya oldinga"
               style={{
                 background: 'none',
                 border: 'none',
@@ -1031,11 +948,11 @@ export const CustomVideoPlayer = ({
                 gap: '2px',
                 padding: '4px',
                 fontSize: '0.72rem',
-                fontWeight: 700
+                fontWeight: 800
               }}
             >
               <RotateCw size={17} />
-              <span>10</span>
+              <span>15</span>
             </button>
 
             {/* Volume Control */}

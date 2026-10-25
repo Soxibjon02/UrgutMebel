@@ -131,6 +131,45 @@ export const INITIAL_VIDEO_REELS = [
   }
 ];
 
+export const INITIAL_VIDEO_COMMENTS = [
+  {
+    id: 'vcomm-1',
+    video_id: 'reel-1',
+    user_name: 'Bobur Mirzayev',
+    user_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    comment: 'Yozuv stoli juda qulay va sifatli ishlangan ekan! Buyurtma bersak Urgutdan Samarqand shahriga necha kunda yetkaziladi?',
+    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+    likes: 7
+  },
+  {
+    id: 'vcomm-2',
+    video_id: 'reel-1',
+    user_name: 'Dildora Karimova',
+    user_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+    comment: 'Videoda ko‘ringan stul ham to‘plam ichidami yoki alohida buyurtma qilinadimi?',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    likes: 4
+  },
+  {
+    id: 'vcomm-3',
+    video_id: 'reel-2',
+    user_name: 'Shahzod Ergashev',
+    user_avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
+    comment: 'Gidravlik mexanizmi qanchalik mustahkam? Kafolat muddati qancha beriladi?',
+    created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    likes: 12
+  },
+  {
+    id: 'vcomm-4',
+    video_id: 'reel-4',
+    user_name: 'Malika Usmonova',
+    user_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+    comment: 'Velvet matosi tozalashga osonmi? Rangi juda hashamatli ko‘rinyapti, ayniqsa kechki chiroqda!',
+    created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+    likes: 9
+  }
+];
+
 // Check if an order (standard or custom) belongs to the given user
 export const isOrderOwnedByUser = (order, userObj) => {
   if (!order || !userObj) return false;
@@ -970,6 +1009,40 @@ export const dataService = {
     setStored('video_reels', INITIAL_VIDEO_REELS, true);
     window.dispatchEvent(new CustomEvent('urgut_store_videos_updated', { detail: INITIAL_VIDEO_REELS }));
     return INITIAL_VIDEO_REELS;
+  },
+
+  // Video Comments
+  async getVideoComments(videoId) {
+    const all = getStored('video_comments', INITIAL_VIDEO_COMMENTS);
+    return videoId ? all.filter((c) => c.video_id === videoId) : all;
+  },
+
+  async addVideoComment(comment) {
+    const all = getStored('video_comments', INITIAL_VIDEO_COMMENTS);
+    const newComment = {
+      ...comment,
+      id: `vcomm-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      likes: 0
+    };
+    const updated = [newComment, ...all];
+    setStored('video_comments', updated, true);
+    window.dispatchEvent(new CustomEvent('urgut_video_comments_updated', { detail: { videoId: comment.video_id } }));
+    return newComment;
+  },
+
+  async toggleLikeVideoComment(commentId) {
+    const all = getStored('video_comments', INITIAL_VIDEO_COMMENTS);
+    const updated = all.map((c) => (c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c));
+    setStored('video_comments', updated, true);
+    return updated;
+  },
+
+  async deleteVideoComment(commentId) {
+    const all = getStored('video_comments', INITIAL_VIDEO_COMMENTS);
+    const updated = all.filter((c) => c.id !== commentId);
+    setStored('video_comments', updated, true);
+    return updated;
   },
 
   // Craftsmen

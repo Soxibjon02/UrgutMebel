@@ -14,10 +14,17 @@ import {
   ExternalLink,
   ShieldCheck,
   ChevronRight,
-  Maximize2
+  Maximize2,
+  MessageSquare,
+  Send,
+  ThumbsUp,
+  Trash2,
+  User,
+  Lock
 } from 'lucide-react';
 import { dataService } from '../services/dataService';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { QuickBuyModal } from '../components/QuickBuyModal';
 import { CustomVideoPlayer } from '../components/video/CustomVideoPlayer';
@@ -27,6 +34,7 @@ export const WatchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user, isGuest, openAuthModal, isAdmin } = useAuth();
   const { addToast } = useNotification();
 
   const [videos, setVideos] = useState([]);
@@ -38,6 +46,9 @@ export const WatchPage = () => {
   const [quickBuyProduct, setQuickBuyProduct] = useState(null);
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
   const [autoNext, setAutoNext] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
   const playerContainerRef = useRef(null);
 
   // Load all video reels
@@ -135,6 +146,66 @@ export const WatchPage = () => {
       }
       return next;
     });
+  };
+
+  // Load and listen to video comments
+  useEffect(() => {
+    if (!activeVideo?.id) return;
+    const loadComments = async () => {
+      const list = await dataService.getVideoComments(activeVideo.id);
+      setComments(list);
+    };
+    loadComments();
+
+    const handleCommentsUpdate = () => {
+      loadComments();
+    };
+    window.addEventListener('urgut_video_comments_updated', handleCommentsUpdate);
+    return () => window.removeEventListener('urgut_video_comments_updated', handleCommentsUpdate);
+  }, [activeVideo?.id]);
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
+    if (!user || isGuest) {
+      openAuthModal('login');
+      addToast('Fikr qoldirish uchun avval tizimga kiring', 'info');
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      const newComment = await dataService.addVideoComment({
+        video_id: activeVideo.id,
+        user_id: user.id || 'usr-custom',
+        user_name: user.name || user.full_name || 'Foydalanuvchi',
+        user_avatar: user.avatar || '',
+        comment: commentText.trim()
+      });
+      setComments((prev) => [newComment, ...prev]);
+      setCommentText('');
+      addToast('Izohingiz muvaffaqiyatli qoldirildi!', 'success');
+    } catch (err) {
+      console.error('Error adding comment:', err);
+      addToast('Izoh yozishda xatolik yuz berdi', 'error');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleLikeComment = async (commentId) => {
+    await dataService.toggleLikeVideoComment(commentId);
+    setComments((prev) =>
+      prev.map((c) => (c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c))
+    );
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Haqiqatan ham bu izohni o‘chirmoqchimisiz?')) return;
+    await dataService.deleteVideoComment(commentId);
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    addToast('Izoh o‘chirildi', 'info');
   };
 
   const handleAddToCart = (product) => {
@@ -404,8 +475,257 @@ export const WatchPage = () => {
                   </div>
                 </div>
               )}
+
+            {/* VIDEO COMMENTS SECTION */}
+            <div
+              className="watch-comments-card"
+              style={{
+                marginTop: '1.75rem',
+                backgroundColor: 'var(--bg-card)',
+                borderRadius: '16px',
+                border: '1px solid var(--border-subtle)',
+                padding: '1.5rem',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                  <MessageSquare size={20} color="var(--figma-coral, #FA6D58)" />
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                    Fikr va Izohlar ({comments.length})
+                  </h3>
+                </div>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Haqiqiy xaridorlar fikri
+                </span>
+              </div>
+
+              {/* Comment submission form or login prompt */}
+              {!user || isGuest ? (
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    padding: '1.35rem',
+                    textAlign: 'center',
+                    border: '1px dashed var(--border-subtle)',
+                    marginBottom: '1.5rem'
+                  }}
+                >
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: 'rgba(250, 109, 88, 0.12)', color: 'var(--figma-coral)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.65rem' }}>
+                    <Lock size={20} />
+                  </div>
+                  <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 0.35rem', color: 'var(--text-main)' }}>
+                    Izoh qoldirish uchun tizimga kiring
+                  </h4>
+                  <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 1rem', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.4 }}>
+                    Faqat ro‘yxatdan o‘tgan foydalanuvchilar o‘z nomidan mahsulot haqida fikr yoki savol qoldirishlari mumkin.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal('login')}
+                    className="btn btn-primary btn-sm"
+                    style={{ fontWeight: 800, borderRadius: 'var(--radius-full)', padding: '0.55rem 1.4rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
+                  >
+                    <User size={15} /> Tizimga Kirish / Ro‘yxatdan O‘tish
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleAddComment} style={{ marginBottom: '1.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.65rem' }}>
+                    <div
+                      style={{
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--figma-coral, #FA6D58)',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        (user.name || user.full_name || 'U').charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                        {user.name || user.full_name || 'Mijoz'}
+                      </span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--figma-coral)', fontWeight: 700, marginLeft: '0.5rem' }}>
+                        (Siz)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ position: 'relative' }}>
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Ushbu mebel sifati, yetkazib berish yoki o‘lchamlari haqida fikringiz yoki savolingizni yozing..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-subtle)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-main)',
+                        fontSize: '0.88rem',
+                        outline: 'none',
+                        resize: 'vertical',
+                        fontFamily: 'inherit',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = 'var(--figma-coral)')}
+                      onBlur={(e) => (e.target.style.borderColor = 'var(--border-subtle)')}
+                    />
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                      <button
+                        type="submit"
+                        disabled={submittingComment || !commentText.trim()}
+                        className="btn btn-primary btn-sm"
+                        style={{
+                          fontWeight: 800,
+                          borderRadius: 'var(--radius-full)',
+                          padding: '0.5rem 1.25rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.45rem',
+                          opacity: !commentText.trim() ? 0.6 : 1,
+                          cursor: !commentText.trim() ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        <Send size={14} />
+                        <span>{submittingComment ? 'Yuborilmoqda...' : 'Izoh qoldirish'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+
+              {/* Comments List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {comments.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                    Hozircha izohlar mavjud emas. Birinchi bo‘lib o‘z fikringizni bildiring!
+                  </div>
+                ) : (
+                  comments.map((comm) => {
+                    const isOwn = user && (comm.user_id === user.id || comm.user_name === user.name);
+                    const canDelete = isOwn || isAdmin;
+
+                    return (
+                      <div
+                        key={comm.id}
+                        style={{
+                          display: 'flex',
+                          gap: '0.85rem',
+                          padding: '0.85rem 1rem',
+                          borderRadius: '12px',
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-subtle)'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '38px',
+                            height: '38px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(250, 109, 88, 0.15)',
+                            color: 'var(--figma-coral)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            flexShrink: 0
+                          }}
+                        >
+                          {comm.user_avatar ? (
+                            <img src={comm.user_avatar} alt={comm.user_name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            (comm.user_name || 'X').charAt(0).toUpperCase()
+                          )}
+                        </div>
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                {comm.user_name}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(22, 163, 74, 0.12)', color: '#16a34a', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>
+                                Xaridor
+                              </span>
+                            </div>
+
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {comm.created_at ? new Date(comm.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }) : 'Yaqinda'}
+                            </span>
+                          </div>
+
+                          <p style={{ margin: '0 0 0.65rem', fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: 1.45 }}>
+                            {comm.comment}
+                          </p>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.78rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleLikeComment(comm.id)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: 0
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--figma-coral)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                            >
+                              <ThumbsUp size={13} />
+                              <span>{comm.likes || 0} ta yoqdi</span>
+                            </button>
+
+                            {canDelete && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteComment(comm.id)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  padding: 0,
+                                  fontSize: '0.76rem'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                                <span>O‘chirish</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
+        </div>
 
           {/* RIGHT: Next / Recommended Videos (YouTube-style sidebar) */}
           <div className="watch-sidebar">
