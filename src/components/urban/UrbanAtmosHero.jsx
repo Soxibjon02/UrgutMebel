@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export const UrbanAtmosHero = () => {
   return (
-    <section className="urban-atmos-section" style={{ padding: '0 0 2.5rem' }}>
+    <section className="urban-atmos-section" style={{ padding: '2.5rem 0' }}>
       <div className="container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.25rem' }}>
         <div
           className="urban-atmos-grid"

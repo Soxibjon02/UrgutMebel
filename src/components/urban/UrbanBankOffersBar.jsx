@@ -30,7 +30,7 @@ export const UrbanBankOffersBar = () => {
   ];
 
   return (
-    <section className="urban-bank-offers-section" style={{ padding: '1.25rem 0 2rem' }}>
+    <section className="urban-bank-offers-section" style={{ padding: '1.5rem 0 1rem' }}>
       <div className="container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.25rem' }}>
         <div style={{ marginBottom: '0.85rem' }}>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
