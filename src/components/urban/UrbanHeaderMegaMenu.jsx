@@ -84,11 +84,11 @@ export const UrbanHeaderMegaMenu = () => {
   // Nav categories in top bar (Asosiy is first)
   const navCategories = [
     { id: 'home', label: 'Asosiy', icon: Home, link: '/' },
-    { id: 'collections', label: 'Kolleksiyalar', badge: 'Yangi', badgeIcon: Sparkles, link: '/collections' },
-    { id: 'custom-order', label: 'Maxsus Buyurtma', badge: 'Buyurtma', badgeIcon: Sparkles, link: '/custom-order' },
-    { id: 'craftsmen', label: 'Ustalar', badge: 'Ustalar', badgeIcon: Hammer, link: '/craftsmen' },
-    { id: 'deal-zone', label: 'Aksiya & Chegirmalar', badge: 'Chegirma', badgeIcon: Flame, link: '/furniture?filter=discount' },
-    { id: 'sections', label: 'Bo‘limlar', badge: 'Barchasi', hasMegamenu: true },
+    { id: 'collections', label: 'Kolleksiyalar', link: '/collections' },
+    { id: 'custom-order', label: 'Maxsus Buyurtma', link: '/custom-order' },
+    { id: 'craftsmen', label: 'Ustalar', link: '/craftsmen' },
+    { id: 'deal-zone', label: 'Aksiya & Chegirmalar', link: '/furniture?filter=discount' },
+    { id: 'sections', label: 'Bo‘limlar', hasMegamenu: true },
     { id: 'sofas', label: 'Divanlar', link: '/furniture?category=cat-sofas' },
     { id: 'living', label: 'Mehmonxona', link: '/furniture?category=cat-1' },
     { id: 'bedroom', label: 'Yotoqxona', link: '/furniture?category=cat-2' },
@@ -592,20 +592,6 @@ export const UrbanHeaderMegaMenu = () => {
                     className="urban-megamenu-item"
                   >
                     <span className="urban-nav-label">{cat.label}</span>
-                    <span
-                      className="urban-nav-badge"
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 800,
-                        backgroundColor: '#0071e3',
-                        color: '#ffffff',
-                        padding: '0.1rem 0.45rem',
-                        borderRadius: '980px',
-                        lineHeight: 1
-                      }}
-                    >
-                      {cat.badge}
-                    </span>
                     <ChevronDown size={13} color="var(--text-muted)" />
                   </button>
                 ) : (
@@ -615,8 +601,8 @@ export const UrbanHeaderMegaMenu = () => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.35rem',
-                      padding: '0.75rem 0.55rem',
-                      fontSize: '0.84rem',
+                      padding: '0.75rem 0.65rem',
+                      fontSize: '0.86rem',
                       fontWeight: isHomeActive ? 750 : 600,
                       color: isHomeActive ? 'var(--figma-coral, #FA6D58)' : 'var(--text-main)',
                       backgroundColor: isHomeActive ? 'rgba(250, 109, 88, 0.08)' : 'transparent',
@@ -635,26 +621,6 @@ export const UrbanHeaderMegaMenu = () => {
                       />
                     )}
                     <span className="urban-nav-label">{cat.label}</span>
-                    {cat.badge && (
-                      <span
-                        className="urban-nav-badge"
-                        style={{
-                          fontSize: '0.62rem',
-                          fontWeight: 800,
-                          backgroundColor: cat.id === 'deal-zone' ? '#ef4444' : cat.id === 'craftsmen' ? '#0071e3' : 'var(--figma-coral, #FA6D58)',
-                          color: '#ffffff',
-                          padding: '0.12rem 0.45rem',
-                          borderRadius: '980px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.2rem',
-                          lineHeight: 1
-                        }}
-                      >
-                        {cat.badgeIcon && <cat.badgeIcon size={9} strokeWidth={2.8} />}
-                        <span>{cat.badge}</span>
-                      </span>
-                    )}
                   </Link>
                 )}
               </div>
@@ -918,26 +884,6 @@ export const UrbanHeaderMegaMenu = () => {
                   )}
                   <span>{cat.label}</span>
                 </div>
-                {cat.badge && (
-                  <span
-                    className="urban-nav-badge"
-                    style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 800,
-                      backgroundColor: cat.id === 'deal-zone' ? '#ef4444' : cat.id === 'craftsmen' ? '#0071e3' : 'var(--figma-coral, #FA6D58)',
-                      color: '#ffffff',
-                      padding: '0.12rem 0.5rem',
-                      borderRadius: '980px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      lineHeight: 1
-                    }}
-                  >
-                    {cat.badgeIcon && <cat.badgeIcon size={9} strokeWidth={2.8} />}
-                    <span>{cat.badge}</span>
-                  </span>
-                )}
               </Link>
             );
           })}
