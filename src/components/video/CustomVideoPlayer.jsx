@@ -770,6 +770,22 @@ export const CustomVideoPlayer = ({
         </div>
       )}
 
+      {/* Anti-YouTube Pause Overlay Shield: Completely blocks the annoying "Boshqa videolar" / "More videos" popup and YouTube watermark */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '80px',
+          background: 'linear-gradient(0deg, #09090b 0%, rgba(9, 9, 11, 0.98) 60%, rgba(9, 9, 11, 0.5) 85%, transparent 100%)',
+          zIndex: 7,
+          pointerEvents: 'none',
+          opacity: !isPlaying || showControls ? 1 : 0,
+          transition: 'opacity 0.28s ease'
+        }}
+      />
+
       {/* 9. Modern Glassmorphic Bottom Control Bar */}
       <div
         className="cvp-bottom-bar"
@@ -780,7 +796,7 @@ export const CustomVideoPlayer = ({
           right: 0,
           zIndex: 10,
           padding: '1.4rem 1.25rem 0.85rem',
-          background: 'linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 65%, transparent 100%)',
+          background: 'linear-gradient(0deg, #09090b 0%, rgba(9, 9, 11, 0.92) 55%, rgba(9, 9, 11, 0.4) 85%, transparent 100%)',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.65rem',
