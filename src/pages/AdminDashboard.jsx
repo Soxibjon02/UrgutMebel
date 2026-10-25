@@ -562,12 +562,15 @@ export const AdminDashboard = () => {
     const form = e.target;
     const updatedSec = {
       ...editingSection,
-      title: form.title.value.trim(),
+      title: form.title?.value?.trim() || editingSection.title || '',
       subtitle: form.subtitle?.value?.trim() || '',
       badge: form.badge?.value?.trim() || '',
       banner_image: form.banner_image?.value?.trim() || editingSection.banner_image || '',
       link: form.link?.value?.trim() || editingSection.link || '',
-      is_active: form.is_active.checked
+      btn_text: form.btn_text?.value?.trim() || editingSection.btn_text || '',
+      item_limit: form.item_limit?.value ? Number(form.item_limit.value) : (editingSection.item_limit || 8),
+      autoplay_speed: form.autoplay_speed?.value ? Number(form.autoplay_speed.value) : (editingSection.autoplay_speed || 5500),
+      is_active: form.is_active ? form.is_active.checked : true
     };
     const updatedList = homeSections.map((s) => s.id === updatedSec.id ? updatedSec : s);
     setHomeSections(updatedList);
@@ -5721,125 +5724,613 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* HOMEPAGE SECTION EDIT MODAL (SUPER ADMIN FULL CONTROL) */}
-      {sectionModalOpen && editingSection && (
-        <div className="modal-overlay" onClick={() => setSectionModalOpen(false)}>
-          <div className="modal-content" style={{ maxWidth: '580px', padding: '2rem', borderRadius: '22px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-              <div>
-                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  SUPER ADMIN • BO‘LIMNI TAHRIRLASH
-                </span>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0 0', color: 'var(--text-main)' }}>
-                  {editingSection.name}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSectionModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
+      {/* HOMEPAGE SECTION EDIT MODAL (SUPER ADMIN SMART TYPE-BASED FORMS) */}
+      {sectionModalOpen && editingSection && (() => {
+        const getSectionTypeInfo = (sec) => {
+          if (!sec) return { type: 'banner', label: 'Afisha & Katta Banner', icon: '🖼️', color: '#0284c7' };
+          if (sec.id === 'hero_slider') return { type: 'slider', label: 'Asosiy Katta Slayder (Hero Fiesta)', icon: '🎠', color: '#d97706' };
+          if (sec.category === 'products' || sec.category === 'trending') return { type: 'products', label: 'Mahsulotlar Qatori & Vitrina', icon: '🛋️', color: '#10b981' };
+          if (sec.category === 'banner') return { type: 'banner', label: 'Afisha & Katta Banner', icon: '🖼️', color: '#0284c7' };
+          if (sec.category === 'showcase' || sec.category === 'curated' || sec.category === 'tiles') return { type: 'showcase', label: '4-in-1 Vitrina & Kolleksiya', icon: '🏛️', color: '#8b5cf6' };
+          if (sec.category === 'deals' || sec.category === 'offers' || sec.category === 'promo') return { type: 'deals', label: 'Chegirmalar & Aksiyalar', icon: '🏷️', color: '#ef4444' };
+          if (sec.category === 'media' || sec.id === 'video_reels') return { type: 'media', label: 'Watch & Shop Video Lavhalar', icon: '🎬', color: '#ec4899' };
+          if (sec.category === 'navigation' || sec.id === 'category_pills') return { type: 'navigation', label: 'Kategoriyalar Navigatsiyasi', icon: '🧭', color: '#f59e0b' };
+          if (sec.category === 'inspiration' || sec.id === 'shop_the_look') return { type: 'inspiration', label: 'Interyer Ilhomi (Shop The Look)', icon: '💡', color: '#06b6d4' };
+          return { type: 'feature', label: 'Xizmat & Ishonch Nishonlari', icon: '⭐', color: '#64748b' };
+        };
 
-            <form onSubmit={handleSaveSectionForm}>
-              <div className="form-group">
-                <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
-                <input
-                  type="text"
-                  required
-                  name="title"
-                  defaultValue={editingSection.title || ''}
-                  placeholder="Masalan: Explore Shoe Racks yoki Bayramona Chegirmalar"
-                  className="form-input"
-                />
-              </div>
+        const typeInfo = getSectionTypeInfo(editingSection);
 
-              <div className="form-group">
-                <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
-                <textarea
-                  rows={2}
-                  name="subtitle"
-                  defaultValue={editingSection.subtitle || ''}
-                  placeholder="Bo‘lim haqidagi qo‘shimcha yozuv yoki reklama shiori..."
-                  className="form-textarea"
-                />
-              </div>
-
-              <div className="dashboard-form-row">
-                <div className="form-group">
-                  <label className="form-label">Aksiya Nishoni (Badge)</label>
-                  <input
-                    type="text"
-                    name="badge"
-                    defaultValue={editingSection.badge || ''}
-                    placeholder="Masalan: NEW, -50%, SALE, EDITORIAL"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Tugma / Bo‘lim Havolasi (Link)</label>
-                  <input
-                    type="text"
-                    name="link"
-                    defaultValue={editingSection.link || ''}
-                    placeholder="/furniture?category=cat-living"
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              <ImageUploadField
-                label="Afisha yoki Banner Rasmi (Ixtiyoriy)"
-                name="banner_image"
-                value={editingSection.banner_image || ''}
-                folder="banners"
-                placeholder="https://... yoki faylni tanlab yuklang"
-                helperText="Banner yoki vitrina bo‘limlari uchun rasm havolasi (Supabase-ga yuklanadi)."
-              />
-
-              <div style={{ padding: '0.85rem 1rem', borderRadius: '12px', backgroundColor: 'var(--bg-secondary)', marginBottom: '1.25rem', border: '1px solid var(--border-subtle)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
-                  <input
-                    type="checkbox"
-                    name="is_active"
-                    defaultChecked={editingSection.is_active !== false}
-                    style={{ width: '18px', height: '18px', accentColor: '#0071e3' }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
-                      Ushbu bo‘lim bosh sahifada ko‘rinsin (Faol holat)
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Belgini olib tashlasangiz, bo‘lim sayt bosh sahifasidan vaqtincha yashiriladi.
-                    </div>
+        return (
+          <div className="modal-overlay" onClick={() => setSectionModalOpen(false)}>
+            <div className="modal-content" style={{ maxWidth: '640px', padding: '2rem', borderRadius: '22px' }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.74rem', fontWeight: 800, color: typeInfo.color, textTransform: 'uppercase', letterSpacing: '0.05em', backgroundColor: `${typeInfo.color}15`, padding: '0.2rem 0.6rem', borderRadius: '999px', marginBottom: '0.35rem' }}>
+                    <span>{typeInfo.icon}</span>
+                    <span>{typeInfo.label}</span>
                   </div>
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0 0', color: 'var(--text-main)' }}>
+                    {editingSection.name}
+                  </h3>
+                </div>
                 <button
                   type="button"
                   onClick={() => setSectionModalOpen(false)}
-                  className="btn btn-secondary"
-                  style={{ padding: '0.7rem 1.25rem' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
                 >
-                  Bekor qilish
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '0.7rem 1.5rem', backgroundColor: '#0071e3', borderColor: '#0071e3', fontWeight: 700 }}
-                >
-                  Saqlash va Saytda Yangilash
+                  <X size={20} />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSaveSectionForm}>
+                {/* 1. SLIDER FORM (Hero Fiesta) */}
+                {typeInfo.type === 'slider' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Asosiy Slayd Sarlavhasi *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="BIGGEST SALE OF THE YEAR | FullHouse Fiesta"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Slayd Reklama Ta'rifi (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Uy mebellari to‘plamlariga 70% gacha ulkan chegirmalar!..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Nishoni (Badge)</label>
+                        <input
+                          type="text"
+                          name="badge"
+                          defaultValue={editingSection.badge || ''}
+                          placeholder="UP TO 70% OFF"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Asosiy Tugma Matni</label>
+                        <input
+                          type="text"
+                          name="btn_text"
+                          defaultValue={editingSection.btn_text || 'Shop Now'}
+                          placeholder="Shop Now"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Tugma Havolasi</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || '/furniture?filter=discount'}
+                          placeholder="/furniture?filter=discount"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Avtomatik Almashish Vaqti</label>
+                        <select
+                          name="autoplay_speed"
+                          defaultValue={editingSection.autoplay_speed || 5500}
+                          className="form-input"
+                        >
+                          <option value="3500">Tez (3.5 soniya)</option>
+                          <option value="5500">Standart (5.5 soniya)</option>
+                          <option value="8000">Sekin (8 soniya)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <ImageUploadField
+                      label="Asosiy Slayd Afisha Rasmi (Katta Fon Rasmi)"
+                      name="banner_image"
+                      value={editingSection.banner_image || ''}
+                      folder="banners"
+                      placeholder="https://... yoki faylni tanlab yuklang"
+                      helperText="Bosh sahifadagi katta slayderning 1-slaydi uchun fon rasmi (1600x600 px tavsiya etiladi)."
+                    />
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '10px', backgroundColor: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', marginBottom: '1.25rem', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                      ℹ️ Bu yerda o‘rnatilgan sarlavha, rasm va tugma bosh sahifaning asosiy katta slayderida darhol aks etadi.
+                    </div>
+                  </>
+                )}
+
+                {/* 2. PRODUCTS FORM (Mahsulot Qatorlari & Top 10 Trend) */}
+                {typeInfo.type === 'products' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Masalan: Explore Shoe Racks yoki Top 10 Trend Mebellari"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Kompakt va keng sig‘imli poyafzal shkaflari..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Ko‘rsatiladigan Mahsulotlar Soni</label>
+                        <select
+                          name="item_limit"
+                          defaultValue={editingSection.item_limit || 8}
+                          className="form-input"
+                        >
+                          <option value="4">4 ta mahsulot</option>
+                          <option value="6">6 ta mahsulot</option>
+                          <option value="8">8 ta mahsulot (Standart)</option>
+                          <option value="10">10 ta mahsulot</option>
+                          <option value="12">12 ta mahsulot</option>
+                          <option value="16">16 ta mahsulot</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">"Barchasini ko‘rish" Havolasi</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || '/furniture'}
+                          placeholder="/furniture?category=cat-wardrobe"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '10px', backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', marginBottom: '1.25rem', fontSize: '0.82rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
+                      <span>Ushbu bo‘lim mahsulotlar qatoridir. Mahsulotlar avtomatik narx, rasm va 1-bosishda xarid qilish tugmasi bilan karuselda chiqadi. Afisha rasmi yuklash talab etilmaydi.</span>
+                    </div>
+                  </>
+                )}
+
+                {/* 3. SHOWCASE FORM (ATMOS 4-in-1, Toledo, Curated) */}
+                {typeInfo.type === 'showcase' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Vitrina Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="ATMOS yoki The Toledo Look"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Pastki Yozuv (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="4 xil zamonaviy uslubdagi premium interyer to‘plamlari..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Nishoni (Badge)</label>
+                        <input
+                          type="text"
+                          name="badge"
+                          defaultValue={editingSection.badge || ''}
+                          placeholder="NEW ATMOS yoki EDITORIAL"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Kolleksiya Havolasi (Link)</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || '/collections'}
+                          placeholder="/collections"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    <ImageUploadField
+                      label="Asosiy Vitrina Fon Rasmi (Katta Kartochka Fon Rasmi)"
+                      name="banner_image"
+                      value={editingSection.banner_image || ''}
+                      folder="banners"
+                      placeholder="https://... yoki faylni tanlab yuklang"
+                      helperText="Yuklangan rasm bosh sahifadagi ushbu vitrinaning asosiy katta kartochkasi fonida to‘g‘ridan-to‘g‘ri aks etadi."
+                    />
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '10px', backgroundColor: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.25)', marginBottom: '1.25rem', fontSize: '0.82rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Sparkles size={16} color="#8b5cf6" style={{ flexShrink: 0 }} />
+                      <span>Yuklangan fon rasmi va kiritilgan sarlavha bevosita bosh sahifadagi vitrinaning asosiy katta blokida paydo bo‘ladi.</span>
+                    </div>
+                  </>
+                )}
+
+                {/* 4. BANNER FORM (Afisha & Katta Bannerlar) */}
+                {typeInfo.type === 'banner' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Banner Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Masalan: Full Bedroom Range yoki Celebrations Banner"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Reklama Matni / Izoh (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Find your favourites from 1600+ options..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Nishoni (Badge)</label>
+                        <input
+                          type="text"
+                          name="badge"
+                          defaultValue={editingSection.badge || ''}
+                          placeholder="BEDROOM, FESTIVE SALE, 60% OFF"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Banner Havolasi (Link)</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || ''}
+                          placeholder="/furniture?category=cat-bedroom"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    <ImageUploadField
+                      label="Afisha yoki Banner Fon Rasmi"
+                      name="banner_image"
+                      value={editingSection.banner_image || ''}
+                      folder="banners"
+                      placeholder="https://... yoki faylni tanlab yuklang"
+                      helperText="Ushbu rasm to‘g‘ridan-to‘g‘ri sayt bosh sahifasidagi bannerda fon sifatida namoyish etiladi."
+                    />
+                  </>
+                )}
+
+                {/* 5. DEALS FORM (Deal Zone & Bank Offers) */}
+                {typeInfo.type === 'deals' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Aksiya Bo‘limi Sarlavhasi *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Deal Zone yoki To‘lov va Bank Aksiyalari"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Shior / Ta'rif (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Uzum, Anor, Payme va Humo kartalari orqali muddatli to‘lov..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Nishoni (Badge)</label>
+                        <input
+                          type="text"
+                          name="badge"
+                          defaultValue={editingSection.badge || ''}
+                          placeholder="0-0-12 MUDDATLI TO‘LOV yoki DEALS"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Havolasi (Link)</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || ''}
+                          placeholder="/furniture?filter=under1m"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    {editingSection.id === 'gift_card' && (
+                      <ImageUploadField
+                        label="Sovg‘a Kartasi Fon Rasmi"
+                        name="banner_image"
+                        value={editingSection.banner_image || ''}
+                        folder="banners"
+                        placeholder="https://... yoki faylni tanlab yuklang"
+                        helperText="Sovg‘a sertifikati blokida o‘ng tomonda chiqadigan rasm."
+                      />
+                    )}
+                  </>
+                )}
+
+                {/* 6. MEDIA FORM (Watch & Shop Video Reels) */}
+                {typeInfo.type === 'media' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Video Bo‘limi Sarlavhasi *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Watch & Shop Video Lavhalar (Reels)"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Mebellarning real video ko‘rinishi va qulayliklari..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Aksiya Nishoni (Badge)</label>
+                      <input
+                        type="text"
+                        name="badge"
+                        defaultValue={editingSection.badge || ''}
+                        placeholder="REELS yoki VIDEO SHARH"
+                        className="form-input"
+                      />
+                    </div>
+                    <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.25)', marginBottom: '1.25rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#db2777', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Film size={16} /> Videolarni qo‘shish va YouTube havolalarini boshqarish
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
+                        Alohida video lavhalarni qo‘shish, YouTube linkini ulash va mahsulot bog‘lash "Videolar (Reels)" boshqaruvida amalga oshiriladi.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSectionModalOpen(false);
+                          setActiveTab('video_reels');
+                        }}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontWeight: 700, color: '#db2777', borderColor: 'rgba(236, 72, 153, 0.4)' }}
+                      >
+                        🎬 Videolar Boshqaruviga O‘tish
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* 7. NAVIGATION FORM (Kategoriyalar Tezkor Tugmalari) */}
+                {typeInfo.type === 'navigation' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Shop by Categories"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Barcha asosiy toifalar bo‘yicha tezkor o‘tish..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">"Barcha toifalar" Havolasi</label>
+                      <input
+                        type="text"
+                        name="link"
+                        defaultValue={editingSection.link || '/categories'}
+                        placeholder="/categories"
+                        className="form-input"
+                      />
+                    </div>
+                    <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', marginBottom: '1.25rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#d97706', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Layers size={16} /> Kategoriyalar nomlari va rasmlarini tahrirlash
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
+                        Kategoriyalar doirachalari avtomatik tarzda tizimdagi toifalardan olinadi. Yangi toifa kiritish yoki rasmini o‘zgartirish uchun toifalar bo‘limiga o‘ting.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSectionModalOpen(false);
+                          setActiveTab('categories');
+                        }}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontWeight: 700, color: '#d97706', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+                      >
+                        📁 Kategoriyalar Boshqaruviga O‘tish
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* 8. INSPIRATION FORM (Shop The Look) */}
+                {typeInfo.type === 'inspiration' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Shop The Look yoki Xonadoningiz Ko‘rinishidan Ilhomlaning"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Shior (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="Rasmdagi nuqtalarni bosing va xona mebellarini o‘rganing..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Aksiya Nishoni (Badge)</label>
+                      <input
+                        type="text"
+                        name="badge"
+                        defaultValue={editingSection.badge || ''}
+                        placeholder="INTERIOR INSPIRATION"
+                        className="form-input"
+                      />
+                    </div>
+                    <ImageUploadField
+                      label="Interaktiv Xona Fon Rasmi (Staged Room Image)"
+                      name="banner_image"
+                      value={editingSection.banner_image || ''}
+                      folder="banners"
+                      placeholder="https://... yoki faylni tanlab yuklang"
+                      helperText="Yuklangan rasm 'Shop The Look' sahnasida asosiy interyer foni bo‘lib ko‘rinadi."
+                    />
+                  </>
+                )}
+
+                {/* 9. FEATURE FORM (Xizmatlar, Ishonch Nishonlari, Do'konlar) */}
+                {typeInfo.type === 'feature' && (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Bo‘lim Sarlavhasi (Heading) *</label>
+                      <input
+                        type="text"
+                        required
+                        name="title"
+                        defaultValue={editingSection.title || ''}
+                        placeholder="Masalan: Nega Aynan Urgut Mebel?"
+                        className="form-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Qisqa Izoh / Ta'rif (Subtitle)</label>
+                      <textarea
+                        rows={2}
+                        name="subtitle"
+                        defaultValue={editingSection.subtitle || ''}
+                        placeholder="5 Yillik Kafolat, Bepul Yetkazish va O‘rnatish..."
+                        className="form-textarea"
+                      />
+                    </div>
+                    <div className="dashboard-form-row">
+                      <div className="form-group">
+                        <label className="form-label">Aksiya Nishoni (Badge)</label>
+                        <input
+                          type="text"
+                          name="badge"
+                          defaultValue={editingSection.badge || ''}
+                          placeholder="Masalan: KAFOLAT"
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Tugma / Bo‘lim Havolasi (Link)</label>
+                        <input
+                          type="text"
+                          name="link"
+                          defaultValue={editingSection.link || ''}
+                          placeholder="/stores yoki /furniture"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* COMMON ACTIVE TOGGLE FOR ALL SECTIONS */}
+                <div style={{ padding: '0.85rem 1rem', borderRadius: '12px', backgroundColor: 'var(--bg-secondary)', marginBottom: '1.25rem', border: '1px solid var(--border-subtle)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      defaultChecked={editingSection.is_active !== false}
+                      style={{ width: '18px', height: '18px', accentColor: '#0071e3' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                        Ushbu bo‘lim bosh sahifada ko‘rinsin (Faol holat)
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Belgini olib tashlasangiz, bo‘lim sayt bosh sahifasidan vaqtincha yashiriladi.
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSectionModalOpen(false)}
+                    className="btn btn-secondary"
+                    style={{ padding: '0.7rem 1.25rem' }}
+                  >
+                    Bekor qilish
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ padding: '0.7rem 1.5rem', backgroundColor: '#0071e3', borderColor: '#0071e3', fontWeight: 700 }}
+                  >
+                    Saqlash va Saytda Yangilash
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* MODAL: CREATE / EDIT COLLECTION */}
       {collectionModalOpen && (

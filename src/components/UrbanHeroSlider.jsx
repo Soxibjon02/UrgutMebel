@@ -3,7 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, Sparkles, Award, Trees, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const UrbanHeroSlider = () => {
+export const UrbanHeroSlider = ({
+  title,
+  subtitle,
+  badge,
+  banner_image,
+  primaryBtnText,
+  primaryBtnLink,
+  autoplay_speed
+}) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,14 +21,14 @@ export const UrbanHeroSlider = () => {
   const slides = [
     {
       id: 0,
-      badge: 'MOST BEAUTIFUL TIME OF THE YEAR | UP TO 70% OFF',
-      title: 'BIGGEST SALE OF THE YEAR | FullHouse Fiesta',
-      desc: 'Uy mebellari to‘plamlariga 70% gacha ulkan chegirmalar! 0-0-12 foizsiz muddatli to‘lov va bepul o‘rnatib berish xizmati.',
-      img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=80',
+      badge: badge || 'MOST BEAUTIFUL TIME OF THE YEAR | UP TO 70% OFF',
+      title: title || 'BIGGEST SALE OF THE YEAR | FullHouse Fiesta',
+      desc: subtitle || 'Uy mebellari to‘plamlariga 70% gacha ulkan chegirmalar! 0-0-12 foizsiz muddatli to‘lov va bepul o‘rnatib berish xizmati.',
+      img: banner_image || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=80',
       pill1: '70% Gacha Chegirma',
       pill2: '0-0-12 Muddatli To‘lov',
-      primaryBtnText: 'Shop Now',
-      primaryBtnLink: '/furniture?filter=discount',
+      primaryBtnText: primaryBtnText || 'Shop Now',
+      primaryBtnLink: primaryBtnLink || '/furniture?filter=discount',
       secondaryBtnText: 'Aksiyalar Zonasi',
       secondaryBtnLink: '/furniture'
     },
@@ -68,12 +76,13 @@ export const UrbanHeroSlider = () => {
   // Auto-play timer
   useEffect(() => {
     if (!isPaused) {
+      const speed = Number(autoplay_speed) > 0 ? Number(autoplay_speed) : 5500;
       slideIntervalRef.current = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % slides.length);
-      }, 5500);
+      }, speed);
     }
     return () => clearInterval(slideIntervalRef.current);
-  }, [isPaused, slides.length]);
+  }, [isPaused, slides.length, autoplay_speed]);
 
   const nextSlide = () => setCurrentSlide((currentSlide + 1) % slides.length);
   const prevSlide = () => setCurrentSlide((currentSlide - 1 + slides.length) % slides.length);

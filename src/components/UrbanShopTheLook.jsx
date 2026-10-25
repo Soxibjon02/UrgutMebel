@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Sparkles, ShoppingBag, Eye, X, Star, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export const UrbanShopTheLook = ({ onQuickBuy }) => {
+export const UrbanShopTheLook = ({ title, subtitle, badge, roomImage, onQuickBuy }) => {
   const { t } = useLanguage();
   const [activePin, setActivePin] = useState(null);
 
@@ -80,7 +80,7 @@ export const UrbanShopTheLook = ({ onQuickBuy }) => {
               textTransform: 'uppercase'
             }}
           >
-            <Sparkles size={14} /> {t('look.badge', 'Interyer Ilhomi')}
+            <Sparkles size={14} /> {badge || t('look.badge', 'Interyer Ilhomi')}
           </div>
           <h2
             style={{
@@ -91,10 +91,10 @@ export const UrbanShopTheLook = ({ onQuickBuy }) => {
               margin: '0 0 0.5rem'
             }}
           >
-            {t('look.title', 'Xonadoningiz Ko‘rinishidan Ilhomlaning')}
+            {title || t('look.title', 'Xonadoningiz Ko‘rinishidan Ilhomlaning')}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: '0 auto', maxWidth: '620px' }}>
-            {t('look.desc', 'Rasmdagi yashil nuqtalarni bosing va xonani to‘ldirgan har bir mebelning narxi hamda xususiyatlarini bilib oling.')}
+            {subtitle || t('look.desc', 'Rasmdagi yashil nuqtalarni bosing va xonani to‘ldirgan har bir mebelning narxi hamda xususiyatlarini bilib oling.')}
           </p>
         </div>
 
@@ -114,7 +114,7 @@ export const UrbanShopTheLook = ({ onQuickBuy }) => {
         >
           {/* Main Background Staged Image */}
           <img
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80"
+            src={roomImage || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80"}
             alt="Styled Living Room by Urgut Mebel"
             style={{
               width: '100%',

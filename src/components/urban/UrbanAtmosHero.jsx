@@ -2,7 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-export const UrbanAtmosHero = () => {
+export const UrbanAtmosHero = ({ title, subtitle, badge, banner_image, link }) => {
+  const displayTitle = title || 'ATMOS';
+  const displaySubtitle = subtitle || 'COLLECTION';
+  const displayBadge = badge || 'THE NEW';
+  const bgImage = banner_image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80';
+  const destinationLink = link || '/collections';
+
   return (
     <section className="urban-atmos-section" style={{ padding: '2.5rem 0' }}>
       <div className="container" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.25rem' }}>
@@ -18,12 +24,12 @@ export const UrbanAtmosHero = () => {
         >
           {/* Main Atmos Card (Left) */}
           <Link
-            to="/collections"
+            to={destinationLink}
             style={{
               position: 'relative',
               minHeight: '440px',
               backgroundColor: '#231518',
-              backgroundImage: 'url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80)',
+              backgroundImage: `url(${bgImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               borderRadius: '8px',
@@ -58,7 +64,7 @@ export const UrbanAtmosHero = () => {
                   marginBottom: '0.3rem'
                 }}
               >
-                THE NEW
+                {displayBadge}
               </div>
               <h2
                 style={{
@@ -72,7 +78,7 @@ export const UrbanAtmosHero = () => {
                   textTransform: 'uppercase'
                 }}
               >
-                ATMOS
+                {displayTitle}
               </h2>
               <div
                 style={{
@@ -84,7 +90,7 @@ export const UrbanAtmosHero = () => {
                   marginTop: '0.35rem'
                 }}
               >
-                COLLECTION
+                {displaySubtitle}
               </div>
             </div>
 

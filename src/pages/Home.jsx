@@ -125,13 +125,33 @@ export const Home = () => {
   const renderSection = (sec) => {
     switch (sec.id) {
       case 'category_pills':
-        return <UrbanCategoryQuickPills key={sec.id} title={sec.title} />;
+        return <UrbanCategoryQuickPills key={sec.id} title={sec.title} subtitle={sec.subtitle} link={sec.link} />;
       case 'hero_slider':
-        return <UrbanHeroSlider key={sec.id} />;
+        return (
+          <UrbanHeroSlider
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            banner_image={sec.banner_image}
+            primaryBtnText={sec.btn_text}
+            primaryBtnLink={sec.link}
+            autoplay_speed={sec.autoplay_speed}
+          />
+        );
       case 'bank_offers':
-        return <UrbanBankOffersBar key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return <UrbanBankOffersBar key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
       case 'atmos_hero':
-        return <UrbanAtmosHero key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanAtmosHero
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            banner_image={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'top_10_trending':
       case 'trending':
         return (
@@ -149,14 +169,14 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore Shoe Racks"}
             viewAllLink={sec.link || "/furniture?category=cat-shoe-racks"}
-            products={urbanShoeRacks}
+            products={urbanShoeRacks.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'new_arrivals':
-        return <UrbanNewArrivalsTiles key={sec.id} title={sec.title} badge={sec.badge} />;
+        return <UrbanNewArrivalsTiles key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
       case 'deal_zone':
-        return <UrbanDealZone key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return <UrbanDealZone key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} link={sec.link} />;
       case 'top_categories':
         return <UrbanTopCategoriesCurated key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
       case 'video_reels':
@@ -169,6 +189,7 @@ export const Home = () => {
             subtitle={sec.subtitle}
             badge={sec.badge}
             imageUrl={sec.banner_image}
+            link={sec.link}
           />
         );
       case 'lounge_chairs':
@@ -177,31 +198,48 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore Lounge Chairs"}
             viewAllLink={sec.link || "/furniture?category=cat-lounge-chairs"}
-            products={urbanLoungeChairs}
+            products={urbanLoungeChairs.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'bedroom_banner':
-        return <UrbanFullBedroomBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanFullBedroomBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'hydraulic_beds':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Hydraulic Beds"}
             viewAllLink={sec.link || "/furniture?category=cat-beds"}
-            products={urbanHydraulicBeds}
+            products={urbanHydraulicBeds.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'partner_brands_banner':
-        return <UrbanPartnerBrandsBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanPartnerBrandsBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            link={sec.link}
+          />
+        );
       case 'partner_brands_products':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Top Picks From Partner Brands"}
             viewAllLink={sec.link || "/furniture"}
-            products={urbanPartnerBrands}
+            products={urbanPartnerBrands.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
@@ -211,19 +249,28 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Premium Solid Wood From Partner's Brand"}
             viewAllLink={sec.link || "/furniture"}
-            products={urbanSolidWoodBrands}
+            products={urbanSolidWoodBrands.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'shop_the_look':
-        return <UrbanShopTheLook key={sec.id} title={sec.title} subtitle={sec.subtitle} onQuickBuy={handleOpenQuickBuy} />;
+        return (
+          <UrbanShopTheLook
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            roomImage={sec.banner_image}
+            onQuickBuy={handleOpenQuickBuy}
+          />
+        );
       case 'coffee_tables':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Coffee Tables"}
             viewAllLink={sec.link || "/furniture?category=cat-coffee-tables"}
-            products={urbanCoffeeTables}
+            products={urbanCoffeeTables.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
@@ -233,37 +280,81 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore TV Units"}
             viewAllLink={sec.link || "/furniture?category=cat-tv-units"}
-            products={urbanTvUnits}
+            products={urbanTvUnits.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'study_tables_feature':
-        return <UrbanStudyTablesFeature key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanStudyTablesFeature
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'c_tables':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Drink & C Tables"}
             viewAllLink={sec.link || "/furniture?category=cat-c-tables"}
-            products={urbanCTables}
+            products={urbanCTables.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'gift_card':
-        return <UrbanGiftCardBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanGiftCardBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'toledo_collection':
-        return <UrbanToledoCollectionBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanToledoCollectionBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'explore_stores':
-        return <UrbanExploreStoresBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanExploreStoresBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            link={sec.link}
+          />
+        );
       case 'non_storage_beds':
-        return <UrbanNonStorageBedsBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanNonStorageBedsBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'wardrobes':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Wardrobes"}
             viewAllLink={sec.link || "/furniture?category=cat-wardrobes"}
-            products={urbanWardrobes}
+            products={urbanWardrobes.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
@@ -273,21 +364,39 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore Chest Of Drawers"}
             viewAllLink={sec.link || "/furniture?category=cat-chest-drawers"}
-            products={urbanChestOfDrawers}
+            products={urbanChestOfDrawers.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'modular_kitchen':
-        return <UrbanModularKitchenBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} badge={sec.badge} />;
+        return (
+          <UrbanModularKitchenBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'shoe_racks_banner':
-        return <UrbanShoeRacksBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanShoeRacksBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'bookshelves':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Bookshelves"}
             viewAllLink={sec.link || "/furniture?category=cat-bookshelves"}
-            products={urbanBookshelves}
+            products={urbanBookshelves.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
@@ -297,21 +406,39 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore Sideboards"}
             viewAllLink={sec.link || "/furniture?category=cat-sideboards"}
-            products={urbanSideboards}
+            products={urbanSideboards.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
       case 'mattresses':
-        return <UrbanMattressesBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanMattressesBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'sofa_beds':
-        return <UrbanSofaBedsBanner key={sec.id} title={sec.title} subtitle={sec.subtitle} />;
+        return (
+          <UrbanSofaBedsBanner
+            key={sec.id}
+            title={sec.title}
+            subtitle={sec.subtitle}
+            badge={sec.badge}
+            imageUrl={sec.banner_image}
+            link={sec.link}
+          />
+        );
       case 'recliners':
         return (
           <UrbanProductRow
             key={sec.id}
             title={sec.title || "Explore Recliners"}
             viewAllLink={sec.link || "/furniture?category=cat-recliners"}
-            products={urbanRecliners}
+            products={urbanRecliners.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );
@@ -321,7 +448,7 @@ export const Home = () => {
             key={sec.id}
             title={sec.title || "Explore Study Tables"}
             viewAllLink={sec.link || "/furniture?category=cat-study-tables"}
-            products={urbanStudyTables}
+            products={urbanStudyTables.slice(0, Number(sec.item_limit) || 8)}
             onQuickBuy={handleOpenQuickBuy}
           />
         );

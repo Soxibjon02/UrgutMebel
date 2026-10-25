@@ -12,7 +12,8 @@ import {
   SkipForward,
   Loader2,
   Sparkles,
-  Check
+  Check,
+  Subtitles
 } from 'lucide-react';
 
 // Format seconds into MM:SS or HH:MM:SS
@@ -61,6 +62,7 @@ export const CustomVideoPlayer = ({
   const [countdown, setCountdown] = useState(null);
   const [hasEnded, setHasEnded] = useState(false);
   const [doubleTapFeedback, setDoubleTapFeedback] = useState(null);
+  const [isCaptionsOn, setIsCaptionsOn] = useState(false);
 
   // Send command to underlying YouTube iframe reliably via postMessage + API
   const sendYtCommand = useCallback((func, args = []) => {
@@ -126,6 +128,25 @@ export const CustomVideoPlayer = ({
     },
     [currentTime, duration, sendYtCommand, handleUserActivity]
   );
+
+  // Toggle Subtitles / Captions (CC)
+  const toggleCaptions = useCallback(() => {
+    setIsCaptionsOn((prev) => {
+      const nextState = !prev;
+      if (nextState) {
+        sendYtCommand('loadModule', ['captions']);
+        sendYtCommand('setOption', ['captions', 'track', { languageCode: 'uz' }]);
+        sendYtCommand('setOption', ['cc', 'track', { languageCode: 'uz' }]);
+        sendYtCommand('setOption', ['captions', 'fontSize', 1]);
+      } else {
+        sendYtCommand('unloadModule', ['captions']);
+        sendYtCommand('setOption', ['captions', 'track', {}]);
+        sendYtCommand('setOption', ['cc', 'track', {}]);
+      }
+      return nextState;
+    });
+    handleUserActivity();
+  }, [sendYtCommand, handleUserActivity]);
 
   // Reset states when video changes
   useEffect(() => {
@@ -258,12 +279,15 @@ export const CustomVideoPlayer = ({
       } else if (e.key === 'm') {
         e.preventDefault();
         toggleMute();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        toggleCaptions();
       }
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [togglePlay, handleSeekDelta]);
+  }, [togglePlay, handleSeekDelta, toggleCaptions]);
 
   // Double-tap to seek 15s on mobile or desktop overlay
   const handleOverlayClick = (e) => {
@@ -407,14 +431,14 @@ export const CustomVideoPlayer = ({
         justifyContent: 'center'
       }}
     >
-      {/* 1. Underlying YouTube engine (Cropped by 6% on all sides so YouTube watermark/logo in bottom-right is 100% offscreen) */}
+      {/* 1. Underlying YouTube engine: Heavily cropped and shifted so YouTube watermark, 'Boshqa videolar' bar, and logo are 100% offscreen */}
       <div
         style={{
           position: 'absolute',
-          top: '-6%',
-          left: '-6%',
-          width: '112%',
-          height: '112%',
+          top: '-14%',
+          left: '-10%',
+          width: '120%',
+          height: '138%',
           pointerEvents: 'none',
           overflow: 'hidden',
           zIndex: 1
@@ -430,10 +454,40 @@ export const CustomVideoPlayer = ({
             width: '100%',
             height: '100%',
             border: 'none',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            transform: 'scale(1.05) translateY(-2%)',
+            transformOrigin: 'center center'
           }}
         />
       </div>
+
+      {/* 1b. Deep Onyx Bottom Mask Shield: 100% impenetrable barrier against any underlying bleed-through */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '84px',
+          background: 'linear-gradient(0deg, #0a0a0c 0%, rgba(10,10,12,0.92) 55%, transparent 100%)',
+          pointerEvents: 'none',
+          zIndex: 2
+        }}
+      />
+
+      {/* 1c. Deep Onyx Top Mask Shield */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '60px',
+          background: 'linear-gradient(180deg, #0a0a0c 0%, rgba(10,10,12,0.85) 55%, transparent 100%)',
+          pointerEvents: 'none',
+          zIndex: 2
+        }}
+      />
 
       {/* 2. Poster / Thumbnail Splash Shield: Fades out only when the video actually starts playing, permanently eliminating the 1-2s YouTube logo flash */}
       <div
@@ -1045,6 +1099,38 @@ export const CustomVideoPlayer = ({
               </button>
             )}
 
+            {/* Captions / Subtitles toggle button (User requested) */}
+            <button
+              type="button"
+              className="cvp-btn-captions"
+              onClick={toggleCaptions}
+              title={isCaptionsOn ? "Subtitrlar: Yoqilgan (C)" : "Subtitrlar: O‘chirilgan (C)"}
+              aria-label={isCaptionsOn ? "Subtitrlar yoqilgan" : "Subtitrlar o‘chirilgan"}
+              style={{
+                background: isCaptionsOn ? 'rgba(250, 109, 88, 0.28)' : 'rgba(255, 255, 255, 0.12)',
+                border: isCaptionsOn ? '1px solid rgba(250, 109, 88, 0.75)' : '1px solid rgba(255, 255, 255, 0.18)',
+                color: isCaptionsOn ? 'var(--figma-coral, #FA6D58)' : '#ffffff',
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                padding: '0.2rem 0.5rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!isCaptionsOn) e.currentTarget.style.color = 'var(--figma-coral, #FA6D58)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isCaptionsOn) e.currentTarget.style.color = '#ffffff';
+              }}
+            >
+              <Subtitles size={15} />
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.04em' }}>CC</span>
+            </button>
+
             {/* Playback speed selector */}
             <div className="cvp-btn-speed-group" style={{ position: 'relative' }}>
               <button
@@ -1203,6 +1289,10 @@ export const CustomVideoPlayer = ({
             font-size: 0.72rem !important;
             min-width: 36px !important;
           }
+          .cvp-btn-captions {
+            padding: 0.15rem 0.35rem !important;
+            font-size: 0.68rem !important;
+          }
         }
 
         @media (max-width: 480px) {
@@ -1218,6 +1308,9 @@ export const CustomVideoPlayer = ({
           }
           .cvp-left-group {
             gap: 0.35rem !important;
+          }
+          .cvp-btn-captions span {
+            display: none !important;
           }
         }
       `}</style>
