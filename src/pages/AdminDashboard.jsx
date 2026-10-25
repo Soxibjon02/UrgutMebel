@@ -2026,9 +2026,9 @@ export const AdminDashboard = () => {
               })}
             </div>
 
-            {/* Sections Reordering & Editing Table */}
-            <div className="table-responsive glass-card" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+            {/* Desktop View: Sections Reordering & Editing Table */}
+            <div className="admin-sections-desktop-table table-responsive glass-card" style={{ borderRadius: '16px', overflowX: 'auto', border: '1px solid var(--border-subtle)' }}>
+              <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
                 <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <tr>
                     <th style={{ padding: '0.85rem 1rem', width: '90px' }}>Tartib</th>
@@ -2190,6 +2190,188 @@ export const AdminDashboard = () => {
                     })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile View: Compact Responsive Section Cards */}
+            <div className="admin-sections-mobile-list">
+              {homeSections
+                .filter((sec) => sectionCategoryFilter === 'ALL' || sec.category === sectionCategoryFilter)
+                .map((sec) => {
+                  const originalIndex = homeSections.findIndex((s) => s.id === sec.id);
+                  const isFirst = originalIndex === 0;
+                  const isLast = originalIndex === homeSections.length - 1;
+                  const isActive = sec.is_active !== false;
+
+                  return (
+                    <div
+                      key={sec.id}
+                      className="glass-card"
+                      style={{
+                        borderRadius: '14px',
+                        padding: '0.85rem',
+                        border: '1px solid var(--border-subtle)',
+                        backgroundColor: isActive ? 'var(--card-bg, #ffffff)' : 'rgba(239, 68, 68, 0.04)',
+                        opacity: isActive ? 1 : 0.78,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.65rem'
+                      }}
+                    >
+                      {/* Top Bar: Order & Move buttons, Section Name & Category, Status Toggle */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                          {/* Order Badge & Reorder Arrows */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minWidth: '28px',
+                                height: '28px',
+                                padding: '0 4px',
+                                borderRadius: '6px',
+                                backgroundColor: 'var(--bg-secondary)',
+                                fontWeight: 800,
+                                fontSize: '0.78rem',
+                                color: 'var(--text-main)',
+                                border: '1px solid var(--border-subtle)'
+                              }}
+                            >
+                              #{sec.order || originalIndex + 1}
+                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveSection(originalIndex, -1)}
+                                disabled={isFirst}
+                                style={{
+                                  border: 'none',
+                                  background: 'none',
+                                  cursor: isFirst ? 'not-allowed' : 'pointer',
+                                  opacity: isFirst ? 0.3 : 1,
+                                  padding: '0 2px',
+                                  color: 'var(--text-main)',
+                                  lineHeight: 1
+                                }}
+                                title="Yuqoriga surish"
+                              >
+                                <ArrowUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveSection(originalIndex, 1)}
+                                disabled={isLast}
+                                style={{
+                                  border: 'none',
+                                  background: 'none',
+                                  cursor: isLast ? 'not-allowed' : 'pointer',
+                                  opacity: isLast ? 0.3 : 1,
+                                  padding: '0 2px',
+                                  color: 'var(--text-main)',
+                                  lineHeight: 1
+                                }}
+                                title="Pastga surish"
+                              >
+                                <ArrowDown size={12} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Section Name & ID */}
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {sec.name}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem' }}>
+                              <code style={{ fontSize: '0.68rem', color: 'var(--text-light)', background: 'var(--bg-secondary)', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                                {sec.id}
+                              </code>
+                              {sec.category && (
+                                <span style={{ fontSize: '0.68rem', color: '#0071e3', fontWeight: 600 }}>
+                                  • {sec.category}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Toggle Switch */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSectionActive(sec)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.28rem 0.65rem',
+                            borderRadius: 'var(--radius-full)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            backgroundColor: isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                            color: isActive ? '#10b981' : '#ef4444'
+                          }}
+                        >
+                          {isActive ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
+                          <span>{isActive ? 'Faol' : 'O‘chirilgan'}</span>
+                        </button>
+                      </div>
+
+                      {/* Middle: Saytdagi Sarlavha & Izoh & Badge */}
+                      {(sec.title || sec.subtitle || sec.badge) && (
+                        <div
+                          style={{
+                            backgroundColor: 'var(--bg-secondary)',
+                            borderRadius: '8px',
+                            padding: '0.5rem 0.75rem',
+                            border: '1px solid var(--border-subtle)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.2rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: 650, color: 'var(--text-main)' }}>
+                              {sec.title || "—"}
+                            </span>
+                            {sec.badge && (
+                              <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '4px', backgroundColor: 'rgba(0, 113, 227, 0.12)', color: '#0071e3' }}>
+                                {sec.badge}
+                              </span>
+                            )}
+                          </div>
+                          {sec.subtitle && (
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.35 }}>
+                              {sec.subtitle}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Edit Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditSection(sec)}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                          fontSize: '0.78rem',
+                          padding: '0.42rem 0.75rem',
+                          width: '100%',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <Edit2 size={13} /> Bo‘limni Tahrirlash
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}
@@ -3144,8 +3326,8 @@ export const AdminDashboard = () => {
               </div>
 
               {/* Products Table */}
-              <div className="table-responsive glass-card" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+              <div className="table-responsive glass-card" style={{ borderRadius: '16px', overflowX: 'auto', border: '1px solid var(--border-subtle)' }}>
+                <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
                   <thead style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
                     <tr>
                       <th style={{ padding: '0.85rem 1rem' }}>Mebel nomi & Kategoriya</th>

@@ -1480,6 +1480,30 @@ select:-webkit-autofill:focus {
   .table-responsive table {
     min-width: 540px;
   }
+
+  .admin-sections-desktop-table {
+    display: none !important;
+  }
+
+  .admin-sections-mobile-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-sections-desktop-table {
+  display: block;
+}
+
+.admin-sections-mobile-list {
+  display: none;
 }
 
 @media (max-width: 480px) {
