@@ -431,14 +431,13 @@ export const CustomVideoPlayer = ({
         justifyContent: 'center'
       }}
     >
-      {/* 1. Underlying YouTube engine: Heavily cropped and shifted so YouTube watermark, 'Boshqa videolar' bar, and logo are 100% offscreen */}
+      {/* 1. Underlying Video Engine: Standard 100% 16:9 dimensions with natural scale and zero distortion */}
       <div
         style={{
           position: 'absolute',
-          top: '-14%',
-          left: '-10%',
-          width: '120%',
-          height: '138%',
+          inset: 0,
+          width: '100%',
+          height: '100%',
           pointerEvents: 'none',
           overflow: 'hidden',
           zIndex: 1
@@ -454,40 +453,10 @@ export const CustomVideoPlayer = ({
             width: '100%',
             height: '100%',
             border: 'none',
-            pointerEvents: 'none',
-            transform: 'scale(1.05) translateY(-2%)',
-            transformOrigin: 'center center'
+            pointerEvents: 'none'
           }}
         />
       </div>
-
-      {/* 1b. Deep Onyx Bottom Mask Shield: 100% impenetrable barrier against any underlying bleed-through */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '84px',
-          background: 'linear-gradient(0deg, #0a0a0c 0%, rgba(10,10,12,0.92) 55%, transparent 100%)',
-          pointerEvents: 'none',
-          zIndex: 2
-        }}
-      />
-
-      {/* 1c. Deep Onyx Top Mask Shield */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '60px',
-          background: 'linear-gradient(180deg, #0a0a0c 0%, rgba(10,10,12,0.85) 55%, transparent 100%)',
-          pointerEvents: 'none',
-          zIndex: 2
-        }}
-      />
 
       {/* 2. Poster / Thumbnail Splash Shield: Fades out only when the video actually starts playing, permanently eliminating the 1-2s YouTube logo flash */}
       <div
